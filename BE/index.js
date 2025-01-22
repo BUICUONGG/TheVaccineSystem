@@ -9,7 +9,7 @@ app.listen(port, () => {
 });
 
 const uri =
-  "mongodb+srv://cuongbui10704:cuongbui10704@swp.lg53w.mongodb.net/?retryWrites=true&w=majority&appName=SWP";
+  "mongodb+srv://cuongbui10704:cuongbui10704@swp.lg53w.mongodb.net/test";
 app.get("/", async (req, res) => {
   await mongoose.connect(uri);
 
