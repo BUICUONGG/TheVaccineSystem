@@ -20,6 +20,8 @@ app.get("/", async (req, res) => {
   res.send(users);
 });
 
+//  bui ba cuong
+
 app.listen(port, () => {
   console.log("Your app running on port " + `${port}`);
 });
