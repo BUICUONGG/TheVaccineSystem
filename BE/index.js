@@ -1,27 +1,42 @@
+// import { Router } from "express";
+
+// app.use("./users", usersRouter);
+// app.use("./vaccince", vaccinceRouter);
+import dotenv from "dotenv";
+dotenv.config();
 import express from "express";
-import mongoose from "mongoose";
-import UserModel from "./usersdbTest.js";
+
+import { MongoClient } from "mongodb";
 const app = express();
-const PORT = process.env.PORT || 8080;
-app.use(express.json());
+const PORT = 8080 || process.env.PORT;
 
-import { Router } from "express";
+const dbName = "test";
+const collectionName = "users";
 
-app.use("./users", usersRouter);
-app.use("./vaccince", vaccinceRouter);
+const client = new MongoClient(process.env.MONGO_URI);
 
-const uri =
-  "mongodb+srv://cuongbui10704:cuongbui10704@swp.lg53w.mongodb.net/test";
-app.get("/", async (req, res) => {
-  await mongoose.connect(uri);
+async function connectAndFetchData() {
+  try {
+    // Kết nối tới MongoDB
+    await client.connect();
+    console.log("Kết nối thành công tới MongoDB!");
 
-  let users = await UserModel.find();
+    const db = client.db(dbName);
+    const collection = db.collection(collectionName);
+  } catch (error) {
+    console.error("Lỗi kết nối MongoDB:", error);
+    return [];
+  }
+}
 
-  res.send(users);
+app.get("", async (req, res) => {
+  const data = await connectAndFetchData();
+  res.json(data); // Trả về dữ liệu JSON
 });
 
-//  bui ba cuong
+export default connectAndFetchData();
 
-app.listen(port, () => {
-  console.log("Your app running on port " + `${port}`);
+// Start server
+app.listen(PORT, () => {
+  console.log(`Server đang chạy tại http://localhost${PORT}}`);
 });
