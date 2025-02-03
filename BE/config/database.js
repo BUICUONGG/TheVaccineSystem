@@ -18,16 +18,5 @@ async function connectToDatabase() {
   }
 }
 
-async function fetchUsers() {
-  try {
-    const db = await connectToDatabase();
-    const collection = db.collection(collectionName);
-    return await collection.find({}).toArray();
-  } catch (error) {
-    console.error("Lỗi khi lấy dữ liệu:", error);
-    return [];
-  }
-}
-
 // Xuất các hàm để có thể tái sử dụng
-export { connectToDatabase, fetchUsers };
+export { connectToDatabase };

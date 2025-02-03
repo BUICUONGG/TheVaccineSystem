@@ -1,14 +1,17 @@
 import express from "express";
-import { fetchUsers } from "./config/database.js";
+import "dotenv/config";
+import usersRouter from "./src/routes/users.routers.js";
 
 const app = express();
-const port = 8080;
+app.use(express.json());
+const PORT = 8080 || process.env.MONGO_URI;
 
 app.get("", async (req, res) => {
-  const data = await fetchUsers();
-  res.json(data);
+  console.log("Nothing");
 });
 
-app.listen(port, () => {
-  console.log(`Server đang chạy tại http://localhost:${port}`);
+app.use("user", usersRouter);
+
+app.listen(PORT, () => {
+  console.log(`Server đang chạy tại http://localhost:${PORT}`);
 });
