@@ -1,6 +1,7 @@
 import express from "express";
 import "dotenv/config";
 import usersRouter from "./src/routes/users.routers.js";
+import vaccinceRouter from "./src/routes/vaccinces.routers.js";
 
 const app = express();
 app.use(express.json());
@@ -11,6 +12,7 @@ app.get("", async (req, res) => {
 });
 
 app.use("user", usersRouter);
+app.use("vaccince", vaccinceRouter);
 
 app.listen(PORT, () => {
   console.log(`Server đang chạy tại http://localhost:${PORT}`);

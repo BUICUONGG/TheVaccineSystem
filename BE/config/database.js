@@ -1,11 +1,13 @@
 import { MongoClient } from "mongodb";
 import "dotenv/config";
+import { Collection } from "mongoose";
+import User from "../model/userSchema";
 
 const uri = process.env.MONGO_URI;
 const client = new MongoClient(uri);
 
 const dbName = "test";
-const collectionName = "users";
+// const collectionName = "users";
 
 async function connectToDatabase() {
   try {
@@ -17,6 +19,10 @@ async function connectToDatabase() {
     throw error;
   }
 }
+
+//môi lần viết hàm kết nối tới db thì dùng cái này
+// const db = await connectToDatabase();
+// const collection = db.collection(collectionName);
 
 // Xuất các hàm để có thể tái sử dụng
 export { connectToDatabase };
