@@ -1,5 +1,8 @@
 import { Router } from "express";
-import { showInFoController } from "../controllers/users.controllers.js";
+import {
+  showInFoController,
+  addUserController,
+} from "../controllers/users.controllers.js";
 
 const usersRouter = Router();
 
@@ -8,5 +11,5 @@ usersRouter.post("/register");
 usersRouter.post("/logout");
 usersRouter.post("/forgot-password");
 usersRouter.get("/showInfo", showInFoController);
-
+usersRouter.post("/addUser", addUserController);
 export default usersRouter;

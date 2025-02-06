@@ -7,3 +7,15 @@ export const showInFoController = async (req, res) => {
     result,
   });
 };
+
+export const addUserController = async (req, res) => {
+  const { username, email, phone, password, role } = req.body;
+  const result = await userService.addUser({
+    username,
+    email,
+    phone,
+    password,
+    role,
+  });
+  return res.json(result);
+};

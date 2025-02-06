@@ -1,8 +1,11 @@
 import connectToDatabase from "../config/database.js";
+import User from "../model/userSchema.js";
 
 class UserService {
-  async showInfo() {
-    const users = await connectToDatabase.users.find().toArray();
+  async addUser(userData) {
+    const user = new User(userData);
+    const result = await connectToDatabase.users.insertOne(user);
+    return "Them thanh cong";
   }
 }
 
