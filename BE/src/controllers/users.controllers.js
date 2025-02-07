@@ -3,7 +3,7 @@ import userService from "../services/user.services.js";
 
 export const showInFoController = async (req, res) => {
   const result = await userService.showData();
-  return res.json({ result });
+  return res.json(result);
 };
 
 export const addUserController = async (req, res) => {
