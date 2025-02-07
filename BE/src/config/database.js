@@ -1,5 +1,6 @@
 import { MongoClient } from "mongodb";
 import "dotenv/config";
+import mongoose from "mongoose";
 // import { Collection } from "mongoose";
 
 const uri = process.env.MONGO_URI;
@@ -25,7 +26,6 @@ const dbName = "test";
 
 // Xuất các hàm để có thể tái sử dụng
 // export { connectToDatabase };
-
 class ConnectDatabaseService {
   client;
   db;
@@ -37,9 +37,7 @@ class ConnectDatabaseService {
   async connect() {
     try {
       await this.db.command({ ping: 1 });
-      console.log(
-        "Pinged your deployment. You successfully connected to MongoDB!"
-      );
+      console.log("You successfully connected to MongoDB!");
     } catch (err) {
       console.log(err);
       throw err;
