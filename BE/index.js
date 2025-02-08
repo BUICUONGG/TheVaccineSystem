@@ -3,8 +3,6 @@ import "dotenv/config";
 import usersRouter from "./src/routes/users.routers.js";
 import vaccinceRouter from "./src/routes/vaccines.routers.js";
 import connectToDatabase from "./src/config/database.js";
-import swaggerUi from "swagger-ui-express";
-import swaggerSpec from "./src/config/swagger.js";
 
 const app = express();
 app.use(express.json());
@@ -25,10 +23,8 @@ app.use("/vaccince", vaccinceRouter);
 // app.use('staff', staffRouter);
 
 // Route Swagger UI
-app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Lắng nghe cổng
 app.listen(PORT, () => {
   console.log(`Server đang chạy tại http://localhost:${PORT}`);
-  console.log(`Swagger UI tại http://localhost:${PORT}/api-docs`);
 });

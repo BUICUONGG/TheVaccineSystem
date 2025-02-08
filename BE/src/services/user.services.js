@@ -2,6 +2,7 @@ import { ClientSession } from "mongodb";
 import connectToDatabase from "../config/database.js";
 import User from "../model/userSchema.js";
 import mongoose from "mongoose";
+import { loginController } from "../controllers/users.controllers.js";
 
 class UserService {
   async addUser(userData) {

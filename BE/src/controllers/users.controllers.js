@@ -17,7 +17,9 @@ export const addUserController = async (req, res) => {
 
 export const loginController = async (req, res) => {
   try {
-    const { email, password } = await userService.login(req.body);
+    const { email } = req.body;
+    const { password } = req.body;
+    const account = await userService.login(email, password);
     if (!email || !password) throw new Error("Vui lòng nhập email và mật khẩu");
     res.status(200).json({ message: "Login successfully", ...account });
   } catch (error) {
