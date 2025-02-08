@@ -39,7 +39,7 @@ class UserService {
       return { _id: user._id, email: user.email };
     } catch (error) {
       console.error("Error login account:", error.message);
-      throw new Error(error.message); // Ném lỗi để controller xử lý
+      throw new Error(error.message);
     }
   }
 
