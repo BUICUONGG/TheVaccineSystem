@@ -23,6 +23,8 @@ app.get("", async (req, res) => {
 
 app.use("/user", usersRouter);
 app.use("/vaccince", vaccinceRouter);
+// app.use("/admin", adminRouter);
+// app.use('staff', staffRouter);
 
 app.listen(PORT, () => {
   console.log(`Server đang chạy tại http://localhost:${PORT}`);
