@@ -1,4 +1,5 @@
-import { Router } from "express";
+import { ClientSession } from "mongodb";
+import vaccineService from "../services/vaccine.services.js";
 
 export const addVaccineController = async (req, res) => {
   try {
@@ -8,5 +9,3 @@ export const addVaccineController = async (req, res) => {
     res.status(400).json({ error: error.message });
   }
 };
-
-export default vaccinceRouter;
