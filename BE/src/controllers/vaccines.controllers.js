@@ -1,9 +1,5 @@
-<<<<<<< HEAD
-import vaccinceService from "../services/vaccine.services.js";
-=======
 import { ClientSession } from "mongodb";
-import vaccineService from "../services/vaccine.services.js";
->>>>>>> 3654e8f213246ad6d227d96de6db58dfcfa03805
+import vaccinceService from "../services/vaccine.services.js";
 
 export const addVaccineController = async (req, res) => {
   try {
