@@ -9,9 +9,9 @@ export const validateRegister = (req, res, next) => {
   next();
 };
 
-export const verifyToken = (req, res, next) => {
-  const token = req.header.token;
-  if (token) {
-    const accesstoken = token.slipt;
-  }
-};
+// export const verifyToken = (req, res, next) => {
+//   const token = req.header.token;
+//   if (token) {
+//     const accesstoken = token.slipt;
+//   }
+// };
