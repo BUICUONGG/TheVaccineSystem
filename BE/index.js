@@ -1,7 +1,11 @@
 import express from "express";
 import "dotenv/config";
 import usersRouter from "./src/routes/users.routers.js";
+<<<<<<< HEAD
 import vaccineRouter from "./src/routes/vaccines.routers.js";
+=======
+import vaccinesRouter from "./src/routes/vaccines.routers.js";
+>>>>>>> 3654e8f213246ad6d227d96de6db58dfcfa03805
 import connectToDatabase from "./src/config/database.js";
 
 const app = express();
@@ -16,8 +20,13 @@ app.get("", async (req, res) => {
 });
 
 // Routes API hiện tại
+<<<<<<< HEAD
 app.use("/user", usersRouter);
 app.use("/vaccine", vaccineRouter);
+=======
+//app.use("/user", usersRouter);
+app.use("/vaccine", vaccinesRouter);
+>>>>>>> 3654e8f213246ad6d227d96de6db58dfcfa03805
 // app.use("/admin", adminRouter);
 // app.use('staff', staffRouter);
 
