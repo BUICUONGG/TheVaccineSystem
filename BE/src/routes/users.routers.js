@@ -5,12 +5,15 @@ import {
   loginController,
   deleteController,
 } from "../controllers/users.controllers.js";
-import { validateRegister } from "../middlewares/user.middleware.js";
+import {
+  registerValidate,
+  loginValidate,
+} from "../middlewares/user.middleware.js";
 
 const usersRouter = Router();
 
 usersRouter.get("/showInfo", showInFoController);
-usersRouter.post("/login", loginController);
-usersRouter.post("/register", validateRegister, registerController);
+usersRouter.post("/login", loginValidate, loginController);
+usersRouter.post("/register", registerValidate, registerController);
 usersRouter.delete("/delete", deleteController);
 export default usersRouter;

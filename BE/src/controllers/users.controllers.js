@@ -8,7 +8,7 @@ export const showInFoController = async (req, res) => {
 export const registerController = async (req, res) => {
   try {
     const { user } = await userService.resgister(req.body);
-    res.status(201).json({ message: "User created successfully", user });
+    res.status(201).json({ message: "User created successfully", token });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
