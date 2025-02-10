@@ -1,19 +1,19 @@
-import { ClientSession } from "mongodb";
 import connectToDatabase from "../config/database.js";
 import User from "../model/userSchema.js";
-import mongoose from "mongoose";
-import { loginController } from "../controllers/users.controllers.js";
+import { hashPassword, comparePassword } from "../utils/bcrypt.js";
+import jwt from "jsonwebtoken";
+import "dotenv/config";
 
 class UserService {
-  async addUser(userData) {
+  async resgister(userData) {
     try {
+      userData.password = await hashPassword(userData.password);
       const user = new User(userData);
       await user.validate(); // Kiểm tra dữ liệu hợp lệ
-
       const result = await connectToDatabase.users.insertOne(user);
       return { _id: result.insertedId, ...userData };
     } catch (error) {
-      console.error("Error adding user:", error.message);
+      console.error("Không tạo được tài khoản", error.message);
       throw new Error(error.message); // Ném lỗi để controller xử lý
     }
   }
@@ -23,35 +23,27 @@ class UserService {
     return result;
   }
 
-  async login(email, password) {
+  async login(username, password) {
     try {
-      const user = await connectToDatabase.users.findOne({ email });
+      const user = await connectToDatabase.users.findOne({ username });
       if (!user) {
-        throw new Error("Tài khoản không tồn tại", email);
+        throw new Error("Tài khoản không tồn tại", username);
       }
-      const isValidPassword = await connectToDatabase.users.findOne({
-        password,
-      });
-
-      if (!isValidPassword) {
+      const validPassword = await comparePassword(password, user.password);
+      if (!validPassword) {
         throw new Error("Sai mật khẩu");
       }
-      return { _id: user._id, email: user.email };
+      if (user && validPassword) {
+        const accesstoken = jwt.sign({ user }, process.env.JWT_ACCESS_TOKEN, {
+          expiresIn: "30s",
+        });
+        return { accesstoken };
+      }
     } catch (error) {
       console.error("Error login account:", error.message);
       throw new Error(error.message);
     }
   }
-
-  // async checkEmailExists(email) {
-  //   try {
-  //     const user = await User.findOne({ email });
-  //     return !!user; // Nếu user tồn tại, trả về true, ngược lại false
-  //   } catch (error) {
-  //     console.error("Error checking email:", error);
-  //     throw new Error("Lỗi kiểm tra email");
-  //   }
-  // }
 }
 const userService = new UserService();
 export default userService;

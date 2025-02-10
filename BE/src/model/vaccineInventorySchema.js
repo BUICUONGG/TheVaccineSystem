@@ -17,11 +17,11 @@ const vaccineInventorySchema = new mongoose.Schema({
     min: [0, "Quantity cannot be negative"]
   },
   mfgDate: { 
-    type: Date, 
+    type: String, 
     required: [true, "Manufacturing date is required"]
   },
   expDate: { 
-    type: Date, 
+    type: String, 
     required: [true, "Expiration date is required"],
     validate: {
       validator: function(value) {

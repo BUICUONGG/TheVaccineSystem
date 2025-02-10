@@ -9,7 +9,6 @@ app.use(express.json());
 const PORT = 8080 || process.env.MONGO_URI;
 
 connectToDatabase.connect();
-
 // Route mặc định
 app.get("", async (req, res) => {
   console.log("Nothing");
@@ -17,7 +16,7 @@ app.get("", async (req, res) => {
 });
 
 // Routes API hiện tại
-//app.use("/user", usersRouter);
+app.use("/user", usersRouter);
 app.use("/vaccine", vaccinesRouter);
 // app.use("/admin", adminRouter);
 // app.use('staff', staffRouter);

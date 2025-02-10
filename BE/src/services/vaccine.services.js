@@ -1,14 +1,16 @@
 import mongoose from "mongoose";
-import VaccineInventory from "../model/vaccine/vaccineInventorySchema.js";
+import connectToDatabase from "../config/database.js";
+import VaccineInventory from "../model/vaccineInventorySchema.js";
+import "dotenv/config";
 
 class VaccineService {
     async addVaccine(vaccineData) {
         try {
             const vaccine = new VaccineInventory(vaccineData);
             await vaccine.validate();
-
-            const result = await vaccine.save();
+            const result = await connectToDatabase.vaccines.insertOne(vaccine);
             return result;
+
         } catch (error) {
             console.error("Error adding vaccine:", error.message);
             throw new Error(error.message);
