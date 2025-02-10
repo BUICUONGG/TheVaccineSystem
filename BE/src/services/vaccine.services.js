@@ -59,6 +59,41 @@ class VaccineService {
       throw new Error(error.message);
     }
   }
+
+  async deleteVaccine(vaccineId) {
+    try {
+      if (!vaccineId) {
+        throw new Error('Vaccine ID is required for deletion');
+      }
+
+      // Kiểm tra vaccine có tồn tại không
+      const existingVaccine = await connectToDatabase.vaccines.findOne({ 
+        _id: new ObjectId(vaccineId) 
+      });
+      
+      if (!existingVaccine) {
+        throw new Error('Vaccine not found');
+      }
+
+      // Cập nhật trạng thái vaccine về "out of stock"
+      const result = await connectToDatabase.vaccines.updateOne(
+        { _id: new ObjectId(vaccineId) },
+        { $set: { status: "out of stock" } }
+      );
+
+      if (result.modifiedCount === 0) {
+        throw new Error('Failed to update vaccine status');
+      }
+
+      // Lấy lại tài liệu đã được cập nhật
+      const updatedVaccine = await connectToDatabase.vaccines.findOne({ _id: new ObjectId(vaccineId) });
+
+      return updatedVaccine;
+    } catch (error) {
+      console.error("Error deleting vaccine:", error.message);
+      throw new Error(error.message);
+    }
+  }
 }
 
 const vaccineService = new VaccineService();
