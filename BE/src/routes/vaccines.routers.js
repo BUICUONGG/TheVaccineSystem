@@ -1,7 +1,7 @@
 import { Router } from "express";
-import { addVaccineController } from "../controllers/vaccines.controllers.js";
+import { addVaccineController, getVaccinesController } from "../controllers/vaccines.controllers.js";
 
-const vaccinesRouter = express.Router();
+const vaccinesRouter = Router();
 
 vaccinesRouter.post("/addVaccine", addVaccineController);
 vaccinesRouter.get("/ListVaccine", getVaccinesController);

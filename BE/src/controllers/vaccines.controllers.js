@@ -1,4 +1,3 @@
-import { ClientSession } from "mongodb";
 import vaccinceService from "../services/vaccine.services.js";
 
 export const addVaccineController = async (req, res) => {
@@ -12,7 +11,7 @@ export const addVaccineController = async (req, res) => {
 
 export const getVaccinesController = async (req, res) => {
   try {
-    const vaccines = await vaccineService.getVaccines();
+    const vaccines = await vaccinceService.getVaccines();
     return res.json({ vaccines });
   } catch (error) {
     res.status(400).json({ error: error.message });
