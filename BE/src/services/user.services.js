@@ -49,6 +49,8 @@ class UserService {
       throw new Error(error.message);
     }
   }
+
+  async delete(userId) {}
 }
 const userService = new UserService();
 export default userService;
