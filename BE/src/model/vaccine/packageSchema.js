@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 
 const packageSchema = new mongoose.Schema({
+  packageID: { type: mongoose.Schema.Types.ObjectId, required: true },
   packageName: { type: String, required: true },
   packagePrice: { type: Number, required: true },
   description: { type: String },

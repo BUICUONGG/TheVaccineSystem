@@ -54,8 +54,8 @@ class ConnectDatabaseService {
   get packages() {
     return this.db.collection(String("packages"));
   }
-  get pauments() {
-    return this.db.collection(String("pauments"));
+  get payments() {
+    return this.db.collection(String("payments"));
   }
   get staffs() {
     return this.db.collection(String("staffs"));
