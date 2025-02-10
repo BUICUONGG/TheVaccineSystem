@@ -10,19 +10,24 @@ export const registerValidate = (req, res, next) => {
 };
 
 export const verifyToken = (req, res, next) => {
-  const token = req.headers.authorization;
-  if (token) {
-    const accesstoken = token.split(" ")[1];
+  try {
+    const token = req.headers.authorization;
 
-    jwt.verify(accesstoken, process.env.JWT_ACCESS_TOKEN, (err, user) => {
+    if (!token) {
+      return res.status(401).json({ message: "You're not authenticated" });
+    }
+    const accessToken = token.split(" ")[1]; // Lấy token từ "Bearer <token>"
+
+    jwt.verify(accessToken, process.env.JWT_ACCESS_TOKEN, (err, user) => {
       if (err) {
-        res.status(403).json("Token is not valid");
+        return res.status(403).json({ message: "Token is not valid" });
       }
       req.user = user;
       next();
     });
-  } else {
-    res.status(401).json("You're not authenticated");
+  } catch (error) {
+    console.error("Token verification error:", error);
+    res.status(500).json({ message: "Internal Server Error" });
   }
 };
 
@@ -35,4 +40,39 @@ export const loginValidate = (req, res, next) => {
     return res.status(400).json({ message: "Vui long nhap password" });
   }
   next();
+};
+
+export const verifyAdmin = (req, res, next) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ message: "You're not authenticated" });
+    }
+
+    if (req.user.role !== "admin") {
+      return res
+        .status(403)
+        .json({ message: "You do not have Admin privileges" });
+    }
+
+    next(); // Cho phép tiếp tục nếu là admin
+  } catch (error) {
+    console.error("Admin verification error:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+export const verifyStaff = (req, res, next) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ message: "You're not authenticated" });
+    }
+    if (req.user.role !== "admin") {
+      return res
+        .status(403)
+        .json({ message: "You do not have Staff privileges" });
+    }
+  } catch (error) {
+    console.error("Staff verification error:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
 };

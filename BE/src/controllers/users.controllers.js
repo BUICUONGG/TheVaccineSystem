@@ -1,3 +1,4 @@
+import connectToDatabase from "../config/database.js";
 import userService from "../services/user.services.js";
 
 export const showInFoController = async (req, res) => {
@@ -28,7 +29,14 @@ export const loginController = async (req, res) => {
 
 export const deleteController = async (req, res) => {
   try {
+    const userId = req.params.id; // Lấy ID từ URL
+    const user = await userService.delete(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    res.status(200).json({ message: "User deleted successfully" });
   } catch (error) {
+    console.error("Delete error:", error);
     res.status(500).json({ error: error.message });
   }
 };
