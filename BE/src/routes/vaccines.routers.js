@@ -1,5 +1,5 @@
-import express from 'express';
-import { addVaccineController, getVaccinesController } from '../controllers/vaccines.controllers.js';
+import { Router } from "express";
+import { addVaccineController } from "../controllers/vaccines.controllers.js";
 
 const vaccinesRouter = express.Router();
 
