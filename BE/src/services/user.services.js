@@ -38,7 +38,7 @@ class UserService {
           { id: user._id.toString(), role: user.role },
           process.env.JWT_ACCESS_TOKEN,
           {
-            expiresIn: "30s",
+            expiresIn: "1h",
           }
         );
 
@@ -52,18 +52,17 @@ class UserService {
 
   async delete(userId) {
     try {
-      const userId = req.params.id; // Lấy ID từ URL
-
-      const user = await User.findById(userId);
-
+      // console.log(userId);
+      const user = await connectToDatabase.users.findOneAndDelete({
+        _id: userId,
+      });
       if (!user) {
-        return res.status(404).json({ message: "User not found" });
+        throw new Error("User not found");
       }
-
-      res.status(200).json({ message: "User deleted successfully" });
+      return { message: "User deleted successfully" };
     } catch (error) {
       console.error("Delete error:", error);
-      res.status(500).json({ error: error.message });
+      throw new Error(error.message);
     }
   }
 }

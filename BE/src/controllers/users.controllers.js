@@ -29,10 +29,11 @@ export const loginController = async (req, res) => {
 
 export const deleteController = async (req, res) => {
   try {
-    const userId = req.params.id; // Lấy ID từ URL
-    const user = await userService.delete(userId);
+    const { id } = req.params; // Lấy ID từ URL
+    console.log(id);
+    const user = await userService.delete(id);
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      throw new Error("User not found");
     }
     res.status(200).json({ message: "User deleted successfully" });
   } catch (error) {

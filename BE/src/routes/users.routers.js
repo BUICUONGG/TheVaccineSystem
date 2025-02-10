@@ -10,7 +10,7 @@ import {
   loginValidate,
   verifyToken,
   verifyAdmin,
-  verifyStaff,
+  // verifyStaff,
 } from "../middlewares/user.middleware.js";
 
 const usersRouter = Router();
