@@ -9,3 +9,14 @@ export const addVaccineController = async (req, res) => {
     res.status(400).json({ error: error.message });
   }
 };
+
+export const getVaccinesController = async (req, res) => {
+  try {
+    const vaccines = await vaccineService.getVaccines();
+    return res.json({ vaccines });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
+
