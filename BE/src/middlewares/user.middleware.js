@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
 // import { User } from "../models/user.js";
-
+import "dotenv/config";
 export const registerValidate = (req, res, next) => {
   const { username, email, password, phone } = req.body;
   if (!username || !email || !password || !phone) {
@@ -10,20 +10,20 @@ export const registerValidate = (req, res, next) => {
 };
 
 export const verifyToken = (req, res, next) => {
-  const token = req.header("Authorization");
-  if (!token) return res.status(401).json({ message: "Access Denied" });
+  const token = req.headers.authorization;
+  if (token) {
+    const accesstoken = token.split(" ")[1];
 
-  try {
-    const verified = jwt.verify(
-      token.replace("Bearer ", ""),
-      process.env.JWT_SECRET
-    );
-    req.user = verified;
-    next();
-  } catch (err) {
-    res.status(400).json({ message: "Invalid Token" });
+    jwt.verify(accesstoken, process.env.JWT_ACCESS_TOKEN, (err, user) => {
+      if (err) {
+        res.status(403).json("Token is not valid");
+      }
+      req.user = user;
+      next();
+    });
+  } else {
+    res.status(401).json("You're not authenticated");
   }
-  next();
 };
 
 export const loginValidate = (req, res, next) => {

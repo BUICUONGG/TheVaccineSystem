@@ -8,11 +8,12 @@ import {
 import {
   registerValidate,
   loginValidate,
+  verifyToken,
 } from "../middlewares/user.middleware.js";
 
 const usersRouter = Router();
 
-usersRouter.get("/showInfo", showInFoController);
+usersRouter.get("/showInfo", verifyToken, showInFoController);
 usersRouter.post("/login", loginValidate, loginController);
 usersRouter.post("/register", registerValidate, registerController);
 usersRouter.delete("/delete", deleteController);

@@ -34,10 +34,15 @@ class UserService {
         throw new Error("Sai mật khẩu");
       }
       if (user && validPassword) {
-        const accesstoken = jwt.sign({ user }, process.env.JWT_ACCESS_TOKEN, {
-          expiresIn: "30s",
-        });
-        return { accesstoken };
+        const accesstoken = jwt.sign(
+          { id: user._id.toString(), role: user.role },
+          process.env.JWT_ACCESS_TOKEN,
+          {
+            expiresIn: "30s",
+          }
+        );
+
+        return { user, accesstoken };
       }
     } catch (error) {
       console.error("Error login account:", error.message);
