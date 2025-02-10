@@ -7,8 +7,8 @@ export const showInFoController = async (req, res) => {
 
 export const registerController = async (req, res) => {
   try {
-    const { user } = await userService.resgister(req.body);
-    res.status(201).json({ message: "User created successfully", token });
+    const user = await userService.resgister(req.body);
+    res.status(201).json({ message: "User created successfully", user });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -17,10 +17,10 @@ export const registerController = async (req, res) => {
 export const loginController = async (req, res) => {
   try {
     const { username, password } = req.body;
-    const account = await userService.login(username, password);
+    const token = await userService.login(username, password);
     if (!username || !password)
       throw new Error("Vui lòng nhập email và mật khẩu");
-    res.status(200).json({ message: "Login successfully", ...account });
+    res.status(200).json({ message: "Login successfully", token });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
