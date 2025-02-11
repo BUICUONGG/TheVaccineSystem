@@ -75,7 +75,7 @@ class VaccineService {
         throw new Error("Vaccine not found");
       }
 
-      // Thực hiện xóa vaccine
+      
       const result = await connectToDatabase.vaccines.deleteOne({ _id: new ObjectId(vaccineId) });
 
       if (result.deletedCount === 0) {
