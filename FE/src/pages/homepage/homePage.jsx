@@ -5,5 +5,6 @@ function HomePage() {
     <div>H</div>
   )
 }
-// export HomePage
+// export HomePage component
+
 export default HomePage
