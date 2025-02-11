@@ -12,16 +12,12 @@ const HomePage = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isDarkMode, setIsDarkMode] = useState(false);
 
-  // Array of banner images
+
   const banners = [
     "/images/banner1.png",
     "/images/banner2.jpg",
     "/images/banner3.png",
-    // '/images/banner4.jpg',
-    // '/images/banner5.jpg',
-    // '/images/banner6.jpg',
-    // '/images/banner7.jpg',
-    // '/images/banner8.jpg',
+
   ];
 
   // Auto slide function
@@ -72,9 +68,9 @@ const HomePage = () => {
     <div className={`homepage ${isDarkMode ? 'dark-mode' : ''}`}>
       <header className="header-framework">
         <div className="header-content">
-          {/* Logo */}
-          <div className="header-logo-container">
-            <img src="/images/header-logo.png" alt="Logo" />
+          {/* Thay thế logo bằng text */}
+          <div className="header-title">
+            <h1>Nhật Ký Tiêm Chủng</h1>
           </div>
 
           {/* Search Bar */}
@@ -176,7 +172,7 @@ const HomePage = () => {
         <div className="vaccine-types">
           <div className="vaccine-card">
             <img
-              src="/images/vaccine-custom.jpg"
+              src="/images/vaccineInfo1.webp"
               alt="Tiêm chủng theo yêu cầu"
             />
             <h3>TIÊM CHỦNG THEO YÊU CẦU</h3>
@@ -185,7 +181,7 @@ const HomePage = () => {
             </a>
           </div>
           <div className="vaccine-card">
-            <img src="/images/vaccine-standard.jpg" alt="Tiêm chủng trọn gói" />
+            <img src="/images/vaccineInfo2.jpg" alt="Tiêm chủng trọn gói" />
             <h3>TIÊM CHỦNG TRỌN GÓI</h3>
             <a href="#" className="read-more">
               XEM THÊM
@@ -220,8 +216,68 @@ const HomePage = () => {
       {/* News Section */}
       <div className="news-section">
         <h2>TIN TỨC SỨC KHỎE</h2>
-        <div className="news-grid">{/* Add your news articles here */}</div>
+        <div className="news-grid">
+          <div className="news-item">
+            <div className="news-image">
+              <img src="/images/news1.jpg" alt="COVID-19 News" />
+            </div>
+            <div className="news-content">
+              <h3>60% mẫu giải trình tự gen ca COVID-19 ở các tỉnh phía Bắc nhiễm biến thể BA.5</h3>
+              <p>Theo báo cáo về tình hình dịch bệnh COVID-19 của 28 tỉnh, thành phố từ Hà Tĩnh trở ra cho thấy từ đầu năm 2022 đến ngày 15/8, các địa phương đã ghi nhận tổng cộng 7.731.853 ca mắc COVID-19...</p>
+              <a href="#" className="read-more">XEM THÊM</a>
+            </div>
+          </div>
+
+          <div className="news-item">
+            <div className="news-image">
+              <img src="/images/news2.jpg" alt="COVID Test" />
+            </div>
+            <div className="news-content">
+              <h3>Sáng 1/8: Có 3 dấu hiệu chính mắc bệnh đậu mùa khỉ; 1 tuần ghi nhận hơn 10 nghìn ca COVID-19 mới</h3>
+              <p>Theo báo cáo về tình hình dịch bệnh COVID-19 của 28 tỉnh, thành phố từ Hà Tĩnh trở ra...</p>
+              <a href="#" className="read-more">XEM THÊM</a>
+            </div>
+          </div>
+
+          <div className="news-item">
+            <div className="news-image">
+              <img src="/images/news3.jpg" alt="Hospital Care" />
+            </div>
+            <div className="news-content">
+              <h3>Nguy hiểm bệnh viêm não vào mùa</h3>
+              <p>Theo báo cáo về tình hình dịch bệnh COVID-19 của 28 tỉnh, thành phố từ Hà Tĩnh trở ra cho thấy từ đầu năm 2022...</p>
+              <a href="#" className="read-more">XEM THÊM</a>
+            </div>
+          </div>
+        </div>
       </div>
+
+      {/* Footer */}
+      <footer className="footer">
+        <div className="footer-content">
+          <div className="footer-section">
+            <h3>NHẬT KÝ TIÊM CHỦNG</h3>
+            <p>Hệ thống quản lý tiêm chủng toàn diện</p>
+          </div>
+          <div className="footer-section">
+            <h3>LIÊN HỆ</h3>
+            <p>Email: contact@nhatkytiemchung.vn</p>
+            <p>Hotline: 1900 xxxx</p>
+            <p>Địa chỉ: Hà Nội, Việt Nam</p>
+          </div>
+          <div className="footer-section">
+            <h3>THEO DÕI CHÚNG TÔI</h3>
+            <div className="social-links">
+              <a href="#"><i className="fab fa-facebook"></i></a>
+              <a href="#"><i className="fab fa-twitter"></i></a>
+              <a href="#"><i className="fab fa-instagram"></i></a>
+            </div>
+          </div>
+        </div>
+        <div className="footer-bottom">
+          <p>&copy; 2024 Nhật Ký Tiêm Chủng. All rights reserved.</p>
+        </div>
+      </footer>
     </div>
   );
 };
