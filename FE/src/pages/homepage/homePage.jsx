@@ -1,7 +1,7 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect } from "react";
 
-import './homePage.css'
-import { useNavigate } from 'react-router-dom'
+import './homePage.css';
+import { useNavigate } from 'react-router-dom';
 
 import { FaSearch } from 'react-icons/fa';
 import { IoIosArrowBack, IoIosArrowForward } from 'react-icons/io';
@@ -13,7 +13,7 @@ const HomePage = () => {
 
   // Array of banner images
   const banners = [
-    "/images/banner1.jpg",
+    "/images/banner1.png",
     "/images/banner2.jpg",
     "/images/banner3.png",
     // '/images/banner4.jpg',
