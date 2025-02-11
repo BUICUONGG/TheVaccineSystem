@@ -54,4 +54,11 @@ export const updateController = async (req, res) => {
   }
 };
 
-export const logoutController = async (req, res) => {};
+// export const logoutController = async (req, res) => {
+//   try {
+//     // Xóa token phía client (Frontend sẽ xóa token khỏi localStorage/cookies)
+//     res.status(200).json({ message: "Đăng xuất thành công" });
+//   } catch (error) {
+//     res.status(500).json({ error: "Lỗi đăng xuất" });
+//   }
+// };
