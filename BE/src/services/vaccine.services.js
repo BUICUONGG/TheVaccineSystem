@@ -75,22 +75,14 @@ class VaccineService {
         throw new Error("Vaccine not found");
       }
 
-      // Cập nhật trạng thái vaccine về "out of stock"
-      const result = await connectToDatabase.vaccines.updateOne(
-        { _id: new ObjectId(vaccineId) },
-        { $set: { status: "out of stock" } }
-      );
+      // Thực hiện xóa vaccine
+      const result = await connectToDatabase.vaccines.deleteOne({ _id: new ObjectId(vaccineId) });
 
-      if (result.modifiedCount === 0) {
-        throw new Error("Failed to update vaccine status");
+      if (result.deletedCount === 0) {
+        throw new Error("Failed to delete vaccine");
       }
 
-      // Lấy lại tài liệu đã được cập nhật
-      const updatedVaccine = await connectToDatabase.vaccines.findOne({
-        _id: new ObjectId(vaccineId),
-      });
-
-      return updatedVaccine;
+      return { message: "Vaccine deleted successfully", _id: vaccineId };
     } catch (error) {
       console.error("Error deleting vaccine:", error.message);
       throw new Error(error.message);

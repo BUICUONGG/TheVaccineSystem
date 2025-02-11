@@ -30,8 +30,8 @@ export const updateVaccineController = async (req, res) => {
 export const deleteVaccineController = async (req, res) => {
   try {
     const { _id } = req.body;
-    const updatedVaccine = await vaccineService.deleteVaccine(_id);
-    res.status(200).json({ message: "Vaccine deleted successfully", vaccine: updatedVaccine });
+    const result = await vaccineService.deleteVaccine(_id);
+    res.status(200).json(result);
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
