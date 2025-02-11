@@ -5,10 +5,34 @@ import { useEffect, useState } from "react";
 const TestUsers = () => {
   const [userList, setUserList] = useState([]);
 
+  // const fetchUsers = async () => {
+  //   const respone = await axios.get("http://localhost:8080/user/showInfo");
+  //   console.log(respone.data);
+  //   setUserList(respone.data);
+  // };
+
+  // useEffect(() => {
+  //   fetchUsers();
+  // }, []);
   const fetchUsers = async () => {
-    const respone = await axios.get("http://localhost:8080/user/showData");
-    console.log(respone.data);
-    setUserList(respone.data);
+    try {
+      const response = await axios.get("http://localhost:8080/user/showInfo");
+      console.log(response.data);
+
+      // Lấy danh sách users từ API
+      const users = response.data.result || [];
+
+      // Thêm số thứ tự cho từng user
+      const usersWithIndex = users.map((user, index) => ({
+        ...user,
+        stt: index + 1, // STT bắt đầu từ 1
+        key: user.id || index, // key giúp React tối ưu render
+      }));
+
+      setUserList(usersWithIndex);
+    } catch (error) {
+      console.error("Lỗi khi lấy dữ liệu:", error);
+    }
   };
 
   useEffect(() => {
@@ -17,13 +41,18 @@ const TestUsers = () => {
 
   useEffect(() => {
     document.title = "User Management";
-  },[]);
+  }, []);
 
   const columns = [
     {
+      title: "STT",
+      dataIndex: "stt",
+      key: "stt",
+    },
+    {
       title: "UserID",
-      dataIndex: "id",
-      key: "id",
+      dataIndex: "_id",
+      key: "_id",
     },
     {
       title: "UserName",
@@ -55,7 +84,9 @@ const TestUsers = () => {
 
   return (
     <div>
-      <h1><b>User Management</b></h1>
+      <h1>
+        <b>User Management</b>
+      </h1>
       <Table dataSource={userList} columns={columns} />
     </div>
   );
