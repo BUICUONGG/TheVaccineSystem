@@ -2,7 +2,7 @@ import express from "express";
 import "dotenv/config";
 import usersRouter from "./src/routes/users.routers.js";
 import vaccinesRouter from "./src/routes/vaccines.routers.js";
-import appointmentRouter from "./src/routes/appointment.routers.js";
+// import appointmentRouter from "./src/routes/appointment.routers.js";
 import connectToDatabase from "./src/config/database.js";
 import cors from "cors";
 const app = express();
@@ -25,7 +25,7 @@ app.get("", async (req, res) => {
 // Routes API hiện tại
 app.use("/user", usersRouter);
 app.use("/vaccine", vaccinesRouter);
-app.use("/appointment", appointmentRouter);
+
 // app.use("/admin", adminRouter);
 // app.use('staff', staffRouter);
 

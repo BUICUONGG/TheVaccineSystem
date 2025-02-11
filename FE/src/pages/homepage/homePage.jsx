@@ -1,5 +1,11 @@
 import { useState, useEffect } from "react";
 import "./homePage.css";
+import { useState, useEffect } from 'react'
+import './homePage.css'
+import { useNavigate } from 'react-router-dom'
+
+import { FaSearch } from 'react-icons/fa';
+import { IoIosArrowBack, IoIosArrowForward } from 'react-icons/io';
 
 const HomePage = () => {
   // const [count, setCount] = useState({0})
@@ -24,10 +30,11 @@ const HomePage = () => {
         prevSlide === banners.length - 1 ? 0 : prevSlide + 1
       );
     }, 5000); // Change slide every 5 seconds
-
+    document.title = "Trang chủ";
     return () => clearInterval(timer);
   }, []);
 
+ 
   // Manual slide functions
   const nextSlide = () => {
     setCurrentSlide(currentSlide === banners.length - 1 ? 0 : currentSlide + 1);
@@ -37,28 +44,56 @@ const HomePage = () => {
     setCurrentSlide(currentSlide === 0 ? banners.length - 1 : currentSlide - 1);
   };
 
+  // News data
+  const newsItems = [
+    {
+      image: "/images/news1.jpg",
+      title: "60% mẫu giải trình tự gen ca COVID-19 ở các tỉnh phía Bắc nhiễm biến thể BA.5",
+      description: "Theo báo cáo về tình hình dịch bệnh COVID-19 của 28 tỉnh, thành phố từ Hà Tĩnh trở ra cho thấy từ đầu năm 2022, đến ngày 15/8, các địa phương đã ghi nhận tổng cộng 7.731.853 ca mắc COVID-19..."
+    },
+    {
+      image: "/images/news2.jpg",
+      title: "Sáng 1/8: Có 3 dấu hiệu chính mắc bệnh đậu mùa khỉ; 1 tuần ghi nhận hơn 10 nghìn ca COVID-19 mới",
+      description: "Theo báo cáo về tình hình dịch bệnh COVID-19 của 28 tỉnh, thành phố từ Hà Tĩnh trở ra cho thấy từ đầu năm 2022 đến ngày 15/8, các địa phương đã ghi nhận tổng cộng 7.731.853 ca mắc COVID-19..."
+    },
+    {
+      image: "/images/news3.jpg",
+      title: "Nguy hiểm bệnh viêm não vào mùa",
+      description: "Theo báo cáo về tình hình dịch bệnh COVID-19 của 28 tỉnh, thành phố từ Hà Tĩnh trở ra cho thấy từ đầu năm 2022 đến ngày 15/8, các địa phương đã ghi nhận tổng cộng 7.731.853 ca mắc COVID-19..."
+    }
+  ];
+
+  const handleLogin = () => {
+    navigate('/login');
+  };
+
+  const handleRegister = () => {
+    navigate('/register');
+  };
+
   return (
     <div className="homepage">
-      {/* Header Framework */}
+      
       <header className="header-framework">
         <div className="header-content">
+
           {/* Logo */}
-          <div className="logo">
-            <img src="/images/logo.png" alt="Logo" />
+          <div className="header-logo-container">
+            <img src="/images/header-logo.png" alt="Logo" />
           </div>
 
           {/* Search Bar */}
           <div className="search-bar">
             <input type="text" placeholder="Tìm kiếm..." />
             <button className="search-button">
-              <i className="fas fa-search"></i>
+              <FaSearch className="search-icon" />
             </button>
           </div>
 
           {/* Auth Buttons */}
           <div className="auth-buttons">
-            <button className="login-btn">Đăng nhập</button>
-            <button className="register-btn">Đăng ký</button>
+            <button className="login-btn" onClick={handleLogin}>Đăng nhập</button>
+            <button className="register-btn" onClick={handleRegister}>Đăng ký</button>
           </div>
         </div>
       </header>
@@ -81,10 +116,10 @@ const HomePage = () => {
 
         {/* Slider Controls */}
         <button className="slider-button prev" onClick={prevSlide}>
-          <i className="fas fa-chevron-left"></i>
+          <IoIosArrowBack className="arrow-icon" />
         </button>
         <button className="slider-button next" onClick={nextSlide}>
-          <i className="fas fa-chevron-right"></i>
+          <IoIosArrowForward className="arrow-icon" />
         </button>
 
         {/* Slider Indicators */}
@@ -102,6 +137,9 @@ const HomePage = () => {
         <nav className="navbar">
           <div className="nav-links">
             <a href="#">Trang chủ</a>
+            <a href="#">Giới thiệu</a>
+            <a href="#">Tin tức</a>
+            <a href="#">Cẩm nang</a>
             <a href="#">Đăng ký tiêm</a>
             <a href="#">Cẩm nang</a>
           </div>
