@@ -20,8 +20,16 @@ class UserService {
   }
 
   async showData() {
-    const result = await connectToDatabase.users.find().toArray();
-    return result;
+    try {
+      const result = await connectToDatabase.users.find().toArray();
+      if (!result) {
+        throw new Error("Không có dữ liệu");
+      }
+      return result;
+    } catch (error) {
+      console.error("Display data error:", error);
+      throw new Error(error.message);
+    }
   }
 
   async login(username, password) {
