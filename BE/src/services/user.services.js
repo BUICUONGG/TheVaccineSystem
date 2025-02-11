@@ -2,6 +2,7 @@ import connectToDatabase from "../config/database.js";
 import User from "../model/userSchema.js";
 import { hashPassword, comparePassword } from "../utils/bcrypt.js";
 import jwt from "jsonwebtoken";
+import { ObjectId } from "mongodb";
 import "dotenv/config";
 
 class UserService {
@@ -54,7 +55,7 @@ class UserService {
     try {
       // console.log(userId);
       const user = await connectToDatabase.users.findOneAndDelete({
-        _id: userId,
+        _id: new ObjectId(userId),
       });
       if (!user) {
         throw new Error("User not found");

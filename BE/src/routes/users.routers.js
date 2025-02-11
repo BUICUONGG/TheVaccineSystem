@@ -18,5 +18,5 @@ const usersRouter = Router();
 usersRouter.get("/showInfo", verifyToken, showInFoController);
 usersRouter.post("/login", loginValidate, loginController);
 usersRouter.post("/register", registerValidate, registerController);
-usersRouter.delete("/delete/:id", verifyToken, verifyAdmin, deleteController);
+usersRouter.post("/delete/:id", verifyToken, verifyAdmin, deleteController);
 export default usersRouter;
