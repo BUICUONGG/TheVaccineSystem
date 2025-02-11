@@ -21,11 +21,11 @@ class UserService {
 
   async showData() {
     try {
-      const result = await connectToDatabase.users.find().toArray();
-      if (!result) {
+      const aaaaa = await connectToDatabase.users.find().toArray();
+      if (!aaaaa) {
         throw new Error("Không có dữ liệu");
       }
-      return result;
+      return aaaaa;
     } catch (error) {
       console.error("Display data error:", error);
       throw new Error(error.message);
