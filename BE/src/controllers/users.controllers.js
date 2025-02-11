@@ -21,7 +21,7 @@ export const loginController = async (req, res) => {
     const token = await userService.login(username, password);
     if (!username || !password)
       throw new Error("Vui lòng nhập email và mật khẩu");
-    res.status(200).json({ message: "Login successfully", token });
+    res.status(200).json(token);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -53,3 +53,5 @@ export const updateController = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+export const logoutController = async (req, res) => {};

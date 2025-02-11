@@ -21,11 +21,11 @@ class UserService {
 
   async showData() {
     try {
-      const aaaaa = await connectToDatabase.users.find().toArray();
-      if (!aaaaa) {
+      const result = await connectToDatabase.users.find().toArray();
+      if (!result) {
         throw new Error("Không có dữ liệu");
       }
-      return aaaaa;
+      return result;
     } catch (error) {
       console.error("Display data error:", error);
       throw new Error(error.message);
@@ -50,8 +50,7 @@ class UserService {
             expiresIn: "1h",
           }
         );
-
-        return { user, accesstoken };
+        return { accesstoken };
       }
     } catch (error) {
       console.error("Error login account:", error.message);
