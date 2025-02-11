@@ -1,11 +1,16 @@
 import { Router } from "express";
-import { addVaccineController, getVaccinesController, updateVaccineController, deleteVaccineController } from "../controllers/vaccines.controllers.js";
+import {
+  addVaccineController,
+  getVaccinesController,
+  updateVaccineController,
+  deleteVaccineController,
+} from "../controllers/vaccines.controllers.js";
 
 const vaccinesRouter = Router();
 
 vaccinesRouter.post("/addVaccine", addVaccineController);
-vaccinesRouter.get("/ListVaccine", getVaccinesController);
-vaccinesRouter.post("/UpdateVaccine", updateVaccineController);
-vaccinesRouter.post("/DeleteVaccine", deleteVaccineController);
+vaccinesRouter.get("/listVaccine", getVaccinesController);
+vaccinesRouter.post("/updateVaccine", updateVaccineController);
+vaccinesRouter.post("/deleteVaccine", deleteVaccineController);
 
 export default vaccinesRouter;
