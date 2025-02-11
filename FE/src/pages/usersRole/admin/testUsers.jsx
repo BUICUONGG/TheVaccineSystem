@@ -15,6 +15,10 @@ const TestUsers = () => {
     fetchUsers();
   }, []);
 
+  useEffect(() => {
+    document.title = "User Management";
+  },[]);
+
   const columns = [
     {
       title: "UserID",
@@ -51,7 +55,7 @@ const TestUsers = () => {
 
   return (
     <div>
-      <h1>User Management</h1>
+      <h1><b>User Management</b></h1>
       <Table dataSource={userList} columns={columns} />
     </div>
   );
