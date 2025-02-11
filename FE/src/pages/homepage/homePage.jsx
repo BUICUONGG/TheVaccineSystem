@@ -1,6 +1,5 @@
-import { useState, useEffect } from "react";
-import "./homePage.css";
-import { useState, useEffect } from 'react'
+import { useState, useEffect } from "react"
+
 import './homePage.css'
 import { useNavigate } from 'react-router-dom'
 
@@ -8,6 +7,7 @@ import { FaSearch } from 'react-icons/fa';
 import { IoIosArrowBack, IoIosArrowForward } from 'react-icons/io';
 
 const HomePage = () => {
+  const navigate = useNavigate();
   // const [count, setCount] = useState({0})
   const [currentSlide, setCurrentSlide] = useState(0);
 
@@ -44,24 +44,7 @@ const HomePage = () => {
     setCurrentSlide(currentSlide === 0 ? banners.length - 1 : currentSlide - 1);
   };
 
-  // News data
-  const newsItems = [
-    {
-      image: "/images/news1.jpg",
-      title: "60% mẫu giải trình tự gen ca COVID-19 ở các tỉnh phía Bắc nhiễm biến thể BA.5",
-      description: "Theo báo cáo về tình hình dịch bệnh COVID-19 của 28 tỉnh, thành phố từ Hà Tĩnh trở ra cho thấy từ đầu năm 2022, đến ngày 15/8, các địa phương đã ghi nhận tổng cộng 7.731.853 ca mắc COVID-19..."
-    },
-    {
-      image: "/images/news2.jpg",
-      title: "Sáng 1/8: Có 3 dấu hiệu chính mắc bệnh đậu mùa khỉ; 1 tuần ghi nhận hơn 10 nghìn ca COVID-19 mới",
-      description: "Theo báo cáo về tình hình dịch bệnh COVID-19 của 28 tỉnh, thành phố từ Hà Tĩnh trở ra cho thấy từ đầu năm 2022 đến ngày 15/8, các địa phương đã ghi nhận tổng cộng 7.731.853 ca mắc COVID-19..."
-    },
-    {
-      image: "/images/news3.jpg",
-      title: "Nguy hiểm bệnh viêm não vào mùa",
-      description: "Theo báo cáo về tình hình dịch bệnh COVID-19 của 28 tỉnh, thành phố từ Hà Tĩnh trở ra cho thấy từ đầu năm 2022 đến ngày 15/8, các địa phương đã ghi nhận tổng cộng 7.731.853 ca mắc COVID-19..."
-    }
-  ];
+ 
 
   const handleLogin = () => {
     navigate('/login');

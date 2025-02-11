@@ -49,7 +49,7 @@ const LoginPage = () => {
 
         setIsLoading(false);
         alert("Đăng nhập thành công!");
-        navigate("/dashboard"); // Điều hướng tới trang chính sau khi đăng nhập
+        navigate("/homePage"); // Điều hướng tới trang chính sau khi đăng nhập
       } catch (error) {
         setIsLoading(false);
         console.error("Login failed:", error);
