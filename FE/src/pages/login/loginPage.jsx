@@ -49,7 +49,11 @@ const LoginPage = () => {
 
         setIsLoading(false);
         alert("Đăng nhập thành công!");
+<<<<<<< HEAD
+        navigate("/Home"); // Điều hướng tới trang chính sau khi đăng nhập
+=======
         navigate("/homePage"); // Điều hướng tới trang chính sau khi đăng nhập
+>>>>>>> f56e4e1acff4e48c6492c946c94ffc9d3077ff89
       } catch (error) {
         setIsLoading(false);
         console.error("Login failed:", error);

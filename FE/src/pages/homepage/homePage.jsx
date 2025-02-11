@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
 
-import './homePage.css';
-import { useNavigate } from 'react-router-dom';
+import "./homePage.css";
+import { useNavigate } from "react-router-dom";
 
-import { FaSearch } from 'react-icons/fa';
-import { IoIosArrowBack, IoIosArrowForward } from 'react-icons/io';
+import { FaSearch } from "react-icons/fa";
+import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 
 const HomePage = () => {
   const navigate = useNavigate();
@@ -34,7 +34,6 @@ const HomePage = () => {
     return () => clearInterval(timer);
   }, []);
 
- 
   // Manual slide functions
   const nextSlide = () => {
     setCurrentSlide(currentSlide === banners.length - 1 ? 0 : currentSlide + 1);
@@ -44,22 +43,18 @@ const HomePage = () => {
     setCurrentSlide(currentSlide === 0 ? banners.length - 1 : currentSlide - 1);
   };
 
- 
-
   const handleLogin = () => {
-    navigate('/login');
+    navigate("/login");
   };
 
   const handleRegister = () => {
-    navigate('/register');
+    navigate("/register");
   };
 
   return (
     <div className="homepage">
-      
       <header className="header-framework">
         <div className="header-content">
-
           {/* Logo */}
           <div className="header-logo-container">
             <img src="/images/header-logo.png" alt="Logo" />
@@ -75,8 +70,12 @@ const HomePage = () => {
 
           {/* Auth Buttons */}
           <div className="auth-buttons">
-            <button className="login-btn" onClick={handleLogin}>Đăng nhập</button>
-            <button className="register-btn" onClick={handleRegister}>Đăng ký</button>
+            <button className="login-btn" onClick={handleLogin}>
+              Đăng nhập
+            </button>
+            <button className="register-btn" onClick={handleRegister}>
+              Đăng ký
+            </button>
           </div>
         </div>
       </header>
