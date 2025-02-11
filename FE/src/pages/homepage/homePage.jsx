@@ -8,36 +8,41 @@ import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 
 const HomePage = () => {
   const navigate = useNavigate();
-  // const [count, setCount] = useState({0})
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isDarkMode, setIsDarkMode] = useState(false);
-
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const banners = [
     "/images/banner1.png",
     "/images/banner2.jpg",
     "/images/banner3.png",
-
   ];
 
-  // Auto slide function
   useEffect(() => {
+    const token = localStorage.getItem("accesstoken");
+    if (token) {
+      setIsLoggedIn(true);
+    }
+    document.title = "Trang chủ";
     const timer = setInterval(() => {
       setCurrentSlide((prevSlide) =>
         prevSlide === banners.length - 1 ? 0 : prevSlide + 1
       );
     }, 5000); // Change slide every 5 seconds
-    document.title = "Trang chủ";
     return () => clearInterval(timer);
-  });
+  }, []);
 
-  // Manual slide functions
   const nextSlide = () => {
     setCurrentSlide(currentSlide === banners.length - 1 ? 0 : currentSlide + 1);
   };
 
   const prevSlide = () => {
     setCurrentSlide(currentSlide === 0 ? banners.length - 1 : currentSlide - 1);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("accesstoken");
+    navigate("/login");
   };
 
   const handleLogin = () => {
@@ -57,7 +62,6 @@ const HomePage = () => {
     }
   };
 
-  // Cleanup dark mode when component unmounts
   useEffect(() => {
     return () => {
       document.body.classList.remove('dark-mode');
@@ -68,12 +72,10 @@ const HomePage = () => {
     <div className={`homepage ${isDarkMode ? 'dark-mode' : ''}`}>
       <header className="header-framework">
         <div className="header-content">
-          {/* Thay thế logo bằng text */}
           <div className="header-title">
             <h1>Nhật Ký Tiêm Chủng</h1>
           </div>
 
-          {/* Search Bar */}
           <div className="search-bar">
             <input type="text" placeholder="Tìm kiếm..." />
             <button className="search-button">
@@ -81,14 +83,28 @@ const HomePage = () => {
             </button>
           </div>
 
-          {/* Auth Buttons */}
           <div className="auth-buttons">
-            <button className="login-btn" onClick={handleLogin}>
-              Đăng nhập
-            </button>
-            <button className="register-btn" onClick={handleRegister}>
-              Đăng ký
-            </button>
+            {isLoggedIn ? (
+              <>
+                <button className="logout-btn" onClick={handleLogout}>
+                  Logout
+                </button>
+                <img
+                  src="/icons/avatar.png"
+                  alt="User Avatar"
+                  className="avatar-icon"
+                />
+              </>
+            ) : (
+              <>
+                <button className="login-btn" onClick={handleLogin}>
+                  Đăng nhập
+                </button>
+                <button className="register-btn" onClick={handleRegister}>
+                  Đăng ký
+                </button>
+              </>
+            )}
             <button 
               className={`theme-toggle-btn ${isDarkMode ? 'dark' : ''}`} 
               onClick={toggleTheme}
@@ -98,7 +114,6 @@ const HomePage = () => {
         </div>
       </header>
 
-      {/* Banner Section */}
       <div className="banner-container">
         <div
           className="banner-slider"
@@ -114,7 +129,6 @@ const HomePage = () => {
           ))}
         </div>
 
-        {/* Slider Controls */}
         <button className="slider-button prev" onClick={prevSlide}>
           <IoIosArrowBack className="arrow-icon" />
         </button>
@@ -122,7 +136,6 @@ const HomePage = () => {
           <IoIosArrowForward className="arrow-icon" />
         </button>
 
-        {/* Slider Indicators */}
         <div className="slider-indicators">
           {banners.map((_, index) => (
             <button
@@ -133,7 +146,6 @@ const HomePage = () => {
           ))}
         </div>
 
-        {/* Navigation Bar */}
         <nav className="navbar">
           <div className="nav-links">
             <a href="#">Trang chủ</a>
@@ -146,7 +158,6 @@ const HomePage = () => {
         </nav>
       </div>
 
-      {/* Quick Access Icons Section */}
       <div className="quick-access">
         <div className="icon-item">
           <img src="/icons/injection.png" alt="Các gói tiêm" />
@@ -166,7 +177,6 @@ const HomePage = () => {
         </div>
       </div>
 
-      {/* Vaccine Information Section */}
       <div className="vaccine-info">
         <h2>THÔNG TIN VACCINE</h2>
         <div className="vaccine-types">
@@ -190,7 +200,6 @@ const HomePage = () => {
         </div>
       </div>
 
-      {/* Vaccination Guide Section */}
       <div className="vaccination-guide">
         <h2>CẨM NANG TIÊM CHỦNG</h2>
         <div className="guide-icons">
@@ -213,7 +222,6 @@ const HomePage = () => {
         </div>
       </div>
 
-      {/* News Section */}
       <div className="news-section">
         <h2>TIN TỨC SỨC KHỎE</h2>
         <div className="news-grid">
@@ -252,7 +260,6 @@ const HomePage = () => {
         </div>
       </div>
 
-      {/* Footer */}
       <footer className="footer">
         <div className="footer-content">
           <div className="footer-section">

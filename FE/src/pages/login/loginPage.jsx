@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { FiUser, FiLock, FiEye, FiEyeOff } from "react-icons/fi";
 import { FcGoogle } from "react-icons/fc";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
+import "./loginPage.css"; // Import file css mới
 
 const LoginPage = () => {
   const [username, setUsername] = useState("");
@@ -45,8 +46,6 @@ const LoginPage = () => {
           JSON.stringify(response.data.accesstoken)
         );
         console.log(response.data);
-        // localStorage.setItem("user", JSON.stringify(response.data.user));
-
         setIsLoading(false);
         alert("Đăng nhập thành công!");
         navigate("/homepage"); // Điều hướng tới trang chính sau khi đăng nhập
@@ -65,6 +64,7 @@ const LoginPage = () => {
 
   return (
     <div className="min-h-screen flex flex-col lg:flex-row">
+      {/* Banner hình ảnh bên trái */}
       <div className="lg:w-1/2 relative hidden lg:block">
         <img
           src="https://images.unsplash.com/photo-1497215728101-856f4ea42174"
@@ -72,8 +72,15 @@ const LoginPage = () => {
           className="w-full h-full object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-gray-900/50 to-gray-900/25" />
+        {/* Nút "Back home" đè lên ảnh */}
+        <div className="back-home-wrapper">
+          <Link to="/homepage" className="back-home">
+            Back home
+          </Link>
+        </div>
       </div>
 
+      {/* Phần form đăng nhập bên phải */}
       <div className="lg:w-1/2 flex items-center justify-center p-8 sm:p-12 lg:p-16 bg-white">
         <div className="w-full max-w-md space-y-8">
           <div className="text-center">
