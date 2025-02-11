@@ -1,3 +1,5 @@
+import { useState, useEffect } from "react";
+import "./homePage.css";
 import { useState, useEffect } from 'react'
 import './homePage.css'
 import { useNavigate } from 'react-router-dom'
@@ -6,21 +8,25 @@ import { FaSearch } from 'react-icons/fa';
 import { IoIosArrowBack, IoIosArrowForward } from 'react-icons/io';
 
 const HomePage = () => {
-  const [count, setCount] = useState(0)
+  // const [count, setCount] = useState({0})
   const [currentSlide, setCurrentSlide] = useState(0);
-  const navigate = useNavigate();
-  
+
   // Array of banner images
   const banners = [
-    '/images/banner1.jpg',
-    '/images/banner2.jpg',
-    '/images/banner3.png'
+    "/images/banner1.jpg",
+    "/images/banner2.jpg",
+    "/images/banner3.png",
+    // '/images/banner4.jpg',
+    // '/images/banner5.jpg',
+    // '/images/banner6.jpg',
+    // '/images/banner7.jpg',
+    // '/images/banner8.jpg',
   ];
 
   // Auto slide function
   useEffect(() => {
     const timer = setInterval(() => {
-      setCurrentSlide((prevSlide) => 
+      setCurrentSlide((prevSlide) =>
         prevSlide === banners.length - 1 ? 0 : prevSlide + 1
       );
     }, 5000); // Change slide every 5 seconds
@@ -94,9 +100,12 @@ const HomePage = () => {
 
       {/* Banner Section */}
       <div className="banner-container">
-        <div className="banner-slider" style={{ transform: `translateX(-${currentSlide * 100}%)` }}>
+        <div
+          className="banner-slider"
+          style={{ transform: `translateX(-${currentSlide * 100}%)` }}
+        >
           {banners.map((banner, index) => (
-            <img 
+            <img
               key={index}
               src={banner}
               alt={`Banner ${index + 1}`}
@@ -104,7 +113,7 @@ const HomePage = () => {
             />
           ))}
         </div>
-        
+
         {/* Slider Controls */}
         <button className="slider-button prev" onClick={prevSlide}>
           <IoIosArrowBack className="arrow-icon" />
@@ -118,7 +127,7 @@ const HomePage = () => {
           {banners.map((_, index) => (
             <button
               key={index}
-              className={`indicator ${currentSlide === index ? 'active' : ''}`}
+              className={`indicator ${currentSlide === index ? "active" : ""}`}
               onClick={() => setCurrentSlide(index)}
             />
           ))}
@@ -162,14 +171,21 @@ const HomePage = () => {
         <h2>THÔNG TIN VACCINE</h2>
         <div className="vaccine-types">
           <div className="vaccine-card">
-            <img src="/images/vaccine-custom.jpg" alt="Tiêm chủng theo yêu cầu" />
+            <img
+              src="/images/vaccine-custom.jpg"
+              alt="Tiêm chủng theo yêu cầu"
+            />
             <h3>TIÊM CHỦNG THEO YÊU CẦU</h3>
-            <a href="#" className="read-more">XEM THÊM</a>
+            <a href="#" className="read-more">
+              XEM THÊM
+            </a>
           </div>
           <div className="vaccine-card">
             <img src="/images/vaccine-standard.jpg" alt="Tiêm chủng trọn gói" />
             <h3>TIÊM CHỦNG TRỌN GÓI</h3>
-            <a href="#" className="read-more">XEM THÊM</a>
+            <a href="#" className="read-more">
+              XEM THÊM
+            </a>
           </div>
         </div>
       </div>
@@ -200,9 +216,7 @@ const HomePage = () => {
       {/* News Section */}
       <div className="news-section">
         <h2>TIN TỨC SỨC KHỎE</h2>
-        <div className="news-grid">
-          {/* Add your news articles here */}
-        </div>
+        <div className="news-grid">{/* Add your news articles here */}</div>
       </div>
     </div>
   );

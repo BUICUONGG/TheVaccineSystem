@@ -6,9 +6,16 @@ const TestUsers = () => {
   const [userList, setUserList] = useState([]);
 
   // const fetchUsers = async () => {
-  //   const respone = await axios.get("http://localhost:8080/user/showInfo");
-  //   console.log(respone.data);
-  //   setUserList(respone.data);
+  //   const response = await axios.get("http://localhost:8080/user/showInfo");
+  //   const usersWithIndex = response.map((user, index) => ({
+  //     ...user,
+  //     stt: index + 1, // STT bắt đầu từ 1
+  //     key: user.id || index, // key giúp React tối ưu render
+  //   }));
+  //   console.log(usersWithIndex);
+  //   setUserList(usersWithIndex);
+  //   //   console.log(response.data);
+  //   //   setUserList(response.data);
   // };
 
   // useEffect(() => {
