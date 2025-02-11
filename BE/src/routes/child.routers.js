@@ -8,7 +8,7 @@ import {
 
 const childRouter = Router();
 
-childRouter.get("/show", showChildController);
+childRouter.get("/showChildren", showChildController);
 childRouter.post("/create", createChildController);
 
 export default childRouter;
