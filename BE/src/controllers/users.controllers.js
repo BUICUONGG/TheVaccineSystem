@@ -30,14 +30,26 @@ export const loginController = async (req, res) => {
 export const deleteController = async (req, res) => {
   try {
     const { id } = req.params; // Lấy ID từ URL
-    console.log(id);
     const user = await userService.delete(id);
     if (!user) {
       throw new Error("User not found");
     }
     res.status(200).json({ message: "User deleted successfully" });
   } catch (error) {
-    console.error("Delete error:", error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+export const updateController = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updateData = req.body;
+    const result = await userService.update(id, updateData);
+    if (!id || !result) {
+      throw new Error("Cannot update user");
+    }
+    res.status(200).json({ message: "User update successfully" });
+  } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };

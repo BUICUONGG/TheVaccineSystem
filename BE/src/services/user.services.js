@@ -66,6 +66,22 @@ class UserService {
       throw new Error(error.message);
     }
   }
+
+  async update(id, updateData) {
+    try {
+      const result = await connectToDatabase.users.findOneAndUpdate(
+        { _id: new ObjectId(id) },
+        { $set: updateData },
+        { returnDocument: "after" }
+      );
+      if (!result) {
+        throw new Error("User not found");
+      }
+    } catch (error) {
+      console.error("Delete error:", error);
+      throw new Error(error.message);
+    }
+  }
 }
 const userService = new UserService();
 export default userService;

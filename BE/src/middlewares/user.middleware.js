@@ -9,6 +9,18 @@ export const registerValidate = (req, res, next) => {
   next();
 };
 
+export const userDataValidate = (req, res, next) => {
+  const { error } = userSchema.validate(req.body, { abortEarly: false });
+
+  if (error) {
+    return res.status(400).json({
+      error: error.details.map((err) => err.message),
+    });
+  }
+
+  next();
+};
+
 export const verifyToken = (req, res, next) => {
   try {
     const token = req.headers.authorization;
