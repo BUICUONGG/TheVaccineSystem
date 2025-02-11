@@ -10,6 +10,7 @@ const HomePage = () => {
   const navigate = useNavigate();
   // const [count, setCount] = useState({0})
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [isDarkMode, setIsDarkMode] = useState(false);
 
   // Array of banner images
   const banners = [
@@ -51,8 +52,24 @@ const HomePage = () => {
     navigate("/register");
   };
 
+  const toggleTheme = () => {
+    setIsDarkMode(!isDarkMode);
+    if (!isDarkMode) {
+      document.body.classList.add('dark-mode');
+    } else {
+      document.body.classList.remove('dark-mode');
+    }
+  };
+
+  // Cleanup dark mode when component unmounts
+  useEffect(() => {
+    return () => {
+      document.body.classList.remove('dark-mode');
+    };
+  }, []);
+
   return (
-    <div className="homepage">
+    <div className={`homepage ${isDarkMode ? 'dark-mode' : ''}`}>
       <header className="header-framework">
         <div className="header-content">
           {/* Logo */}
@@ -76,6 +93,11 @@ const HomePage = () => {
             <button className="register-btn" onClick={handleRegister}>
               Đăng ký
             </button>
+            <button 
+              className={`theme-toggle-btn ${isDarkMode ? 'dark' : ''}`} 
+              onClick={toggleTheme}
+              aria-label="Toggle theme"
+            />
           </div>
         </div>
       </header>
