@@ -9,6 +9,14 @@ import AdminPage from "./pages/usersRole/admin/adminPage";
 
 const router = createBrowserRouter([
   {
+    path: "/",
+    element: <HomePage />, // page mặc định
+  },
+  {
+    path: "/homepage",
+    element: <HomePage />, // page mặc định
+  },
+  {
     path: "/login",
     element: <LoginPage />,
   },
@@ -19,14 +27,6 @@ const router = createBrowserRouter([
   {
     path: "/userList",
     element: <TestUsers />,
-  },
-  {
-    path: "/",
-    element: <HomePage />, // page mặc định
-  },
-  {
-    path: "/homePage",
-    element: <HomePage />, // page mặc định
   },
   {
     path: "/admin",

@@ -32,7 +32,7 @@ const HomePage = () => {
     }, 5000); // Change slide every 5 seconds
     document.title = "Trang chủ";
     return () => clearInterval(timer);
-  }, []);
+  });
 
   // Manual slide functions
   const nextSlide = () => {
