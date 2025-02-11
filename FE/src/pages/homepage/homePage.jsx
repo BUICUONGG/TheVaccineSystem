@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+
 import "./homePage.css";
 import { useNavigate } from "react-router-dom";
 
@@ -6,7 +7,7 @@ import { FaSearch } from "react-icons/fa";
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 
 const HomePage = () => {
-  const navigate = useNavigate;
+  const navigate = useNavigate();
   // const [count, setCount] = useState({0})
   const [currentSlide, setCurrentSlide] = useState(0);
 
@@ -41,8 +42,6 @@ const HomePage = () => {
   const prevSlide = () => {
     setCurrentSlide(currentSlide === 0 ? banners.length - 1 : currentSlide - 1);
   };
-
-  // News data
 
   const handleLogin = () => {
     navigate("/login");

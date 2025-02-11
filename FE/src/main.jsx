@@ -32,6 +32,10 @@ const router = createBrowserRouter([
     path: "/admin",
     element: <AdminPage />, // page mặc định
   },
+  {
+    path: "/homeUser",
+    element: <TestUsers />,
+  },
 ]);
 
 createRoot(document.getElementById("root")).render(
