@@ -1,9 +1,10 @@
 import connectToDatabase from "../config/database.js";
 import User from "../model/userSchema.js";
 import { hashPassword, comparePassword } from "../utils/bcrypt.js";
-import jwt from "jsonwebtoken";
+// import jwt from "jsonwebtoken";
 import { ObjectId } from "mongodb";
 import "dotenv/config";
+import { signToken } from "../utils/jwt.js";
 
 class UserService {
   async resgister(userData) {
@@ -43,13 +44,12 @@ class UserService {
         throw new Error("Sai mật khẩu");
       }
       if (user && validPassword) {
-        const accesstoken = jwt.sign(
-          { id: user._id.toString(), role: user.role },
-          process.env.JWT_ACCESS_TOKEN,
-          {
-            expiresIn: "1h",
-          }
-        );
+        const accesstoken = await signToken({
+          payload: { id: user._id.toString(), role: user.role },
+          privateKey: process.env.JWT_ACCESS_TOKEN,
+          options: { expiresIn: "1h" },
+        });
+
         return { accesstoken };
       }
     } catch (error) {
