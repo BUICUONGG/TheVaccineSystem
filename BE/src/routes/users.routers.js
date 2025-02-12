@@ -5,7 +5,8 @@ import {
   loginController,
   deleteController,
   updateController,
-  logoutController,
+  getAllUsersController,
+  // logoutController,
 } from "../controllers/users.controllers.js";
 import {
   registerValidate,
@@ -17,10 +18,11 @@ import {
 
 const usersRouter = Router();
 
-usersRouter.get("/showInfo", showInFoController);
+usersRouter.get("/showInfo", verifyToken, showInFoController);
 usersRouter.post("/login", loginValidate, loginController);
 usersRouter.post("/register", registerValidate, registerController);
 usersRouter.post("/delete/:id", verifyToken, verifyAdmin, deleteController);
 usersRouter.post("update/:id", verifyToken, verifyAdmin, updateController);
-usersRouter.post("/logout", logoutController);
+usersRouter.get("/getAllUsers", verifyToken, verifyAdmin, getAllUsersController);
+// usersRouter.post("/logout", logoutController);
 export default usersRouter;

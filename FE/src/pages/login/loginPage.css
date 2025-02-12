@@ -1,0 +1,24 @@
+/* Nút Back home */
+.back-home-wrapper {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  z-index: 10;
+}
+
+.back-home {
+  text-decoration: none;
+  font-size: 18px;
+  color: white;
+  padding: 8px 12px;
+  border-radius: 4px;
+  transition: background 0.3s ease, color 0.3s ease, font-weight 0.3s ease;
+}
+
+/* Khi hover: background trắng, chữ đen, in đậm */
+.back-home:hover {
+  background: white;
+  color: black;
+  font-weight: bold;
+  cursor: pointer;
+}
