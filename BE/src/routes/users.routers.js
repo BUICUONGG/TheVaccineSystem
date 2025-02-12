@@ -17,7 +17,7 @@ import {
 
 const usersRouter = Router();
 
-usersRouter.get("/showInfo", showInFoController);
+usersRouter.get("/showInfo", verifyToken, showInFoController);
 usersRouter.post("/login", loginValidate, loginController);
 usersRouter.post("/register", registerValidate, registerController);
 usersRouter.post("/delete/:id", verifyToken, verifyAdmin, deleteController);
