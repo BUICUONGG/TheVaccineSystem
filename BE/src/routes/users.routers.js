@@ -5,6 +5,7 @@ import {
   loginController,
   deleteController,
   updateController,
+  getAllUsersController,
   // logoutController,
 } from "../controllers/users.controllers.js";
 import {
@@ -22,5 +23,6 @@ usersRouter.post("/login", loginValidate, loginController);
 usersRouter.post("/register", registerValidate, registerController);
 usersRouter.post("/delete/:id", verifyToken, verifyAdmin, deleteController);
 usersRouter.post("update/:id", verifyToken, verifyAdmin, updateController);
+usersRouter.get("/getAllUsers", verifyToken, verifyAdmin, getAllUsersController);
 // usersRouter.post("/logout", logoutController);
 export default usersRouter;
