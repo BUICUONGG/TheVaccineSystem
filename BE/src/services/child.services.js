@@ -20,7 +20,7 @@ class ChildService {
         try {
             const child = new Child(childData);
             await child.validate(); // Kiểm tra dữ liệu có hợp lệ theo schema
-            const result = await connectToDatabase.children.insertOne(child);
+            const result = await connectToDatabase.childs.insertOne(child);
             return { _id: result.insertedId, ...childData };
         } catch (error) {
             console.error("Create child error:", error);
