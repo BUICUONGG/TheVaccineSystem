@@ -16,16 +16,6 @@ class VaccineService {
     }
   }
 
-  async getVaccines() {
-    try {
-      const vaccines = await connectToDatabase.vaccines.find().toArray();
-      return vaccines;
-    } catch (error) {
-      console.error("Error get vaccine:", error.message);
-      throw new Error(error.message);
-    }
-  }
-
   async updateVaccine(vaccineData) {
     try {
       const { _id, ...updateData } = vaccineData;
@@ -75,8 +65,9 @@ class VaccineService {
         throw new Error("Vaccine not found");
       }
 
-      
-      const result = await connectToDatabase.vaccines.deleteOne({ _id: new ObjectId(vaccineId) });
+      const result = await connectToDatabase.vaccines.deleteOne({
+        _id: new ObjectId(vaccineId),
+      });
 
       if (result.deletedCount === 0) {
         throw new Error("Failed to delete vaccine");

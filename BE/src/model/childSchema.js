@@ -1,7 +1,6 @@
 import mongoose from "mongoose";
 
 const childSchema = new mongoose.Schema({
- /* userId: { type: mongoose.Schema.Types.ObjectId, ref: "Customer", required: true },*/
   customerId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Customer",

@@ -11,7 +11,7 @@ export const registerController = async (req, res) => {
     const user = await userService.resgister(req.body);
     res.status(201).json({ message: "User created successfully", user });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json(error.message);
   }
 };
 
@@ -23,7 +23,7 @@ export const loginController = async (req, res) => {
       throw new Error("Vui lòng nhập email và mật khẩu");
     res.status(200).json(token);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json(error.message);
   }
 };
 
@@ -34,7 +34,7 @@ export const deleteController = async (req, res) => {
     if (!user) {
       throw new Error("User not found");
     }
-    res.status(200).json({ message: "User deleted successfully" });
+    res.status(200).json("User deleted successfully");
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -48,9 +48,9 @@ export const updateController = async (req, res) => {
     if (!id || !result) {
       throw new Error("Cannot update user");
     }
-    res.status(200).json({ message: "User update successfully" });
+    res.status(200).json("User update successfully");
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    res.status(500).json(error.message);
   }
 };
 
@@ -59,13 +59,13 @@ export const getAllUsersController = async (req, res) => {
     const users = await userService.getAllUsers();
     return res.status(200).json({
       success: true,
-      data: users
+      data: users,
     });
   } catch (error) {
     return res.status(500).json({
       success: false,
       message: "Internal server error",
-      error: error.message
+      error: error.message,
     });
   }
 };

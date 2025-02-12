@@ -1,11 +1,12 @@
 import express from "express";
 import "dotenv/config";
-import usersRouter from "./src/routes/users.routers.js";
-import vaccinesRouter from "./src/routes/vaccines.routers.js";
-import childRouter from "./src/routes/child.routers.js";
+import usersRouter from "./src/routes/users.routes.js";
+import vaccinesRouter from "./src/routes/vaccines.routes.js";
+import childRouter from "./src/routes/child.routes.js";
 // import appointmentRouter from "./src/routes/appointment.routers.js";
 import connectToDatabase from "./src/config/database.js";
 import cors from "cors";
+import blogRoutes from "./src/routes/blogs.routes.js";
 const app = express();
 app.use(express.json());
 const PORT = 8080 || process.env.MONGO_URI;
@@ -27,6 +28,7 @@ app.get("", async (req, res) => {
 app.use("/user", usersRouter);
 app.use("/vaccine", vaccinesRouter);
 app.use("/child", childRouter);
+app.use("/blog", blogRoutes);
 // app.use("/admin", adminRouter);
 // app.use('staff', staffRouter);
 

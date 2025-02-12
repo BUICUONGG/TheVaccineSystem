@@ -23,8 +23,8 @@ class UserService {
   async showData() {
     try {
       const result = await connectToDatabase.users.find().toArray();
-      if (!result) {
-        throw new Error("Không có dữ liệu");
+      if (!result || result.length === 0) {
+        throw new Error("Không có dữ liệu child");
       }
       return result;
     } catch (error) {
@@ -49,7 +49,6 @@ class UserService {
           privateKey: process.env.JWT_ACCESS_TOKEN,
           options: { expiresIn: "1h" },
         });
-
         return { accesstoken };
       }
     } catch (error) {
@@ -92,25 +91,27 @@ class UserService {
 
   async getAllUsers() {
     try {
-      const users = await connectToDatabase.users.aggregate([
-        {
-          $lookup: {
-            from: "customers",
-            localField: "_id",
-            foreignField: "userId",
-            as: "customerInfo"
-          }
-        },
-        {
-          $project: {
-            _id: 1,
-            fullname: 1,
-            email: 1,
-            customerInfo: 1
-          }
-        }
-      ]).toArray();
-      
+      const users = await connectToDatabase.users
+        .aggregate([
+          {
+            $lookup: {
+              from: "customers",
+              localField: "_id",
+              foreignField: "userId",
+              as: "customerInfo",
+            },
+          },
+          {
+            $project: {
+              _id: 1,
+              fullname: 1,
+              email: 1,
+              customerInfo: 1,
+            },
+          },
+        ])
+        .toArray();
+
       return users;
     } catch (error) {
       console.error("Get all users error:", error);

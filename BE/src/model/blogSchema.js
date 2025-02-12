@@ -5,7 +5,7 @@ const blogSchema = new mongoose.Schema({
   blogTitle: { type: String, required: true },
   blogContent: { type: String, required: true },
   createDate: { type: Date, default: Date.now },
-  status: { type: String, enum: ["active", "none"], default: "draft" },
+  status: { type: String, enum: ["active", "none"], default: "none" },
 });
 const Blog = mongoose.model("Blog", blogSchema);
 
