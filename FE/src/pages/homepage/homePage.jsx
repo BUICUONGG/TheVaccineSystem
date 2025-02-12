@@ -30,7 +30,7 @@ const HomePage = () => {
       );
     }, 5000); // Change slide every 5 seconds
     return () => clearInterval(timer);
-  }, []);
+  }, [banners.length]);
 
   const nextSlide = () => {
     setCurrentSlide(currentSlide === banners.length - 1 ? 0 : currentSlide + 1);

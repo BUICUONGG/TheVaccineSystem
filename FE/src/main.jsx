@@ -6,7 +6,7 @@ import RegisterPage from "./pages/register/registerPage";
 import TestUsers from "./pages/usersRole/admin/testUsers";
 import HomePage from "./pages/homepage/homePage";
 import AdminPage from "./pages/usersRole/admin/adminPage";
-git
+
 
 const router = createBrowserRouter([
   {
@@ -26,7 +26,7 @@ const router = createBrowserRouter([
     element: <RegisterPage />,
   },
   {
-    path: "/userList",
+    path: "/userlist",
     element: <TestUsers />,
   },
   {
@@ -34,7 +34,7 @@ const router = createBrowserRouter([
     element: <AdminPage />, // page mặc định
   },
   {
-    path: "/homeUser",
+    path: "/homeuser",
     element: <TestUsers />,
   },
   
