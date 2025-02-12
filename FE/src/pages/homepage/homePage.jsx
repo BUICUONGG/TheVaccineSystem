@@ -30,7 +30,7 @@ const HomePage = () => {
       );
     }, 5000); // Change slide every 5 seconds
     return () => clearInterval(timer);
-  }, []);
+  }, [banners.length]);
 
   const nextSlide = () => {
     setCurrentSlide(currentSlide === banners.length - 1 ? 0 : currentSlide + 1);
@@ -56,20 +56,20 @@ const HomePage = () => {
   const toggleTheme = () => {
     setIsDarkMode(!isDarkMode);
     if (!isDarkMode) {
-      document.body.classList.add('dark-mode');
+      document.body.classList.add("dark-mode");
     } else {
-      document.body.classList.remove('dark-mode');
+      document.body.classList.remove("dark-mode");
     }
   };
 
   useEffect(() => {
     return () => {
-      document.body.classList.remove('dark-mode');
+      document.body.classList.remove("dark-mode");
     };
   }, []);
 
   return (
-    <div className={`homepage ${isDarkMode ? 'dark-mode' : ''}`}>
+    <div className={`homepage ${isDarkMode ? "dark-mode" : ""}`}>
       <header className="header-framework">
         <div className="header-content">
           <div className="header-title">
@@ -105,8 +105,8 @@ const HomePage = () => {
                 </button>
               </>
             )}
-            <button 
-              className={`theme-toggle-btn ${isDarkMode ? 'dark' : ''}`} 
+            <button
+              className={`theme-toggle-btn ${isDarkMode ? "dark" : ""}`}
               onClick={toggleTheme}
               aria-label="Toggle theme"
             />
@@ -230,9 +230,19 @@ const HomePage = () => {
               <img src="/images/news1.jpg" alt="COVID-19 News" />
             </div>
             <div className="news-content">
-              <h3>60% mẫu giải trình tự gen ca COVID-19 ở các tỉnh phía Bắc nhiễm biến thể BA.5</h3>
-              <p>Theo báo cáo về tình hình dịch bệnh COVID-19 của 28 tỉnh, thành phố từ Hà Tĩnh trở ra cho thấy từ đầu năm 2022 đến ngày 15/8, các địa phương đã ghi nhận tổng cộng 7.731.853 ca mắc COVID-19...</p>
-              <a href="#" className="read-more">XEM THÊM</a>
+              <h3>
+                60% mẫu giải trình tự gen ca COVID-19 ở các tỉnh phía Bắc nhiễm
+                biến thể BA.5
+              </h3>
+              <p>
+                Theo báo cáo về tình hình dịch bệnh COVID-19 của 28 tỉnh, thành
+                phố từ Hà Tĩnh trở ra cho thấy từ đầu năm 2022 đến ngày 15/8,
+                các địa phương đã ghi nhận tổng cộng 7.731.853 ca mắc
+                COVID-19...
+              </p>
+              <a href="#" className="read-more">
+                XEM THÊM
+              </a>
             </div>
           </div>
 
@@ -241,9 +251,17 @@ const HomePage = () => {
               <img src="/images/news2.jpg" alt="COVID Test" />
             </div>
             <div className="news-content">
-              <h3>Sáng 1/8: Có 3 dấu hiệu chính mắc bệnh đậu mùa khỉ; 1 tuần ghi nhận hơn 10 nghìn ca COVID-19 mới</h3>
-              <p>Theo báo cáo về tình hình dịch bệnh COVID-19 của 28 tỉnh, thành phố từ Hà Tĩnh trở ra...</p>
-              <a href="#" className="read-more">XEM THÊM</a>
+              <h3>
+                Sáng 1/8: Có 3 dấu hiệu chính mắc bệnh đậu mùa khỉ; 1 tuần ghi
+                nhận hơn 10 nghìn ca COVID-19 mới
+              </h3>
+              <p>
+                Theo báo cáo về tình hình dịch bệnh COVID-19 của 28 tỉnh, thành
+                phố từ Hà Tĩnh trở ra...
+              </p>
+              <a href="#" className="read-more">
+                XEM THÊM
+              </a>
             </div>
           </div>
 
@@ -253,8 +271,13 @@ const HomePage = () => {
             </div>
             <div className="news-content">
               <h3>Nguy hiểm bệnh viêm não vào mùa</h3>
-              <p>Theo báo cáo về tình hình dịch bệnh COVID-19 của 28 tỉnh, thành phố từ Hà Tĩnh trở ra cho thấy từ đầu năm 2022...</p>
-              <a href="#" className="read-more">XEM THÊM</a>
+              <p>
+                Theo báo cáo về tình hình dịch bệnh COVID-19 của 28 tỉnh, thành
+                phố từ Hà Tĩnh trở ra cho thấy từ đầu năm 2022...
+              </p>
+              <a href="#" className="read-more">
+                XEM THÊM
+              </a>
             </div>
           </div>
         </div>
@@ -275,9 +298,15 @@ const HomePage = () => {
           <div className="footer-section">
             <h3>THEO DÕI CHÚNG TÔI</h3>
             <div className="social-links">
-              <a href="#"><i className="fab fa-facebook"></i></a>
-              <a href="#"><i className="fab fa-twitter"></i></a>
-              <a href="#"><i className="fab fa-instagram"></i></a>
+              <a href="#">
+                <i className="fab fa-facebook"></i>
+              </a>
+              <a href="#">
+                <i className="fab fa-twitter"></i>
+              </a>
+              <a href="#">
+                <i className="fab fa-instagram"></i>
+              </a>
             </div>
           </div>
         </div>
