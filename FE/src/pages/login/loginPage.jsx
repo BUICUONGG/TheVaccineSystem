@@ -39,13 +39,12 @@ const LoginPage = () => {
           username,
           password,
         });
-
+        console.log(response.data);
         // Nếu đăng nhập thành công, lưu token vào localStorage
         localStorage.setItem(
           "accesstoken",
           JSON.stringify(response.data.accesstoken)
         );
-        console.log(response.data);
         setIsLoading(false);
         alert("Đăng nhập thành công!");
         navigate("/homepage"); // Điều hướng tới trang chính sau khi đăng nhập
