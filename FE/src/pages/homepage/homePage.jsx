@@ -90,7 +90,7 @@ const HomePage = () => {
                   Logout
                 </button>
                 <img
-                  src="/icons/avatar.png"
+                  src="../icons/adminIcon.png"
                   alt="User Avatar"
                   className="avatar-icon"
                 />

@@ -1,14 +1,16 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Table, Button } from 'antd';
+import { Table, Input } from 'antd';
 import axios from 'axios';
 import './adminPage.css';
 
+const { Search } = Input;
+
 const AdminPage = () => {
-  const [searchTerm, setSearchTerm] = useState('');
   const [userList, setUserList] = useState([]);
   const [showTable, setShowTable] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [searchText, setSearchText] = useState('');
 
   const columns = [
     {
@@ -41,6 +43,22 @@ const AdminPage = () => {
       title: "Role",
       dataIndex: "role",
       key: "role",
+      filters: [
+        { text: 'Admin', value: 'admin' },
+        { text: 'Staff', value: 'staff' },
+        { text: 'Customer', value: 'customer' }
+      ],
+      onFilter: (value, record) => record.role === value,
+      render: (role) => (
+        <span style={{ 
+          textTransform: 'capitalize',
+          color: role === 'admin' ? '#ff4d4f' : 
+                 role === 'staff' ? '#1890ff' : 
+                 '#52c41a'
+        }}>
+          {role}
+        </span>
+      )
     }
   ];
 
@@ -48,7 +66,16 @@ const AdminPage = () => {
     try {
       setLoading(true);
       const response = await axios.get("http://localhost:8080/user/showInfo");
-      setUserList(response.data.result || []);
+      // Sort users by role order when data is fetched
+      const sortedUsers = (response.data.result || []).sort((a, b) => {
+        const roleOrder = {
+          admin: 1,
+          staff: 2,
+          customer: 3
+        };
+        return roleOrder[a.role] - roleOrder[b.role];
+      });
+      setUserList(sortedUsers);
     } catch (error) {
       console.error("Error fetching users:", error);
     } finally {
@@ -60,6 +87,14 @@ const AdminPage = () => {
     setShowTable(true);
     fetchUsers();
   };
+
+  const handleSearch = (value) => {
+    setSearchText(value);
+  };
+
+  const filteredUsers = userList.filter(user => 
+    user.username.toLowerCase().includes(searchText.toLowerCase())
+  );
 
   return (
     <div className="container">
@@ -99,20 +134,20 @@ const AdminPage = () => {
             <span className="nav-item">Home</span>
             <span className="nav-item">Contact</span>
           </nav>
-          <input
-            type="text"
-            className="search-bar"
-            placeholder="Search"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
         </header>
         <main className="content">
           {showTable && (
             <div style={{ padding: "20px" }}>
               <h2>User List</h2>
+              <Search
+                placeholder="Search by username"
+                allowClear
+                enterButton
+                onSearch={handleSearch}
+                style={{ width: 300, marginBottom: 16 }}
+              />
               <Table 
-                dataSource={userList} 
+                dataSource={filteredUsers} 
                 columns={columns}
                 loading={loading}
                 rowKey="_id"
