@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Table, Input } from 'antd';
+import { Table, Input, Button, Modal } from 'antd';
 import axios from 'axios';
+import { DeleteOutlined } from '@ant-design/icons';
 import './adminPage.css';
 
 const { Search } = Input;
@@ -11,6 +12,7 @@ const AdminPage = () => {
   const [showTable, setShowTable] = useState(false);
   const [loading, setLoading] = useState(false);
   const [searchText, setSearchText] = useState('');
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   const columns = [
     {
@@ -59,6 +61,23 @@ const AdminPage = () => {
           {role}
         </span>
       )
+    },
+    {
+      title: "Actions",
+      key: "actions",
+      width: 100,
+      render: (_, record) => (
+        <Button 
+          type="primary" 
+          danger
+          icon={<DeleteOutlined />}
+          onClick={() => handleDelete(record._id)}
+          loading={deleteLoading}
+          disabled={record.role === 'admin'}
+        >
+          Delete
+        </Button>
+      ),
     }
   ];
 
@@ -95,6 +114,34 @@ const AdminPage = () => {
   const filteredUsers = userList.filter(user => 
     user.username.toLowerCase().includes(searchText.toLowerCase())
   );
+
+  const handleDelete = async (userId) => {
+    Modal.confirm({
+      title: 'Are you sure you want to delete this user?',
+      content: 'This action cannot be undone.',
+      okText: 'Yes',
+      okType: 'danger',
+      cancelText: 'No',
+      onOk: async () => {
+        try {
+          setDeleteLoading(true);
+          await axios.post(`http://localhost:8080/user/delete/${userId}`);
+          // Refresh user list after successful deletion
+          fetchUsers();
+          Modal.success({
+            content: 'User deleted successfully',
+          });
+        } catch (error) {
+          console.error("Error deleting user:", error);
+          Modal.error({
+            content: 'Failed to delete user',
+          });
+        } finally {
+          setDeleteLoading(false);
+        }
+      },
+    });
+  };
 
   return (
     <div className="container">
