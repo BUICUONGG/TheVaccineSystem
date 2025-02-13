@@ -1,13 +1,14 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Table, Input, Button, Modal } from 'antd';
 import axios from 'axios';
-import { DeleteOutlined } from '@ant-design/icons';
+import { DeleteOutlined, LogoutOutlined } from '@ant-design/icons';
 import './adminPage.css';
 
 const { Search } = Input;
 
 const AdminPage = () => {
+  const navigate = useNavigate();
   const [userList, setUserList] = useState([]);
   const [showTable, setShowTable] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -84,8 +85,17 @@ const AdminPage = () => {
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      const response = await axios.get("http://localhost:8080/user/showInfo");
-      // Sort users by role order when data is fetched
+      const accesstoken = localStorage.getItem('accesstoken');
+      
+      const response = await axios.get(
+        "http://localhost:8080/user/showInfo",
+        {
+          headers: {
+            'Authorization': `Bearer ${accesstoken}`
+          }
+        }
+      );
+      
       const sortedUsers = (response.data.result || []).sort((a, b) => {
         const roleOrder = {
           admin: 1,
@@ -97,6 +107,11 @@ const AdminPage = () => {
       setUserList(sortedUsers);
     } catch (error) {
       console.error("Error fetching users:", error);
+      if (error.response?.status === 401) {
+        Modal.error({
+          content: 'Unauthorized. Please login again.',
+        });
+      }
     } finally {
       setLoading(false);
     }
@@ -116,6 +131,15 @@ const AdminPage = () => {
   );
 
   const handleDelete = async (userId) => {
+    const accesstoken = localStorage.getItem('accesstoken');
+    
+    if (!accesstoken) {
+      Modal.error({
+        content: 'You need to login first',
+      });
+      return;
+    }
+
     Modal.confirm({
       title: 'Are you sure you want to delete this user?',
       content: 'This action cannot be undone.',
@@ -125,22 +149,46 @@ const AdminPage = () => {
       onOk: async () => {
         try {
           setDeleteLoading(true);
-          await axios.post(`http://localhost:8080/user/delete/${userId}`);
-          // Refresh user list after successful deletion
+          await axios.post(
+            `http://localhost:8080/user/delete/${userId}`,
+            {},
+            {
+              headers: {
+                'Authorization': `Bearer ${accesstoken}`
+              }
+            }
+          );
+          
           fetchUsers();
+          
           Modal.success({
             content: 'User deleted successfully',
           });
         } catch (error) {
           console.error("Error deleting user:", error);
-          Modal.error({
-            content: 'Failed to delete user',
-          });
+          if (error.response?.status === 401) {
+            Modal.error({
+              content: 'Unauthorized. Please login again.',
+            });
+          } else if (error.response?.status === 403) {
+            Modal.error({
+              content: 'You do not have permission to delete users.',
+            });
+          } else {
+            Modal.error({
+              content: 'Failed to delete user',
+            });
+          }
         } finally {
           setDeleteLoading(false);
         }
       },
     });
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem("accesstoken");
+    navigate("/login");
   };
 
   return (
@@ -173,6 +221,18 @@ const AdminPage = () => {
             <Link to="/admin/consultations">Consultations</Link>
           </li>
         </ul>
+
+        <div className="logout-section">
+          <Button 
+            type="primary" 
+            danger
+            icon={<LogoutOutlined />}
+            onClick={handleLogout}
+            className="logout-button"
+          >
+            Logout
+          </Button>
+        </div>
       </div>
 
       <div className="main-content">
