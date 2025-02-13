@@ -1,5 +1,6 @@
 import connectToDatabase from "../config/database.js";
 import userService from "../services/user.services.js";
+import { signToken } from "../utils/jwt.js";
 
 export const showInFoController = async (req, res) => {
   const result = await userService.showData();
@@ -15,13 +16,41 @@ export const registerController = async (req, res) => {
   }
 };
 
+// export const refreshTokenController = async (req, res) => {
+//   try {
+//     const refreshToken = req.cookies.refreshToken; // Lấy từ Cookie
+//     if (!refreshToken)
+//       return res.status(401).json({ message: "Không có Refresh Token" });
+
+//     jwt.verify(refreshToken, process.env.JWT_REFRESH_TOKEN, (err, decoded) => {
+//       if (err)
+//         return res.status(403).json({ message: "Refresh Token không hợp lệ" });
+
+//       const newAccessToken = signToken(refreshToken);
+
+//       return res.json({ accesstoken: newAccessToken });
+//     });
+//   } catch (error) {
+//     res.status(500).json({ message: "Không thể làm mới Access Token" });
+//   }
+// };
+
 export const loginController = async (req, res) => {
   try {
     const { username, password } = req.body;
-    const token = await userService.login(username, password);
     if (!username || !password)
       throw new Error("Vui lòng nhập email và mật khẩu");
-    res.status(200).json(token);
+    const { accesstoken, refreshtoken } = await userService.login(
+      username,
+      password
+    );
+    res.cookie("refreshToken", refreshtoken, {
+      httpOnly: true, // Chặn truy cập từ JavaScript (Bảo mật XSS)
+      secure: true, // Chỉ gửi qua HTTPS
+      sameSite: "None", // Chống CSRF
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 ngày
+    });
+    res.status(200).json({ accesstoken, refreshtoken });
   } catch (error) {
     res.status(500).json(error.message);
   }

@@ -35,10 +35,11 @@ const LoginPage = () => {
     if (validateForm()) {
       setIsLoading(true);
       try {
-        const response = await axios.post("http://localhost:8080/user/login", {
-          username,
-          password,
-        });
+        const response = await axios.post(
+          "http://localhost:8080/user/login",
+          { username, password },
+          { withCredentials: true } // 🔥 BẮT BUỘC để gửi & nhận Cookie
+        );
         console.log(response.data);
         // Nếu đăng nhập thành công, lưu token vào localStorage
         localStorage.setItem(

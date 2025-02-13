@@ -47,9 +47,16 @@ class UserService {
         const accesstoken = await signToken({
           payload: { id: user._id.toString(), role: user.role },
           privateKey: process.env.JWT_ACCESS_TOKEN,
+          options: { expiresIn: "10" },
+        });
+        const refreshtoken = await signToken({
+          payload: { id: user._id.toString(), role: user.role },
+          privateKey: process.env.JWT_REFRESH_TOKEN,
           options: { expiresIn: "1h" },
         });
-        return { accesstoken };
+
+        return { accesstoken, refreshtoken };
+        console.log(refreshtoken);
       }
     } catch (error) {
       console.error("Error login account:", error.message);
