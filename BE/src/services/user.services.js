@@ -96,35 +96,35 @@ class UserService {
     }
   }
 
-  async getAllUsers() {
-    try {
-      const users = await connectToDatabase.users
-        .aggregate([
-          {
-            $lookup: {
-              from: "customers",
-              localField: "_id",
-              foreignField: "userId",
-              as: "customerInfo",
-            },
-          },
-          {
-            $project: {
-              _id: 1,
-              fullname: 1,
-              email: 1,
-              customerInfo: 1,
-            },
-          },
-        ])
-        .toArray();
+  // async getAllUsers() {
+  //   try {
+  //     const users = await connectToDatabase.users
+  //       .aggregate([
+  //         {
+  //           $lookup: {
+  //             from: "customers",
+  //             localField: "_id",
+  //             foreignField: "userId",
+  //             as: "customerInfo",
+  //           },
+  //         },
+  //         {
+  //           $project: {
+  //             _id: 1,
+  //             fullname: 1,
+  //             email: 1,
+  //             customerInfo: 1,
+  //           },
+  //         },
+  //       ])
+  //       .toArray();
 
-      return users;
-    } catch (error) {
-      console.error("Get all users error:", error);
-      throw new Error(error.message);
-    }
-  }
+  //     return users;
+  //   } catch (error) {
+  //     console.error("Get all users error:", error);
+  //     throw new Error(error.message);
+  //   }
+  // }
 }
 const userService = new UserService();
 export default userService;
