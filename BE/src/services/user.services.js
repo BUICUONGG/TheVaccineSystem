@@ -54,6 +54,7 @@ class UserService {
       if (!user) {
         throw new Error("Tài khoản không tồn tại", username);
       }
+      const userId = user._id.toString();
       const validPassword = await comparePassword(password, user.password);
       if (!validPassword) {
         throw new Error("Sai mật khẩu");
@@ -61,8 +62,12 @@ class UserService {
       if (user && validPassword) {
         const accesstoken = await this.signAccessToken(user);
         const refreshtoken = await this.signRefreshToken(user);
-
-        return { accesstoken, refreshtoken };
+        return {
+          userId,
+          role: user.role,
+          accesstoken,
+          refreshtoken,
+        };
       }
     } catch (error) {
       console.error("Error login account:", error.message);
@@ -101,7 +106,6 @@ class UserService {
       throw new Error(error.message);
     }
   }
-
 }
 const userService = new UserService();
 export default userService;

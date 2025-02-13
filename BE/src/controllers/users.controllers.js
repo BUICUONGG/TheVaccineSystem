@@ -46,7 +46,7 @@ export const loginController = async (req, res) => {
     const { username, password } = req.body;
     if (!username || !password)
       throw new Error("Vui lòng nhập email và mật khẩu");
-    const { accesstoken, refreshtoken } = await userService.login(
+    const { userId, role, accesstoken, refreshtoken } = await userService.login(
       username,
       password
     );
@@ -56,7 +56,7 @@ export const loginController = async (req, res) => {
       sameSite: "None", // Chống CSRF
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 ngày
     });
-    res.status(200).json({ accesstoken, refreshtoken });
+    res.status(200).json({ userId, role, accesstoken, refreshtoken });
   } catch (error) {
     res.status(500).json(error.message);
   }

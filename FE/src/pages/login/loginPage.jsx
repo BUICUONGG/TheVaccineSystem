@@ -38,17 +38,16 @@ const LoginPage = () => {
         const response = await axios.post(
           "http://localhost:8080/user/login",
           { username, password },
-          { withCredentials: true } // 🔥 BẮT BUỘC để gửi & nhận Cookie
+          { withCredentials: true } // BẮT BUỘC để gửi & nhận Cookie
         );
-        console.log(response.data);
+
         // Nếu đăng nhập thành công, lưu token vào localStorage
-        localStorage.setItem(
-          "accesstoken",
-          JSON.stringify(response.data.accesstoken)
-        );
+        localStorage.setItem("accesstoken", response.data.accesstoken);
+        localStorage.setItem("role", response.data.role);
+        localStorage.setItem("userId", response.data.userId);
         setIsLoading(false);
         alert("Đăng nhập thành công!");
-        navigate("/homepage"); // Điều hướng tới trang chính sau khi đăng nhập
+        navigate(response.data.role === "admin" ? "/admin" : "/homepage"); // Điều hướng tới trang chính sau khi đăng nhập
       } catch (error) {
         setIsLoading(false);
         console.error("Login failed:", error);
