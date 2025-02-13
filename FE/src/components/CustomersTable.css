@@ -1,0 +1,23 @@
+.customers-table-container {
+  padding: 24px;
+}
+
+.customers-table-container h2 {
+  margin-bottom: 24px;
+  color: #1890ff;
+}
+
+.ant-table-wrapper {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.ant-table-thead > tr > th {
+  background: #f0f2f5;
+  font-weight: 600;
+}
+
+.ant-table-tbody > tr:hover > td {
+  background: #e6f7ff;
+} 
