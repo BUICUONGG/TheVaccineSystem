@@ -33,6 +33,21 @@ class UserService {
     }
   }
 
+  async signAccessToken(user) {
+    return await signToken({
+      payload: { id: user._id.toString(), role: user.role },
+      privateKey: process.env.JWT_ACCESS_TOKEN,
+      options: { expiresIn: "5" },
+    });
+  }
+  async signRefreshToken(user) {
+    return await signToken({
+      payload: { id: user._id.toString(), role: user.role },
+      privateKey: process.env.JWT_REFRESH_TOKEN,
+      options: { expiresIn: "1h" },
+    });
+  }
+
   async login(username, password) {
     try {
       const user = await connectToDatabase.users.findOne({ username });
@@ -44,19 +59,10 @@ class UserService {
         throw new Error("Sai mật khẩu");
       }
       if (user && validPassword) {
-        const accesstoken = await signToken({
-          payload: { id: user._id.toString(), role: user.role },
-          privateKey: process.env.JWT_ACCESS_TOKEN,
-          options: { expiresIn: "10" },
-        });
-        const refreshtoken = await signToken({
-          payload: { id: user._id.toString(), role: user.role },
-          privateKey: process.env.JWT_REFRESH_TOKEN,
-          options: { expiresIn: "1h" },
-        });
+        const accesstoken = await this.signAccessToken(user);
+        const refreshtoken = await this.signRefreshToken(user);
 
         return { accesstoken, refreshtoken };
-        console.log(refreshtoken);
       }
     } catch (error) {
       console.error("Error login account:", error.message);

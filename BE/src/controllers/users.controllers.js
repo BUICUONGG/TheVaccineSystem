@@ -16,24 +16,30 @@ export const registerController = async (req, res) => {
   }
 };
 
-// export const refreshTokenController = async (req, res) => {
-//   try {
-//     const refreshToken = req.cookies.refreshToken; // Lấy từ Cookie
-//     if (!refreshToken)
-//       return res.status(401).json({ message: "Không có Refresh Token" });
+export const refreshTokenController = async (req, res) => {
+  try {
+    const refreshToken = req.cookies.refreshToken; // Lấy từ Cookie
+    if (!refreshToken)
+      return res.status(401).json({ message: "Không có Refresh Token" });
 
-//     jwt.verify(refreshToken, process.env.JWT_REFRESH_TOKEN, (err, decoded) => {
-//       if (err)
-//         return res.status(403).json({ message: "Refresh Token không hợp lệ" });
+    jwt.verify(refreshToken, process.env.JWT_REFRESH_TOKEN, (err, decoded) => {
+      if (err)
+        return res.status(403).json({ message: "Refresh Token không hợp lệ" });
 
-//       const newAccessToken = signToken(refreshToken);
-
-//       return res.json({ accesstoken: newAccessToken });
-//     });
-//   } catch (error) {
-//     res.status(500).json({ message: "Không thể làm mới Access Token" });
-//   }
-// };
+      const newAccessToken = userService.signAccessToken(decoded);
+      const newRefreshToken = userService.signRefreshToken(decoded);
+      res.cookie("refreshToken", newRefreshToken, {
+        httpOnly: true, // Chặn truy cập từ JavaScript (Bảo mật XSS)
+        secure: true, // Chỉ gửi qua HTTPS
+        sameSite: "None", // Chống CSRF
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 ngày
+      });
+      return res.json({ accesstoken: newAccessToken });
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Không thể làm mới Access Token" });
+  }
+};
 
 export const loginController = async (req, res) => {
   try {
@@ -96,14 +102,5 @@ export const updateController = async (req, res) => {
 //       message: "Internal server error",
 //       error: error.message,
 //     });
-//   }
-// };
-
-// export const logoutController = async (req, res) => {
-//   try {
-//     // Xóa token phía client (Frontend sẽ xóa token khỏi localStorage/cookies)
-//     res.status(200).json({ message: "Đăng xuất thành công" });
-//   } catch (error) {
-//     res.status(500).json({ error: "Lỗi đăng xuất" });
 //   }
 // };
