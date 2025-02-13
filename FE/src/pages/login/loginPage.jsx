@@ -38,16 +38,26 @@ const LoginPage = () => {
         const response = await axios.post(
           "http://localhost:8080/user/login",
           { username, password },
-          { withCredentials: true } // BẮT BUỘC để gửi & nhận Cookie
+          { withCredentials: true }
         );
 
-        // Nếu đăng nhập thành công, lưu token vào localStorage
+        // Lưu token vào localStorage
         localStorage.setItem("accesstoken", response.data.accesstoken);
-        localStorage.setItem("role", response.data.role);
-        localStorage.setItem("userId", response.data.userId);
+
+        // Decode token để lấy role
+        const tokenParts = response.data.accesstoken.split(".");
+        const payload = JSON.parse(atob(tokenParts[1]));
+        const userRole = payload.role;
+
         setIsLoading(false);
         alert("Đăng nhập thành công!");
-        navigate(response.data.role === "admin" ? "/admin" : "/homepage"); // Điều hướng tới trang chính sau khi đăng nhập
+
+        // Kiểm tra role và điều hướng
+        if (userRole === "admin") {
+          navigate("/admin");
+        } else {
+          navigate("/homepage");
+        }
       } catch (error) {
         setIsLoading(false);
         console.error("Login failed:", error);
