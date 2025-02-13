@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import CustomersTable from '../../../components/CustomersTable';
 import './adminPage.css';
 
 const AdminPage = () => {
