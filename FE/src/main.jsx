@@ -7,7 +7,7 @@ import HomePage from "./pages/homepage/homePage";
 import AdminLayout from "./pages/usersRole/admin/adminLayout";
 import AccountsPage from "./pages/usersRole/admin/accountsPage";
 import VaccinesPage from "./pages/usersRole/admin/vaccinesPage";
-import { ToastContainer , toast } from "react-toastify";
+import { ToastContainer } from "react-toastify";
 
 const router = createBrowserRouter([
   {
@@ -64,8 +64,7 @@ const router = createBrowserRouter([
 
 createRoot(document.getElementById("root")).render(
   <>
-  <RouterProvider router={router} />
-  <ToastContainer />
+    <RouterProvider router={router} />
+    <ToastContainer />
   </>
-  
 );

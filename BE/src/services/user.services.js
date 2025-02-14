@@ -90,7 +90,8 @@ class UserService {
         _id: new ObjectId(userId),
       });
       if (!user) {
-        throw new Error("User not found");
+        console.warn(`Không tìm thấy user với id: ${id}`);
+        return null;
       }
       return { message: "User deleted successfully" };
     } catch (error) {
@@ -119,14 +120,17 @@ class UserService {
     try {
       const result = await connectToDatabase.users.findOneAndUpdate(
         { _id: new ObjectId(id) },
-        { $set: { refreshToken: "" } }
+        { $set: { refreshToken: "" } },
+        { returnDocument: "after" }
       );
       if (!result) {
-        throw new Error("khong thay user");
+        console.warn(`Không tìm thấy user với id: ${id}`);
+        return null;
       }
+      return result;
     } catch (error) {
-      console.log("Logout err:", error);
-      throw new Error(error.message);
+      console.error("Lỗi khi logout:", error);
+      return null;
     }
   }
 }

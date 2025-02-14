@@ -22,7 +22,7 @@ usersRouter.get("/showInfo", /*verifyToken,*/ showInFoController);
 usersRouter.post("/login", loginValidate, loginController);
 usersRouter.post("/register", registerValidate, registerController);
 usersRouter.post("/delete/:id", verifyToken, verifyAdmin, deleteController);
-usersRouter.post("update/:id", verifyToken, verifyAdmin, updateController);
+usersRouter.post("/update/:id", verifyToken, verifyAdmin, updateController);
 usersRouter.post("/logout/:id", logoutController);
 // usersRouter.post("/logout", logoutController);
 export default usersRouter;
