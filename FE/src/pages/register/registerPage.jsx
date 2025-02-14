@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { FaEye, FaEyeSlash, FaTimesCircle } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 const RegistrationForm = () => {
   const [formData, setFormData] = useState({
@@ -13,6 +15,7 @@ const RegistrationForm = () => {
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const validateUsername = (username) => {
     if (username.length < 3) return "Username must be at least 3 characters";
@@ -104,17 +107,18 @@ const RegistrationForm = () => {
       const data = await response.json();
       
       if (response.ok) {
-        // Đăng ký thành công
-        console.log("Registration successful:", data);
+        // Đăng ký thành công        
         setFormData({ username: "", fullname: "", email: "", phone: "", password: "" });
+        toast.success("Registration successful:", data);
         // Có thể thêm thông báo thành công hoặc chuyển hướng người dùng
+        navigate("/login");
       } else {
         // Xử lý lỗi từ server
-        console.error("Registration failed:", data.message);
+        toast.error("Registration failed:", data.message);
         // Có thể hiển thị thông báo lỗi cho người dùng
       }
     } catch (error) {
-      console.error("Submission error:", error);
+      toast.error("Submission error:", error);
       // Xử lý lỗi kết nối
     } finally {
       setLoading(false);
