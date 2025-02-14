@@ -1,9 +1,9 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Table, Input, Button, Modal } from 'antd';
-import axios from 'axios';
-import { DeleteOutlined, LogoutOutlined } from '@ant-design/icons';
-import './adminPage.css';
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { Table, Input, Button, Modal } from "antd";
+import axios from "axios";
+import { DeleteOutlined, LogoutOutlined } from "@ant-design/icons";
+import "./adminPage.css";
 
 const { Search } = Input;
 
@@ -12,7 +12,7 @@ const AdminPage = () => {
   const [userList, setUserList] = useState([]);
   const [showTable, setShowTable] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [searchText, setSearchText] = useState('');
+  const [searchText, setSearchText] = useState("");
   const [deleteLoading, setDeleteLoading] = useState(false);
 
   const columns = [
@@ -47,60 +47,62 @@ const AdminPage = () => {
       dataIndex: "role",
       key: "role",
       filters: [
-        { text: 'Admin', value: 'admin' },
-        { text: 'Staff', value: 'staff' },
-        { text: 'Customer', value: 'customer' }
+        { text: "Admin", value: "admin" },
+        { text: "Staff", value: "staff" },
+        { text: "Customer", value: "customer" },
       ],
       onFilter: (value, record) => record.role === value,
       render: (role) => (
-        <span style={{ 
-          textTransform: 'capitalize',
-          color: role === 'admin' ? '#ff4d4f' : 
-                 role === 'staff' ? '#1890ff' : 
-                 '#52c41a'
-        }}>
+        <span
+          style={{
+            textTransform: "capitalize",
+            color:
+              role === "admin"
+                ? "#ff4d4f"
+                : role === "staff"
+                ? "#1890ff"
+                : "#52c41a",
+          }}
+        >
           {role}
         </span>
-      )
+      ),
     },
     {
       title: "Actions",
       key: "actions",
       width: 100,
       render: (_, record) => (
-        <Button 
-          type="primary" 
+        <Button
+          type="primary"
           danger
           icon={<DeleteOutlined />}
           onClick={() => handleDelete(record._id)}
           loading={deleteLoading}
-          disabled={record.role === 'admin'}
+          disabled={record.role === "admin"}
         >
           Delete
         </Button>
       ),
-    }
+    },
   ];
 
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      const accesstoken = localStorage.getItem('accesstoken');
-      
-      const response = await axios.get(
-        "http://localhost:8080/user/showInfo",
-        {
-          headers: {
-            'Authorization': `Bearer ${accesstoken}`
-          }
-        }
-      );
-      
+      const accesstoken = localStorage.getItem("accesstoken");
+
+      const response = await axios.get("http://localhost:8080/user/showInfo", {
+        headers: {
+          Authorization: `Bearer ${accesstoken}`,
+        },
+      });
+
       const sortedUsers = (response.data.result || []).sort((a, b) => {
         const roleOrder = {
           admin: 1,
           staff: 2,
-          customer: 3
+          customer: 3,
         };
         return roleOrder[a.role] - roleOrder[b.role];
       });
@@ -109,7 +111,7 @@ const AdminPage = () => {
       console.error("Error fetching users:", error);
       if (error.response?.status === 401) {
         Modal.error({
-          content: 'Unauthorized. Please login again.',
+          content: "Unauthorized. Please login again.",
         });
       }
     } finally {
@@ -126,26 +128,26 @@ const AdminPage = () => {
     setSearchText(value);
   };
 
-  const filteredUsers = userList.filter(user => 
+  const filteredUsers = userList.filter((user) =>
     user.username.toLowerCase().includes(searchText.toLowerCase())
   );
 
   const handleDelete = async (userId) => {
-    const accesstoken = localStorage.getItem('accesstoken');
-    
+    const accesstoken = localStorage.getItem("accesstoken");
+
     if (!accesstoken) {
       Modal.error({
-        content: 'You need to login first',
+        content: "You need to login first",
       });
       return;
     }
 
     Modal.confirm({
-      title: 'Are you sure you want to delete this user?',
-      content: 'This action cannot be undone.',
-      okText: 'Yes',
-      okType: 'danger',
-      cancelText: 'No',
+      title: "Are you sure you want to delete this user?",
+      content: "This action cannot be undone.",
+      okText: "Yes",
+      okType: "danger",
+      cancelText: "No",
       onOk: async () => {
         try {
           setDeleteLoading(true);
@@ -154,29 +156,29 @@ const AdminPage = () => {
             {},
             {
               headers: {
-                'Authorization': `Bearer ${accesstoken}`
-              }
+                Authorization: `Bearer ${accesstoken}`,
+              },
             }
           );
-          
+
           fetchUsers();
-          
+
           Modal.success({
-            content: 'User deleted successfully',
+            content: "User deleted successfully",
           });
         } catch (error) {
           console.error("Error deleting user:", error);
           if (error.response?.status === 401) {
             Modal.error({
-              content: 'Unauthorized. Please login again.',
+              content: "Unauthorized. Please login again.",
             });
           } else if (error.response?.status === 403) {
             Modal.error({
-              content: 'You do not have permission to delete users.',
+              content: "You do not have permission to delete users.",
             });
           } else {
             Modal.error({
-              content: 'Failed to delete user',
+              content: "Failed to delete user",
             });
           }
         } finally {
@@ -198,13 +200,13 @@ const AdminPage = () => {
           <div className="admin-icon">👤</div>
           <span className="admin-name">adminName</span>
         </div>
-        
+
         <ul className="menu-items">
           <li className="menu-item">
             <Link to="/admin/overview">Overview</Link>
           </li>
           <li className="menu-item">
-            <span onClick={handleShowUsers} style={{ cursor: 'pointer' }}>
+            <span onClick={handleShowUsers} style={{ cursor: "pointer" }}>
               Show Users
             </span>
           </li>
@@ -223,8 +225,8 @@ const AdminPage = () => {
         </ul>
 
         <div className="logout-section">
-          <Button 
-            type="primary" 
+          <Button
+            type="primary"
             danger
             icon={<LogoutOutlined />}
             onClick={handleLogout}
@@ -253,8 +255,8 @@ const AdminPage = () => {
                 onSearch={handleSearch}
                 style={{ width: 300, marginBottom: 16 }}
               />
-              <Table 
-                dataSource={filteredUsers} 
+              <Table
+                dataSource={filteredUsers}
                 columns={columns}
                 loading={loading}
                 rowKey="_id"
