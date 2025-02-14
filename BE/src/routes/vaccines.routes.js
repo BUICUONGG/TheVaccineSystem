@@ -8,7 +8,7 @@ import {
 
 const vaccinesRouter = Router();
 
-vaccinesRouter.post("/  ", addVaccineController);
+vaccinesRouter.post("/addVaccine", addVaccineController);
 vaccinesRouter.get("/listVaccine", getVaccinesController);
 vaccinesRouter.post("/updateVaccine", updateVaccineController);
 vaccinesRouter.post("/deleteVaccine", deleteVaccineController);

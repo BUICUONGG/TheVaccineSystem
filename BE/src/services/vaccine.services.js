@@ -79,6 +79,19 @@ class VaccineService {
       throw new Error(error.message);
     }
   }
+
+  async getVaccines() {
+    try {
+      const vaccines = await connectToDatabase.vaccines.find().toArray();
+      if (!vaccines || vaccines.length === 0) {
+        throw new Error("No vaccines found");
+      }
+      return vaccines;
+    } catch (error) {
+      console.error("Error getting vaccines:", error.message);
+      throw new Error(error.message);
+    }
+  }
 }
 
 const vaccineService = new VaccineService();
