@@ -4,6 +4,7 @@ import { FcGoogle } from "react-icons/fc";
 import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
 import "./loginPage.css"; // Import file css mới
+import { toast } from "react-toastify";
 
 const LoginPage = () => {
   const [username, setUsername] = useState("");
@@ -41,7 +42,7 @@ const LoginPage = () => {
           { withCredentials: true }
         );
 
-        // Lưu token vào localStorage
+        // Lưu token và username vào localStorage
         localStorage.setItem("accesstoken", response.data.accesstoken);
 
         // Decode token để lấy role
@@ -50,7 +51,7 @@ const LoginPage = () => {
         const userRole = payload.role;
 
         setIsLoading(false);
-        alert("Đăng nhập thành công!");
+        toast.success("Đăng nhập thành công!");
 
         // Kiểm tra role và điều hướng
         if (userRole === "admin") {
