@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import "./homePage.css";
 import { useNavigate } from "react-router-dom";
 
-import { FaSearch } from "react-icons/fa";
+import { FaSearch, FaShoppingCart } from "react-icons/fa";
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 
 const HomePage = () => {
@@ -74,16 +74,13 @@ const HomePage = () => {
         <div className="header-content">
           <div className="header-title">
             <h1>Nhật Ký Tiêm Chủng</h1>
-          </div>
-
-          <div className="search-bar">
-            <input type="text" placeholder="Tìm kiếm..." />
-            <button className="search-button">
-              <FaSearch className="search-icon" />
-            </button>
+            <div className="header-subtitle">
+              AN TOÀN - UY TÍN - CHẤT LƯỢNG HÀNG ĐẦU VIỆT NAM
+            </div>
           </div>
 
           <div className="auth-buttons">
+            <FaShoppingCart className="cart-icon" />
             {isLoggedIn ? (
               <>
                 <button className="logout-btn" onClick={handleLogout}>
