@@ -64,7 +64,8 @@ export const loginController = async (req, res) => {
 
 export const deleteController = async (req, res) => {
   try {
-    const { id } = req.params; // Lấy ID từ URL
+    const id = req.params; // Lấy ID từ URL
+
     const user = await userService.delete(id);
     if (!user) {
       throw new Error("User not found");
@@ -91,29 +92,13 @@ export const updateController = async (req, res) => {
 
 export const logoutController = async (req, res) => {
   try {
-    const { userId } = req.params;
-    console.log(typeof userId);
-    const result = await userService.logout(userId);
+    const { id } = req.params;
+    const result = await userService.logout(id);
     if (!result) {
       throw new Error("Can not logout");
     }
+    res.status(200).json("User logoutt successfully");
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
-
-// export const getAllUsersController = async (req, res) => {
-//   try {
-//     const users = await userService.getAllUsers();
-//     return res.status(200).json({
-//       success: true,
-//       data: users,
-//     });
-//   } catch (error) {
-//     return res.status(500).json({
-//       success: false,
-//       message: "Internal server error",
-//       error: error.message,
-//     });
-//   }
-// };
