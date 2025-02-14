@@ -1,12 +1,14 @@
 import { useState, useEffect } from "react";
-import { Table, Input, Button, Modal } from "antd";
-import { DeleteOutlined } from "@ant-design/icons";
+import { Table, Input, Button, Modal, Form, DatePicker, InputNumber } from "antd";
+import { DeleteOutlined, PlusOutlined } from "@ant-design/icons";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
 const { Search } = Input;
 
 const VaccinesPage = () => {
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [form] = Form.useForm();
   const navigate = useNavigate();
   const [vaccineList, setVaccineList] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -100,6 +102,75 @@ const VaccinesPage = () => {
     });
   };
 
+  const showModal = () => {
+    setIsModalVisible(true);
+  };
+
+  const handleCancel = () => {
+    form.resetFields();
+    setIsModalVisible(false);
+  };
+
+  const handleAddVaccine = async (values) => {
+    const accesstoken = localStorage.getItem("accesstoken");
+    
+    console.log("Starting handleAddVaccine with values:", values); // Debug log
+
+    if (!accesstoken) {
+      Modal.error({
+        content: "You need to login first",
+      });
+      return;
+    }
+
+    try {
+      const vaccineData = {
+        vaccineName: values.vaccineName,
+        price: Number(values.price),
+        quantity: Number(values.quantity),
+        mfgDate: values.mfgDate.format('DD/MM/YYYY'),
+        expDate: values.expDate.format('DD/MM/YYYY'),
+        status: "in stock"
+      };
+
+      console.log("Sending request to:", "http://localhost:8080/vaccine/addVaccine");
+      console.log("With data:", vaccineData);
+      console.log("Headers:", {
+        Authorization: `Bearer ${accesstoken}`,
+        'Content-Type': 'application/json',
+      });
+
+      const response = await axios.post(
+        "http://localhost:8080/vaccine/addVaccine",
+        vaccineData,
+        {
+          headers: {
+            Authorization: `Bearer ${accesstoken}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      console.log("Response received:", response.data);
+
+      if (response.data.success) {
+        Modal.success({
+          content: "Vaccine added successfully",
+        });
+        setIsModalVisible(false);
+        form.resetFields();
+        await fetchVaccines();
+      } else {
+        throw new Error(response.data.message || "Failed to add vaccine");
+      }
+    } catch (error) {
+      console.error("Error in handleAddVaccine:", error);
+      Modal.error({
+        content: error.response?.data?.message || "Failed to add vaccine",
+      });
+    }
+  };
+
   const columns = [
     {
       title: "STT",
@@ -127,11 +198,13 @@ const VaccinesPage = () => {
       title: "Manufacturing Date",
       dataIndex: "mfgDate",
       key: "mfgDate",
+      render: (date) => date
     },
     {
       title: "Expiration Date",
       dataIndex: "expDate",
       key: "expDate",
+      render: (date) => date
     },
     {
       title: "Status",
@@ -166,17 +239,28 @@ const VaccinesPage = () => {
 
   return (
     <div style={{ padding: "20px" }}>
-      <h2>Vaccine Inventory Management</h2>
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
+        <h2>Vaccine Inventory Management</h2>
+        <div style={{ marginBottom: 16, textAlign: 'right' }}>
+          <Button
+            type="primary"
+            icon={<PlusOutlined />}
+            onClick={showModal}
+          >
+            Add Vaccine
+          </Button>
+        </div>
+      </div>
+      
       <Search
-        placeholder="Search by vaccine name"
-        allowClear
-        enterButton
-        onSearch={handleSearch}
-        style={{ width: 300, marginBottom: 16 }}
+        placeholder="Search vaccines..."
+        onChange={(e) => handleSearch(e.target.value)}
+        style={{ marginBottom: 16, width: 300 }}
       />
+
       <Table
-        dataSource={filteredVaccines}
         columns={columns}
+        dataSource={filteredVaccines}
         loading={loading}
         rowKey="_id"
         pagination={{
@@ -185,6 +269,76 @@ const VaccinesPage = () => {
           showTotal: (total) => `Total ${total} vaccines`,
         }}
       />
+
+      <Modal
+        title="Add New Vaccine"
+        open={isModalVisible}
+        onCancel={handleCancel}
+        footer={null}
+      >
+        <Form
+          form={form}
+          layout="vertical"
+          onFinish={handleAddVaccine}
+        >
+          <Form.Item
+            name="vaccineName"
+            label="Vaccine Name"
+            rules={[{ required: true, message: 'Please input vaccine name!' }]}
+          >
+            <Input />
+          </Form.Item>
+
+          <Form.Item
+            name="price"
+            label="Price"
+            rules={[
+              { required: true, message: 'Please input price!' },
+              { type: 'number', min: 0, message: 'Price must be greater than 0!' }
+            ]}
+          >
+            <InputNumber
+              style={{ width: '100%' }}
+              formatter={value => `$ ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+              parser={value => value.replace(/\$\s?|(,*)/g, '')}
+            />
+          </Form.Item>
+
+          <Form.Item
+            name="quantity"
+            label="Quantity"
+            rules={[
+              { required: true, message: 'Please input quantity!' },
+              { type: 'number', min: 0, message: 'Quantity must be greater than or equal to 0!' }
+            ]}
+          >
+            <InputNumber style={{ width: '100%' }} />
+          </Form.Item>
+
+          <Form.Item
+            name="mfgDate"
+            label="Manufacturing Date"
+            rules={[{ required: true, message: 'Please select manufacturing date!' }]}
+          >
+            <DatePicker style={{ width: '100%' }} />
+          </Form.Item>
+
+          <Form.Item
+            name="expDate"
+            label="Expiration Date"
+            rules={[{ required: true, message: 'Please select expiration date!' }]}
+          >
+            <DatePicker style={{ width: '100%' }} />
+          </Form.Item>
+
+          <Form.Item>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
+              <Button onClick={handleCancel}>Cancel</Button>
+              <Button type="primary" htmlType="submit">Add</Button>
+            </div>
+          </Form.Item>
+        </Form>
+      </Modal>
     </div>
   );
 };
