@@ -6,6 +6,7 @@ import RegisterPage from "./pages/register/registerPage";
 import HomePage from "./pages/homepage/homePage";
 import AdminLayout from "./pages/usersRole/admin/adminLayout";
 import AccountsPage from "./pages/usersRole/admin/accountsPage";
+import VaccinesPage from "./pages/usersRole/admin/vaccinesPage";
 
 const router = createBrowserRouter([
   {
@@ -42,7 +43,7 @@ const router = createBrowserRouter([
       },
       {
         path: "vaccines",
-        element: <div>Vaccines Management</div>,
+        element: <VaccinesPage />,
       },
       {
         path: "feedback",
