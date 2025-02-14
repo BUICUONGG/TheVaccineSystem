@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Table, Input, Button, Modal } from "antd";
 import axios from "axios";
 import { DeleteOutlined, LogoutOutlined } from "@ant-design/icons";
@@ -9,11 +9,20 @@ const { Search } = Input;
 
 const AdminPage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [userList, setUserList] = useState([]);
   const [showTable, setShowTable] = useState(false);
   const [loading, setLoading] = useState(false);
   const [searchText, setSearchText] = useState("");
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const [adminName, setAdminName] = useState("");
+
+  useEffect(() => {
+    const username = localStorage.getItem("username");
+    if (username) {
+      setAdminName(`Admin: ${username}`);
+    }
+  }, []);
 
   const columns = [
     {
@@ -193,6 +202,7 @@ const AdminPage = () => {
 
   const handleLogout = () => {
     localStorage.removeItem("accesstoken");
+    localStorage.removeItem("username");
     navigate("/login");
   };
 
@@ -201,20 +211,33 @@ const AdminPage = () => {
       <div className="sidebar">
         <div className="admin-info">
           <div className="admin-icon">👤</div>
-          <span className="admin-name">adminName</span>
+          <span className="admin-name">{adminName}</span>
         </div>
 
         <ul className="menu-items">
           <li className="menu-item">
-            <Link to="/admin/overview">Overview</Link>
+            <Link 
+              to="/admin/overview"
+              className={location.pathname === "/admin/overview" ? "active" : ""}
+            >
+              Overview
+            </Link>
           </li>
           <li className="menu-item">
-            <span onClick={handleShowUsers} style={{ cursor: "pointer" }}>
-              Show Users
-            </span>
+            <Link 
+              to="/admin/accounts"
+              className={location.pathname === "/admin/accounts" ? "active" : ""}
+            >
+              Accounts
+            </Link>
           </li>
           <li className="menu-item">
-            <Link to="/admin/vaccines">Vaccines</Link>
+            <Link 
+              to="/admin/vaccines"
+              className={location.pathname === "/admin/vaccines" ? "active" : ""}
+            >
+              Vaccines
+            </Link>
           </li>
           <li className="menu-item">
             <Link to="/admin/feedback">Feedback</Link>
