@@ -5,12 +5,16 @@ import {
   updateVaccineController,
   deleteVaccineController,
 } from "../controllers/vaccines.controllers.js";
+import { verifyVaccineAdmin, validateVaccineData } from "../middlewares/vaccine.middleware.js";
 
 const vaccinesRouter = Router();
 
-vaccinesRouter.post("/addVaccine", addVaccineController);
+// Public route - không cần verify token
 vaccinesRouter.get("/listVaccine", getVaccinesController);
-vaccinesRouter.post("/updateVaccine", updateVaccineController);
-vaccinesRouter.post("/deleteVaccine", deleteVaccineController);
+
+// Protected routes - cần verify admin
+vaccinesRouter.post("/addVaccine", verifyVaccineAdmin, validateVaccineData, addVaccineController);
+vaccinesRouter.post("/updateVaccine", verifyVaccineAdmin, validateVaccineData, updateVaccineController);
+vaccinesRouter.delete("/delete/:id", verifyVaccineAdmin, deleteVaccineController);
 
 export default vaccinesRouter;
