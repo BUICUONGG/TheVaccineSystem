@@ -41,7 +41,7 @@ const LoginPage = () => {
           { withCredentials: true }
         );
 
-        // Lưu token vào localStorage
+        // Lưu token và username vào localStorage
         localStorage.setItem("accesstoken", response.data.accesstoken);
 
         // Decode token để lấy role

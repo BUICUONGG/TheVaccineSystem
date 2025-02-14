@@ -151,18 +151,20 @@ const AdminPage = () => {
       onOk: async () => {
         try {
           setDeleteLoading(true);
-          await axios.post(
+          console.log('Deleting user with ID:', userId); // Debug log
+
+          const response = await axios.post(
             `http://localhost:8080/user/delete/${userId}`,
-            {},
+            {}, // empty body
             {
               headers: {
                 Authorization: `Bearer ${accesstoken}`,
               },
             }
           );
-
+          
           fetchUsers();
-
+          
           Modal.success({
             content: "User deleted successfully",
           });
@@ -172,6 +174,7 @@ const AdminPage = () => {
             Modal.error({
               content: "Unauthorized. Please login again.",
             });
+            navigate('/login');
           } else if (error.response?.status === 403) {
             Modal.error({
               content: "You do not have permission to delete users.",
