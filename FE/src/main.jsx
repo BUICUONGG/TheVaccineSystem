@@ -4,7 +4,7 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import LoginPage from "./pages/login/loginPage";
 import RegisterPage from "./pages/register/registerPage";
 import HomePage from "./pages/homepage/homePage";
-import AdminPage from "./pages/usersRole/admin/adminPage";
+import AdminLayout from "./pages/usersRole/admin/adminLayout";
 import AccountsPage from "./pages/usersRole/admin/accountsPage";
 
 const router = createBrowserRouter([
@@ -26,31 +26,37 @@ const router = createBrowserRouter([
   },
   {
     path: "/admin",
-    element: <AdminPage />,
-  },
-  {
-    path: "/admin/overview",
-    element: <AdminPage />,
-  },
-  {
-    path: "/admin/accounts",
-    element: <AccountsPage />,
-  },
-  {
-    path: "/admin/vaccines",
-    element: <div>Vaccines Management</div>,
-  },
-  {
-    path: "/admin/feedback",
-    element: <div>Feedback Management</div>,
-  },
-  {
-    path: "/admin/appointments",
-    element: <div>Appointments Management</div>,
-  },
-  {
-    path: "/admin/consultations",
-    element: <div>Consultations Management</div>,
+    element: <AdminLayout />,
+    children: [
+      {
+        path: "",
+        element: <div>Welcome to Admin Dashboard</div>,
+      },
+      {
+        path: "overview",
+        element: <div>Overview Page</div>,
+      },
+      {
+        path: "accounts",
+        element: <AccountsPage />,
+      },
+      {
+        path: "vaccines",
+        element: <div>Vaccines Management</div>,
+      },
+      {
+        path: "feedback",
+        element: <div>Feedback Management</div>,
+      },
+      {
+        path: "appointments",
+        element: <div>Appointments Management</div>,
+      },
+      {
+        path: "consultations",
+        element: <div>Consultations Management</div>,
+      },
+    ],
   },
 ]);
 
