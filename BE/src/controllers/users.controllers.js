@@ -89,6 +89,19 @@ export const updateController = async (req, res) => {
   }
 };
 
+export const logoutController = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    console.log(typeof userId);
+    const result = await userService.logout(userId);
+    if (!result) {
+      throw new Error("Can not logout");
+    }
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 // export const getAllUsersController = async (req, res) => {
 //   try {
 //     const users = await userService.getAllUsers();

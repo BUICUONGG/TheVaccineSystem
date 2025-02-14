@@ -12,6 +12,7 @@ const userSchema = new mongoose.Schema({
     enum: ["admin", "staff", "customer"],
     default: "customer",
   },
+  refreshToken: { type: String, default: "" },
 });
 
 const User = mongoose.model("User", userSchema);

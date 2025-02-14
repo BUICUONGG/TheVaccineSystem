@@ -5,6 +5,7 @@ import { hashPassword, comparePassword } from "../utils/bcrypt.js";
 import { ObjectId } from "mongodb";
 import "dotenv/config";
 import { signToken } from "../utils/jwt.js";
+import { config } from "dotenv";
 
 class UserService {
   async resgister(userData) {
@@ -62,6 +63,13 @@ class UserService {
       if (user && validPassword) {
         const accesstoken = await this.signAccessToken(user);
         const refreshtoken = await this.signRefreshToken(user);
+        console.log(typeof refreshtoken);
+        // Lưu refreshToken vào database
+        await connectToDatabase.users.updateOne(
+          { _id: user._id },
+          { $set: { refreshToken: refreshtoken } }
+        );
+
         return {
           userId,
           role: user.role,
@@ -103,6 +111,21 @@ class UserService {
       }
     } catch (error) {
       console.error("Delete error:", error);
+      throw new Error(error.message);
+    }
+  }
+
+  async logout(id) {
+    try {
+      const result = await connectToDatabase.users.findOneAndUpdate(
+        { _id: new ObjectId(id) },
+        { $set: { refreshToken: "" } }
+      );
+      if (!result) {
+        throw new Error("khong thay user");
+      }
+    } catch (error) {
+      console.log("Logout err:", error);
       throw new Error(error.message);
     }
   }
