@@ -65,7 +65,6 @@ export const loginController = async (req, res) => {
 export const deleteController = async (req, res) => {
   try {
     const id = req.params; // Lấy ID từ URL
-
     const user = await userService.delete(id);
     if (!user) {
       throw new Error("User not found");
