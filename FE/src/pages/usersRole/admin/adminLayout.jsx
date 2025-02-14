@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation, Outlet } from "react-router-dom";
-import { Button } from "antd";
+import { Button, Modal } from "antd";
 import { LogoutOutlined } from "@ant-design/icons";
+import axios from "axios";
 import "./adminLayout.css";
 
 const AdminLayout = () => {
@@ -16,10 +17,35 @@ const AdminLayout = () => {
     }
   }, []);
 
-  const handleLogout = () => {
-    localStorage.removeItem("accesstoken");
-    localStorage.removeItem("username");
-    navigate("/login");
+  const handleLogout = async () => {
+    try {
+      const userId = localStorage.getItem("userId");
+      const accesstoken = localStorage.getItem("accesstoken");
+      
+      if (userId && accesstoken) {
+        await axios.post(
+          `http://localhost:8080/user/logout/${userId}`,
+          {},
+          {
+            headers: {
+              Authorization: `Bearer ${accesstoken}`,
+            },
+          }
+        );
+      }
+
+      // Xóa toàn bộ localStorage
+      localStorage.removeItem("accesstoken");
+      localStorage.removeItem("username");
+      localStorage.removeItem("userId");
+      
+      navigate("/login");
+    } catch (error) {
+      console.error("Logout error:", error);
+      Modal.error({
+        content: "Logout failed. Please try again.",
+      });
+    }
   };
 
   return (
