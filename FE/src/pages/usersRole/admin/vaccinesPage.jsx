@@ -3,6 +3,9 @@ import { Table, Input, Button, Modal, Form, DatePicker, InputNumber } from "antd
 import { DeleteOutlined, PlusOutlined } from "@ant-design/icons";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { ToastContainer } from "react-toastify";
 
 const { Search } = Input;
 
@@ -15,6 +18,7 @@ const VaccinesPage = () => {
   const [searchText, setSearchText] = useState("");
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [filteredVaccines, setFilteredVaccines] = useState([]);
+
 
   useEffect(() => {
     fetchVaccines();
@@ -114,7 +118,7 @@ const VaccinesPage = () => {
   const handleAddVaccine = async (values) => {
     const accesstoken = localStorage.getItem("accesstoken");
     
-    console.log("Starting handleAddVaccine with values:", values); // Debug log
+    console.log("Starting handleAddVaccine with values:", values);
 
     if (!accesstoken) {
       Modal.error({
@@ -133,13 +137,6 @@ const VaccinesPage = () => {
         status: "in stock"
       };
 
-      console.log("Sending request to:", "http://localhost:8080/vaccine/addVaccine");
-      console.log("With data:", vaccineData);
-      console.log("Headers:", {
-        Authorization: `Bearer ${accesstoken}`,
-        'Content-Type': 'application/json',
-      });
-
       const response = await axios.post(
         "http://localhost:8080/vaccine/addVaccine",
         vaccineData,
@@ -151,22 +148,27 @@ const VaccinesPage = () => {
         }
       );
 
-      console.log("Response received:", response.data);
-
-      if (response.data.success) {
-        Modal.success({
-          content: "Vaccine added successfully",
-        });
-        setIsModalVisible(false);
-        form.resetFields();
-        await fetchVaccines();
-      } else {
-        throw new Error(response.data.message || "Failed to add vaccine");
-      }
+      Modal.success({
+        content: "Vaccine added successfully",
+      });
+      
+      toast.success("Vaccine added successfully!", {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
+      
+      setIsModalVisible(false);
+      form.resetFields();
+      await fetchVaccines();
+      
     } catch (error) {
       console.error("Error in handleAddVaccine:", error);
       Modal.error({
-        content: error.response?.data?.message || "Failed to add vaccine",
+        content: "Failed to add vaccine. Please try again.",
       });
     }
   };
@@ -239,6 +241,20 @@ const VaccinesPage = () => {
 
   return (
     <div style={{ padding: "20px" }}>
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        //closeOffClick //Không cần
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+      />
+      
       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
         <h2>Vaccine Inventory Management</h2>
         <div style={{ marginBottom: 16, textAlign: 'right' }}>
