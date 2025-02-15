@@ -5,8 +5,10 @@ import { Modal } from "antd";
 import "./homePage.css";
 import { useNavigate } from "react-router-dom";
 
+// eslint-disable-next-line no-unused-vars
 import { FaSearch, FaShoppingCart } from "react-icons/fa";
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
+import { Link } from 'react-router-dom';
 
 const HomePage = () => {
   const navigate = useNavigate();
@@ -177,9 +179,8 @@ const HomePage = () => {
             <a href="#">Trang chủ</a>
             <a href="#">Giới thiệu</a>
             <a href="#">Tin tức</a>
-            <a href="#">Cẩm nang</a>
+            <Link to="/camnang">Cẩm nang</Link>
             <a href="#">Đăng ký tiêm</a>
-            <a href="#">Cẩm nang</a>
           </div>
         </nav>
       </div>
@@ -191,7 +192,7 @@ const HomePage = () => {
         </div>
         <div className="icon-item">
           <img src="/icons/handbook.png" alt="Cẩm nang" />
-          <span>CẨM NANG</span>
+          <Link to="/camnang">Cẩm nang</Link>
         </div>
         <div className="icon-item">
           <img src="/icons/register.png" alt="Đăng ký tiêm" />
