@@ -1,27 +1,23 @@
 import mongoose from "mongoose";
 
 const vaccineImportSchema = new mongoose.Schema({
+  batchNumber: { type: String, required: true, unique: true }, // tên lô vaccine giống như là khoá chính nhưng dùng để dễ tìm hơn
   vaccineId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "VaccineInventory",
+    quantity: { type: Number, required: true }, // số lượng vaccine này trong kho
     required: true,
   },
-  quantity: { type: Number, required: true },
-  batchNumber: { type: String, required: true },
-  importPrice: { type: Number, required: true },
-  mfgDate: { type: Date, required: true },
-  expDate: { type: Date, required: true },
-  importDate: { type: Date, default: Date.now },
+  price: { type: Number, required: true },
+  mfgDate: { type: String, required: true },
+  expDate: { type: String, required: true },
+  importDate: { type: String, required: true }, // lưu date string theo kiểu DD/MM/YYY
   importedBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Admin",
     required: true,
   },
-  status: {
-    type: String,
-    enum: ["pending", "completed", "cancelled"],
-    default: "pending",
-  },
+  supplier: { type: String, required: true }, //công ty sản xuất, nhà cung cấp
 });
 
 const VaccineImport = mongoose.model("VaccineImport", vaccineImportSchema);

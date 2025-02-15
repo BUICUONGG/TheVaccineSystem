@@ -5,10 +5,11 @@ const childSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "Customer",
     required: true,
+    unique: true,
   },
   childName: { type: String, required: true },
-  dateOfBirth: { type: Date, required: true },
-  healthNote: { type: String },
+  dateOfBirth: { type: String, required: true },
+  healthNote: { type: String }, // giống desprition mô tả
 });
 const Child = mongoose.model("Child", childSchema);
 

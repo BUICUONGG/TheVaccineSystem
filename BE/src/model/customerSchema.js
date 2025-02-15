@@ -1,13 +1,17 @@
 import mongoose from "mongoose";
 
 const customerSchema = new mongoose.Schema({
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: "Customer", required: true },
-  gender: { 
-    type: String, 
-    enum: ["Nam", "Nữ", "Chưa xác định"],
-    default: "Chưa xác định"
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    unique: true,
+    required: true,
   },
-  customerId: { type: String },
+  customerName: { type: String, default: null },
+  phone: { type: String, default: null },
+  birthDate: { type: String, default: null }, // Ngày sinh
+  address: { type: String, default: null },
+  gender: { type: String, enum: ["Male", "Female", "Other"], default: null },
 });
 const Customer = mongoose.model("Customer", customerSchema);
 
