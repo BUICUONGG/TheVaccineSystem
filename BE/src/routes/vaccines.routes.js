@@ -10,7 +10,7 @@ const vaccinesRouter = Router();
 
 vaccinesRouter.get("/listVaccine", getVaccinesController);
 vaccinesRouter.post("/addVaccine",  addVaccineController);
-vaccinesRouter.post("/updateVaccine", updateVaccineController);
+vaccinesRouter.post("/updateVaccine/:id", updateVaccineController);
 vaccinesRouter.delete("/delete/:id",  deleteVaccineController);
 
 export default vaccinesRouter;
