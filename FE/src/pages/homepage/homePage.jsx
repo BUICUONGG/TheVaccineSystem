@@ -1,10 +1,14 @@
 import { useState, useEffect } from "react";
+import axios from "axios";
+import { Modal } from "antd";
 
 import "./homePage.css";
 import { useNavigate } from "react-router-dom";
 
-import { FaSearch } from "react-icons/fa";
+// eslint-disable-next-line no-unused-vars
+import { FaSearch, FaShoppingCart } from "react-icons/fa";
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
+import { Link } from 'react-router-dom';
 
 const HomePage = () => {
   const navigate = useNavigate();
@@ -40,9 +44,36 @@ const HomePage = () => {
     setCurrentSlide(currentSlide === 0 ? banners.length - 1 : currentSlide - 1);
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem("accesstoken");
-    navigate("/login");
+  const handleLogout = async () => {
+    try {
+      const userId = localStorage.getItem("userId");
+      const accesstoken = localStorage.getItem("accesstoken");
+      
+      if (userId && accesstoken) {
+        await axios.post(
+          `http://localhost:8080/user/logout/${userId}`,
+          {},
+          {
+            headers: {
+              Authorization: `Bearer ${accesstoken}`,
+            },
+          }
+        );
+      }
+
+      // Xóa toàn bộ localStorage
+      localStorage.removeItem("accesstoken");
+      localStorage.removeItem("username");
+      localStorage.removeItem("userId");
+      setIsLoggedIn(false);
+      
+      navigate("/login");
+    } catch (error) {
+      console.error("Logout error:", error);
+      Modal.error({
+        content: "Logout failed. Please try again.",
+      });
+    }
   };
 
   const handleLogin = () => {
@@ -74,16 +105,13 @@ const HomePage = () => {
         <div className="header-content">
           <div className="header-title">
             <h1>Nhật Ký Tiêm Chủng</h1>
-          </div>
-
-          <div className="search-bar">
-            <input type="text" placeholder="Tìm kiếm..." />
-            <button className="search-button">
-              <FaSearch className="search-icon" />
-            </button>
+            <div className="header-subtitle">
+              AN TOÀN - UY TÍN - CHẤT LƯỢNG HÀNG ĐẦU VIỆT NAM
+            </div>
           </div>
 
           <div className="auth-buttons">
+            <FaShoppingCart className="cart-icon" />
             {isLoggedIn ? (
               <>
                 <button className="logout-btn" onClick={handleLogout}>
@@ -151,9 +179,8 @@ const HomePage = () => {
             <a href="#">Trang chủ</a>
             <a href="#">Giới thiệu</a>
             <a href="#">Tin tức</a>
-            <a href="#">Cẩm nang</a>
+            <Link to="/camnang">Cẩm nang</Link>
             <a href="#">Đăng ký tiêm</a>
-            <a href="#">Cẩm nang</a>
           </div>
         </nav>
       </div>
@@ -165,7 +192,7 @@ const HomePage = () => {
         </div>
         <div className="icon-item">
           <img src="/icons/handbook.png" alt="Cẩm nang" />
-          <span>CẨM NANG</span>
+          <Link to="/camnang">Cẩm nang</Link>
         </div>
         <div className="icon-item">
           <img src="/icons/register.png" alt="Đăng ký tiêm" />

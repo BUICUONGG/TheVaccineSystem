@@ -8,6 +8,7 @@ import AdminLayout from "./pages/usersRole/admin/adminLayout";
 import AccountsPage from "./pages/usersRole/admin/accountsPage";
 import VaccinesPage from "./pages/usersRole/admin/vaccinesPage";
 import { ToastContainer } from "react-toastify";
+import CamnangPage from "./pages/homepage/camnang/camnang";
 
 const router = createBrowserRouter([
   {
@@ -26,6 +27,10 @@ const router = createBrowserRouter([
     path: "/register",
     element: <RegisterPage />,
   },
+  {
+  path: "/camnang",
+  element: <CamnangPage />,
+},
   {
     path: "/admin",
     element: <AdminLayout />,

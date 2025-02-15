@@ -1,18 +1,24 @@
 import { useState, useEffect } from "react";
-import { Table, Input, Button, Modal } from "antd";
-import { DeleteOutlined } from "@ant-design/icons";
+import { Table, Input, Button, Modal, Form, DatePicker, InputNumber } from "antd";
+import { DeleteOutlined, PlusOutlined } from "@ant-design/icons";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { ToastContainer } from "react-toastify";
 
 const { Search } = Input;
 
 const VaccinesPage = () => {
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [form] = Form.useForm();
   const navigate = useNavigate();
   const [vaccineList, setVaccineList] = useState([]);
   const [loading, setLoading] = useState(false);
   const [searchText, setSearchText] = useState("");
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [filteredVaccines, setFilteredVaccines] = useState([]);
+
 
   useEffect(() => {
     fetchVaccines();
@@ -100,6 +106,73 @@ const VaccinesPage = () => {
     });
   };
 
+  const showModal = () => {
+    setIsModalVisible(true);
+  };
+
+  const handleCancel = () => {
+    form.resetFields();
+    setIsModalVisible(false);
+  };
+
+  const handleAddVaccine = async (values) => {
+    const accesstoken = localStorage.getItem("accesstoken");
+    
+    console.log("Starting handleAddVaccine with values:", values);
+
+    if (!accesstoken) {
+      Modal.error({
+        content: "You need to login first",
+      });
+      return;
+    }
+
+    try {
+      const vaccineData = {
+        vaccineName: values.vaccineName,
+        price: Number(values.price),
+        quantity: Number(values.quantity),
+        mfgDate: values.mfgDate.format('DD/MM/YYYY'),
+        expDate: values.expDate.format('DD/MM/YYYY'),
+        status: "in stock"
+      };
+
+      const response = await axios.post(
+        "http://localhost:8080/vaccine/addVaccine",
+        vaccineData,
+        {
+          headers: {
+            Authorization: `Bearer ${accesstoken}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      Modal.success({
+        content: "Vaccine added successfully",
+      });
+      
+      toast.success("Vaccine added successfully!", {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
+      
+      setIsModalVisible(false);
+      form.resetFields();
+      await fetchVaccines();
+      
+    } catch (error) {
+      console.error("Error in handleAddVaccine:", error);
+      Modal.error({
+        content: "Failed to add vaccine. Please try again.",
+      });
+    }
+  };
+
   const columns = [
     {
       title: "STT",
@@ -127,11 +200,13 @@ const VaccinesPage = () => {
       title: "Manufacturing Date",
       dataIndex: "mfgDate",
       key: "mfgDate",
+      render: (date) => date
     },
     {
       title: "Expiration Date",
       dataIndex: "expDate",
       key: "expDate",
+      render: (date) => date
     },
     {
       title: "Status",
@@ -166,17 +241,42 @@ const VaccinesPage = () => {
 
   return (
     <div style={{ padding: "20px" }}>
-      <h2>Vaccine Inventory Management</h2>
-      <Search
-        placeholder="Search by vaccine name"
-        allowClear
-        enterButton
-        onSearch={handleSearch}
-        style={{ width: 300, marginBottom: 16 }}
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        //closeOffClick //Không cần
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
       />
+      
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
+        <h2>Vaccine Inventory Management</h2>
+        <div style={{ marginBottom: 16, textAlign: 'right' }}>
+          <Button
+            type="primary"
+            icon={<PlusOutlined />}
+            onClick={showModal}
+          >
+            Add Vaccine
+          </Button>
+        </div>
+      </div>
+      
+      <Search
+        placeholder="Search vaccines..."
+        onChange={(e) => handleSearch(e.target.value)}
+        style={{ marginBottom: 16, width: 300 }}
+      />
+
       <Table
-        dataSource={filteredVaccines}
         columns={columns}
+        dataSource={filteredVaccines}
         loading={loading}
         rowKey="_id"
         pagination={{
@@ -185,6 +285,76 @@ const VaccinesPage = () => {
           showTotal: (total) => `Total ${total} vaccines`,
         }}
       />
+
+      <Modal
+        title="Add New Vaccine"
+        open={isModalVisible}
+        onCancel={handleCancel}
+        footer={null}
+      >
+        <Form
+          form={form}
+          layout="vertical"
+          onFinish={handleAddVaccine}
+        >
+          <Form.Item
+            name="vaccineName"
+            label="Vaccine Name"
+            rules={[{ required: true, message: 'Please input vaccine name!' }]}
+          >
+            <Input />
+          </Form.Item>
+
+          <Form.Item
+            name="price"
+            label="Price"
+            rules={[
+              { required: true, message: 'Please input price!' },
+              { type: 'number', min: 0, message: 'Price must be greater than 0!' }
+            ]}
+          >
+            <InputNumber
+              style={{ width: '100%' }}
+              formatter={value => `$ ${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+              parser={value => value.replace(/\$\s?|(,*)/g, '')}
+            />
+          </Form.Item>
+
+          <Form.Item
+            name="quantity"
+            label="Quantity"
+            rules={[
+              { required: true, message: 'Please input quantity!' },
+              { type: 'number', min: 0, message: 'Quantity must be greater than or equal to 0!' }
+            ]}
+          >
+            <InputNumber style={{ width: '100%' }} />
+          </Form.Item>
+
+          <Form.Item
+            name="mfgDate"
+            label="Manufacturing Date"
+            rules={[{ required: true, message: 'Please select manufacturing date!' }]}
+          >
+            <DatePicker style={{ width: '100%' }} />
+          </Form.Item>
+
+          <Form.Item
+            name="expDate"
+            label="Expiration Date"
+            rules={[{ required: true, message: 'Please select expiration date!' }]}
+          >
+            <DatePicker style={{ width: '100%' }} />
+          </Form.Item>
+
+          <Form.Item>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
+              <Button onClick={handleCancel}>Cancel</Button>
+              <Button type="primary" htmlType="submit">Add</Button>
+            </div>
+          </Form.Item>
+        </Form>
+      </Modal>
     </div>
   );
 };
