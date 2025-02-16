@@ -90,8 +90,7 @@ class UserService {
         _id: new ObjectId(userId),
       });
       if (!user) {
-        console.warn(`Không tìm thấy user với id: ${id}`);
-        return null;
+        throw new Error(`Không tìm thấy user với id: ${userId}`);
       }
       return { message: "User deleted successfully" };
     } catch (error) {

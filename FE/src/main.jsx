@@ -27,10 +27,10 @@ const router = createBrowserRouter([
     path: "/register",
     element: <RegisterPage />,
   },
-  // {
-  //   path: "/camnang",
-  //   element: <CamnangPage />,
-  // },
+  {
+    path: "/camnang",
+    element: <CamnangPage />,
+  },
   {
     path: "/admin",
     element: <AdminLayout />,

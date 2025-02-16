@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { Table, Input, Button, Modal } from "antd";
-import { DeleteOutlined } from "@ant-design/icons";
+import { Table, Input, Button, Modal, Form, Popconfirm } from "antd";
+import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
@@ -16,6 +16,10 @@ const AccountsPage = () => {
   // Thêm state cho filtered users
   const [filteredUsers, setFilteredUsers] = useState([]);
 
+  const [isEditModalVisible, setIsEditModalVisible] = useState(false);
+  const [editingUser, setEditingUser] = useState(null);
+  const [form] = Form.useForm();
+
   useEffect(() => {
     fetchUsers();
   }, []);
@@ -28,8 +32,11 @@ const AccountsPage = () => {
     setFilteredUsers(filtered);
   }, [userList, searchText]);
 
-  const handleSearch = (value) => {
-    setSearchText(value);
+  // const handleSearch = (value) => {
+  //   setSearchText(value);
+  // };
+  const handleSearch = (e) => {
+    setSearchText(e.target.value);
   };
 
   const fetchUsers = async () => {
@@ -70,55 +77,75 @@ const AccountsPage = () => {
   };
 
   const handleDelete = async (userId) => {
+    try {
+      const accesstoken = localStorage.getItem("accesstoken");
+      setDeleteLoading(true);
+      
+      const response = await axios.post(
+        `http://localhost:8080/user/delete/${userId}`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${accesstoken}`,
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        // Xóa user khỏi state trực tiếp
+        setUserList(prevUsers => prevUsers.filter(user => user._id !== userId));
+        setFilteredUsers(prevUsers => prevUsers.filter(user => user._id !== userId));
+        
+        Modal.success({
+          content: "Xóa user thành công",
+        });
+      }
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      Modal.error({
+        content: "Không thể xóa user",
+      });
+    } finally {
+      setDeleteLoading(false);
+    }
+  };
+
+  const handleUpdate = async (values) => {
     const accesstoken = localStorage.getItem("accesstoken");
 
-    if (!accesstoken) {
-      Modal.error({
-        content: "You need to login first",
-      });
-      return;
-    }
-
-    Modal.confirm({
-      title: "Are you sure you want to delete this user?",
-      content: "This action cannot be undone.",
-      okText: "Yes",
-      okType: "danger",
-      cancelText: "No",
-      onOk: async () => {
-        try {
-          setDeleteLoading(true);
-          await axios.post(
-            `http://localhost:8080/user/delete/${userId}`,
-            {},
-            {
-              headers: {
-                Authorization: `Bearer ${accesstoken}`,
-              },
-            }
-          );
-
-          await fetchUsers(); // Refresh the list after deletion
-          Modal.success({
-            content: "User deleted successfully",
-          });
-        } catch (error) {
-          console.error("Error deleting user:", error);
-          if (error.response?.status === 401) {
-            Modal.error({
-              content: "Unauthorized. Please login again.",
-            });
-            navigate("/login");
-          } else {
-            Modal.error({
-              content: "Failed to delete user",
-            });
-          }
-        } finally {
-          setDeleteLoading(false);
+    try {
+      await axios.post(
+        `http://localhost:8080/user/update/${editingUser._id}`,
+        values,
+        {
+          headers: {
+            Authorization: `Bearer ${accesstoken}`,
+          },
         }
-      },
+      );
+
+      Modal.success({
+        content: "User updated successfully",
+      });
+      setIsEditModalVisible(false);
+      fetchUsers(); // Refresh the list
+    } catch (error) {
+      console.error("Error updating user:", error);
+      Modal.error({
+        content: error.response?.data?.message || "Failed to update user",
+      });
+    }
+  };
+
+  const showEditModal = (user) => {
+    setEditingUser(user);
+    form.setFieldsValue({
+      username: user.username,
+      fullname: user.fullname,
+      email: user.email,
+      phone: user.phone,
     });
+    setIsEditModalVisible(true);
   };
 
   const columns = [
@@ -177,18 +204,35 @@ const AccountsPage = () => {
     {
       title: "Actions",
       key: "actions",
-      width: 100,
+      width: 200,
       render: (_, record) => (
-        <Button
-          type="primary"
-          danger
-          icon={<DeleteOutlined />}
-          onClick={() => handleDelete(record._id)}
-          loading={deleteLoading}
-          disabled={record.role === "admin"}
-        >
-          Delete
-        </Button>
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <Button
+            type="primary"
+            icon={<EditOutlined />}
+            style={{ backgroundColor: '#52c41a' }}
+            onClick={() => showEditModal(record)}
+            disabled={record.role === "admin"}
+          >
+            Update
+          </Button>
+          <Popconfirm
+            title={`Xóa user "${record.username}"`}
+            okText="Xóa"
+            cancelText="Hủy"
+            onConfirm={() => handleDelete(record._id)}
+          >
+            <Button
+              type="primary"
+              danger
+              icon={<DeleteOutlined />}
+              loading={deleteLoading}
+              disabled={record.role === "admin"}
+            >
+              Delete
+            </Button>
+          </Popconfirm>
+        </div>
       ),
     },
   ];
@@ -196,11 +240,10 @@ const AccountsPage = () => {
   return (
     <div style={{ padding: "20px" }}>
       <h2>User Accounts Management</h2>
-      <Search
+      <Input
         placeholder="Search by username"
         allowClear
-        enterButton
-        onSearch={handleSearch}
+        onChange={handleSearch}
         style={{ width: 300, marginBottom: 16 }}
       />
       <Table
@@ -214,6 +257,60 @@ const AccountsPage = () => {
           showTotal: (total) => `Total ${total} users`,
         }}
       />
+
+      <Modal
+        title="Edit User"
+        open={isEditModalVisible}
+        onCancel={() => setIsEditModalVisible(false)}
+        footer={null}
+      >
+        <Form
+          form={form}
+          onFinish={handleUpdate}
+          layout="vertical"
+        >
+          <Form.Item
+            name="username"
+            label="Username"
+            rules={[{ required: true, message: 'Please input username!' }]}
+          >
+            <Input />
+          </Form.Item>
+          <Form.Item
+            name="fullname"
+            label="Full Name"
+            rules={[{ required: true, message: 'Please input full name!' }]}
+          >
+            <Input />
+          </Form.Item>
+          <Form.Item
+            name="email"
+            label="Email"
+            rules={[
+              { required: true, message: 'Please input email!' },
+              { type: 'email', message: 'Please input valid email!' }
+            ]}
+          >
+            <Input />
+          </Form.Item>
+          <Form.Item
+            name="phone"
+            label="Phone"
+            rules={[{ required: true, message: 'Please input phone!' }]}
+          >
+            <Input />
+          </Form.Item>
+
+          <Form.Item>
+            <Button type="primary" htmlType="submit" style={{ marginRight: 8 }}>
+              Update
+            </Button>
+            <Button onClick={() => setIsEditModalVisible(false)}>
+              Cancel
+            </Button>
+          </Form.Item>
+        </Form>
+      </Modal>
     </div>
   );
 };
