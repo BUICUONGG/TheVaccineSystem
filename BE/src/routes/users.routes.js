@@ -33,7 +33,12 @@ usersRouter.post(
   deleteController
 );
 
-usersRouter.post("/update/:id", updateController);
+usersRouter.post(
+  "/update/:id",
+  validateRefreshToken,
+  verifyAdmin,
+  updateController
+);
 
 usersRouter.post("/logout/:id", logoutController);
 
