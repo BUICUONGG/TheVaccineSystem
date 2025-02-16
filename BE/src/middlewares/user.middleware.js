@@ -1,9 +1,13 @@
 import jwt from "jsonwebtoken";
 import "dotenv/config";
+import connectToDatabase from "../config/database.js";
+import { verifyToken } from "../utils/jwt.js";
+import mongoose from "mongoose";
+import { ObjectId } from "mongodb";
 
 export const registerValidate = (req, res, next) => {
-  const { username, email, password, phone } = req.body;
-  if (!username || !email || !password || !phone) {
+  const { username, email, password } = req.body;
+  if (!username || !email || !password) {
     return res.status(400).json({ message: "Vui lòng nhập đầy đủ thông tin." });
   }
   next();
@@ -17,29 +21,99 @@ export const userDataValidate = (req, res, next) => {
       error: error.details.map((err) => err.message),
     });
   }
-
   next();
 };
 
-export const verifyToken = (req, res, next) => {
+// export const verifyAccessToken = (req, res, next) => {
+//   try {
+//     const token = req.headers.authorization;
+
+//     if (!token) {
+//       return res.status(401).json({ message: "You're not authenticated" });
+//     }
+//     const accessToken = token.split(" ")[1]; // Lấy token từ "Bearer <token>"
+// // console.log(accessToken)
+//     jwt.verify(accessToken, process.env.JWT_ACCESS_TOKEN, (err, user) => {
+//       if (err) {
+//         const message =
+//           err.name === "TokenExpiredErrorr" ? "Token expiredd" : "Invalid tokenn";
+//         return res.status(403).json({ message });
+//       }
+//       req.user = user;
+//       next();
+//     });
+//   } catch (error) {
+//     console.error("Token verification error:", error);
+//     res.status(500).json({ message: "Internal Server Error" });
+//   }
+// };
+
+export const validateAccessToken = async (req, res, next) => {
   try {
-    const token = req.headers.authorization;
+    const accessToken = req.headers.authorization?.split(" ")[1];
 
     if (!token) {
       return res.status(401).json({ message: "You're not authenticated" });
     }
-    const accessToken = token.split(" ")[1]; // Lấy token từ "Bearer <token>"
-
-    jwt.verify(accessToken, process.env.JWT_ACCESS_TOKEN, (err, user) => {
-      if (err) {
-        return res.status(403).json({ message: "Token is not valid" });
-      }
-      req.user = user;
-      next();
+    // Kiểm tra token
+    const decoded = await verifyToken({
+      token: accessToken,
+      secredOrPublickey: process.env.JWT_ACCESS_TOKEN,
     });
+
+    req.user = decoded; // Gán user vào request
+    next();
   } catch (error) {
-    console.error("Token verification error:", error);
-    res.status(500).json({ message: "Internal Server Error" });
+    console.error("Access Token expired or invalid:", error);
+    return res.status(401).json({ message: "Access Token expired" }); // Trả về lỗi 401
+  }
+};
+
+export const validateRefreshToken = async (req, res, next) => {
+  try {
+    const refreshToken = req.cookies.refreshToken || req.body.refreshToken;
+
+    if (!refreshToken) {
+      return res.status(401).json({ message: "Không có Refresh Token" });
+    }
+    // Giải mã token để lấy userId
+    // const decoded = await verifyToken({
+    //   token: refreshToken,
+    //   secredOrPublickey: process.env.JWT_REFRESH_TOKEN,
+    // });
+
+    let decoded;
+    try {
+      // 🟢 Giải mã token để kiểm tra hạn sử dụng
+      decoded = await verifyToken({
+        token: refreshToken,
+        secredOrPublickey: process.env.JWT_REFRESH_TOKEN,
+      });
+    } catch (err) {
+      if (err.name === "TokenExpiredError") {
+        return res.status(403).json({ message: "Refresh Token đã hết hạn" });
+      }
+      return res.status(403).json({ message: "Refresh Token không hợp lệ" });
+    }
+
+    const user = await connectToDatabase.users.findOne({
+      _id: new ObjectId(decoded.id),
+    });
+
+    if (!user || user.refreshToken !== refreshToken) {
+      return res
+        .status(403)
+        .json({ message: "Refresh Token không hợp lệ hoặc đã bị thu hồi" });
+    }
+    console.log(decoded);
+    req.user = {
+      _id: decoded.id,
+      role: decoded.role,
+    };
+    next();
+  } catch (error) {
+    console.error("Lỗi xác thực Refresh Token:", error);
+    res.status(500).json({ message: "Lỗi xác thực Refresh Token" });
   }
 };
 
@@ -83,6 +157,7 @@ export const verifyStaff = (req, res, next) => {
         .status(403)
         .json({ message: "You do not have Staff privileges" });
     }
+    next();
   } catch (error) {
     console.error("Staff verification error:", error);
     res.status(500).json({ message: "Internal Server Error" });

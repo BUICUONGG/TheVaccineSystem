@@ -1,5 +1,6 @@
 import express from "express";
 import "dotenv/config";
+import cookieParser from "cookie-parser";
 import usersRouter from "./src/routes/users.routes.js";
 import vaccinesRouter from "./src/routes/vaccines.routes.js";
 import childRouter from "./src/routes/child.routes.js";
@@ -18,6 +19,7 @@ app.use(
     credentials: true,
   })
 );
+app.use(cookieParser());
 connectToDatabase.connect();
 // Route mặc định
 app.get("", async (req, res) => {

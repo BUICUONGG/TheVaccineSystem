@@ -8,12 +8,22 @@ import { signToken } from "../utils/jwt.js";
 import { config } from "dotenv";
 
 class UserService {
+  //đăng kí tài khoản chỉ cần username password và email thôi. tự động lưu vào bảng customer khi nào cần cập nhật thông tin thì vào đó cập nhật sau
   async resgister(userData) {
     try {
       userData.password = await hashPassword(userData.password);
       const user = new User(userData);
       await user.validate(); // Kiểm tra dữ liệu hợp lệ
       const result = await connectToDatabase.users.insertOne(user);
+      const customerData = {
+        userId: result.insertedId,
+        customerName: "", // Nếu user có name thì lấy
+        phone: "",
+        birthDate: "",
+        address: "",
+        gender: "", // Liên kết với user
+      };
+      await connectToDatabase.customers.insertOne(customerData);
       return { _id: result.insertedId, ...userData };
     } catch (error) {
       console.error("Không tạo được tài khoản", error.message);
@@ -21,7 +31,7 @@ class UserService {
     }
   }
 
-  async showData() {
+  async showDataUser() {
     try {
       const result = await connectToDatabase.users.find().toArray();
       if (!result || result.length === 0) {
@@ -38,14 +48,15 @@ class UserService {
     return await signToken({
       payload: { id: user._id.toString(), role: user.role },
       privateKey: process.env.JWT_ACCESS_TOKEN,
-      options: { expiresIn: "5" },
+      options: { expiresIn: "5s" },
     });
   }
+
   async signRefreshToken(user) {
     return await signToken({
       payload: { id: user._id.toString(), role: user.role },
       privateKey: process.env.JWT_REFRESH_TOKEN,
-      options: { expiresIn: "1h" },
+      options: { expiresIn: "5h" },
     });
   }
 
@@ -63,7 +74,7 @@ class UserService {
       if (user && validPassword) {
         const accesstoken = await this.signAccessToken(user);
         const refreshtoken = await this.signRefreshToken(user);
-        console.log(typeof refreshtoken);
+
         // Lưu refreshToken vào database
         await connectToDatabase.users.updateOne(
           { _id: user._id },

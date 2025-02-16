@@ -1,9 +1,9 @@
 import connectToDatabase from "../config/database.js";
 import userService from "../services/user.services.js";
-import { signToken } from "../utils/jwt.js";
+import { signToken, verifyToken } from "../utils/jwt.js";
 
 export const showInFoController = async (req, res) => {
-  const result = await userService.showData();
+  const result = await userService.showDataUser();
   return res.json({ result });
 };
 
@@ -18,26 +18,16 @@ export const registerController = async (req, res) => {
 
 export const refreshTokenController = async (req, res) => {
   try {
-    const refreshToken = req.cookies.refreshToken; // Lấy từ Cookie
-    if (!refreshToken)
-      return res.status(401).json({ message: "Không có Refresh Token" });
+    const user = req.user; // Lấy thông tin user từ middleware
+    console.log(user);
+    const newAccessToken = await userService.signAccessToken(user);
 
-    jwt.verify(refreshToken, process.env.JWT_REFRESH_TOKEN, (err, decoded) => {
-      if (err)
-        return res.status(403).json({ message: "Refresh Token không hợp lệ" });
-
-      const newAccessToken = userService.signAccessToken(decoded);
-      const newRefreshToken = userService.signRefreshToken(decoded);
-      res.cookie("refreshToken", newRefreshToken, {
-        httpOnly: true, // Chặn truy cập từ JavaScript (Bảo mật XSS)
-        secure: true, // Chỉ gửi qua HTTPS
-        sameSite: "None", // Chống CSRF
-        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 ngày
-      });
-      return res.json({ accesstoken: newAccessToken });
+    return res.json({
+      accessToken: newAccessToken,
+      // refreshToken: newRefreshToken,
     });
   } catch (error) {
-    res.status(500).json({ message: "Không thể làm mới Access Token" });
+    res.status(500).json({ message: "Không thể làm mới Access Tokenn" });
   }
 };
 
