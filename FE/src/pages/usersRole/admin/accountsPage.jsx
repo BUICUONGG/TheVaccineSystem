@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { Table, Input, Button, Modal } from "antd";
-import { DeleteOutlined } from "@ant-design/icons";
+import { Table, Input, Button, Modal, Form } from "antd";
+import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
@@ -15,6 +15,10 @@ const AccountsPage = () => {
 
   // Thêm state cho filtered users
   const [filteredUsers, setFilteredUsers] = useState([]);
+
+  const [isEditModalVisible, setIsEditModalVisible] = useState(false);
+  const [editingUser, setEditingUser] = useState(null);
+  const [form] = Form.useForm();
 
   useEffect(() => {
     fetchUsers();
@@ -121,6 +125,44 @@ const AccountsPage = () => {
     });
   };
 
+  const handleUpdate = async (values) => {
+    const accesstoken = localStorage.getItem("accesstoken");
+
+    try {
+      await axios.post(
+        `http://localhost:8080/user/update/${editingUser._id}`,
+        values,
+        {
+          headers: {
+            Authorization: `Bearer ${accesstoken}`,
+          },
+        }
+      );
+
+      Modal.success({
+        content: "User updated successfully",
+      });
+      setIsEditModalVisible(false);
+      fetchUsers(); // Refresh the list
+    } catch (error) {
+      console.error("Error updating user:", error);
+      Modal.error({
+        content: error.response?.data?.message || "Failed to update user",
+      });
+    }
+  };
+
+  const showEditModal = (user) => {
+    setEditingUser(user);
+    form.setFieldsValue({
+      username: user.username,
+      fullname: user.fullname,
+      email: user.email,
+      phone: user.phone,
+    });
+    setIsEditModalVisible(true);
+  };
+
   const columns = [
     {
       title: "STT",
@@ -177,18 +219,29 @@ const AccountsPage = () => {
     {
       title: "Actions",
       key: "actions",
-      width: 100,
+      width: 200,
       render: (_, record) => (
-        <Button
-          type="primary"
-          danger
-          icon={<DeleteOutlined />}
-          onClick={() => handleDelete(record._id)}
-          loading={deleteLoading}
-          disabled={record.role === "admin"}
-        >
-          Delete
-        </Button>
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <Button
+            type="primary"
+            icon={<EditOutlined />}
+            style={{ backgroundColor: '#52c41a' }}
+            onClick={() => showEditModal(record)}
+            disabled={record.role === "admin"}
+          >
+            Update
+          </Button>
+          <Button
+            type="primary"
+            danger
+            icon={<DeleteOutlined />}
+            onClick={() => handleDelete(record._id)}
+            loading={deleteLoading}
+            disabled={record.role === "admin"}
+          >
+            Delete
+          </Button>
+        </div>
       ),
     },
   ];
@@ -214,6 +267,60 @@ const AccountsPage = () => {
           showTotal: (total) => `Total ${total} users`,
         }}
       />
+
+      <Modal
+        title="Edit User"
+        open={isEditModalVisible}
+        onCancel={() => setIsEditModalVisible(false)}
+        footer={null}
+      >
+        <Form
+          form={form}
+          onFinish={handleUpdate}
+          layout="vertical"
+        >
+          <Form.Item
+            name="username"
+            label="Username"
+            rules={[{ required: true, message: 'Please input username!' }]}
+          >
+            <Input />
+          </Form.Item>
+          <Form.Item
+            name="fullname"
+            label="Full Name"
+            rules={[{ required: true, message: 'Please input full name!' }]}
+          >
+            <Input />
+          </Form.Item>
+          <Form.Item
+            name="email"
+            label="Email"
+            rules={[
+              { required: true, message: 'Please input email!' },
+              { type: 'email', message: 'Please input valid email!' }
+            ]}
+          >
+            <Input />
+          </Form.Item>
+          <Form.Item
+            name="phone"
+            label="Phone"
+            rules={[{ required: true, message: 'Please input phone!' }]}
+          >
+            <Input />
+          </Form.Item>
+
+          <Form.Item>
+            <Button type="primary" htmlType="submit" style={{ marginRight: 8 }}>
+              Update
+            </Button>
+            <Button onClick={() => setIsEditModalVisible(false)}>
+              Cancel
+            </Button>
+          </Form.Item>
+        </Form>
+      </Modal>
     </div>
   );
 };

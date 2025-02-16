@@ -102,14 +102,22 @@ class UserService {
 
   async update(id, updateData) {
     try {
+      // Nếu có password trong updateData, hash password mới
+      if (updateData.password) {
+        updateData.password = await hashPassword(updateData.password);
+      }
+      
       const result = await connectToDatabase.users.findOneAndUpdate(
         { _id: new ObjectId(id) },
         { $set: updateData },
         { returnDocument: "after" }
       );
+      
       if (!result) {
         throw new Error("User not found");
       }
+      
+      return result; // Trả về user đã được update
     } catch (error) {
       console.error("Delete error:", error);
       throw new Error(error.message);
