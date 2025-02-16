@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Table, Input, Button, Modal, Form } from "antd";
+import { Table, Input, Button, Modal, Form, Popconfirm } from "antd";
 import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
@@ -216,16 +216,22 @@ const AccountsPage = () => {
           >
             Update
           </Button>
-          <Button
-            type="primary"
-            danger
-            icon={<DeleteOutlined />}
-            onClick={() => handleDelete(record._id)}
-            loading={deleteLoading}
-            disabled={record.role === "admin"}
+          <Popconfirm
+            title={`Xóa user "${record.username}"`}
+            okText="Xóa"
+            cancelText="Hủy"
+            onConfirm={() => handleDelete(record._id)}
           >
-            Delete
-          </Button>
+            <Button
+              type="primary"
+              danger
+              icon={<DeleteOutlined />}
+              loading={deleteLoading}
+              disabled={record.role === "admin"}
+            >
+              Delete
+            </Button>
+          </Popconfirm>
         </div>
       ),
     },
