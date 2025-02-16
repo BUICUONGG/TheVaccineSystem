@@ -32,8 +32,11 @@ const AccountsPage = () => {
     setFilteredUsers(filtered);
   }, [userList, searchText]);
 
-  const handleSearch = (value) => {
-    setSearchText(value);
+  // const handleSearch = (value) => {
+  //   setSearchText(value);
+  // };
+  const handleSearch = (e) => {
+    setSearchText(e.target.value);
   };
 
   const fetchUsers = async () => {
@@ -74,55 +77,37 @@ const AccountsPage = () => {
   };
 
   const handleDelete = async (userId) => {
-    const accesstoken = localStorage.getItem("accesstoken");
-
-    if (!accesstoken) {
-      Modal.error({
-        content: "You need to login first",
-      });
-      return;
-    }
-
-    Modal.confirm({
-      title: "Are you sure you want to delete this user?",
-      content: "This action cannot be undone.",
-      okText: "Yes",
-      okType: "danger",
-      cancelText: "No",
-      onOk: async () => {
-        try {
-          setDeleteLoading(true);
-          await axios.post(
-            `http://localhost:8080/user/delete/${userId}`,
-            {},
-            {
-              headers: {
-                Authorization: `Bearer ${accesstoken}`,
-              },
-            }
-          );
-
-          await fetchUsers(); // Refresh the list after deletion
-          Modal.success({
-            content: "User deleted successfully",
-          });
-        } catch (error) {
-          console.error("Error deleting user:", error);
-          if (error.response?.status === 401) {
-            Modal.error({
-              content: "Unauthorized. Please login again.",
-            });
-            navigate("/login");
-          } else {
-            Modal.error({
-              content: "Failed to delete user",
-            });
-          }
-        } finally {
-          setDeleteLoading(false);
+    try {
+      const accesstoken = localStorage.getItem("accesstoken");
+      setDeleteLoading(true);
+      
+      const response = await axios.post(
+        `http://localhost:8080/user/delete/${userId}`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${accesstoken}`,
+          },
         }
-      },
-    });
+      );
+
+      if (response.status === 200) {
+        // Xóa user khỏi state trực tiếp
+        setUserList(prevUsers => prevUsers.filter(user => user._id !== userId));
+        setFilteredUsers(prevUsers => prevUsers.filter(user => user._id !== userId));
+        
+        Modal.success({
+          content: "Xóa user thành công",
+        });
+      }
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      Modal.error({
+        content: "Không thể xóa user",
+      });
+    } finally {
+      setDeleteLoading(false);
+    }
   };
 
   const handleUpdate = async (values) => {
@@ -249,11 +234,10 @@ const AccountsPage = () => {
   return (
     <div style={{ padding: "20px" }}>
       <h2>User Accounts Management</h2>
-      <Search
+      <Input
         placeholder="Search by username"
         allowClear
-        enterButton
-        onSearch={handleSearch}
+        onChange={handleSearch}
         style={{ width: 300, marginBottom: 16 }}
       />
       <Table
