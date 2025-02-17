@@ -24,35 +24,11 @@ export const userDataValidate = (req, res, next) => {
   next();
 };
 
-// export const verifyAccessToken = (req, res, next) => {
-//   try {
-//     const token = req.headers.authorization;
-
-//     if (!token) {
-//       return res.status(401).json({ message: "You're not authenticated" });
-//     }
-//     const accessToken = token.split(" ")[1]; // Lấy token từ "Bearer <token>"
-// // console.log(accessToken)
-//     jwt.verify(accessToken, process.env.JWT_ACCESS_TOKEN, (err, user) => {
-//       if (err) {
-//         const message =
-//           err.name === "TokenExpiredErrorr" ? "Token expiredd" : "Invalid tokenn";
-//         return res.status(403).json({ message });
-//       }
-//       req.user = user;
-//       next();
-//     });
-//   } catch (error) {
-//     console.error("Token verification error:", error);
-//     res.status(500).json({ message: "Internal Server Error" });
-//   }
-// };
-
 export const validateAccessToken = async (req, res, next) => {
   try {
     const accessToken = req.headers.authorization?.split(" ")[1];
 
-    if (!token) {
+    if (!accessToken) {
       return res.status(401).json({ message: "You're not authenticated" });
     }
     // Kiểm tra token
@@ -76,12 +52,6 @@ export const validateRefreshToken = async (req, res, next) => {
     if (!refreshToken) {
       return res.status(401).json({ message: "Không có Refresh Token" });
     }
-    // Giải mã token để lấy userId
-    // const decoded = await verifyToken({
-    //   token: refreshToken,
-    //   secredOrPublickey: process.env.JWT_REFRESH_TOKEN,
-    // });
-
     let decoded;
     try {
       // 🟢 Giải mã token để kiểm tra hạn sử dụng

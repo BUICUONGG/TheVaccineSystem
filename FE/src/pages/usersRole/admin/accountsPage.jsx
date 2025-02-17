@@ -4,7 +4,7 @@ import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
-const { Search } = Input;
+// const { Search } = Input;
 
 const AccountsPage = () => {
   const navigate = useNavigate();
@@ -26,7 +26,7 @@ const AccountsPage = () => {
 
   // Cập nhật filtered users khi userList hoặc searchText thay đổi
   useEffect(() => {
-    const filtered = userList.filter(user => 
+    const filtered = userList.filter((user) =>
       user.username.toLowerCase().includes(searchText.toLowerCase())
     );
     setFilteredUsers(filtered);
@@ -44,14 +44,11 @@ const AccountsPage = () => {
       setLoading(true);
       const accesstoken = localStorage.getItem("accesstoken");
 
-      const response = await axios.get(
-        "http://localhost:8080/user/showInfo",
-        {
-          headers: {
-            Authorization: `Bearer ${accesstoken}`,
-          },
-        }
-      );
+      const response = await axios.get("http://localhost:8080/user/showInfo", {
+        headers: {
+          Authorization: `Bearer ${accesstoken}`,
+        },
+      });
 
       const sortedUsers = (response.data.result || []).sort((a, b) => {
         const roleOrder = {
@@ -80,7 +77,7 @@ const AccountsPage = () => {
     try {
       const accesstoken = localStorage.getItem("accesstoken");
       setDeleteLoading(true);
-      
+
       const response = await axios.post(
         `http://localhost:8080/user/delete/${userId}`,
         {},
@@ -93,9 +90,13 @@ const AccountsPage = () => {
 
       if (response.status === 200) {
         // Xóa user khỏi state trực tiếp
-        setUserList(prevUsers => prevUsers.filter(user => user._id !== userId));
-        setFilteredUsers(prevUsers => prevUsers.filter(user => user._id !== userId));
-        
+        setUserList((prevUsers) =>
+          prevUsers.filter((user) => user._id !== userId)
+        );
+        setFilteredUsers((prevUsers) =>
+          prevUsers.filter((user) => user._id !== userId)
+        );
+
         Modal.success({
           content: "Xóa user thành công",
         });
@@ -141,9 +142,7 @@ const AccountsPage = () => {
     setEditingUser(user);
     form.setFieldsValue({
       username: user.username,
-      fullname: user.fullname,
       email: user.email,
-      phone: user.phone,
     });
     setIsEditModalVisible(true);
   };
@@ -161,19 +160,14 @@ const AccountsPage = () => {
       key: "username",
     },
     {
-      title: "Full Name",
-      dataIndex: "fullname",
-      key: "fullname",
+      title: "Password",
+      dataIndex: "password",
+      key: "password",
     },
     {
       title: "Email",
       dataIndex: "email",
       key: "email",
-    },
-    {
-      title: "Phone",
-      dataIndex: "phone",
-      key: "phone",
     },
     {
       title: "Role",
@@ -206,11 +200,11 @@ const AccountsPage = () => {
       key: "actions",
       width: 200,
       render: (_, record) => (
-        <div style={{ display: 'flex', gap: '8px' }}>
+        <div style={{ display: "flex", gap: "8px" }}>
           <Button
             type="primary"
             icon={<EditOutlined />}
-            style={{ backgroundColor: '#52c41a' }}
+            style={{ backgroundColor: "#52c41a" }}
             onClick={() => showEditModal(record)}
             disabled={record.role === "admin"}
           >
@@ -264,22 +258,18 @@ const AccountsPage = () => {
         onCancel={() => setIsEditModalVisible(false)}
         footer={null}
       >
-        <Form
-          form={form}
-          onFinish={handleUpdate}
-          layout="vertical"
-        >
+        <Form form={form} onFinish={handleUpdate} layout="vertical">
           <Form.Item
             name="username"
             label="Username"
-            rules={[{ required: true, message: 'Please input username!' }]}
+            rules={[{ required: true, message: "Please input username!" }]}
           >
             <Input />
           </Form.Item>
           <Form.Item
             name="fullname"
             label="Full Name"
-            rules={[{ required: true, message: 'Please input full name!' }]}
+            rules={[{ required: true, message: "Please input full name!" }]}
           >
             <Input />
           </Form.Item>
@@ -287,8 +277,8 @@ const AccountsPage = () => {
             name="email"
             label="Email"
             rules={[
-              { required: true, message: 'Please input email!' },
-              { type: 'email', message: 'Please input valid email!' }
+              { required: true, message: "Please input email!" },
+              { type: "email", message: "Please input valid email!" },
             ]}
           >
             <Input />
@@ -296,7 +286,7 @@ const AccountsPage = () => {
           <Form.Item
             name="phone"
             label="Phone"
-            rules={[{ required: true, message: 'Please input phone!' }]}
+            rules={[{ required: true, message: "Please input phone!" }]}
           >
             <Input />
           </Form.Item>
@@ -305,9 +295,7 @@ const AccountsPage = () => {
             <Button type="primary" htmlType="submit" style={{ marginRight: 8 }}>
               Update
             </Button>
-            <Button onClick={() => setIsEditModalVisible(false)}>
-              Cancel
-            </Button>
+            <Button onClick={() => setIsEditModalVisible(false)}>Cancel</Button>
           </Form.Item>
         </Form>
       </Modal>
@@ -315,4 +303,4 @@ const AccountsPage = () => {
   );
 };
 
-export default AccountsPage; 
+export default AccountsPage;

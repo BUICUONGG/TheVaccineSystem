@@ -48,7 +48,7 @@ class UserService {
     return await signToken({
       payload: { id: user._id.toString(), role: user.role },
       privateKey: process.env.JWT_ACCESS_TOKEN,
-      options: { expiresIn: "5s" },
+      options: { expiresIn: "1h" },
     });
   }
 

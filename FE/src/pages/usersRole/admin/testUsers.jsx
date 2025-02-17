@@ -5,22 +5,6 @@ import { useEffect, useState } from "react";
 const TestUsers = () => {
   const [userList, setUserList] = useState([]);
 
-  // const fetchUsers = async () => {
-  //   const response = await axios.get("http://localhost:8080/user/showInfo");
-  //   const usersWithIndex = response.map((user, index) => ({
-  //     ...user,
-  //     stt: index + 1, // STT bắt đầu từ 1
-  //     key: user.id || index, // key giúp React tối ưu render
-  //   }));
-  //   console.log(usersWithIndex);
-  //   setUserList(usersWithIndex);
-  //   //   console.log(response.data);
-  //   //   setUserList(response.data);
-  // };
-
-  // useEffect(() => {
-  //   fetchUsers();
-  // }, []);
   const fetchUsers = async () => {
     try {
       const response = await axios.get("http://localhost:8080/user/showInfo");

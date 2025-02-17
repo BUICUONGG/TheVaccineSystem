@@ -86,6 +86,13 @@ export const logoutController = async (req, res) => {
     if (!result) {
       throw new Error("Can not logout");
     }
+    // Xóa Refresh Token khỏi cookie
+    res.clearCookie("refreshToken", {
+      httpOnly: true,
+      secure: true,
+      sameSite: "None",
+    });
+
     res.status(200).json("User logoutt successfully");
   } catch (error) {
     res.status(500).json({ error: error.message });
