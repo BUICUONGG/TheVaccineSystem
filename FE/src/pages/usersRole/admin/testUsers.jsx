@@ -32,7 +32,11 @@ const TestUsers = () => {
 
   useEffect(() => {
     document.title = "User Management";
+<<<<<<< HEAD
   }, []);
+=======
+  },[]);
+>>>>>>> 4421b62bc36345f6c61f5368cd1e6571fb0fd47e
 
   const columns = [
     {
@@ -75,9 +79,13 @@ const TestUsers = () => {
 
   return (
     <div>
+<<<<<<< HEAD
       <h1>
         <b>User Management</b>
       </h1>
+=======
+      <h1><b>User Management</b></h1>
+>>>>>>> 4421b62bc36345f6c61f5368cd1e6571fb0fd47e
       <Table dataSource={userList} columns={columns} />
     </div>
   );

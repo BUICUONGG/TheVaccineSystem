@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { Modal } from "antd";
@@ -385,3 +386,14 @@ const HomePage = () => {
 };
 
 export default HomePage;
+=======
+
+
+function HomePage() {
+  return (
+    <div>H</div>
+  )
+}
+
+export default HomePage
+>>>>>>> 4421b62bc36345f6c61f5368cd1e6571fb0fd47e
