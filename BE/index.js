@@ -8,6 +8,7 @@ import childRouter from "./src/routes/child.routes.js";
 import connectToDatabase from "./src/config/database.js";
 import cors from "cors";
 import blogRoutes from "./src/routes/blogs.routes.js";
+import customerRoutes from "./src/routes/customers.routes.js";
 const app = express();
 app.use(express.json());
 const PORT = 8080 || process.env.MONGO_URI;
@@ -32,6 +33,7 @@ app.use("/user", usersRouter);
 app.use("/vaccine", vaccinesRouter);
 app.use("/child", childRouter);
 app.use("/blog", blogRoutes);
+app.use("/customer", customerRoutes);
 // app.use("/admin", adminRouter);
 // app.use('staff', staffRouter);
 

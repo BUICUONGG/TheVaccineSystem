@@ -9,7 +9,7 @@ const customerSchema = new mongoose.Schema({
   },
   customerName: { type: String, default: null },
   phone: { type: String, default: null },
-  birthDate: { type: String, default: null }, // Ngày sinh
+  birthday: { type: String, default: null }, // Ngày sinh
   address: { type: String, default: null },
   gender: { type: String, enum: ["Male", "Female", "Other"], default: null },
 });

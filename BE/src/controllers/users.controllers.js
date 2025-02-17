@@ -1,6 +1,5 @@
 import connectToDatabase from "../config/database.js";
 import userService from "../services/user.services.js";
-import { signToken, verifyToken } from "../utils/jwt.js";
 
 export const showInFoController = async (req, res) => {
   const result = await userService.showDataUser();
@@ -65,19 +64,19 @@ export const deleteController = async (req, res) => {
   }
 };
 
-export const updateController = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const updateData = req.body;
-    const result = await userService.update(id, updateData);
-    if (!id || !result) {
-      throw new Error("Cannot update user");
-    }
-    res.status(200).json("User update successfully");
-  } catch (error) {
-    res.status(500).json(error.message);
-  }
-};
+// export const updateController = async (req, res) => {
+//   try {
+//     const { id } = req.params;
+//     const updateData = req.body;
+//     const result = await userService.update(id, updateData);
+//     if (!id || !result) {
+//       throw new Error("Cannot update user");
+//     }
+//     res.status(200).json("User update successfully");
+//   } catch (error) {
+//     res.status(500).json(error.message);
+//   }
+// };
 
 export const logoutController = async (req, res) => {
   try {

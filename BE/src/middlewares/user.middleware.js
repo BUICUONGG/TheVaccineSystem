@@ -1,8 +1,6 @@
-import jwt from "jsonwebtoken";
 import "dotenv/config";
 import connectToDatabase from "../config/database.js";
 import { verifyToken } from "../utils/jwt.js";
-import mongoose from "mongoose";
 import { ObjectId } from "mongodb";
 
 export const registerValidate = (req, res, next) => {
