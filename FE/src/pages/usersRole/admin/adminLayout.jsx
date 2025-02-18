@@ -10,11 +10,34 @@ const AdminLayout = () => {
   const [adminName, setAdminName] = useState("");
 
   useEffect(() => {
-    const username = localStorage.getItem("username");
-    if (username) {
-      setAdminName(`Admin: ${username}`);
+    // Kiểm tra authentication và authorization
+    const accessToken = localStorage.getItem("accesstoken");
+    
+    if (!accessToken) {
+      navigate("/login");
+      return;
     }
-  }, []);
+
+    try {
+      // Decode token để kiểm tra role
+      const tokenParts = accessToken.split(".");
+      const payload = JSON.parse(atob(tokenParts[1]));
+      
+      if (payload.role !== "admin") {
+        navigate("/homepage");
+        return;
+      }
+
+      // Nếu là admin, set tên admin
+      const username = localStorage.getItem("username");
+      if (username) {
+        setAdminName(`Admin: ${username}`);
+      }
+    } catch (error) {
+      console.error("Invalid token:", error);
+      navigate("/login");
+    }
+  }, [navigate]);
 
   const handleLogout = () => {
     localStorage.removeItem("accesstoken");
