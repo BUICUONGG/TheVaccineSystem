@@ -1,62 +1,86 @@
 import { useState, useEffect } from "react";
-import { Table, Input, Button, Modal, Form } from "antd";
-import { EditOutlined } from "@ant-design/icons";
+import { Table, Input, Button, Modal, Form, Popconfirm } from "antd";
+import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
+// const { Search } = Input;
+
 const AccountsPage = () => {
   const navigate = useNavigate();
-  const [customerList, setCustomerList] = useState([]);
+  const [userList, setUserList] = useState([]);
   const [loading, setLoading] = useState(false);
   const [searchText, setSearchText] = useState("");
-  const [filteredCustomers, setFilteredCustomers] = useState([]);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+
+  // Thêm state cho filtered users
+  const [filteredUsers, setFilteredUsers] = useState([]);
+
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
-  const [editingCustomer, setEditingCustomer] = useState(null);
+  const [editingUser, setEditingUser] = useState(null);
   const [form] = Form.useForm();
 
   useEffect(() => {
-    fetchCustomers();
+    fetchUsers();
   }, []);
 
+  // Cập nhật filtered users khi userList hoặc searchText thay đổi
   useEffect(() => {
-    const filtered = customerList.filter((customer) =>
-      customer.customerName?.toLowerCase().includes(searchText.toLowerCase())
+    const filtered = userList.filter((user) =>
+      user.username.toLowerCase().includes(searchText.toLowerCase())
     );
-    setFilteredCustomers(filtered);
-  }, [customerList, searchText]);
+    setFilteredUsers(filtered);
+  }, [userList, searchText]);
 
+  // const handleSearch = (value) => {
+  //   setSearchText(value);
+  // };
   const handleSearch = (e) => {
     setSearchText(e.target.value);
   };
 
-  const fetchCustomers = async () => {
+  const fetchUsers = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(
-        "http://localhost:8080/customer/getAllCustomer"
-      );
+      const accesstoken = localStorage.getItem("accesstoken");
 
-      if (response.data.result) {
-        setCustomerList(response.data.result);
-        setFilteredCustomers(response.data.result);
-      }
-    } catch (error) {
-      console.error("Error fetching customers:", error);
-      Modal.error({
-        content: "Failed to fetch customers",
+      const response = await axios.get("http://localhost:8080/user/showInfo", {
+        headers: {
+          Authorization: `Bearer ${accesstoken}`,
+        },
       });
+
+      const sortedUsers = (response.data.result || []).sort((a, b) => {
+        const roleOrder = {
+          admin: 1,
+          staff: 2,
+          customer: 3,
+        };
+        return roleOrder[a.role] - roleOrder[b.role];
+      });
+      setUserList(sortedUsers);
+      setFilteredUsers(sortedUsers);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+      if (error.response?.status === 401) {
+        Modal.error({
+          content: "Unauthorized. Please login again.",
+        });
+        navigate("/login");
+      }
     } finally {
       setLoading(false);
     }
   };
 
-  const handleUpdate = async (values) => {
-    const accesstoken = localStorage.getItem("accesstoken");
-
+  const handleDelete = async (userId) => {
     try {
+      const accesstoken = localStorage.getItem("accesstoken");
+      setDeleteLoading(true);
+
       const response = await axios.post(
-        `http://localhost:8080/customer/update/${editingCustomer.userId}`,
-        values,
+        `http://localhost:8080/user/delete/${userId}`,
+        {},
         {
           headers: {
             Authorization: `Bearer ${accesstoken}`,
@@ -65,18 +89,62 @@ const AccountsPage = () => {
       );
 
       if (response.status === 200) {
+        // Xóa user khỏi state trực tiếp
+        setUserList((prevUsers) =>
+          prevUsers.filter((user) => user._id !== userId)
+        );
+        setFilteredUsers((prevUsers) =>
+          prevUsers.filter((user) => user._id !== userId)
+        );
+
         Modal.success({
-          content: "Customer updated successfully",
+          content: "Xóa user thành công",
         });
-        setIsEditModalVisible(false);
-        fetchCustomers();
       }
     } catch (error) {
-      console.error("Error updating customer:", error);
+      console.error("Error deleting user:", error);
       Modal.error({
-        content: error.response?.data || "Failed to update customer",
+        content: "Không thể xóa user",
+      });
+    } finally {
+      setDeleteLoading(false);
+    }
+  };
+
+  const handleUpdate = async (values) => {
+    const accesstoken = localStorage.getItem("accesstoken");
+
+    try {
+      await axios.post(
+        `http://localhost:8080/user/update/${editingUser._id}`,
+        values,
+        {
+          headers: {
+            Authorization: `Bearer ${accesstoken}`,
+          },
+        }
+      );
+
+      Modal.success({
+        content: "User updated successfully",
+      });
+      setIsEditModalVisible(false);
+      fetchUsers(); // Refresh the list
+    } catch (error) {
+      console.error("Error updating user:", error);
+      Modal.error({
+        content: error.response?.data?.message || "Failed to update user",
       });
     }
+  };
+
+  const showEditModal = (user) => {
+    setEditingUser(user);
+    form.setFieldsValue({
+      username: user.username,
+      email: user.email,
+    });
+    setIsEditModalVisible(true);
   };
 
   const columns = [
@@ -87,123 +155,140 @@ const AccountsPage = () => {
       width: 70,
     },
     {
-      title: "Customer Name",
-      dataIndex: "customerName",
-      key: "customerName",
+      title: "Username",
+      dataIndex: "username",
+      key: "username",
     },
+    // {
+    //   title: "Password",
+    //   dataIndex: "password",
+    //   key: "password",
+    // },
+    // {
+    //   title: "Email",
+    //   dataIndex: "email",
+    //   key: "email",
+    // },
     {
-      title: "Phone",
-      dataIndex: "phone",
-      key: "phone",
-    },
-    {
-      title: "Birthday",
-      dataIndex: "birthday",
-      key: "birthday",
-    },
-    {
-      title: "Address",
-      dataIndex: "address",
-      key: "address",
-    },
-    {
-      title: "Gender",
-      dataIndex: "gender",
-      key: "gender",
+      title: "Role",
+      dataIndex: "role",
+      key: "role",
+      filters: [
+        { text: "Admin", value: "admin" },
+        { text: "Staff", value: "staff" },
+        { text: "Customer", value: "customer" },
+      ],
+      onFilter: (value, record) => record.role === value,
+      render: (role) => (
+        <span
+          style={{
+            textTransform: "capitalize",
+            color:
+              role === "admin"
+                ? "#ff4d4f"
+                : role === "staff"
+                ? "#1890ff"
+                : "#52c41a",
+          }}
+        >
+          {role}
+        </span>
+      ),
     },
     {
       title: "Actions",
       key: "actions",
-      width: 120,
+      width: 200,
       render: (_, record) => (
-        <Button
-          type="primary"
-          icon={<EditOutlined />}
-          style={{ backgroundColor: "#52c41a" }}
-          onClick={() => showEditModal(record)}
-        >
-          Update
-        </Button>
+        <div style={{ display: "flex", gap: "8px" }}>
+          <Button
+            type="primary"
+            icon={<EditOutlined />}
+            style={{ backgroundColor: "#52c41a" }}
+            onClick={() => showEditModal(record)}
+            disabled={record.role === "admin"}
+          >
+            Update
+          </Button>
+          <Popconfirm
+            title={`Xóa user "${record.username}"`}
+            okText="Xóa"
+            cancelText="Hủy"
+            onConfirm={() => handleDelete(record._id)}
+          >
+            <Button
+              type="primary"
+              danger
+              icon={<DeleteOutlined />}
+              loading={deleteLoading}
+              disabled={record.role === "admin"}
+            >
+              Delete
+            </Button>
+          </Popconfirm>
+        </div>
       ),
     },
   ];
 
-  const showEditModal = (customer) => {
-    setEditingCustomer(customer);
-    form.setFieldsValue({
-      customerName: customer.customerName,
-      phone: customer.phone,
-      birthday: customer.birthday,
-      address: customer.address,
-      gender: customer.gender,
-    });
-    setIsEditModalVisible(true);
-  };
-
   return (
     <div style={{ padding: "20px" }}>
-      <h2>Customer Management</h2>
+      <h2>User Accounts Management</h2>
       <Input
-        placeholder="Search by customer name"
+        placeholder="Search by username"
         allowClear
         onChange={handleSearch}
         style={{ width: 300, marginBottom: 16 }}
       />
       <Table
-        dataSource={filteredCustomers}
+        dataSource={filteredUsers}
         columns={columns}
         loading={loading}
-        rowKey="userId"
+        rowKey="_id"
         pagination={{
           pageSize: 10,
           showSizeChanger: true,
-          showTotal: (total) => `Total ${total} customers`,
+          showTotal: (total) => `Total ${total} users`,
         }}
       />
 
       <Modal
-        title="Edit Customer"
+        title="Edit User"
         open={isEditModalVisible}
         onCancel={() => setIsEditModalVisible(false)}
         footer={null}
       >
         <Form form={form} onFinish={handleUpdate} layout="vertical">
           <Form.Item
-            name="customerName"
-            label="Customer Name"
-            rules={[{ required: true, message: "Please input customer name!" }]}
+            name="username"
+            label="Username"
+            rules={[{ required: true, message: "Please input username!" }]}
+          >
+            <Input />
+          </Form.Item>
+          <Form.Item
+            name="fullname"
+            label="Full Name"
+            rules={[{ required: true, message: "Please input full name!" }]}
+          >
+            <Input />
+          </Form.Item>
+          <Form.Item
+            name="email"
+            label="Email"
+            rules={[
+              { required: true, message: "Please input email!" },
+              { type: "email", message: "Please input valid email!" },
+            ]}
           >
             <Input />
           </Form.Item>
           <Form.Item
             name="phone"
             label="Phone"
-            rules={[{ required: true, message: "Please input phone number!" }]}
+            rules={[{ required: true, message: "Please input phone!" }]}
           >
             <Input />
-          </Form.Item>
-          <Form.Item
-            name="birthday"
-            label="Birthday"
-          >
-            <Input />
-          </Form.Item>
-          <Form.Item
-            name="address"
-            label="Address"
-          >
-            <Input />
-          </Form.Item>
-          <Form.Item
-            name="gender"
-            label="Gender"
-            rules={[{ required: true, message: "Please select gender!" }]}
-          >
-            <select style={{ width: '100%', padding: '8px' }}>
-              <option value="Male">Male</option>
-              <option value="Female">Female</option>
-              <option value="Other">Other</option>
-            </select>
           </Form.Item>
 
           <Form.Item>

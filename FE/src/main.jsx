@@ -7,7 +7,6 @@ import HomePage from "./pages/homepage/homePage";
 import AdminLayout from "./pages/usersRole/admin/adminLayout";
 import AccountsPage from "./pages/usersRole/admin/accountsPage";
 import VaccinesPage from "./pages/usersRole/admin/vaccinesPage";
-import AllCustomerPage from "./pages/usersRole/customer/allCustomerPage";
 import { ToastContainer } from "react-toastify";
 // import CamnangPage from "./pages/homepage/camnang/camnang";
 
@@ -47,10 +46,6 @@ const router = createBrowserRouter([
       {
         path: "accounts",
         element: <AccountsPage />,
-      },
-      {
-        path: "customers",
-        element: <AllCustomerPage />,
       },
       {
         path: "vaccines",
