@@ -15,6 +15,7 @@ const HomePage = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
 
   const banners = [
     "/images/banner1.png",
@@ -154,16 +155,20 @@ const HomePage = () => {
           <div className="auth-buttons">
             <FaShoppingCart className="cart-icon" />
             {isLoggedIn ? (
-              <>
-                <button className="logout-btn" onClick={handleLogout}>
-                  Logout
-                </button>
+              <div className="user-menu">
                 <img
                   src="../icons/adminIcon.png"
                   alt="User Avatar"
                   className="avatar-icon"
+                  onClick={() => setShowDropdown(!showDropdown)}
                 />
-              </>
+                {showDropdown && (
+                  <div className="dropdown-menu">
+                    <Link to="/profile">Profile</Link>
+                    <button onClick={handleLogout}>Logout</button>
+                  </div>
+                )}
+              </div>
             ) : (
               <>
                 <button className="login-btn" onClick={handleLogin}>
@@ -245,7 +250,7 @@ const HomePage = () => {
           <span>GIÁ TIÊM</span>
           </Link>
         </div>
-     
+       
       </div>
 
       <div className="vaccine-info">

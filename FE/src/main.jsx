@@ -12,6 +12,7 @@ import AllCustomerPage from "./pages/usersRole/customer/allCustomerPage";
 // import CamnangPage from "./pages/homepage/camnang/camnang";
 import VaccinePriceList from "./pages/homepage/vaccineShop/vaccineShopPage";
 import CheckOutPrice from "./pages/homepage/vaccineShop/checkoutPrice";
+import Profile from "./pages/homepage/profile/profile";
 
 
 const router = createBrowserRouter([
@@ -80,6 +81,10 @@ const router = createBrowserRouter([
         element: <AllCustomerPage />,
       },
     ],
+  },
+  {
+    path: "/profile",
+    element: <Profile />,
   },
 ]);
 
