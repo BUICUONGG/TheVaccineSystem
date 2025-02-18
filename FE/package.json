@@ -17,10 +17,7 @@
     "react-dom": "^19.0.0",
     "react-icons": "^5.4.0",
     "react-router-dom": "^7.1.5",
-<<<<<<< HEAD
     "react-toastify": "^11.0.3",
-=======
->>>>>>> 4421b62bc36345f6c61f5368cd1e6571fb0fd47e
     "tailwindcss": "^4.0.5"
   },
   "devDependencies": {

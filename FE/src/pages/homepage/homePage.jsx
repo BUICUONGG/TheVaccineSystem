@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { Modal } from "antd";
@@ -9,7 +8,7 @@ import { useNavigate } from "react-router-dom";
 // eslint-disable-next-line no-unused-vars
 import { FaSearch, FaShoppingCart } from "react-icons/fa";
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
-import { Link } from 'react-router-dom';
+import { Link } from "react-router-dom";
 
 const HomePage = () => {
   const navigate = useNavigate();
@@ -49,7 +48,7 @@ const HomePage = () => {
     try {
       const userId = localStorage.getItem("userId");
       const accesstoken = localStorage.getItem("accesstoken");
-      
+
       if (userId && accesstoken) {
         await axios.post(
           `http://localhost:8080/user/logout/${userId}`,
@@ -67,7 +66,7 @@ const HomePage = () => {
       localStorage.removeItem("username");
       localStorage.removeItem("userId");
       setIsLoggedIn(false);
-      
+
       navigate("/login");
     } catch (error) {
       console.error("Logout error:", error);
@@ -102,7 +101,7 @@ const HomePage = () => {
 
   useEffect(() => {
     // Thêm script cho Chatbase
-    const script = document.createElement('script');
+    const script = document.createElement("script");
     script.innerHTML = `
       (function(){
         if(!window.chatbase||window.chatbase("getState")!=="initialized"){
@@ -386,14 +385,3 @@ const HomePage = () => {
 };
 
 export default HomePage;
-=======
-
-
-function HomePage() {
-  return (
-    <div>H</div>
-  )
-}
-
-export default HomePage
->>>>>>> 4421b62bc36345f6c61f5368cd1e6571fb0fd47e
