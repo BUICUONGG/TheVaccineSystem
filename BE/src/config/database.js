@@ -1,7 +1,7 @@
 import { MongoClient } from "mongodb";
 import "dotenv/config";
 
-const uri = "mongodb+srv://cuongbui10704:cuongbui10704@swp.lg53w.mongodb.net/?retryWrites=true&w=majority&appName=SWP";
+const uri = process.env.MONGO_URI;
 // const client = new MongoClient(uri);
 
 const dbName = "test";
@@ -51,8 +51,8 @@ class ConnectDatabaseService {
   get feedbacks() {
     return this.db.collection(String("feedbacks"));
   }
-  get packages() {
-    return this.db.collection(String("packages"));
+  get vaccinepackages() {
+    return this.db.collection(String("vaccinepackages"));
   }
   get payments() {
     return this.db.collection(String("payments"));

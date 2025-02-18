@@ -25,7 +25,6 @@ export const userDataValidate = (req, res, next) => {
 export const validateAccessToken = async (req, res, next) => {
   try {
     const accessToken = req.headers.authorization?.split(" ")[1];
-
     if (!accessToken) {
       return res.status(401).json({ message: "You're not authenticated" });
     }

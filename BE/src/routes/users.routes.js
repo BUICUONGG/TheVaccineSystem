@@ -20,7 +20,7 @@ import {
 
 const usersRouter = Router();
 
-usersRouter.get("/showInfo",  showInFoController);
+usersRouter.get("/showInfo", validateAccessToken, showInFoController);
 
 usersRouter.post("/login", loginValidate, loginController);
 

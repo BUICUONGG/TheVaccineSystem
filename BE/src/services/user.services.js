@@ -47,15 +47,15 @@ class UserService {
   async signAccessToken(user) {
     return await signToken({
       payload: { id: user._id.toString(), role: user.role },
-      privateKey: "poijkhmnb",
-      options: { expiresIn: "5s" },
+      privateKey: process.env.JWT_ACCESS_TOKEN,
+      options: { expiresIn: "5h" },
     });
   }
 
   async signRefreshToken(user) {
     return await signToken({
       payload: { id: user._id.toString(), role: user.role },
-      privateKey: "qweasdzxc",
+      privateKey: process.env.JWT_REFRESH_TOKEN,
       options: { expiresIn: "5h" },
     });
   }

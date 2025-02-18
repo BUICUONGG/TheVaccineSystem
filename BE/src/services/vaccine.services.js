@@ -92,7 +92,17 @@ class VaccineService {
       throw new Error(error.message);
     }
   }
-}
 
+  async getAllVaccineImports() {
+    try {
+      const vaccineImports = await connectToDatabase.vaccinceImports
+        .find()
+        .toArray();
+      return vaccineImports;
+    } catch (error) {
+      console.error("Error fetching vaccine imports:", error);
+    }
+  }
+}
 const vaccineService = new VaccineService();
 export default vaccineService;
