@@ -5,7 +5,7 @@ import { hashPassword, comparePassword } from "../utils/bcrypt.js";
 import { ObjectId } from "mongodb";
 import "dotenv/config";
 import { signToken } from "../utils/jwt.js";
-import { config } from "dotenv";
+import "dotenv/config";
 
 class UserService {
   //đăng kí tài khoản chỉ cần username password và email thôi. tự động lưu vào bảng customer khi nào cần cập nhật thông tin thì vào đó cập nhật sau
@@ -47,16 +47,16 @@ class UserService {
   async signAccessToken(user) {
     return await signToken({
       payload: { id: user._id.toString(), role: user.role },
-      privateKey: process.env.JWT_ACCESS_TOKEN,
-      options: { expiresIn: "1h" },
+      privateKey: "poijkhmnb",
+      options: { expiresIn: "5s" },
     });
   }
 
   async signRefreshToken(user) {
     return await signToken({
       payload: { id: user._id.toString(), role: user.role },
-      privateKey: process.env.JWT_REFRESH_TOKEN,
-      options: { expiresIn: "1d" },
+      privateKey: "qweasdzxc",
+      options: { expiresIn: "5h" },
     });
   }
 
