@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 
+
 const customerSchema = new mongoose.Schema({
   userId: {
     type: mongoose.Schema.Types.ObjectId,
@@ -9,7 +10,7 @@ const customerSchema = new mongoose.Schema({
   },
   customerName: { type: String, default: null },
   phone: { type: String, default: null },
-  birthday: { type: String, default: null }, // Ngày sinh
+  birthday: { type: String, default: null },
   address: { type: String, default: null },
   gender: { type: String, enum: ["Male", "Female", "Other"], default: null },
 });

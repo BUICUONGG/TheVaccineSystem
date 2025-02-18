@@ -19,9 +19,9 @@ class UserService {
         userId: result.insertedId,
         customerName: "", // Nếu user có name thì lấy
         phone: "",
+        birthday: "",
         address: "",
         gender: "", // Liên kết với user
-        birthday: "",
       };
       await connectToDatabase.customers.insertOne(customerData);
       return { _id: result.insertedId, ...userData };
@@ -48,7 +48,7 @@ class UserService {
     return await signToken({
       payload: { id: user._id.toString(), role: user.role },
       privateKey: process.env.JWT_ACCESS_TOKEN,
-      options: { expiresIn: "5h" },
+      options: { expiresIn: "1h" },
     });
   }
 

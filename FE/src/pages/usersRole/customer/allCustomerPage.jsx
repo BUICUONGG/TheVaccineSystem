@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
-import { Table, Input, Button, Modal, Form } from "antd";
+import { Table, Input, Button, Modal, Form, Select } from "antd";
 import { EditOutlined } from "@ant-design/icons";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+
+const { Option } = Select;
 
 const AllCustomerPage = () => {
   const navigate = useNavigate();
@@ -62,9 +64,19 @@ const AllCustomerPage = () => {
   const handleUpdate = async (values) => {
     try {
       const accesstoken = localStorage.getItem("accesstoken");
-      const response = await axios.post(
+      
+      // Validate data before sending
+      const updatedData = {
+        customerName: values.customerName?.trim() || null,
+        phone: values.phone?.trim() || null,
+        address: values.address?.trim() || null,
+        gender: values.gender || null,
+        birthday: values.birthday?.trim() || null
+      };
+
+      await axios.post(
         `http://localhost:8080/customer/update/${editingCustomer.userId}`,
-        values,
+        updatedData,
         {
           headers: {
             Authorization: `Bearer ${accesstoken}`,
@@ -72,17 +84,15 @@ const AllCustomerPage = () => {
         }
       );
 
-      if (response.status === 200) {
-        Modal.success({
-          content: "Customer updated successfully",
-        });
-        setIsEditModalVisible(false);
-        fetchCustomers();
-      }
+      Modal.success({
+        content: "Cập nhật thông tin thành công!",
+      });
+      setIsEditModalVisible(false);
+      fetchCustomers();
     } catch (error) {
       console.error("Error updating customer:", error);
       Modal.error({
-        content: error.response?.data || "Failed to update customer",
+        content: error.response?.data?.message || "Không thể cập nhật thông tin",
       });
     }
   };
@@ -95,32 +105,45 @@ const AllCustomerPage = () => {
       width: 70,
     },
     {
-      title: "Customer Name",
+      title: "Họ và tên",
       dataIndex: "customerName",
       key: "customerName",
+      render: (text) => text || "Chưa cập nhật"
     },
     {
-      title: "Phone",
+      title: "Số điện thoại",
       dataIndex: "phone",
       key: "phone",
+      render: (text) => text || "Chưa cập nhật"
     },
     {
-      title: "Birthday",
+      title: "Ngày sinh",
       dataIndex: "birthday",
       key: "birthday",
+      render: (text) => text || "Chưa cập nhật"
     },
     {
-      title: "Address",
+      title: "Địa chỉ",
       dataIndex: "address",
       key: "address",
+      render: (text) => text || "Chưa cập nhật"
     },
     {
-      title: "Gender",
+      title: "Giới tính",
       dataIndex: "gender",
       key: "gender",
+      render: (gender) => {
+        const genderMap = {
+          Male: "Nam",
+          Female: "Nữ",
+          Other: "Khác"
+        };
+        return genderMap[gender] || "Chưa cập nhật";
+      }
     },
+    
     {
-      title: "Actions",
+      title: "Thao tác",
       key: "actions",
       width: 120,
       render: (_, record) => (
@@ -130,7 +153,7 @@ const AllCustomerPage = () => {
           style={{ backgroundColor: "#52c41a" }}
           onClick={() => showEditModal(record)}
         >
-          Update
+          Cập nhật
         </Button>
       ),
     },
@@ -141,9 +164,9 @@ const AllCustomerPage = () => {
     form.setFieldsValue({
       customerName: customer.customerName,
       phone: customer.phone,
-      birthday: customer.birthday,
       address: customer.address,
       gender: customer.gender,
+      birthday: customer.birthday,
     });
     setIsEditModalVisible(true);
   };
@@ -170,7 +193,7 @@ const AllCustomerPage = () => {
       />
 
       <Modal
-        title="Edit Customer Information"
+        title="Chỉnh sửa thông tin khách hàng"
         open={isEditModalVisible}
         onCancel={() => setIsEditModalVisible(false)}
         footer={null}
@@ -178,41 +201,62 @@ const AllCustomerPage = () => {
         <Form form={form} onFinish={handleUpdate} layout="vertical">
           <Form.Item
             name="customerName"
-            label="Customer Name"
-            rules={[{ required: true, message: "Please input customer name!" }]}
+            label="Họ và tên"
+            rules={[
+              { required: true, message: "Vui lòng nhập họ tên!" },
+              { whitespace: true, message: "Không được chỉ nhập khoảng trắng!" }
+            ]}
           >
-            <Input />
+            <Input maxLength={100} />
           </Form.Item>
+
           <Form.Item
             name="phone"
-            label="Phone"
-            rules={[{ required: true, message: "Please input phone number!" }]}
+            label="Số điện thoại"
+            rules={[
+              { required: true, message: "Vui lòng nhập số điện thoại!" },
+              { pattern: /^[0-9]{10}$/, message: "Số điện thoại phải có 10 chữ số!" }
+            ]}
           >
-            <Input />
+            <Input maxLength={10} />
           </Form.Item>
-          <Form.Item name="birthday" label="Birthday">
-            <Input />
+          
+          <Form.Item 
+            name="address" 
+            label="Địa chỉ"
+          >
+            <Input.TextArea maxLength={200} />
           </Form.Item>
-          <Form.Item name="address" label="Address">
-            <Input />
-          </Form.Item>
+
           <Form.Item
             name="gender"
-            label="Gender"
-            rules={[{ required: true, message: "Please select gender!" }]}
+            label="Giới tính"
+            rules={[{ required: true, message: "Vui lòng chọn giới tính!" }]}
           >
-            <select style={{ width: '100%', padding: '8px' }}>
-              <option value="Male">Male</option>
-              <option value="Female">Female</option>
-              <option value="Other">Other</option>
-            </select>
+            <Select>
+              <Option value="Male">Nam</Option>
+              <Option value="Female">Nữ</Option>
+              <Option value="Other">Khác</Option>
+            </Select>
+          </Form.Item>
+
+          <Form.Item 
+            name="birthday" 
+            label="Ngày sinh"
+            rules={[
+              { pattern: /^(0[1-9]|[12][0-9]|3[01])\/(0[1-9]|1[0-2])\/\d{4}$/, 
+                message: "Định dạng ngày sinh không hợp lệ (DD/MM/YYYY)!" 
+              }
+            ]}
+          >
+            <Input placeholder="DD/MM/YYYY" />
           </Form.Item>
 
           <Form.Item>
             <Button type="primary" htmlType="submit" style={{ marginRight: 8 }}>
-              Update
+              Cập nhật
             </Button>
-            <Button onClick={() => setIsEditModalVisible(false)}>Cancel</Button>
+            <Button onClick={() => setIsEditModalVisible(false)}>Hủy</Button>
           </Form.Item>
         </Form>
       </Modal>
