@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { FaShoppingCart, FaTrashAlt } from "react-icons/fa";
 import axios from "axios";
-import { Pagination } from 'antd';
+import { Pagination, Modal } from 'antd'; // Thêm Modal từ antd để hiển thị thông báo lỗi
 import "./vaccineShopPage.css";
 
 const VaccinePriceList = () => {
@@ -27,23 +27,26 @@ const VaccinePriceList = () => {
     fetchProducts();
   }, []);
 
-  // Load cart items from local storage on component mount
-  useEffect(() => {
-    const storedCartItems = JSON.parse(localStorage.getItem("cartItems")) || [];
-    setCartItems(storedCartItems);
-  }, []);
-
-  // Save cart items to local storage whenever they change
-  useEffect(() => {
-    localStorage.setItem("cartItems", JSON.stringify(cartItems));
-  }, [cartItems]);
-
   useEffect(() => {
     const token = localStorage.getItem("accesstoken");
+    const username = localStorage.getItem("username");
     if (token) {
       setIsLoggedIn(true);
+      // Load cart items for specific user
+      const allCartItems = JSON.parse(localStorage.getItem("cartItems")) || {};
+      setCartItems(allCartItems[username] || []);
     }
   }, []);
+
+  // Save cart items for specific user
+  useEffect(() => {
+    if (isLoggedIn) {
+      const username = localStorage.getItem("username");
+      const allCartItems = JSON.parse(localStorage.getItem("cartItems")) || {};
+      allCartItems[username] = cartItems;
+      localStorage.setItem("cartItems", JSON.stringify(allCartItems));
+    }
+  }, [cartItems, isLoggedIn]);
 
   useEffect(() => {
     document.title = "Bảng giá vắc-xin";
@@ -51,7 +54,45 @@ const VaccinePriceList = () => {
 
   const handleLogin = () => navigate("/login");
   const handleRegister = () => navigate("/register");
-  const handleLogout = () => setIsLoggedIn(false);
+
+  const handleLogout = async () => {
+    try {
+      // Lấy thông tin userId và accesstoken từ localStorage
+      const userId = localStorage.getItem("userId");
+      const accesstoken = localStorage.getItem("accesstoken");
+
+      // Kiểm tra xem có userId và accesstoken không
+      if (userId && accesstoken) {
+        // Gọi API logout
+        await axios.post(
+          `http://localhost:8080/user/logout/${userId}`,
+          {},
+          {
+            headers: {
+              Authorization: `Bearer ${accesstoken}`,
+            },
+          }
+        );
+      }
+
+      // Xóa hết thông tin người dùng khỏi localStorage
+      localStorage.removeItem("accesstoken");
+      localStorage.removeItem("username");
+      localStorage.removeItem("userId");
+      setIsLoggedIn(false);
+      setCartItems([]); // Xóa giỏ hàng khi đăng xuất
+
+      // Chuyển hướng về trang đăng nhập
+      navigate("/login");
+    } catch (error) {
+      console.error("Logout error:", error);
+      // Hiển thị thông báo lỗi nếu đăng xuất thất bại
+      Modal.error({
+        content: "Logout failed. Please try again.",
+      });
+    }
+  };
+
   const handleCategoryChange = (event) => setSelectedCategory(event.target.value);
 
   const filteredProducts = selectedCategory === "Single"
@@ -63,7 +104,19 @@ const VaccinePriceList = () => {
   const currentProducts = filteredProducts.slice(indexOfFirstProduct, indexOfLastProduct);
 
   const addToCart = (product) => {
-    setCartItems([...cartItems, product]);
+    setCartItems(prevItems => {
+      const existingItem = prevItems.find(item => item.vaccineName === product.vaccineName);
+      if (existingItem) {
+        // Nếu sản phẩm đã tồn tại, tăng số lượng
+        return prevItems.map(item =>
+          item.vaccineName === product.vaccineName
+            ? { ...item, quantity: (item.quantity || 1) + 1 }
+            : item
+        );
+      }
+      // Nếu là sản phẩm mới, thêm với số lượng là 1
+      return [...prevItems, { ...product, quantity: 1 }];
+    });
   };
 
   const removeFromCart = (index) => {
@@ -94,11 +147,17 @@ const VaccinePriceList = () => {
           </div>
           <div className="auth-buttons">
             <div className="cart-dropdown">
-              <FaShoppingCart className="cart-icon" onClick={toggleCart} />
+              <div className="cart-icon-container">
+                <FaShoppingCart className="cart-icon" onClick={toggleCart} />
+                {cartItems.length > 0 && (
+                  <span className="cart-badge">{cartItems.length}</span>
+                )}
+              </div>
               {isCartOpen && (
                 <div className="cart-dropdown-content show">
                   <div className="cart-header">
                     <span>Sản phẩm</span>
+                    <span>Số lượng</span>
                     <span>Giá</span>
                     <span>Hành động</span>
                   </div>
@@ -107,6 +166,7 @@ const VaccinePriceList = () => {
                       {cartItems.map((item, index) => (
                         <div key={index} className="cart-item">
                           <span>{item.vaccineName}</span>
+                          <span>{item.quantity || 1}</span>
                           <span>{item.price}</span>
                           <button className="delete-btn" onClick={() => removeFromCart(index)}>
                             <FaTrashAlt />

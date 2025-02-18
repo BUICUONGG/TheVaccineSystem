@@ -18,7 +18,7 @@ const AccountsPage = () => {
 
   useEffect(() => {
     fetchUsers();
-  }, []);
+  },  );
 
   // Cập nhật filtered users khi userList hoặc searchText thay đổi
   useEffect(() => {
