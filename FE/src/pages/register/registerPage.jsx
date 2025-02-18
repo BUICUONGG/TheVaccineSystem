@@ -1,9 +1,12 @@
 import { useState } from "react";
 import { FaEye, FaEyeSlash, FaTimesCircle } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 const RegistrationForm = () => {
   const [formData, setFormData] = useState({
     username: "",
+    fullname: "",
     email: "",
     phone: "",
     password: "",
@@ -12,6 +15,7 @@ const RegistrationForm = () => {
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const validateUsername = (username) => {
     if (username.length < 3) return "Username must be at least 3 characters";
@@ -40,6 +44,15 @@ const RegistrationForm = () => {
     return "";
   };
 
+  const validateFullname = (fullname) => {
+    if (fullname.length < 2) return "Full name must be at least 2 characters";
+    if (!/^[A-Za-z\s]+$/.test(fullname))
+      return "Full name can only contain letters and spaces";
+    if (fullname.replace(/\s/g, "").length < 6)
+      return "Full name must contain at least 2 letters";
+    return "";
+  };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
@@ -48,6 +61,9 @@ const RegistrationForm = () => {
     switch (name) {
       case "username":
         validationError = validateUsername(value);
+        break;
+      case "fullname":
+        validationError = validateFullname(value);
         break;
       case "email":
         validationError = validateEmail(value);
@@ -69,6 +85,7 @@ const RegistrationForm = () => {
     e.preventDefault();
     const newErrors = {
       username: validateUsername(formData.username),
+      fullname: validateFullname(formData.fullname),
       email: validateEmail(formData.email),
       phone: validatePhone(formData.phone),
       password: validatePassword(formData.password),
@@ -81,11 +98,36 @@ const RegistrationForm = () => {
 
     setLoading(true);
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      console.log("Form submitted:", formData);
-      setFormData({ username: "", email: "", phone: "", password: "" });
+      const response = await fetch("http://localhost:8080/user/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        // Đăng ký thành công
+        setFormData({
+          username: "",
+          fullname: "",
+          email: "",
+          phone: "",
+          password: "",
+        });
+        toast.success("Registration successful:", data);
+        // Có thể thêm thông báo thành công hoặc chuyển hướng người dùng
+        navigate("/login");
+      } else {
+        // Xử lý lỗi từ server
+        toast.error("Registration failed:", data.message);
+        // Có thể hiển thị thông báo lỗi cho người dùng
+      }
     } catch (error) {
-      console.error("Submission error:", error);
+      toast.error("Submission error:", error);
+      // Xử lý lỗi kết nối
     } finally {
       setLoading(false);
     }
@@ -128,6 +170,37 @@ const RegistrationForm = () => {
               {errors.username && (
                 <p className="mt-2 text-sm text-red-600" role="alert">
                   {errors.username}
+                </p>
+              )}
+            </div>
+
+            <div>
+              <label
+                htmlFor="fullname"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Full Name
+              </label>
+              <div className="mt-1 relative">
+                <input
+                  id="fullname"
+                  name="fullname"
+                  type="text"
+                  value={formData.fullname}
+                  onChange={handleChange}
+                  className={`appearance-none block w-full px-3 py-2 border ${
+                    errors.fullname ? "border-red-300" : "border-gray-300"
+                  } rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm transition-colors`}
+                />
+                {errors.fullname && (
+                  <div className="absolute right-0 top-2">
+                    <FaTimesCircle className="h-5 w-5 text-red-500" />
+                  </div>
+                )}
+              </div>
+              {errors.fullname && (
+                <p className="mt-2 text-sm text-red-600" role="alert">
+                  {errors.fullname}
                 </p>
               )}
             </div>

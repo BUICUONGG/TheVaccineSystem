@@ -10,15 +10,15 @@ import VaccinesPage from "./pages/usersRole/admin/vaccinesPage";
 import { ToastContainer } from "react-toastify";
 // import CamnangPage from "./pages/homepage/camnang/camnang";
 
-import { createRoot } from 'react-dom/client'
-import './index.css'
-import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-import LoginPage from './pages/login/loginPage';
-import RegisterPage from './pages/register/registerPage';
-import TestUsers from './pages/usersRole/admin/testUsers';
-import HomePage from './pages/homepage/homePage';
-
 const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <HomePage />,
+  },
+  {
+    path: "/homepage",
+    element: <HomePage />,
+  },
   {
     path: "/login",
     element: <LoginPage />,
@@ -27,18 +27,49 @@ const router = createBrowserRouter([
     path: "/register",
     element: <RegisterPage />,
   },
+  // {
+  //   path: "/camnang",
+  //   element: <CamnangPage />,
+  // },
   {
-    path: "/userList",
-    element: <TestUsers />,
+    path: "/admin",
+    element: <AdminLayout />,
+    children: [
+      {
+        path: "",
+        element: <div>Welcome to Admin Dashboard</div>,
+      },
+      {
+        path: "overview",
+        element: <div>Overview Page</div>,
+      },
+      {
+        path: "accounts",
+        element: <AccountsPage />,
+      },
+      {
+        path: "vaccines",
+        element: <VaccinesPage />,
+      },
+      {
+        path: "feedback",
+        element: <div>Feedback Management</div>,
+      },
+      {
+        path: "appointments",
+        element: <div>Appointments Management</div>,
+      },
+      {
+        path: "consultations",
+        element: <div>Consultations Management</div>,
+      },
+    ],
   },
-  {
-    path: "/home",
-    element: <HomePage />,
-  },  
 ]);
 
-
-
-createRoot(document.getElementById('root')).render(
-  <RouterProvider router={router} />
+createRoot(document.getElementById("root")).render(
+  <>
+    <RouterProvider router={router} />
+    <ToastContainer />
+  </>
 );

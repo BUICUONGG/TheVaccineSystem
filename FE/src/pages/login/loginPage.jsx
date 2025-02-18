@@ -1,7 +1,14 @@
 import { useState } from "react";
 import { FiUser, FiLock, FiEye, FiEyeOff } from "react-icons/fi";
 import { FcGoogle } from "react-icons/fc";
+<<<<<<< HEAD
 import { useNavigate } from "react-router-dom";
+=======
+import { useNavigate, Link } from "react-router-dom";
+import axios from "axios";
+import "./loginPage.css"; // Import file css mới
+import { toast } from "react-toastify";
+>>>>>>> baodev
 
 const LoginPage = () => {
   const [username, setUsername] = useState("");
@@ -21,7 +28,11 @@ const LoginPage = () => {
     }
     if (!password) {
       newErrors.password = "Password is required";
+<<<<<<< HEAD
     } else if (password.length < 8) {
+=======
+    } else if (password.length < 1) {
+>>>>>>> baodev
       newErrors.password = "Password must be at least 8 characters";
     }
     setErrors(newErrors);
@@ -33,12 +44,42 @@ const LoginPage = () => {
     if (validateForm()) {
       setIsLoading(true);
       try {
+<<<<<<< HEAD
         await new Promise((resolve) => setTimeout(resolve, 2000));
         console.log("Login successful");
       } catch (error) {
         console.error("Login failed:", error);
       } finally {
         setIsLoading(false);
+=======
+        const response = await axios.post(
+          "http://localhost:8080/user/login",
+          { username, password },
+          { withCredentials: true }
+        );
+
+        // Lưu token và username vào localStorage
+        localStorage.setItem("accesstoken", response.data.accesstoken);
+
+        // Decode token để lấy role
+        const tokenParts = response.data.accesstoken.split(".");
+        const payload = JSON.parse(atob(tokenParts[1]));
+        const userRole = payload.role;
+
+        setIsLoading(false);
+        toast.success("Đăng nhập thành công!");
+
+        // Kiểm tra role và điều hướng
+        if (userRole === "admin") {
+          navigate("/admin");
+        } else {
+          navigate("/homepage");
+        }
+      } catch (error) {
+        setIsLoading(false);
+        console.error("Login failed:", error);
+        alert(error.response?.data?.message || "Đăng nhập thất bại!");
+>>>>>>> baodev
       }
     }
   };
@@ -50,6 +91,10 @@ const LoginPage = () => {
 
   return (
     <div className="min-h-screen flex flex-col lg:flex-row">
+<<<<<<< HEAD
+=======
+      {/* Banner hình ảnh bên trái */}
+>>>>>>> baodev
       <div className="lg:w-1/2 relative hidden lg:block">
         <img
           src="https://images.unsplash.com/photo-1497215728101-856f4ea42174"
@@ -57,8 +102,20 @@ const LoginPage = () => {
           className="w-full h-full object-cover"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-gray-900/50 to-gray-900/25" />
+<<<<<<< HEAD
       </div>
 
+=======
+        {/* Nút "Back home" đè lên ảnh */}
+        <div className="back-home-wrapper">
+          <Link to="/homepage" className="back-home">
+            Back home
+          </Link>
+        </div>
+      </div>
+
+      {/* Phần form đăng nhập bên phải */}
+>>>>>>> baodev
       <div className="lg:w-1/2 flex items-center justify-center p-8 sm:p-12 lg:p-16 bg-white">
         <div className="w-full max-w-md space-y-8">
           <div className="text-center">
