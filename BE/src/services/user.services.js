@@ -19,9 +19,10 @@ class UserService {
         userId: result.insertedId,
         customerName: "", // Nếu user có name thì lấy
         phone: "",
+        birthday: "",
         address: "",
         gender: "", // Liên kết với user
-        birthday: "",
+        
       };
       await connectToDatabase.customers.insertOne(customerData);
       return { _id: result.insertedId, ...userData };

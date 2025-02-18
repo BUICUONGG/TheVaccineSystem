@@ -12,8 +12,8 @@ import {
 import {
   registerValidate,
   loginValidate,
-  validateAccessToken,
-  verifyAdmin,
+  // validateAccessToken,
+  // verifyAdmin,
   validateRefreshToken,
   // verifyStaff,
 } from "../middlewares/user.middleware.js";
@@ -28,8 +28,8 @@ usersRouter.post("/register", registerValidate, registerController);
 
 usersRouter.post(
   "/delete/:id",
-  validateAccessToken,
-  verifyAdmin,
+  // validateAccessToken,
+  // verifyAdmin,
   deleteController
 );
 

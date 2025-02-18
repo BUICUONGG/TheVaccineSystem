@@ -104,11 +104,7 @@ const AllCustomerPage = () => {
       dataIndex: "phone",
       key: "phone",
     },
-    {
-      title: "Birthday",
-      dataIndex: "birthday",
-      key: "birthday",
-    },
+
     {
       title: "Address",
       dataIndex: "address",
@@ -118,6 +114,11 @@ const AllCustomerPage = () => {
       title: "Gender",
       dataIndex: "gender",
       key: "gender",
+    },
+    {
+      title: "Birthday",
+      dataIndex: "birthday",
+      key: "birthday",
     },
     {
       title: "Actions",
@@ -141,9 +142,9 @@ const AllCustomerPage = () => {
     form.setFieldsValue({
       customerName: customer.customerName,
       phone: customer.phone,
-      birthday: customer.birthday,
       address: customer.address,
       gender: customer.gender,
+      birthday: customer.birthday,
     });
     setIsEditModalVisible(true);
   };
@@ -190,9 +191,7 @@ const AllCustomerPage = () => {
           >
             <Input />
           </Form.Item>
-          <Form.Item name="birthday" label="Birthday">
-            <Input />
-          </Form.Item>
+          
           <Form.Item name="address" label="Address">
             <Input />
           </Form.Item>
@@ -206,6 +205,9 @@ const AllCustomerPage = () => {
               <option value="Female">Female</option>
               <option value="Other">Other</option>
             </select>
+          </Form.Item>
+          <Form.Item name="birthday" label="Birthday">
+            <Input />
           </Form.Item>
 
           <Form.Item>

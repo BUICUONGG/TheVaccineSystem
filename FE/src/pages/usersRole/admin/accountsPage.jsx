@@ -18,7 +18,7 @@ const AccountsPage = () => {
 
   useEffect(() => {
     fetchUsers();
-  },  );
+  }, []);
 
   // Cập nhật filtered users khi userList hoặc searchText thay đổi
   useEffect(() => {
@@ -133,31 +133,32 @@ const AccountsPage = () => {
       dataIndex: "username",
       key: "username",
     },
-    {
-      title: "Full Name",
-      dataIndex: "fullname",
-      key: "fullname",
-    },
+    // {
+    //   title: "Full Name",
+    //   dataIndex: "fullname",
+    //   key: "fullname",
+    // },
     {
       title: "Email",
       dataIndex: "email",
       key: "email",
     },
-    // {
-    //   title: "Password",
-    //   dataIndex: "password",
-    //   key: "password",
-    // },
+    {
+      title: "Password",
+      dataIndex: "password",
+      key: "password",
+      render: () => "•••••••"
+    },
     // {
     //   title: "Email",
     //   dataIndex: "email",
     //   key: "email",
     // },
-    {
-      title: "Phone",
-      dataIndex: "phone",
-      key: "phone",
-    },
+    // {
+    //   title: "Phone",
+    //   dataIndex: "phone",
+    //   key: "phone",
+    // },
     {
       title: "Role",
       dataIndex: "role",
