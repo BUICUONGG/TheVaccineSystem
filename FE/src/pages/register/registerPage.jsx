@@ -46,8 +46,10 @@ const RegistrationForm = () => {
 
   const validateFullname = (fullname) => {
     if (fullname.length < 2) return "Full name must be at least 2 characters";
-    if (!/^[A-Za-z\s]+$/.test(fullname)) return "Full name can only contain letters and spaces";
-    if (fullname.replace(/\s/g, '').length < 6) return "Full name must contain at least 2 letters";
+    if (!/^[A-Za-z\s]+$/.test(fullname))
+      return "Full name can only contain letters and spaces";
+    if (fullname.replace(/\s/g, "").length < 6)
+      return "Full name must contain at least 2 letters";
     return "";
   };
 
@@ -96,19 +98,25 @@ const RegistrationForm = () => {
 
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:8080/user/register', {
-        method: 'POST',
+      const response = await fetch("http://localhost:8080/user/register", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(formData),
       });
 
       const data = await response.json();
-      
+
       if (response.ok) {
-        // Đăng ký thành công        
-        setFormData({ username: "", fullname: "", email: "", phone: "", password: "" });
+        // Đăng ký thành công
+        setFormData({
+          username: "",
+          fullname: "",
+          email: "",
+          phone: "",
+          password: "",
+        });
         toast.success("Registration successful:", data);
         // Có thể thêm thông báo thành công hoặc chuyển hướng người dùng
         navigate("/login");

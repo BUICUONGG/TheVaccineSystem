@@ -56,13 +56,15 @@ class UserService {
     return await signToken({
       payload: { id: user._id.toString(), role: user.role },
       privateKey: process.env.JWT_REFRESH_TOKEN,
-      options: { expiresIn: "5h" },
+      options: { expiresIn: "1d" },
     });
   }
 
   async login(username, password) {
     try {
-      const user = await connectToDatabase.users.findOne({ username });
+      const user = await connectToDatabase.users.findOne({
+        username,
+      });
       if (!user) {
         throw new Error("Tài khoản không tồn tại", username);
       }

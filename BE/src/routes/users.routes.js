@@ -4,7 +4,7 @@ import {
   registerController,
   loginController,
   deleteController,
-  updateController,
+  // updateController,
   logoutController,
   refreshTokenController,
   // logoutController,
