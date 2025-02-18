@@ -18,9 +18,9 @@ customerRoutes.get(
   getOneCusController
 );
 
-customerRoutes.get("/getAllCustomer", getAllCusController);
+customerRoutes.get("/getAllCustomer", validateAccessToken, getAllCusController);
 
-customerRoutes.post("/update/:id", validateAccessToken, updatemeController);
+customerRoutes.post("/update/:id",validateAccessToken,  updatemeController);
 
 customerRoutes.post(
   "/refresh-token",
