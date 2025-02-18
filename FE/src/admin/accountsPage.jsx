@@ -143,16 +143,6 @@ const AccountsPage = () => {
       dataIndex: "email",
       key: "email",
     },
-    // {
-    //   title: "Password",
-    //   dataIndex: "password",
-    //   key: "password",
-    // },
-    // {
-    //   title: "Email",
-    //   dataIndex: "email",
-    //   key: "email",
-    // },
     {
       title: "Phone",
       dataIndex: "phone",

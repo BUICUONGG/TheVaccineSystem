@@ -9,6 +9,9 @@ import AccountsPage from "./pages/usersRole/admin/accountsPage";
 import VaccinesPage from "./pages/usersRole/admin/vaccinesPage";
 import { ToastContainer } from "react-toastify";
 // import CamnangPage from "./pages/homepage/camnang/camnang";
+import VaccinePriceList from "./pages/homepage/vaccineShop/vaccineShopPage";
+import CheckOutPrice from "./pages/homepage/vaccineShop/checkoutPrice";
+
 
 const router = createBrowserRouter([
   {
@@ -23,6 +26,14 @@ const router = createBrowserRouter([
     path: "/login",
     element: <LoginPage />,
   },
+  {
+      path: "/pricelist",
+      element: <VaccinePriceList />,
+  },
+  {
+    path: "/checkoutprice",
+    element: <CheckOutPrice />,
+},
   {
     path: "/register",
     element: <RegisterPage />,
@@ -63,6 +74,7 @@ const router = createBrowserRouter([
         path: "consultations",
         element: <div>Consultations Management</div>,
       },
+
     ],
   },
 ]);

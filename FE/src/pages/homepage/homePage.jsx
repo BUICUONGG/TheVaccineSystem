@@ -143,12 +143,14 @@ const HomePage = () => {
       <header className="header-framework">
         <div className="header-content">
           <div className="header-title">
+            <Link to="/homepage">
             <h1>Nhật Ký Tiêm Chủng</h1>
+            </Link>          
             <div className="header-subtitle">
               AN TOÀN - UY TÍN - CHẤT LƯỢNG HÀNG ĐẦU VIỆT NAM
             </div>
           </div>
-
+          
           <div className="auth-buttons">
             <FaShoppingCart className="cart-icon" />
             {isLoggedIn ? (
@@ -215,7 +217,7 @@ const HomePage = () => {
 
         <nav className="navbar">
           <div className="nav-links">
-            <a href="#">Trang chủ</a>
+            <a href="/homepage">Trang chủ</a>
             <a href="#">Giới thiệu</a>
             <a href="#">Tin tức</a>
             <Link to="/camnang">Cẩm nang</Link>
@@ -231,16 +233,19 @@ const HomePage = () => {
         </div>
         <div className="icon-item">
           <img src="/icons/handbook.png" alt="Cẩm nang" />
-          <Link to="/camnang">Cẩm nang</Link>
+          <span><Link to="/camnang">CẨM NANG</Link></span>
         </div>
         <div className="icon-item">
           <img src="/icons/register.png" alt="Đăng ký tiêm" />
           <span>ĐĂNG KÝ TIÊM</span>
         </div>
         <div className="icon-item">
+          <Link to = "/pricelist">
           <img src="/icons/price.png" alt="Giá tiêm" />
           <span>GIÁ TIÊM</span>
+          </Link>
         </div>
+     
       </div>
 
       <div className="vaccine-info">

@@ -11,7 +11,7 @@ import blogRoutes from "./src/routes/blogs.routes.js";
 import customerRoutes from "./src/routes/customers.routes.js";
 const app = express();
 app.use(express.json());
-const PORT = 8080 || process.env.MONGO_URI;
+const PORT = 8080 || "mongodb+srv://cuongbui10704:cuongbui10704@swp.lg53w.mongodb.net/?retryWrites=true&w=majority&appName=SWP";
 app.use(
   cors({
     origin: "http://localhost:5173", // Allow only this frontend
