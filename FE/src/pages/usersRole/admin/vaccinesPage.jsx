@@ -19,7 +19,7 @@ const VaccinesPage = () => {
   }, []);
 
   useEffect(() => {
-    const filtered = vaccineList.filter(vaccine => 
+    const filtered = vaccineList.filter((vaccine) =>
       vaccine.vaccineName.toLowerCase().includes(searchText.toLowerCase())
     );
     setFilteredVaccines(filtered);
@@ -138,10 +138,12 @@ const VaccinesPage = () => {
       dataIndex: "status",
       key: "status",
       render: (status) => (
-        <span style={{
-          color: status === "in stock" ? "#52c41a" : "#ff4d4f",
-          textTransform: "capitalize"
-        }}>
+        <span
+          style={{
+            color: status === "in stock" ? "#52c41a" : "#ff4d4f",
+            textTransform: "capitalize",
+          }}
+        >
           {status}
         </span>
       ),
@@ -189,4 +191,4 @@ const VaccinesPage = () => {
   );
 };
 
-export default VaccinesPage; 
+export default VaccinesPage;
