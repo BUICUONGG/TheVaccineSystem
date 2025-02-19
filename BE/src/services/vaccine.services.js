@@ -103,6 +103,36 @@ class VaccineService {
       console.error("Error fetching vaccine imports:", error);
     }
   }
+
+  async getVaccineWithImports() {
+    try {
+      // Lấy danh sách tất cả vaccine
+      const vaccines =
+        (await connectToDatabase.vaccinceInventorys.find().toArray()) || [];
+
+      // Lặp qua từng vaccine để tìm lô nhập tương ứng
+      for (let vaccine of vaccines) {
+        let vaccineImports = await connectToDatabase.vaccinceImports
+          .find({
+            "vaccines.vaccineId": vaccine._id, // Tìm lô nhập chứa vaccine này
+          })
+          .toArray();
+
+        // Loại bỏ vaccineId khỏi từng phần tử trong vaccines của vaccineImports
+        vaccineImports = vaccineImports.map((importRecord) => {
+          const { vaccines, ...rest } = importRecord; // Xóa vaccines
+          return rest;
+        });
+
+        // Gắn danh sách lô nhập vào từng vaccine
+        vaccine.vaccineImports = vaccineImports;
+      }
+
+      return vaccines;
+    } catch (error) {
+      console.error("Error fetching vaccine with imports:", error);
+    }
+  }
 }
 const vaccineService = new VaccineService();
 export default vaccineService;
