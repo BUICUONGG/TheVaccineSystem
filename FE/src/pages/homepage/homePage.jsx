@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
-import { Modal } from "antd";
-
+//import axios from "axios";
+//import { Modal } from "antd";
+import { FaRegCalendarAlt, FaRegListAlt, FaRegThumbsUp, FaRegSmileBeam } from "react-icons/fa";
+import { FaSyringe, FaBook, FaUserCheck, FaMoneyBillWave } from "react-icons/fa";
+import "@fortawesome/fontawesome-free/css/all.min.css";
 import "./homePage.css";
 import { useNavigate } from "react-router-dom";
 
@@ -200,34 +202,35 @@ const HomePage = () => {
           <div className="nav-links">
             <a href="/homepage">Trang chủ</a>
             <a href="#">Giới thiệu</a>
-            <a href="#">Tin tức</a>
-            <Link to="/camnang">Cẩm nang</Link>
+            <Link to="/news">Tin tức</Link>
+            <Link to="/handbook">Cẩm nang</Link>
             <a href="#">Đăng ký tiêm</a>
           </div>
         </nav>
       </div>
 
       <div className="quick-access">
-        <div className="icon-item">
-          <img src="/icons/injection.png" alt="Các gói tiêm" />
-          <span>CÁC GÓI TIÊM</span>
-        </div>
-        <div className="icon-item">
-          <img src="/icons/handbook.png" alt="Cẩm nang" />
-          <span><Link to="/camnang">CẨM NANG</Link></span>
-        </div>
-        <div className="icon-item">
-          <img src="/icons/register.png" alt="Đăng ký tiêm" />
-          <span>ĐĂNG KÝ TIÊM</span>
-        </div>
-        <div className="icon-item">
-          <Link to = "/pricelist">
-          <img src="/icons/price.png" alt="Giá tiêm" />
-          <span>GIÁ TIÊM</span>
-          </Link>
-        </div>
-       
-      </div>
+  <div className="icon-item">
+    <FaSyringe size={50} style={{ color: "#4A90E2" }} />
+    <span>CÁC GÓI TIÊM</span>
+  </div>
+  <div className="icon-item">
+    <Link to="/camnang">
+      <FaBook size={50} style={{ color: "#4A90E2" }} />
+      <span>CẨM NANG</span>
+    </Link>
+  </div>
+  <div className="icon-item">
+    <FaUserCheck size={50} style={{ color: "#4A90E2" }} />
+    <span>ĐĂNG KÝ TIÊM</span>
+  </div>
+  <div className="icon-item">
+    <Link to="/pricelist">
+      <FaMoneyBillWave size={50} style={{ color: "#4A90E2" }} />
+      <span>GIÁ TIÊM</span>
+    </Link>
+  </div>
+</div>
 
       <div className="vaccine-info">
         <h2>THÔNG TIN VACCINE</h2>
@@ -253,26 +256,29 @@ const HomePage = () => {
       </div>
 
       <div className="vaccination-guide">
-        <h2>CẨM NANG TIÊM CHỦNG</h2>
-        <div className="guide-icons">
-          <div className="guide-item">
-            <img src="/icons/calendar.png" alt="Lịch tiêm chủng" />
-            <span>LỊCH TIÊM CHỦNG</span>
-          </div>
-          <div className="guide-item">
-            <img src="/icons/process.png" alt="Quy trình tiêm chủng" />
-            <span>QUY TRÌNH TIÊM CHỦNG</span>
-          </div>
-          <div className="guide-item">
-            <img src="/icons/benefits.png" alt="Lưu ý trước khi tiêm" />
-            <span>LƯU Ý TRƯỚC KHI TIÊM</span>
-          </div>
-          <div className="guide-item">
-            <img src="/icons/after-care.png" alt="Lưu ý sau khi tiêm" />
-            <span>LƯU Ý SAU KHI TIÊM</span>
-          </div>
+      <h2>CẨM NANG TIÊM CHỦNG</h2>
+      <div className="guide-icons">
+        <div className="guide-item">
+          <FaRegCalendarAlt size={50} style={{ color: "#4A90E2" }} />
+          <span>LỊCH TIÊM CHỦNG</span>
+        </div>
+
+        <div className="guide-item">
+          <FaRegListAlt size={50} style={{ color: "#4A90E2" }} />
+          <span>QUY TRÌNH TIÊM CHỦNG</span>
+        </div>
+
+        <div className="guide-item">
+          <FaRegThumbsUp size={50} style={{ color: "#4A90E2" }} />
+          <span>LƯU Ý TRƯỚC KHI TIÊM</span>
+        </div>
+
+        <div className="guide-item">
+          <FaRegSmileBeam size={50} style={{ color: "#4A90E2" }} />
+          <span>LƯU Ý SAU KHI TIÊM</span>
         </div>
       </div>
+    </div>
 
       <div className="news-section">
         <h2>TIN TỨC SỨC KHỎE</h2>

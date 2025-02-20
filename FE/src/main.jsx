@@ -9,7 +9,8 @@ import AccountsPage from "./pages/usersRole/admin/accountsPage";
 import VaccinesPage from "./pages/usersRole/admin/vaccinesPage";
 import { ToastContainer } from "react-toastify";
 import AllCustomerPage from "./pages/usersRole/customer/allCustomerPage";
-// import CamnangPage from "./pages/homepage/camnang/camnang";
+import News from "./pages/homepage/news/news";
+import Handbook from "./pages/homepage/handbook/handbook";
 import VaccinePriceList from "./pages/homepage/vaccineShop/vaccineShopPage";
 import CheckOutPrice from "./pages/homepage/vaccineShop/checkoutPrice";
 import Profile from "./pages/homepage/profile/profile";
@@ -39,6 +40,14 @@ const router = createBrowserRouter([
   {
     path: "/register",
     element: <RegisterPage />,
+  },
+  {
+    path: "/news",
+    element: <News />,
+  },
+  {
+    path: "/handbook",
+    element: <Handbook />,
   },
   // {
   //   path: "/camnang",

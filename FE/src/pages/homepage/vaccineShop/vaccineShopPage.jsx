@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { FaShoppingCart, FaTrashAlt } from "react-icons/fa";
 import axios from "axios";
+import "@fortawesome/fontawesome-free/css/all.min.css";
 import { Pagination, Modal } from 'antd'; // Thêm Modal từ antd để hiển thị thông báo lỗi
 import "./vaccineShopPage.css";
 
@@ -243,6 +244,37 @@ const VaccinePriceList = () => {
           />
         </div>
       )}
+      <footer className="footer">
+        <div className="footer-content">
+          <div className="footer-section">
+            <h3>NHẬT KÝ TIÊM CHỦNG</h3>
+            <p>Hệ thống quản lý tiêm chủng toàn diện</p>
+          </div>
+          <div className="footer-section">
+            <h3>LIÊN HỆ</h3>
+            <p>Email: contact@nhatkytiemchung.vn</p>
+            <p>Hotline: 1900 xxxx</p>
+            <p>Địa chỉ: Hà Nội, Việt Nam</p>
+          </div>
+          <div className="footer-section">
+            <h3>THEO DÕI CHÚNG TÔI</h3>
+            <div className="social-links">
+              <a href="#">
+                <i className="fab fa-facebook"></i>
+              </a>
+              <a href="#">
+                <i className="fab fa-twitter"></i>
+              </a>
+              <a href="#">
+                <i className="fab fa-instagram"></i>
+              </a>
+            </div>
+          </div>
+        </div>
+        <div className="footer-bottom">
+          <p>&copy; 2024 Nhật Ký Tiêm Chủng. All rights reserved.</p>
+        </div>
+      </footer>
     </div>
   );
 };
