@@ -63,7 +63,8 @@ export const getAppointmentsController = async (req, res) => {
 export const getAppointmentsWithDetailsByIdController = async (req, res) => {
   try {
     const id = req.params.id;
-    const result = await appointmentService.getAppointmentsById(id);
+    const result = await appointmentService.getAppointmentsWithDetailsById(id);
+    // console.log(result);
     res.status(200).json(result);
   } catch (error) {
     res.status(500).json(error.message);

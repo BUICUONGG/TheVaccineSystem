@@ -77,7 +77,26 @@ class AppointmentService {
     }
   }
 
-  async getAppointmentsWithDetailsById() {}
+  async getAppointmentsWithDetailsById(id) {
+    try {
+      const result = await connectToDatabase.appointmentLes.findOne({
+        _id: new ObjectId(id),
+      });
+      for (let appointment of result) {
+        const customer = await connectToDatabase.customers.findOne({
+          _id: appointment.cusId,
+        });
+        const vaccine = await connectToDatabase.vaccinceInventorys.findOne({
+          _id: appointment.vaccineId,
+        });
+        appointment.customer = customer;
+        appointment.vaccine = vaccine;
+      }
+      return result;
+    } catch (error) {
+      throw new Error(error.message);
+    }
+  }
 
   async searchAppointments(id) {
     try {
