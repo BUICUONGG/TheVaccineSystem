@@ -82,16 +82,21 @@ class AppointmentService {
       const result = await connectToDatabase.appointmentLes.findOne({
         _id: new ObjectId(id),
       });
-      for (let appointment of result) {
-        const customer = await connectToDatabase.customers.findOne({
-          _id: appointment.cusId,
-        });
-        const vaccine = await connectToDatabase.vaccinceInventorys.findOne({
-          _id: appointment.vaccineId,
-        });
-        appointment.customer = customer;
-        appointment.vaccine = vaccine;
-      }
+
+      if (!result) return null; // Kiểm tra nếu không có dữ liệu
+
+      // Lấy thông tin customer và vaccine
+      const customer = await connectToDatabase.customers.findOne({
+        _id: result.cusId,
+      });
+      const vaccine = await connectToDatabase.vaccinceInventorys.findOne({
+        _id: result.vaccineId,
+      });
+
+      // Gán thông tin vào result
+      result.customer = customer;
+      result.vaccine = vaccine;
+
       return result;
     } catch (error) {
       throw new Error(error.message);
