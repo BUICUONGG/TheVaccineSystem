@@ -15,7 +15,6 @@ const HomePage = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [showDropdown, setShowDropdown] = useState(false);
 
   const banners = [
     "/images/banner1.png",
@@ -45,36 +44,15 @@ const HomePage = () => {
     setCurrentSlide(currentSlide === 0 ? banners.length - 1 : currentSlide - 1);
   };
 
-  const handleLogout = async () => {
-    try {
-      const userId = localStorage.getItem("userId");
-      const accesstoken = localStorage.getItem("accesstoken");
-
-      if (userId && accesstoken) {
-        await axios.post(
-          `http://localhost:8080/user/logout/${userId}`,
-          {},
-          {
-            headers: {
-              Authorization: `Bearer ${accesstoken}`,
-            },
-          }
-        );
-      }
-
-      // Xóa toàn bộ localStorage
-      localStorage.removeItem("accesstoken");
-      localStorage.removeItem("username");
-      localStorage.removeItem("userId");
-      setIsLoggedIn(false);
-
-      navigate("/login");
-    } catch (error) {
-      console.error("Logout error:", error);
-      Modal.error({
-        content: "Logout failed. Please try again.",
-      });
-    }
+  const handleLogout = () => {
+    // Xóa toàn bộ thông tin authentication khỏi localStorage
+    localStorage.removeItem("accesstoken");
+    localStorage.removeItem("username");
+    localStorage.removeItem("userId");
+    setIsLoggedIn(false);
+    
+    // Chuyển hướng về trang login
+    navigate("/login");
   };
 
   const handleLogin = () => {
@@ -83,6 +61,10 @@ const HomePage = () => {
 
   const handleRegister = () => {
     navigate("/register");
+  };
+
+  const handleProfile = () => {
+    navigate("/profile");
   };
 
   const toggleTheme = () => {
@@ -155,20 +137,14 @@ const HomePage = () => {
           <div className="auth-buttons">
             <FaShoppingCart className="cart-icon" />
             {isLoggedIn ? (
-              <div className="user-menu">
-                <img
-                  src="../icons/adminIcon.png"
-                  alt="User Avatar"
-                  className="avatar-icon"
-                  onClick={() => setShowDropdown(!showDropdown)}
-                />
-                {showDropdown && (
-                  <div className="dropdown-menu">
-                    <Link to="/profile">Profile</Link>
-                    <button onClick={handleLogout}>Logout</button>
-                  </div>
-                )}
-              </div>
+              <>
+                <button className="profile-btn" onClick={handleProfile}>
+                  Profile
+                </button>
+                <button className="logout-btn" onClick={handleLogout}>
+                  Đăng xuất
+                </button>
+              </>
             ) : (
               <>
                 <button className="login-btn" onClick={handleLogin}>

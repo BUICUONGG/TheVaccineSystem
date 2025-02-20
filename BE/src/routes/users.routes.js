@@ -39,11 +39,11 @@ usersRouter.post(
 //   updateController
 // );
 
-usersRouter.post("/logout/:id", logoutController);
+usersRouter.post("/logout/:id", validateAccessToken, logoutController);
 
 usersRouter.post(
   "/refresh-token",
   validateRefreshToken,
   refreshTokenController
 );
-export default usersRouter;
+export default usersRouter

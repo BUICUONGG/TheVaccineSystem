@@ -1,59 +1,114 @@
 import { useEffect, useState } from "react";
-import { Table } from "antd";
+import { Form, Input, Select, Button, message } from "antd";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
-const CustomerDetail = (customerId) => {
-  const [customer, setCustomer] = useState(null);
+const CustomerProfile = () => {
+  const [form] = Form.useForm();
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+  const userId = localStorage.getItem("userId");
 
   useEffect(() => {
-    if (!customerId) return;
-
-    const fetchCustomer = async () => {
+    const fetchCustomerProfile = async () => {
       try {
-        const accessToken = localStorage.getItem("accessToken");
+        const accessToken = localStorage.getItem("accesstoken");
         const response = await axios.get(
-          `http://localhost:8080/customer/${customerId}`,
+          `http://localhost:8080/customer/getOneCustomer/${userId}`,
           {
             headers: { Authorization: `Bearer ${accessToken}` },
           }
         );
-        setCustomer(response.data);
+        form.setFieldsValue(response.data);
       } catch (error) {
-        console.error("Lỗi khi lấy thông tin customer:", error);
+        console.error("Error fetching profile:", error);
+        message.error("Failed to load profile");
       }
     };
 
-    fetchCustomer();
-  }, [customerId]);
+    fetchCustomerProfile();
+  }, [form, userId]);
 
-  const columns = [
-    { title: "CusName", dataIndex: "customerName", key: "customerName" },
-    { title: "Phone", dataIndex: "phone", key: "phone" },
-    { title: "BirthDate", dataIndex: "birthDate", key: "birthDate" },
-    { title: "Address", dataIndex: "address", key: "address" },
-    { title: "Gender", dataIndex: "gender", key: "gender" },
-  ];
-
-  const data = customer
-    ? [
-        { key: "customerName", value: customer.customerName },
-        { key: "phone", value: customer.phone },
-        { key: "birthDate", value: customer.birthDate },
-        { key: "address", value: customer.address },
-        { key: "gender", value: customer.gender },
-      ]
-    : [];
+  const onFinish = async (values) => {
+    setLoading(true);
+    try {
+      const accessToken = localStorage.getItem("accesstoken");
+      await axios.post(
+        `http://localhost:8080/customer/update/${userId}`,
+        values,
+        {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        }
+      );
+      message.success("Profile updated successfully");
+      navigate("/homepage");
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      message.error("Failed to update profile");
+    }
+    setLoading(false);
+  };
 
   return (
-    <div>
-      <h2>Thông tin Chi tiết</h2>
-      {customer ? (
-        <Table columns={columns} dataSource={data} pagination={false} />
-      ) : (
-        <p>Chưa chọn customer</p>
-      )}
+    <div className="max-w-2xl mx-auto p-8">
+      <h2 className="text-2xl font-bold mb-6">My Profile</h2>
+      <Form
+        form={form}
+        layout="vertical"
+        onFinish={onFinish}
+      >
+        <Form.Item
+          name="customerName"
+          label="Full Name"
+          rules={[{ required: true, message: "Please input your name!" }]}
+        >
+          <Input />
+        </Form.Item>
+
+        <Form.Item
+          name="phone"
+          label="Phone Number"
+          rules={[{ required: true, message: "Please input your phone number!" }]}
+        >
+          <Input />
+        </Form.Item>
+
+        <Form.Item
+          name="birthday"
+          label="Birthday"
+          rules={[{ required: true, message: "Please input your birthday!" }]}
+        >
+          <Input type="date" />
+        </Form.Item>
+
+        <Form.Item
+          name="address"
+          label="Address"
+          rules={[{ required: true, message: "Please input your address!" }]}
+        >
+          <Input />
+        </Form.Item>
+
+        <Form.Item
+          name="gender"
+          label="Gender"
+          rules={[{ required: true, message: "Please select your gender!" }]}
+        >
+          <Select>
+            <Select.Option value="Male">Male</Select.Option>
+            <Select.Option value="Female">Female</Select.Option>
+            <Select.Option value="Other">Other</Select.Option>
+          </Select>
+        </Form.Item>
+
+        <Form.Item>
+          <Button type="primary" htmlType="submit" loading={loading}>
+            Update Profile
+          </Button>
+        </Form.Item>
+      </Form>
     </div>
   );
 };
 
-export default CustomerDetail;
+export default CustomerProfile;
