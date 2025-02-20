@@ -1,5 +1,4 @@
 import childService from "../services/child.services.js";
-import connectToDatabase from "../config/database.js";
 
 export const showChildController = async (req, res) => {
   const result = await childService.showData();

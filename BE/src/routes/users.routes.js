@@ -12,7 +12,7 @@ import {
 import {
   registerValidate,
   loginValidate,
-   validateAccessToken,
+  // validateAccessToken,
   // verifyAdmin,
   validateRefreshToken,
   // verifyStaff,
