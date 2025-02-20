@@ -12,7 +12,7 @@ import {
 import {
   registerValidate,
   loginValidate,
-  // validateAccessToken,
+   validateAccessToken,
   // verifyAdmin,
   validateRefreshToken,
   // verifyStaff,
@@ -28,7 +28,7 @@ usersRouter.post("/register", registerValidate, registerController);
 
 usersRouter.post(
   "/delete/:id",
-  // validateAccessToken,
+   validateAccessToken,
   // verifyAdmin,
   deleteController
 );
