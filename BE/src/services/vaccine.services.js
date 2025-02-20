@@ -8,7 +8,9 @@ class VaccineService {
     try {
       const vaccine = new VaccineInventory(vaccineData);
       await vaccine.validate();
-      const result = await connectToDatabase.vaccines.insertOne(vaccine);
+      const result = await connectToDatabase.vaccinceInventorys.insertOne(
+        vaccine
+      );
       return { _id: result.insertedId, ...vaccineData };
     } catch (error) {
       console.error("Error adding vaccine:", error.message);
@@ -25,16 +27,17 @@ class VaccineService {
       }
 
       // Kiểm tra vaccine có tồn tại không
-      const existingVaccine = await connectToDatabase.vaccines.findOne({
-        _id: new ObjectId(_id),
-      });
+      const existingVaccine =
+        await connectToDatabase.vaccinceInventorys.findOne({
+          _id: new ObjectId(_id),
+        });
 
       if (!existingVaccine) {
         throw new Error("Vaccine not found");
       }
 
       // Cập nhật vaccine
-      const result = await connectToDatabase.vaccines.updateOne(
+      const result = await connectToDatabase.vaccinceInventorys.updateOne(
         { _id: new ObjectId(_id) },
         { $set: updateData }
       );
@@ -57,15 +60,16 @@ class VaccineService {
       }
 
       // Kiểm tra vaccine có tồn tại không
-      const existingVaccine = await connectToDatabase.vaccines.findOne({
-        _id: new ObjectId(vaccineId),
-      });
+      const existingVaccine =
+        await connectToDatabase.vaccinceInventorys.findOne({
+          _id: new ObjectId(vaccineId),
+        });
 
       if (!existingVaccine) {
         throw new Error("Vaccine not found");
       }
 
-      const result = await connectToDatabase.vaccines.deleteOne({
+      const result = await connectToDatabase.vaccinceInventorys.deleteOne({
         _id: new ObjectId(vaccineId),
       });
 
@@ -82,7 +86,9 @@ class VaccineService {
 
   async getVaccines() {
     try {
-      const vaccines = await connectToDatabase.vaccines.find().toArray();
+      const vaccines = await connectToDatabase.vaccinceInventorys
+        .find()
+        .toArray();
       if (!vaccines || vaccines.length === 0) {
         throw new Error("No vaccines found");
       }

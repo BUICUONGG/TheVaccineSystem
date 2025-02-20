@@ -25,50 +25,67 @@ class ConnectDatabaseService {
   }
 
   //getter
-  get users() {
-    return this.db.collection(String("users"));
-  }
 
-  get vaccines() {
-    return this.db.collection(String("vaccines"));
-  }
+  // get vaccines() {
+  //   return this.db.collection(String("vaccines"));
+  // }
 
   get appointmentLes() {
     return this.db.collection(String("appointmentsLes"));
   }
+
   get appointmentGois() {
     return this.db.collection(String("appointmentsGois"));
   }
+
   get blogs() {
     return this.db.collection(String("blogs"));
   }
+
   get childs() {
     return this.db.collection(String("childs"));
   }
+
   get comments() {
     return this.db.collection(String("comments"));
   }
-  get customers() {
-    return this.db.collection(String("customers"));
-  }
+
   get feedbacks() {
     return this.db.collection(String("feedbacks"));
   }
+
   get vaccinepackages() {
     return this.db.collection(String("vaccinepackages"));
   }
+
   get payments() {
     return this.db.collection(String("payments"));
   }
+
+  get customers() {
+    return this.db.collection(String("customers"));
+  }
+
   get staffs() {
     return this.db.collection(String("staffs"));
   }
-  get types() {
-    return this.db.collection(String("types"));
+
+  get users() {
+    return this.db.collection(String("users"));
   }
+
+  // get types() {
+  //   return this.db.collection(String("types"));
+  // }
+
+  get admins() {
+    return this.db.collection(String("admins"));
+  }
+
   get vaccinceImports() {
     return this.db.collection(String("vaccinceImports"));
   }
+
   get vaccinceInventorys() {
     return this.db.collection(String("vaccinceInventorys"));
   }

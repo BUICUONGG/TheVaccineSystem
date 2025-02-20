@@ -1,3 +1,4 @@
+import { aptGoiRoutes } from "../routes/appointments.routes.js";
 import appointmentService from "../services/appointment.services.js";
 
 export const listAllAptLeController = async (req, res) => {
@@ -18,12 +19,9 @@ export const createAptLeController = async (req, res) => {
   try {
     const data = req.body;
     const result = await appointmentService.createAptLe(data);
-    if (!result) {
-      throw new Error("Khong co thong tin");
-    }
     res.status(200).json(result);
   } catch (error) {
-    console.log("loi controller");
+    console.log("Loi khong create được");
     res.status(500).json(error.message);
   }
 };
@@ -49,6 +47,36 @@ export const deleteAptLeController = async (req, res) => {
     res.status(200).json(result);
   } catch (error) {
     console.log(" ko the delete ");
+    res.status(500).json(error.message);
+  }
+};
+
+export const getAppointmentsController = async (req, res) => {
+  try {
+    const appointments = await appointmentService.getAppointmentsWithDetails();
+    res.status(200).json(appointments);
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching appointments", error });
+  }
+};
+
+export const getAppointmentsWithDetailsByIdController = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const result = await appointmentService.getAppointmentsById(id);
+    res.status(200).json(result);
+  } catch (error) {
+    res.status(500).json(error.message);
+  }
+};
+
+export const searchAppointmentsController = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const result = await appointmentService.searchAppointments(id);
+    res.status(200).json(result);
+  } catch (error) {
+    console.log("Khong tim hay hoa don nay");
     res.status(500).json(error.message);
   }
 };

@@ -1,7 +1,11 @@
 import mongoose from "mongoose";
 
 const appointmentGoiSchema = new mongoose.Schema({
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+  cusIds: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Customer",
+    required: true,
+  },
   date: { type: String, required: true }, // ngayf đặt lịch hẹn
   vaccineId: {
     type: mongoose.Schema.Types.ObjectId,
