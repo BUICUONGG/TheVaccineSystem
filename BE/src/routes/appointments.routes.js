@@ -25,7 +25,7 @@ aptLeRoutes.get("/getdetailallaptle", getAppointmentsController);
 
 // lấy chi tiết 1 hoá đơn dựa theo id
 aptLeRoutes.get(
-  "/getdetailaptle:/id",
+  "/getdetailaptlee/:id",
   getAppointmentsWithDetailsByIdController
 );
 
