@@ -38,7 +38,7 @@ app.use("/child", childRouter);
 app.use("/blog", blogRoutes);
 app.use("/customer", customerRoutes);
 app.use("/appointment", aptLeRoutes);
-app.use("appointment", aptGoiRoutes);
+// app.use("appointment", aptGoiRoutes);
 // app.use("/admin", adminRouter);
 // app.use('staff', staffRouter);
 

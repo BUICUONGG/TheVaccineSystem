@@ -7,12 +7,11 @@ import {
   // updateController,
   logoutController,
   refreshTokenController,
-  // logoutController,
 } from "../controllers/users.controllers.js";
 import {
   registerValidate,
   loginValidate,
-  // validateAccessToken,
+  validateAccessToken,
   // verifyAdmin,
   validateRefreshToken,
   // verifyStaff,
@@ -28,7 +27,7 @@ usersRouter.post("/register", registerValidate, registerController);
 
 usersRouter.post(
   "/delete/:id",
-   validateAccessToken,
+  validateAccessToken,
   // verifyAdmin,
   deleteController
 );
