@@ -9,7 +9,7 @@ const vaccineImportSchema = new mongoose.Schema({
         ref: "VaccineInventory", // Mối liên kết với VaccineInventory
         required: true,
       },
-      quantity: { type: Number, required: true }, // Số lượng mỗi loại vaccine trong lô
+      quantity: { type: String, required: true }, // Số lượng mỗi loại vaccine trong lô
     },
   ],
   price: { type: Number, required: true }, // Giá nhập của từng loại vaccine
