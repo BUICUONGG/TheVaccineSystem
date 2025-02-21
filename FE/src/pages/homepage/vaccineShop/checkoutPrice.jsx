@@ -15,7 +15,7 @@ const CheckOutPrice = () => {
 
   useEffect(() => {
     const token = localStorage.getItem("accesstoken");
-    const username = localStorage.getItem("username");
+    // const username = localStorage.getItem("username");
     if (token) {
       setIsLoggedIn(true);
       // Lấy dữ liệu giỏ hàng từ localStorage
