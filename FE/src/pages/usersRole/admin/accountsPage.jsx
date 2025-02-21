@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Table, Input, Button, Modal } from "antd";
+import { Table, Input, Button, Modal, Popconfirm } from "antd";
 import { DeleteOutlined } from "@ant-design/icons";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
@@ -70,55 +70,44 @@ const AccountsPage = () => {
   };
 
   const handleDelete = async (userId) => {
-    const accesstoken = localStorage.getItem("accesstoken");
+    try {
+      const accesstoken = localStorage.getItem("accesstoken");
 
-    if (!accesstoken) {
-      Modal.error({
-        content: "You need to login first",
-      });
-      return;
-    }
+      if (!accesstoken) {
+        Modal.error({
+          content: "You need to login first",
+        });
+        return;
+      }
 
-    Modal.confirm({
-      title: "Are you sure you want to delete this user?",
-      content: "This action cannot be undone.",
-      okText: "Yes",
-      okType: "danger",
-      cancelText: "No",
-      onOk: async () => {
-        try {
-          setDeleteLoading(true);
-          await axios.post(
-            `http://localhost:8080/user/delete/${userId}`,
-            {},
-            {
-              headers: {
-                Authorization: `Bearer ${accesstoken}`,
-              },
-            }
-          );
-
-          await fetchUsers(); // Refresh the list after deletion
-          Modal.success({
-            content: "User deleted successfully",
-          });
-        } catch (error) {
-          console.error("Error deleting user:", error);
-          if (error.response?.status === 401) {
-            Modal.error({
-              content: "Unauthorized. Please login again.",
-            });
-            navigate("/login");
-          } else {
-            Modal.error({
-              content: "Failed to delete user",
-            });
-          }
-        } finally {
-          setDeleteLoading(false);
+      await axios.post(
+        `http://localhost:8080/user/delete/${userId}`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${accesstoken}`,
+          },
         }
-      },
-    });
+      );
+
+      Modal.success({
+        content: "Xóa tài khoản thành công!",
+      });
+      
+      await fetchUsers(); // Refresh danh sách
+    } catch (error) {
+      console.error("Error deleting user:", error);
+      if (error.response?.status === 401) {
+        Modal.error({
+          content: "Unauthorized. Please login again.",
+        });
+        navigate("/login");
+      } else {
+        Modal.error({
+          content: "Không thể xóa tài khoản",
+        });
+      }
+    }
   };
 
   const columns = [
@@ -190,16 +179,24 @@ const AccountsPage = () => {
       key: "actions",
       width: 100,
       render: (_, record) => (
-        <Button
-          type="primary"
-          danger
-          icon={<DeleteOutlined />}
-          onClick={() => handleDelete(record._id)}
-          loading={deleteLoading}
+        <Popconfirm
+          title="Xóa tài khoản"
+          description="Bạn có chắc chắn muốn xóa tài khoản này?"
+          onConfirm={() => handleDelete(record._id)}
+          okText="Có"
+          cancelText="Không"
+          okType="danger"
           disabled={record.role === "admin"}
         >
-          Delete
-        </Button>
+          <Button
+            type="primary"
+            danger
+            icon={<DeleteOutlined />}
+            disabled={record.role === "admin"}
+          >
+            Delete
+          </Button>
+        </Popconfirm>
       ),
     },
   ];

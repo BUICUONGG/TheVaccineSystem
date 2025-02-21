@@ -15,6 +15,8 @@ import Advise from "./pages/homepage/Advise/advise";
 import VaccinePriceList from "./pages/homepage/vaccineShop/vaccineShopPage";
 import CheckOutPrice from "./pages/homepage/vaccineShop/checkoutPrice";
 import Profile from "./pages/homepage/profile/profile";
+import BlogList from "./pages/blog/BlogList";
+import BlogManagement from "./pages/usersRole/admin/BlogManagement";
 
 
 const router = createBrowserRouter([
@@ -53,6 +55,10 @@ const router = createBrowserRouter([
   {
     path: "/advise",
     element: <Advise />,
+  },
+  {
+    path: "/blogs",
+    element: <BlogList />,
   },
   // {
   //   path: "/camnang",
@@ -93,6 +99,10 @@ const router = createBrowserRouter([
       {
         path: "customers",
         element: <AllCustomerPage />,
+      },
+      {
+        path: "blog",
+        element: <BlogManagement />,
       },
     ],
   },
