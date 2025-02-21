@@ -10,7 +10,8 @@ const VaccinePriceList = () => {
   const navigate = useNavigate();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("Single");
-  const [products, setProducts] = useState([]);
+  const [singleProducts, setSingleProducts] = useState([]);
+  const [packedProducts, setPackedProducts] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [cartItems, setCartItems] = useState([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -19,11 +20,12 @@ const VaccinePriceList = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await axios.get(
-          "http://localhost:8080/vaccine/listVaccine"
-        );
-
-        setProducts(response.data.result);
+        // vaccine đơn
+        const singleResponse = await axios.get("http://localhost:8080/vaccine/listVaccine");
+        setSingleProducts(singleResponse.data.result);
+        // vaccine gói
+        const packedResponse = await axios.get("http://localhost:8080/vaccine/showInfo");
+        setPackedProducts(packedResponse.data);
       } catch (error) {
         console.error("Error fetching products:", error);
       }
@@ -50,11 +52,8 @@ const VaccinePriceList = () => {
       allCartItems[username] = cartItems;
       localStorage.setItem("cartItems", JSON.stringify(allCartItems));
     }
-  }, [cartItems, isLoggedIn]);
-
-  useEffect(() => {
     document.title = "Bảng giá vắc-xin";
-  }, []);
+  }, [cartItems, isLoggedIn]);
 
   const handleLogin = () => navigate("/login");
   const handleRegister = () => navigate("/register");
@@ -100,10 +99,10 @@ const VaccinePriceList = () => {
   const handleCategoryChange = (event) =>
     setSelectedCategory(event.target.value);
 
-  const filteredProducts =
-    selectedCategory === "Single"
-      ? products
-      : products.filter((product) => product.category === selectedCategory);
+  // Lọc sản phẩm dựa trên danh mục được chọn
+  const filteredProducts = selectedCategory === "Single"
+    ? singleProducts
+    : packedProducts;
 
   const indexOfLastProduct = currentPage * productsPerPage;
   const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
@@ -143,6 +142,14 @@ const VaccinePriceList = () => {
     if (!isLoggedIn) {
       navigate("/login");
     } else {
+      // Lưu giỏ hàng hiện tại vào localStorage trước khi chuyển trang
+      const cartData = {
+        items: cartItems,
+        totalAmount: cartItems.reduce((sum, item) => 
+          sum + (parseFloat(item.price) || 0) * (item.quantity || 1), 0
+        )
+      };
+      localStorage.setItem("checkoutCart", JSON.stringify(cartData));
       navigate("/checkoutPrice");
     }
   };
@@ -257,12 +264,17 @@ const VaccinePriceList = () => {
                 </h3>
                 <p>Nhà sản xuất: {product.manufacturer}</p>
                 <span>Mô tả: {product.description}</span>
-                <button
-                  className="select-btn"
-                  onClick={() => addToCart(product)}
-                >
-                  Chọn
-                </button>
+                {selectedCategory === "Single" ? (
+                  <>
+                    <p >Giá:  Chưa cập nhật </p>
+                  </>
+                ) : (
+                  <>
+                    <p>Giá gói: {product.vaccineImports?.[0]?.price || "Chưa có giá"}</p>
+                    
+                  </>
+                )}
+                <button className="select-btn" onClick={() => addToCart(product)}>Chọn</button>
               </div>
             ))}
           </>
@@ -316,3 +328,5 @@ const VaccinePriceList = () => {
 };
 
 export default VaccinePriceList;
+
+
