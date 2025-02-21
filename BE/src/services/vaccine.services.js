@@ -18,29 +18,15 @@ class VaccineService {
     }
   }
 
-  async updateVaccine(vaccineData) {
+  async updateVaccine(id, vaccineData) {
     try {
-      const { _id, ...updateData } = vaccineData;
-
-      if (!_id) {
-        throw new Error("Vaccine ID is required for update");
-      }
-
       // Kiểm tra vaccine có tồn tại không
-      const existingVaccine =
-        await connectToDatabase.vaccinceInventorys.findOne({
-          _id: new ObjectId(_id),
-        });
-
-      if (!existingVaccine) {
-        throw new Error("Vaccine not found");
-      }
-
       // Cập nhật vaccine
-      const result = await connectToDatabase.vaccinceInventorys.updateOne(
-        { _id: new ObjectId(_id) },
-        { $set: updateData }
-      );
+      const result =
+        await connectToDatabase.vaccinceInventorys.findOneAndUpdate(
+          { _id: new ObjectId(id) },
+          { $set: updateData }
+        );
 
       if (result.modifiedCount === 0) {
         throw new Error("No changes were made");
