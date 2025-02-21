@@ -29,7 +29,8 @@ export const getVaccinesController = async (req, res) => {
 
 export const updateVaccineController = async (req, res) => {
   try {
-    const vaccine = await vaccineService.updateVaccine(req.body);
+    const id = req.params.id;
+    const vaccine = await vaccineService.updateVaccine(id, req.body);
     res.status(200).json("Vaccine updated successfully", vaccine);
   } catch (error) {
     res.status(400).json(error.message);
