@@ -1,0 +1,106 @@
+.blog-list-container {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.blog-header {
+  text-align: center;
+  margin-bottom: 48px;
+}
+
+.blog-header h1 {
+  font-size: 2.5em;
+  color: #1a1a1a;
+  margin-bottom: 16px;
+}
+
+.blog-header p {
+  font-size: 1.2em;
+  color: #666;
+}
+
+.blog-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 30px;
+}
+
+.blog-card {
+  background: white;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+  text-decoration: none;
+  color: inherit;
+}
+
+.blog-card:hover {
+  transform: translateY(-5px);
+}
+
+.blog-image {
+  height: 200px;
+  overflow: hidden;
+}
+
+.blog-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.blog-content {
+  padding: 20px;
+}
+
+.blog-content h2 {
+  font-size: 1.4em;
+  margin-bottom: 10px;
+  color: #333;
+}
+
+.blog-summary {
+  color: #666;
+  margin-bottom: 15px;
+  line-height: 1.5;
+}
+
+.blog-meta {
+  margin: 16px 0;
+  display: flex;
+  justify-content: space-between;
+  color: #666;
+}
+
+.blog-tags {
+  margin-top: 16px;
+}
+
+.blog-tags .ant-tag {
+  margin: 4px;
+}
+
+.ant-card {
+  height: 100%;
+}
+
+.ant-card-meta-title {
+  font-size: 1.2em;
+  margin-bottom: 8px;
+}
+
+.ant-card-meta-description {
+  color: #666;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+@media (max-width: 768px) {
+  .blog-grid {
+    grid-template-columns: 1fr;
+  }
+} 
