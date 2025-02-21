@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { FaShoppingCart, FaTrashAlt } from "react-icons/fa";
 import axios from "axios";
 import "@fortawesome/fontawesome-free/css/all.min.css";
-import { Pagination, Modal } from 'antd'; // Thêm Modal từ antd để hiển thị thông báo lỗi
+import { Pagination, Modal } from "antd"; // Thêm Modal từ antd để hiển thị thông báo lỗi
 import "./vaccineShopPage.css";
 
 const VaccinePriceList = () => {
@@ -19,7 +19,10 @@ const VaccinePriceList = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await axios.get("http://localhost:8080/vaccine/listVaccine");
+        const response = await axios.get(
+          "http://localhost:8080/vaccine/listVaccine"
+        );
+
         setProducts(response.data.result);
       } catch (error) {
         console.error("Error fetching products:", error);
@@ -94,22 +97,29 @@ const VaccinePriceList = () => {
     }
   };
 
-  const handleCategoryChange = (event) => setSelectedCategory(event.target.value);
+  const handleCategoryChange = (event) =>
+    setSelectedCategory(event.target.value);
 
-  const filteredProducts = selectedCategory === "Single"
-    ? products
-    : products.filter(product => product.category === selectedCategory);
+  const filteredProducts =
+    selectedCategory === "Single"
+      ? products
+      : products.filter((product) => product.category === selectedCategory);
 
   const indexOfLastProduct = currentPage * productsPerPage;
   const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
-  const currentProducts = filteredProducts.slice(indexOfFirstProduct, indexOfLastProduct);
+  const currentProducts = filteredProducts.slice(
+    indexOfFirstProduct,
+    indexOfLastProduct
+  );
 
   const addToCart = (product) => {
-    setCartItems(prevItems => {
-      const existingItem = prevItems.find(item => item.vaccineName === product.vaccineName);
+    setCartItems((prevItems) => {
+      const existingItem = prevItems.find(
+        (item) => item.vaccineName === product.vaccineName
+      );
       if (existingItem) {
         // Nếu sản phẩm đã tồn tại, tăng số lượng
-        return prevItems.map(item =>
+        return prevItems.map((item) =>
           item.vaccineName === product.vaccineName
             ? { ...item, quantity: (item.quantity || 1) + 1 }
             : item
@@ -169,12 +179,17 @@ const VaccinePriceList = () => {
                           <span>{item.vaccineName}</span>
                           <span>{item.quantity || 1}</span>
                           <span>{item.price}</span>
-                          <button className="delete-btn" onClick={() => removeFromCart(index)}>
+                          <button
+                            className="delete-btn"
+                            onClick={() => removeFromCart(index)}
+                          >
                             <FaTrashAlt />
                           </button>
                         </div>
                       ))}
-                      <button className="select-btn" onClick={handleCheckout}>Thanh toán</button>
+                      <button className="select-btn" onClick={handleCheckout}>
+                        Thanh toán
+                      </button>
                     </>
                   ) : (
                     <p>Giỏ hàng trống</p>
@@ -184,13 +199,23 @@ const VaccinePriceList = () => {
             </div>
             {isLoggedIn ? (
               <>
-                <button className="logout-btn" onClick={handleLogout}>Logout</button>
-                <img src="../icons/adminIcon.png" alt="User Avatar" className="avatar-icon" />
+                <button className="logout-btn" onClick={handleLogout}>
+                  Logout
+                </button>
+                <img
+                  src="../icons/adminIcon.png"
+                  alt="User Avatar"
+                  className="avatar-icon"
+                />
               </>
             ) : (
               <>
-                <button className="login-btn" onClick={handleLogin}>Đăng nhập</button>
-                <button className="register-btn" onClick={handleRegister}>Đăng ký</button>
+                <button className="login-btn" onClick={handleLogin}>
+                  Đăng nhập
+                </button>
+                <button className="register-btn" onClick={handleRegister}>
+                  Đăng ký
+                </button>
               </>
             )}
           </div>
@@ -209,7 +234,11 @@ const VaccinePriceList = () => {
 
       <div className="product-filter">
         <label htmlFor="category">Chọn loại sản phẩm:</label>
-        <select id="category" value={selectedCategory} onChange={handleCategoryChange}>
+        <select
+          id="category"
+          value={selectedCategory}
+          onChange={handleCategoryChange}
+        >
           <option value="Single">Vắc-xin lẻ</option>
           <option value="Pack">Vắc-xin gói</option>
         </select>
@@ -222,11 +251,18 @@ const VaccinePriceList = () => {
           <>
             {currentProducts.map((product, index) => (
               <div className="product-card" key={index}>
-                <img src={product.image} alt={product.vaccineName} />
-                <h3><b>{product.vaccineName}</b></h3>
+                <img src={product.imageUrl} alt={product.vaccineName} />
+                <h3>
+                  <b>{product.vaccineName}</b>
+                </h3>
                 <p>Nhà sản xuất: {product.manufacturer}</p>
                 <span>Mô tả: {product.description}</span>
-                <button className="select-btn" onClick={() => addToCart(product)}>Chọn</button>
+                <button
+                  className="select-btn"
+                  onClick={() => addToCart(product)}
+                >
+                  Chọn
+                </button>
               </div>
             ))}
           </>
