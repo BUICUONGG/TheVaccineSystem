@@ -233,8 +233,9 @@ const VaccinePriceList = () => {
         <div className="nav-links">
           <a href="/homepage">Trang chủ</a>
           <a href="#">Giới thiệu</a>
-          <a href="#">Tin tức</a>
-          <a href="#">Cẩm nang</a>
+          <a href="/news">Tin tức</a>
+          <a href="/handbook">Cẩm nang</a>
+          <a href="/advise">Tư vấn</a>
           <a href="#">Đăng ký tiêm</a>
         </div>
       </nav>

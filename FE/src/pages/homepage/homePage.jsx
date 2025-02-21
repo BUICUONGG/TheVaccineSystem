@@ -204,6 +204,7 @@ const HomePage = () => {
             <a href="#">Giới thiệu</a>
             <Link to="/news">Tin tức</Link>
             <Link to="/handbook">Cẩm nang</Link>
+            <Link to="/advise">Tư vấn</Link>
             <a href="#">Đăng ký tiêm</a>
           </div>
         </nav>
