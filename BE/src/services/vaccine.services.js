@@ -110,7 +110,7 @@ class VaccineService {
     }
   }
 
-  async getVaccineWithImports() {
+  async getVaccineWithImportsDetail() {
     try {
       // Lấy danh sách tất cả vaccine
       const vaccines =
