@@ -36,7 +36,7 @@ const VaccinesPage = () => {
   const fetchVaccines = async () => {
     try {
       setLoading(true);
-      const response = await axios.get("http://localhost:8080/vaccines/showInfo");
+      const response = await axios.get("http://localhost:8080/vaccine/showInfo");
       setVaccineList(response.data);
       setFilteredVaccines(response.data);
     } catch (error) {
@@ -51,9 +51,9 @@ const VaccinesPage = () => {
 
   const handleCreate = async (values) => {
     try {
-      await axios.post("http://localhost:8080/vaccines/addVaccine", {
+      await axios.post("http://localhost:8080/vaccine/addVaccine", {
         ...values,
-        status: "in stock"
+        createdAt: new Date().toLocaleDateString('en-GB'), // DD/MM/YYYY format
       });
       
       Modal.success({
@@ -75,15 +75,13 @@ const VaccinesPage = () => {
     try {
       const updatedData = {
         vaccineName: values.vaccineName?.trim() || null,
-        price: values.price || 0,
-        quantity: values.quantity || 0,
-        mfgDate: values.mfgDate?.trim() || null,
-        expDate: values.expDate?.trim() || null,
-        status: editingVaccine.status
+        description: values.description?.trim() || null,
+        manufacturer: values.manufacturer?.trim() || null,
+        imageUrl: values.imageUrl?.trim() || null,
       };
 
       await axios.post(
-        `http://localhost:8080/vaccines/updateVaccine/${editingVaccine._id}`,
+        `http://localhost:8080/vaccine/updateVaccine/${editingVaccine._id}`,
         updatedData
       );
 
@@ -102,7 +100,7 @@ const VaccinesPage = () => {
 
   const handleDelete = async (vaccineId) => {
     try {
-      await axios.post(`http://localhost:8080/vaccines/delete/${vaccineId}`);
+      await axios.post(`http://localhost:8080/vaccine/delete/${vaccineId}`);
       
       Modal.success({
         content: "Xóa vaccine thành công!",
@@ -130,43 +128,39 @@ const VaccinesPage = () => {
       key: "vaccineName",
     },
     {
-      title: "Giá",
-      dataIndex: "price",
-      key: "price",
-      render: (price) => `${price?.toLocaleString()}đ`,
+      title: "Mô tả",
+      dataIndex: "description",
+      key: "description",
+      ellipsis: true,
     },
     {
-      title: "Số lượng",
-      dataIndex: "quantity",
-      key: "quantity",
+      title: "Nhà sản xuất",
+      dataIndex: "manufacturer",
+      key: "manufacturer",
     },
     {
-      title: "Ngày sản xuất",
-      dataIndex: "mfgDate",
-      key: "mfgDate",
+      title: "Ngày tạo",
+      dataIndex: "createdAt",
+      key: "createdAt",
     },
     {
-      title: "Hạn sử dụng",
-      dataIndex: "expDate",
-      key: "expDate",
-    },
-    {
-      title: "Trạng thái",
-      dataIndex: "status",
-      key: "status",
-      render: (status) => (
-        <span style={{
-          color: status === "in stock" ? "#52c41a" : "#ff4d4f",
-          textTransform: "capitalize"
-        }}>
-          {status}
-        </span>
-      ),
+      title: "Hình ảnh",
+      dataIndex: "imageUrl",
+      key: "imageUrl",
+      render: (imageUrl) => (
+        imageUrl ? (
+          <img 
+            src={imageUrl} 
+            alt="Vaccine" 
+            style={{ width: 50, height: 50, objectFit: 'cover' }}
+          />
+        ) : "Chưa có hình ảnh"
+      )
     },
     {
       title: "Thao tác",
       key: "actions",
-      width: 150,
+      width: 120,
       render: (_, record) => (
         <span>
           <Button
@@ -195,12 +189,11 @@ const VaccinesPage = () => {
 
   const showEditModal = (vaccine) => {
     setEditingVaccine(vaccine);
-    editForm.setFieldsValue({
+    form.setFieldsValue({
       vaccineName: vaccine.vaccineName,
-      price: vaccine.price,
-      quantity: vaccine.quantity,
-      mfgDate: vaccine.mfgDate,
-      expDate: vaccine.expDate,
+      description: vaccine.description,
+      manufacturer: vaccine.manufacturer,
+      imageUrl: vaccine.imageUrl,
     });
     setIsEditModalVisible(true);
   };
@@ -247,7 +240,7 @@ const VaccinesPage = () => {
         onCancel={() => setIsEditModalVisible(false)}
         footer={null}
       >
-        <Form form={editForm} onFinish={handleUpdate} layout="vertical">
+        <Form form={form} onFinish={handleUpdate} layout="vertical">
           <Form.Item
             name="vaccineName"
             label="Tên Vaccine"
@@ -260,47 +253,28 @@ const VaccinesPage = () => {
           </Form.Item>
 
           <Form.Item
-            name="price"
-            label="Giá"
-            rules={[
-              { required: true, message: "Vui lòng nhập giá!" },
-              { type: 'number', min: 0, message: "Giá không được âm!" }
-            ]}
+            name="description"
+            label="Mô tả"
           >
-            <Input type="number" />
+            <Input.TextArea rows={4} maxLength={1000} />
           </Form.Item>
 
           <Form.Item
-            name="quantity"
-            label="Số lượng"
+            name="manufacturer"
+            label="Nhà sản xuất"
             rules={[
-              { required: true, message: "Vui lòng nhập số lượng!" },
-              { type: 'number', min: 0, message: "Số lượng không được âm!" }
+              { required: true, message: "Vui lòng nhập tên nhà sản xuất!" },
+              { whitespace: true, message: "Không được chỉ nhập khoảng trắng!" }
             ]}
           >
-            <Input type="number" />
+            <Input maxLength={200} />
           </Form.Item>
 
           <Form.Item
-            name="mfgDate"
-            label="Ngày sản xuất"
-            rules={[
-              { required: true, message: "Vui lòng nhập ngày sản xuất!" },
-              { pattern: /^\d{2}\/\d{2}\/\d{4}$/, message: "Định dạng ngày không hợp lệ (DD/MM/YYYY)!" }
-            ]}
+            name="imageUrl"
+            label="URL hình ảnh"
           >
-            <Input placeholder="DD/MM/YYYY" />
-          </Form.Item>
-
-          <Form.Item
-            name="expDate"
-            label="Hạn sử dụng"
-            rules={[
-              { required: true, message: "Vui lòng nhập hạn sử dụng!" },
-              { pattern: /^\d{2}\/\d{2}\/\d{4}$/, message: "Định dạng ngày không hợp lệ (DD/MM/YYYY)!" }
-            ]}
-          >
-            <Input placeholder="DD/MM/YYYY" />
+            <Input />
           </Form.Item>
 
           <Form.Item>
@@ -324,39 +298,29 @@ const VaccinesPage = () => {
             label="Tên Vaccine"
             rules={[{ required: true, message: "Vui lòng nhập tên vaccine!" }]}
           >
+            <Input maxLength={200} />
+          </Form.Item>
+
+          <Form.Item
+            name="description"
+            label="Mô tả"
+          >
+            <Input.TextArea rows={4} maxLength={1000} />
+          </Form.Item>
+
+          <Form.Item
+            name="manufacturer"
+            label="Nhà sản xuất"
+            rules={[{ required: true, message: "Vui lòng nhập tên nhà sản xuất!" }]}
+          >
+            <Input maxLength={200} />
+          </Form.Item>
+
+          <Form.Item
+            name="imageUrl"
+            label="URL hình ảnh"
+          >
             <Input />
-          </Form.Item>
-
-          <Form.Item
-            name="price"
-            label="Giá"
-            rules={[{ required: true, message: "Vui lòng nhập giá!" }]}
-          >
-            <Input type="number" min={0} />
-          </Form.Item>
-
-          <Form.Item
-            name="quantity"
-            label="Số lượng"
-            rules={[{ required: true, message: "Vui lòng nhập số lượng!" }]}
-          >
-            <Input type="number" min={0} />
-          </Form.Item>
-
-          <Form.Item
-            name="mfgDate"
-            label="Ngày sản xuất"
-            rules={[{ required: true, message: "Vui lòng nhập ngày sản xuất!" }]}
-          >
-            <Input placeholder="DD/MM/YYYY" />
-          </Form.Item>
-
-          <Form.Item
-            name="expDate"
-            label="Hạn sử dụng"
-            rules={[{ required: true, message: "Vui lòng nhập hạn sử dụng!" }]}
-          >
-            <Input placeholder="DD/MM/YYYY" />
           </Form.Item>
 
           <Form.Item className="text-right">
