@@ -1,122 +1,231 @@
 import { useState, useEffect } from "react";
-import { Table, Button, Modal, Form, Input, message } from "antd";
+import { Table, Input, Button, Modal, Form, Popconfirm } from "antd";
 import { EditOutlined, DeleteOutlined, PlusOutlined } from "@ant-design/icons";
-import ReactQuill from "react-quill";
-import "react-quill/dist/quill.snow.css";
-import axios from "../../../config/axios";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
+
+const { Search } = Input;
 
 const BlogManagement = () => {
+  const navigate = useNavigate();
   const [blogs, setBlogs] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [searchText, setSearchText] = useState("");
+  const [filteredBlogs, setFilteredBlogs] = useState([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [form] = Form.useForm();
+  const [isEditModalVisible, setIsEditModalVisible] = useState(false);
   const [editingBlog, setEditingBlog] = useState(null);
-  const [content, setContent] = useState("");
+  const [form] = Form.useForm();
+  const [editForm] = Form.useForm();
 
   useEffect(() => {
     fetchBlogs();
   }, []);
 
+  // Filter blogs when searchText changes
+  useEffect(() => {
+    const filtered = blogs.filter(blog => 
+      blog.blogTitle.toLowerCase().includes(searchText.toLowerCase()) ||
+      blog.author.toLowerCase().includes(searchText.toLowerCase())
+    );
+    setFilteredBlogs(filtered);
+  }, [blogs, searchText]);
+
+  const handleSearch = (value) => {
+    setSearchText(value);
+  };
+
   const fetchBlogs = async () => {
     try {
-      const response = await axios.get("/blogs");
+      setLoading(true);
+      const response = await axios.get("http://localhost:8080/blogs/showBlog");
       setBlogs(response.data);
+      setFilteredBlogs(response.data);
     } catch (error) {
-      message.error("Failed to fetch blogs");
+      console.error("Error fetching blogs:", error);
+      Modal.error({
+        content: "Failed to fetch blogs",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCreate = async (values) => {
+    try {
+      await axios.post("http://localhost:8080/blogs/createBlog", {
+        ...values,
+        userId: "67b53056af240f16ecf58a5c", // Thay thế bằng userId thực tế
+        status: "active"
+      });
+      
+      Modal.success({
+        content: "Blog created successfully",
+      });
+      
+      setIsModalVisible(false);
+      form.resetFields();
+      fetchBlogs(); // Refresh danh sách blog
+    } catch (error) {
+      console.error("Error creating blog:", error);
+      Modal.error({
+        content: "Failed to create blog",
+      });
+    }
+  };
+
+  const handleUpdate = async (values) => {
+    try {
+      // Validate data before sending
+      const updatedData = {
+        blogTitle: values.blogTitle?.trim() || null,
+        blogContent: values.blogContent?.trim() || null,
+        author: values.author?.trim() || null,
+        status: editingBlog.status
+      };
+
+      await axios.post(
+        `http://localhost:8080/blogs/update/${editingBlog._id}`,
+        updatedData
+      );
+
+      Modal.success({
+        content: "Cập nhật blog thành công!",
+      });
+      setIsEditModalVisible(false);
+      fetchBlogs();
+    } catch (error) {
+      console.error("Error updating blog:", error);
+      Modal.error({
+        content: error.response?.data?.message || "Không thể cập nhật blog",
+      });
+    }
+  };
+
+  const handleDelete = async (blogId) => {
+    try {
+      await axios.post(`http://localhost:8080/blogs/delete/${blogId}`);
+      
+      Modal.success({
+        content: "Xóa blog thành công!",
+      });
+      
+      fetchBlogs();
+    } catch (error) {
+      console.error("Error deleting blog:", error);
+      Modal.error({
+        content: "Không thể xóa blog",
+      });
     }
   };
 
   const columns = [
     {
-      title: "Title",
-      dataIndex: "title",
-      key: "title",
+      title: "STT",
+      key: "stt",
+      render: (_, record, index) => index + 1,
+      width: 70,
     },
     {
-      title: "Created At",
-      dataIndex: "createdAt",
-      key: "createdAt",
-      render: (text) => new Date(text).toLocaleDateString(),
+      title: "Title",
+      dataIndex: "blogTitle",
+      key: "blogTitle",
+      render: (text) => text || "Chưa cập nhật"
+    },
+    {
+      title: "Content",
+      dataIndex: "blogContent",
+      key: "blogContent",
+      ellipsis: true,
+      render: (text) => text || "Chưa cập nhật"
+    },
+    {
+      title: "Author",
+      dataIndex: "author",
+      key: "author",
+      render: (text) => text || "Chưa cập nhật"
+    },
+    {
+      title: "Views",
+      dataIndex: "views",
+      key: "views",
+      width: 100,
+    },
+    {
+      title: "Likes",
+      dataIndex: "likes",
+      key: "likes",
+      width: 100,
     },
     {
       title: "Status",
       dataIndex: "status",
       key: "status",
+      width: 100,
+      render: (status) => (
+        <span style={{
+          color: status === "active" ? "#52c41a" : "#ff4d4f",
+          textTransform: "capitalize"
+        }}>
+          {status}
+        </span>
+      ),
+    },
+    {
+      title: "Created At",
+      dataIndex: "createDate",
+      key: "createDate",
+      render: (text) => new Date(text).toLocaleDateString(),
     },
     {
       title: "Actions",
       key: "actions",
+      width: 150,
       render: (_, record) => (
-        <>
+        <span>
           <Button
             type="link"
             icon={<EditOutlined />}
-            onClick={() => handleEdit(record)}
+            onClick={() => showEditModal(record)}
           />
-          <Button
-            type="link"
-            danger
-            icon={<DeleteOutlined />}
-            onClick={() => handleDelete(record.blogId)}
-          />
-        </>
+          <Popconfirm
+            title="Xóa blog"
+            description="Bạn có chắc chắn muốn xóa blog này?"
+            onConfirm={() => handleDelete(record._id)}
+            okText="Có"
+            cancelText="Không"
+            okType="danger"
+          >
+            <Button
+              type="link"
+              danger
+              icon={<DeleteOutlined />}
+            />
+          </Popconfirm>
+        </span>
       ),
     },
   ];
 
-  const handleEdit = (blog) => {
+  const showEditModal = (blog) => {
     setEditingBlog(blog);
-    form.setFieldsValue(blog);
-    setContent(blog.content);
-    setIsModalVisible(true);
-  };
-
-  const handleDelete = async (blogId) => {
-    try {
-      await axios.delete(`/blogs/${blogId}`);
-      message.success("Blog deleted successfully");
-      fetchBlogs();
-    } catch (error) {
-      message.error("Failed to delete blog");
-    }
-  };
-
-  const handleSubmit = async (values) => {
-    try {
-      const blogData = {
-        ...values,
-        content,
-        author: localStorage.getItem("username"),
-      };
-
-      if (editingBlog) {
-        await axios.put(`/blogs/${editingBlog.blogId}`, blogData);
-        message.success("Blog updated successfully");
-      } else {
-        await axios.post("/blogs", blogData);
-        message.success("Blog created successfully");
-      }
-
-      setIsModalVisible(false);
-      form.resetFields();
-      setContent("");
-      setEditingBlog(null);
-      fetchBlogs();
-    } catch (error) {
-      message.error("Failed to save blog");
-    }
+    form.setFieldsValue({
+      blogTitle: blog.blogTitle,
+      blogContent: blog.blogContent,
+      author: blog.author,
+    });
+    setIsEditModalVisible(true);
   };
 
   return (
-    <div className="blog-management">
-      <div className="header">
+    <div style={{ padding: "20px" }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px' }}>
         <h2>Blog Management</h2>
         <Button
           type="primary"
           icon={<PlusOutlined />}
           onClick={() => {
-            setEditingBlog(null);
             form.resetFields();
-            setContent("");
             setIsModalVisible(true);
           }}
         >
@@ -124,18 +233,84 @@ const BlogManagement = () => {
         </Button>
       </div>
 
-      <Table columns={columns} dataSource={blogs} rowKey="blogId" />
+      <Search
+        placeholder="Search by title or author"
+        allowClear
+        enterButton
+        onSearch={handleSearch}
+        style={{ width: 300, marginBottom: 16 }}
+      />
+
+      <Table
+        dataSource={filteredBlogs}
+        columns={columns}
+        loading={loading}
+        rowKey="_id"
+        pagination={{
+          pageSize: 10,
+          showSizeChanger: true,
+          showTotal: (total) => `Total ${total} blogs`,
+        }}
+      />
 
       <Modal
-        title={editingBlog ? "Edit Blog" : "Create New Blog"}
+        title="Chỉnh sửa blog"
+        open={isEditModalVisible}
+        onCancel={() => setIsEditModalVisible(false)}
+        footer={null}
+      >
+        <Form form={form} onFinish={handleUpdate} layout="vertical">
+          <Form.Item
+            name="blogTitle"
+            label="Tiêu đề"
+            rules={[
+              { required: true, message: "Vui lòng nhập tiêu đề!" },
+              { whitespace: true, message: "Không được chỉ nhập khoảng trắng!" }
+            ]}
+          >
+            <Input maxLength={200} />
+          </Form.Item>
+
+          <Form.Item
+            name="blogContent"
+            label="Nội dung"
+            rules={[
+              { required: true, message: "Vui lòng nhập nội dung!" },
+              { whitespace: true, message: "Không được chỉ nhập khoảng trắng!" }
+            ]}
+          >
+            <Input.TextArea rows={4} maxLength={1000} />
+          </Form.Item>
+
+          <Form.Item
+            name="author"
+            label="Tác giả"
+            rules={[
+              { required: true, message: "Vui lòng nhập tên tác giả!" },
+              { whitespace: true, message: "Không được chỉ nhập khoảng trắng!" }
+            ]}
+          >
+            <Input maxLength={100} />
+          </Form.Item>
+
+          <Form.Item>
+            <Button type="primary" htmlType="submit" style={{ marginRight: 8 }}>
+              Cập nhật
+            </Button>
+            <Button onClick={() => setIsEditModalVisible(false)}>Hủy</Button>
+          </Form.Item>
+        </Form>
+      </Modal>
+
+      <Modal
+        title="Create New Blog"
         open={isModalVisible}
         onCancel={() => setIsModalVisible(false)}
         footer={null}
-        width={800}
       >
-        <Form form={form} onFinish={handleSubmit} layout="vertical">
+        <Form form={form} onFinish={handleCreate} layout="vertical">
           <Form.Item
-            name="title"
+            name="blogTitle"
             label="Title"
             rules={[{ required: true, message: "Please input blog title!" }]}
           >
@@ -143,52 +318,24 @@ const BlogManagement = () => {
           </Form.Item>
 
           <Form.Item
-            name="summary"
-            label="Summary"
-            rules={[{ required: true, message: "Please input blog summary!" }]}
+            name="blogContent"
+            label="Content"
+            rules={[{ required: true, message: "Please input blog content!" }]}
           >
-            <Input.TextArea rows={3} />
-          </Form.Item>
-
-          <Form.Item label="Content" required>
-            <ReactQuill
-              theme="snow"
-              value={content}
-              onChange={setContent}
-              style={{ height: "200px", marginBottom: "50px" }}
-            />
+            <Input.TextArea rows={4} />
           </Form.Item>
 
           <Form.Item
-            name="thumbnail"
-            label="Thumbnail URL"
-            rules={[{ required: true, message: "Please input thumbnail URL!" }]}
+            name="author"
+            label="Author"
+            rules={[{ required: true, message: "Please input author name!" }]}
           >
             <Input />
           </Form.Item>
 
-          <Form.Item
-            name="tags"
-            label="Tags (comma separated)"
-            rules={[{ required: true, message: "Please input tags!" }]}
-          >
-            <Input />
-          </Form.Item>
-
-          <Form.Item
-            name="status"
-            label="Status"
-            rules={[{ required: true, message: "Please select status!" }]}
-          >
-            <Select>
-              <Select.Option value="draft">Draft</Select.Option>
-              <Select.Option value="published">Published</Select.Option>
-            </Select>
-          </Form.Item>
-
-          <Form.Item>
+          <Form.Item className="text-right">
             <Button type="primary" htmlType="submit">
-              {editingBlog ? "Update" : "Create"}
+              Create
             </Button>
           </Form.Item>
         </Form>

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { Table, Input, Button, Modal, Form, Select } from "antd";
-import { EditOutlined } from "@ant-design/icons";
+import { Table, Input, Button, Modal, Form, Select, Popconfirm } from "antd";
+import { EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
@@ -97,6 +97,47 @@ const AllCustomerPage = () => {
     }
   };
 
+  const handleDelete = async (userId) => {
+    try {
+      const accesstoken = localStorage.getItem("accesstoken");
+
+      if (!accesstoken) {
+        Modal.error({
+          content: "Bạn cần đăng nhập lại",
+        });
+        return;
+      }
+
+      await axios.post(
+        `http://localhost:8080/customer/delete/${userId}`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${accesstoken}`,
+          },
+        }
+      );
+
+      Modal.success({
+        content: "Xóa khách hàng thành công!",
+      });
+      
+      await fetchCustomers(); // Refresh danh sách
+    } catch (error) {
+      console.error("Error deleting customer:", error);
+      if (error.response?.status === 401) {
+        Modal.error({
+          content: "Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.",
+        });
+        navigate("/login");
+      } else {
+        Modal.error({
+          content: "Không thể xóa thông tin khách hàng",
+        });
+      }
+    }
+  };
+
   const columns = [
     {
       title: "STT",
@@ -145,16 +186,34 @@ const AllCustomerPage = () => {
     {
       title: "Thao tác",
       key: "actions",
-      width: 120,
+      width: 200,
       render: (_, record) => (
-        <Button
-          type="primary"
-          icon={<EditOutlined />}
-          style={{ backgroundColor: "#52c41a" }}
-          onClick={() => showEditModal(record)}
-        >
-          Cập nhật
-        </Button>
+        <span>
+          <Button
+            type="primary"
+            icon={<EditOutlined />}
+            style={{ backgroundColor: "#52c41a", marginRight: 8 }}
+            onClick={() => showEditModal(record)}
+          >
+            Cập nhật
+          </Button>
+          <Popconfirm
+            title="Xóa khách hàng"
+            description="Bạn có chắc chắn muốn xóa khách hàng này?"
+            onConfirm={() => handleDelete(record.userId)}
+            okText="Có"
+            cancelText="Không"
+            okType="danger"
+          >
+            <Button
+              type="primary"
+              danger
+              icon={<DeleteOutlined />}
+            >
+              Xóa
+            </Button>
+          </Popconfirm>
+        </span>
       ),
     },
   ];
