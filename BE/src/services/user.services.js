@@ -102,6 +102,9 @@ class UserService {
       const user = await connectToDatabase.users.findOneAndDelete({
         _id: new ObjectId(userId),
       });
+      const cus = await connectToDatabase.customers.findOneAndDelete({
+        userId: new ObjectId(userId),
+      });
       if (!user) {
         throw new Error(`Không tìm thấy user với id: ${userId}`);
       }
