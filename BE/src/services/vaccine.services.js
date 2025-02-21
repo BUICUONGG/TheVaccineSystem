@@ -25,7 +25,7 @@ class VaccineService {
       const result =
         await connectToDatabase.vaccinceInventorys.findOneAndUpdate(
           { _id: new ObjectId(id) },
-          { $set: updateData }
+          { $set: vaccineData }
         );
 
       if (result.modifiedCount === 0) {
