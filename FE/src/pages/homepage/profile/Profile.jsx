@@ -46,8 +46,8 @@ const Profile = () => {
 
         // Set form values với dữ liệu từ response
         form.setFieldsValue({
-          username: userData.username,
-          email: userData.email,
+          // username: userData.username,
+          // email: userData.email,
           customerName: customerData.customerName,
           phone: customerData.phone,
           birthday: customerData.birthday,
@@ -116,6 +116,7 @@ const Profile = () => {
 
       message.success("Cập nhật thông tin thành công");
       fetchUserData(); // Refresh data after update
+      navigate("/homepage");
     } catch (error) {
       console.error("Error updating profile:", error);
       message.error("Không thể cập nhật thông tin");
@@ -135,7 +136,7 @@ const Profile = () => {
           className="profile-form"
           initialValues={userData}
         >
-          <div className="form-row">
+          {/* <div className="form-row">
             <Form.Item
               name="username"
               label="Tên đăng nhập"
@@ -151,7 +152,7 @@ const Profile = () => {
             >
               <Input disabled />
             </Form.Item>
-          </div>
+          </div> */}
 
           <div className="form-row">
             <Form.Item
