@@ -65,7 +65,7 @@ export const showInfoVaccineController = async (req, res) => {
 
 export const showVaccineAndImportController = async (req, res) => {
   try {
-    const list = await vaccineService.getVaccineWithImports();
+    const list = await vaccineService.getVaccineWithImportsDetail();
     return res.status(200).json(list);
   } catch (error) {
     res.status(400).json({
