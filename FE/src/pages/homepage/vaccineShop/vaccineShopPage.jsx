@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { FaShoppingCart, FaTrashAlt } from "react-icons/fa";
+// import { FaShoppingCart, FaTrashAlt } from "react-icons/fa";
 import axios from "axios";
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import { Pagination, Modal } from "antd"; // Thêm Modal từ antd để hiển thị thông báo lỗi
@@ -11,21 +11,21 @@ const VaccinePriceList = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("Single");
   const [singleProducts, setSingleProducts] = useState([]);
-  const [packedProducts, setPackedProducts] = useState([]);
+  // const [packedProducts, setPackedProducts] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [cartItems, setCartItems] = useState([]);
-  const [isCartOpen, setIsCartOpen] = useState(false);
+  // const [isCartOpen, setIsCartOpen] = useState(false);
   const productsPerPage = 9;
 
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        // vaccine đơn
-        const singleResponse = await axios.get("http://localhost:8080/vaccine/listVaccine");
-        setSingleProducts(singleResponse.data.result);
+        // vaccine lẻ trong lô
+        const singleResponse = await axios.get("http://localhost:8080/vaccine/showInfo");
+        setSingleProducts(singleResponse.data);
         // vaccine gói
-        const packedResponse = await axios.get("http://localhost:8080/vaccine/showInfo");
-        setPackedProducts(packedResponse.data);
+        
+        // setPackedProducts(packedResponse.data);
       } catch (error) {
         console.error("Error fetching products:", error);
       }
@@ -102,7 +102,7 @@ const VaccinePriceList = () => {
   // Lọc sản phẩm dựa trên danh mục được chọn
   const filteredProducts = selectedCategory === "Single"
     ? singleProducts
-    : packedProducts;
+    : [];
 
   const indexOfLastProduct = currentPage * productsPerPage;
   const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
@@ -111,48 +111,48 @@ const VaccinePriceList = () => {
     indexOfLastProduct
   );
 
-  const addToCart = (product) => {
-    setCartItems((prevItems) => {
-      const existingItem = prevItems.find(
-        (item) => item.vaccineName === product.vaccineName
-      );
-      if (existingItem) {
-        // Nếu sản phẩm đã tồn tại, tăng số lượng
-        return prevItems.map((item) =>
-          item.vaccineName === product.vaccineName
-            ? { ...item, quantity: (item.quantity || 1) + 1 }
-            : item
-        );
-      }
-      // Nếu là sản phẩm mới, thêm với số lượng là 1
-      return [...prevItems, { ...product, quantity: 1 }];
-    });
-  };
+  // const addToCart = (product) => {
+  //   setCartItems((prevItems) => {
+  //     const existingItem = prevItems.find(
+  //       (item) => item.vaccineName === product.vaccineName
+  //     );
+  //     if (existingItem) {
+  //       // Nếu sản phẩm đã tồn tại, tăng số lượng
+  //       return prevItems.map((item) =>
+  //         item.vaccineName === product.vaccineName
+  //           ? { ...item, quantity: (item.quantity || 1) + 1 }
+  //           : item
+  //       );
+  //     }
+  //     // Nếu là sản phẩm mới, thêm với số lượng là 1
+  //     return [...prevItems, { ...product, quantity: 1 }];
+  //   });
+  // };
 
-  const removeFromCart = (index) => {
-    const newCartItems = cartItems.filter((_, i) => i !== index);
-    setCartItems(newCartItems);
-  };
+  // const removeFromCart = (index) => {
+  //   const newCartItems = cartItems.filter((_, i) => i !== index);
+  //   setCartItems(newCartItems);
+  // };
 
-  const toggleCart = () => {
-    setIsCartOpen(!isCartOpen);
-  };
+  // const toggleCart = () => {
+  //   setIsCartOpen(!isCartOpen);
+  // };
 
-  const handleCheckout = () => {
-    if (!isLoggedIn) {
-      navigate("/login");
-    } else {
-      // Lưu giỏ hàng hiện tại vào localStorage trước khi chuyển trang
-      const cartData = {
-        items: cartItems,
-        totalAmount: cartItems.reduce((sum, item) => 
-          sum + (parseFloat(item.price) || 0) * (item.quantity || 1), 0
-        )
-      };
-      localStorage.setItem("checkoutCart", JSON.stringify(cartData));
-      navigate("/checkoutPrice");
-    }
-  };
+  // const handleCheckout = () => {
+  //   if (!isLoggedIn) {
+  //     navigate("/login");
+  //   } else {
+  //     // Lưu giỏ hàng hiện tại vào localStorage trước khi chuyển trang
+  //     const cartData = {
+  //       items: cartItems,
+  //       totalAmount: cartItems.reduce((sum, item) => 
+  //         sum + (parseFloat(item.price) || 0) * (item.quantity || 1), 0
+  //       )
+  //     };
+  //     localStorage.setItem("checkoutCart", JSON.stringify(cartData));
+  //     navigate("/checkoutPrice");
+  //   }
+  // };
 
   return (
     <div className="new-page">
@@ -164,7 +164,7 @@ const VaccinePriceList = () => {
             </Link>
           </div>
           <div className="auth-buttons">
-            <div className="cart-dropdown">
+            {/* <div className="cart-dropdown">
               <div className="cart-icon-container">
                 <FaShoppingCart className="cart-icon" onClick={toggleCart} />
                 {cartItems.length > 0 && (
@@ -203,7 +203,7 @@ const VaccinePriceList = () => {
                   )}
                 </div>
               )}
-            </div>
+            </div> */}
             {isLoggedIn ? (
               <>
                 <button className="logout-btn" onClick={handleLogout}>
@@ -267,15 +267,15 @@ const VaccinePriceList = () => {
                 <span>Mô tả: {product.description}</span>
                 {selectedCategory === "Single" ? (
                   <>
-                    <p >Giá:  Chưa cập nhật </p>
+                    <p >Giá: <b>{product.vaccineImports?.[0]?.price || "Chưa có giá"} VNĐ</b> </p>
                   </>
                 ) : (
                   <>
-                    <p>Giá gói: {product.vaccineImports?.[0]?.price || "Chưa có giá"}</p>
+                    {/* <p>Giá gói: {product.vaccineImports?.[0]?.price || "Chưa có giá"}</p> */}
                     
                   </>
                 )}
-                <button className="select-btn" onClick={() => addToCart(product)}>Chọn</button>
+                {/* <button className="select-btn" onClick={() => addToCart(product)}>Chọn</button> */}
               </div>
             ))}
           </>
