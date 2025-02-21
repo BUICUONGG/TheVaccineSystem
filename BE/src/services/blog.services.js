@@ -1,6 +1,6 @@
 import connectToDatabase from "../config/database.js";
 import Blog from "../model/blogSchema.js";
-
+import { ObjectId } from "mongodb";
 class BlogService {
   async showData() {
     try {
@@ -50,12 +50,38 @@ class BlogService {
       if (!blog) {
         throw new Error("Blog not found");
       }
-      
+
       blog.likes += 1;
       await blog.save();
       return blog;
     } catch (error) {
       console.error("Like error:", error);
+      throw new Error(error.message);
+    }
+  }
+
+  async updateBlog(id, dataUpdate) {
+    try {
+      const result = await connectToDatabase.blogs.findOneAndUpdate(
+        {
+          _id: new ObjectId(id),
+        },
+        { $set: dataUpdate },
+        { returnDocument: "after" }
+      );
+      return result;
+    } catch (error) {
+      throw new Error(error.message);
+    }
+  }
+
+  async deleteBlog(id) {
+    try {
+      const result = await connectToDatabase.blogs.findOneAndDelete({
+        _id: new ObjectId(id),
+      });
+      return result;
+    } catch (error) {
       throw new Error(error.message);
     }
   }
