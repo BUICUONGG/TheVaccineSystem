@@ -197,22 +197,6 @@ const AllCustomerPage = () => {
           >
             Cập nhật
           </Button>
-          <Popconfirm
-            title="Xóa khách hàng"
-            description="Bạn có chắc chắn muốn xóa khách hàng này?"
-            onConfirm={() => handleDelete(record.userId)}
-            okText="Có"
-            cancelText="Không"
-            okType="danger"
-          >
-            <Button
-              type="primary"
-              danger
-              icon={<DeleteOutlined />}
-            >
-              Xóa
-            </Button>
-          </Popconfirm>
         </span>
       ),
     },

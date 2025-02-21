@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { Table, Input, Button, Modal } from "antd";
-import { DeleteOutlined } from "@ant-design/icons";
+import { Table, Input, Button, Modal, Form, Popconfirm } from "antd";
+import { EditOutlined, DeleteOutlined, PlusOutlined } from "@ant-design/icons";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
@@ -11,8 +11,12 @@ const VaccinesPage = () => {
   const [vaccineList, setVaccineList] = useState([]);
   const [loading, setLoading] = useState(false);
   const [searchText, setSearchText] = useState("");
-  const [deleteLoading, setDeleteLoading] = useState(false);
   const [filteredVaccines, setFilteredVaccines] = useState([]);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isEditModalVisible, setIsEditModalVisible] = useState(false);
+  const [editingVaccine, setEditingVaccine] = useState(null);
+  const [form] = Form.useForm();
+  const [editForm] = Form.useForm();
 
   useEffect(() => {
     fetchVaccines();
@@ -32,72 +36,83 @@ const VaccinesPage = () => {
   const fetchVaccines = async () => {
     try {
       setLoading(true);
-      const response = await axios.get(
-        "http://localhost:8080/vaccine/listVaccine"
-      );
-      if (response.data.result) {
-        setVaccineList(response.data.result);
-        setFilteredVaccines(response.data.result);
-      }
+      const response = await axios.get("http://localhost:8080/vaccine/showInfo");
+      setVaccineList(response.data);
+      setFilteredVaccines(response.data);
     } catch (error) {
       console.error("Error fetching vaccines:", error);
       Modal.error({
-        content: "Failed to fetch vaccines",
+        content: "Không thể tải danh sách vaccine",
       });
     } finally {
       setLoading(false);
     }
   };
 
-  const handleDelete = async (vaccineId) => {
-    const accesstoken = localStorage.getItem("accesstoken");
-
-    if (!accesstoken) {
-      Modal.error({
-        content: "You need to login first",
+  const handleCreate = async (values) => {
+    try {
+      await axios.post("http://localhost:8080/vaccine/addVaccine", {
+        ...values,
+        createdAt: new Date().toLocaleDateString('en-GB'), // DD/MM/YYYY format
       });
-      return;
+      
+      Modal.success({
+        content: "Thêm vaccine thành công!",
+      });
+      
+      setIsModalVisible(false);
+      form.resetFields();
+      fetchVaccines();
+    } catch (error) {
+      console.error("Error creating vaccine:", error);
+      Modal.error({
+        content: "Không thể thêm vaccine",
+      });
     }
+  };
 
-    Modal.confirm({
-      title: "Are you sure you want to delete this vaccine?",
-      content: "This action cannot be undone.",
-      okText: "Yes",
-      okType: "danger",
-      cancelText: "No",
-      onOk: async () => {
-        try {
-          setDeleteLoading(true);
-          await axios.delete(
-            `http://localhost:8080/vaccine/delete/${vaccineId}`,
-            {
-              headers: {
-                Authorization: `Bearer ${accesstoken}`,
-              },
-            }
-          );
+  const handleUpdate = async (values) => {
+    try {
+      const updatedData = {
+        vaccineName: values.vaccineName?.trim() || null,
+        description: values.description?.trim() || null,
+        manufacturer: values.manufacturer?.trim() || null,
+        imageUrl: values.imageUrl?.trim() || null,
+      };
 
-          await fetchVaccines();
-          Modal.success({
-            content: "Vaccine deleted successfully",
-          });
-        } catch (error) {
-          console.error("Error deleting vaccine:", error);
-          if (error.response?.status === 401) {
-            Modal.error({
-              content: "Unauthorized. Please login again.",
-            });
-            navigate("/login");
-          } else {
-            Modal.error({
-              content: "Failed to delete vaccine",
-            });
-          }
-        } finally {
-          setDeleteLoading(false);
-        }
-      },
-    });
+      await axios.post(
+        `http://localhost:8080/vaccine/updateVaccine/${editingVaccine._id}`,
+        updatedData
+      );
+
+      Modal.success({
+        content: "Cập nhật vaccine thành công!",
+      });
+      setIsEditModalVisible(false);
+      fetchVaccines();
+    } catch (error) {
+      console.error("Error updating vaccine:", error);
+      Modal.error({
+        content: "Không thể cập nhật vaccine",
+      });
+    }
+  };
+
+  const handleDelete = async (vaccineId) => {
+    try {
+      await axios.post(`http://localhost:8080/vaccine/delete/${vaccineId}`);
+      
+      Modal.success({
+        content: "Xóa vaccine thành công!",
+      });
+      
+      fetchVaccines();
+    } catch (error) {
+      console.error("Error deleting vaccine:", error);
+      Modal.error({
+        content: "Không thể xóa vaccine",
+      });
+    }
   };
 
   const columns = [
@@ -108,74 +123,105 @@ const VaccinesPage = () => {
       width: 70,
     },
     {
-      title: "Vaccine Name",
+      title: "Tên Vaccine",
       dataIndex: "vaccineName",
       key: "vaccineName",
     },
     {
-      title: "Price",
-      dataIndex: "price",
-      key: "price",
-      render: (price) => `$${price.toLocaleString()}`,
+      title: "Mô tả",
+      dataIndex: "description",
+      key: "description",
+      ellipsis: true,
     },
     {
-      title: "Quantity",
-      dataIndex: "quantity",
-      key: "quantity",
+      title: "Nhà sản xuất",
+      dataIndex: "manufacturer",
+      key: "manufacturer",
     },
     {
-      title: "Manufacturing Date",
-      dataIndex: "mfgDate",
-      key: "mfgDate",
+      title: "Ngày tạo",
+      dataIndex: "createdAt",
+      key: "createdAt",
     },
     {
-      title: "Expiration Date",
-      dataIndex: "expDate",
-      key: "expDate",
+      title: "Hình ảnh",
+      dataIndex: "imageUrl",
+      key: "imageUrl",
+      render: (imageUrl) => (
+        imageUrl ? (
+          <img 
+            src={imageUrl} 
+            alt="Vaccine" 
+            style={{ width: 50, height: 50, objectFit: 'cover' }}
+          />
+        ) : "Chưa có hình ảnh"
+      )
     },
     {
-      title: "Status",
-      dataIndex: "status",
-      key: "status",
-      render: (status) => (
-        <span
-          style={{
-            color: status === "in stock" ? "#52c41a" : "#ff4d4f",
-            textTransform: "capitalize",
-          }}
-        >
-          {status}
-        </span>
-      ),
-    },
-    {
-      title: "Actions",
+      title: "Thao tác",
       key: "actions",
-      width: 100,
+      width: 120,
       render: (_, record) => (
-        <Button
-          type="primary"
-          danger
-          icon={<DeleteOutlined />}
-          onClick={() => handleDelete(record._id)}
-          loading={deleteLoading}
-        >
-          Delete
-        </Button>
+        <span>
+          <Button
+            type="link"
+            icon={<EditOutlined />}
+            onClick={() => showEditModal(record)}
+          />
+          <Popconfirm
+            title="Xóa vaccine"
+            description="Bạn có chắc chắn muốn xóa vaccine này?"
+            onConfirm={() => handleDelete(record._id)}
+            okText="Có"
+            cancelText="Không"
+            okType="danger"
+          >
+            <Button
+              type="link"
+              danger
+              icon={<DeleteOutlined />}
+            />
+          </Popconfirm>
+        </span>
       ),
     },
   ];
 
+  const showEditModal = (vaccine) => {
+    setEditingVaccine(vaccine);
+    form.setFieldsValue({
+      vaccineName: vaccine.vaccineName,
+      description: vaccine.description,
+      manufacturer: vaccine.manufacturer,
+      imageUrl: vaccine.imageUrl,
+    });
+    setIsEditModalVisible(true);
+  };
+
   return (
     <div style={{ padding: "20px" }}>
-      <h2>Vaccine Inventory Management</h2>
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px' }}>
+        <h2>Quản lý Vaccine</h2>
+        <Button
+          type="primary"
+          icon={<PlusOutlined />}
+          onClick={() => {
+            form.resetFields();
+            setIsModalVisible(true);
+          }}
+        >
+          Thêm Vaccine Mới
+        </Button>
+      </div>
+
       <Search
-        placeholder="Search by vaccine name"
+        placeholder="Tìm kiếm theo tên vaccine"
         allowClear
         enterButton
         onSearch={handleSearch}
         style={{ width: 300, marginBottom: 16 }}
       />
+
       <Table
         dataSource={filteredVaccines}
         columns={columns}
@@ -184,9 +230,106 @@ const VaccinesPage = () => {
         pagination={{
           pageSize: 10,
           showSizeChanger: true,
-          showTotal: (total) => `Total ${total} vaccines`,
+          showTotal: (total) => `Tổng ${total} vaccine`,
         }}
       />
+
+      <Modal
+        title="Chỉnh sửa Vaccine"
+        open={isEditModalVisible}
+        onCancel={() => setIsEditModalVisible(false)}
+        footer={null}
+      >
+        <Form form={form} onFinish={handleUpdate} layout="vertical">
+          <Form.Item
+            name="vaccineName"
+            label="Tên Vaccine"
+            rules={[
+              { required: true, message: "Vui lòng nhập tên vaccine!" },
+              { whitespace: true, message: "Không được chỉ nhập khoảng trắng!" }
+            ]}
+          >
+            <Input maxLength={200} />
+          </Form.Item>
+
+          <Form.Item
+            name="description"
+            label="Mô tả"
+          >
+            <Input.TextArea rows={4} maxLength={1000} />
+          </Form.Item>
+
+          <Form.Item
+            name="manufacturer"
+            label="Nhà sản xuất"
+            rules={[
+              { required: true, message: "Vui lòng nhập tên nhà sản xuất!" },
+              { whitespace: true, message: "Không được chỉ nhập khoảng trắng!" }
+            ]}
+          >
+            <Input maxLength={200} />
+          </Form.Item>
+
+          <Form.Item
+            name="imageUrl"
+            label="URL hình ảnh"
+          >
+            <Input />
+          </Form.Item>
+
+          <Form.Item>
+            <Button type="primary" htmlType="submit" style={{ marginRight: 8 }}>
+              Cập nhật
+            </Button>
+            <Button onClick={() => setIsEditModalVisible(false)}>Hủy</Button>
+          </Form.Item>
+        </Form>
+      </Modal>
+
+      <Modal
+        title="Thêm Vaccine Mới"
+        open={isModalVisible}
+        onCancel={() => setIsModalVisible(false)}
+        footer={null}
+      >
+        <Form form={form} onFinish={handleCreate} layout="vertical">
+          <Form.Item
+            name="vaccineName"
+            label="Tên Vaccine"
+            rules={[{ required: true, message: "Vui lòng nhập tên vaccine!" }]}
+          >
+            <Input maxLength={200} />
+          </Form.Item>
+
+          <Form.Item
+            name="description"
+            label="Mô tả"
+          >
+            <Input.TextArea rows={4} maxLength={1000} />
+          </Form.Item>
+
+          <Form.Item
+            name="manufacturer"
+            label="Nhà sản xuất"
+            rules={[{ required: true, message: "Vui lòng nhập tên nhà sản xuất!" }]}
+          >
+            <Input maxLength={200} />
+          </Form.Item>
+
+          <Form.Item
+            name="imageUrl"
+            label="URL hình ảnh"
+          >
+            <Input />
+          </Form.Item>
+
+          <Form.Item className="text-right">
+            <Button type="primary" htmlType="submit">
+              Thêm mới
+            </Button>
+          </Form.Item>
+        </Form>
+      </Modal>
     </div>
   );
 };

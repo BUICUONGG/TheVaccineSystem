@@ -17,6 +17,7 @@ const HomePage = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userRole, setUserRole] = useState('');
 
   const banners = [
     "/images/banner1.png",
@@ -27,7 +28,17 @@ const HomePage = () => {
   useEffect(() => {
     const token = localStorage.getItem("accesstoken");
     if (token) {
-      setIsLoggedIn(true);
+      try {
+        // Decode token để lấy role giống như trong loginPage.jsx
+        const tokenParts = token.split(".");
+        const payload = JSON.parse(atob(tokenParts[1]));
+        setUserRole(payload.role);
+        setIsLoggedIn(true);
+      } catch (error) {
+        console.error("Invalid token:", error);
+        setIsLoggedIn(false);
+        setUserRole('');
+      }
     }
     document.title = "Trang chủ";
     const timer = setInterval(() => {
@@ -201,11 +212,15 @@ const HomePage = () => {
         <nav className="navbar">
           <div className="nav-links">
             <a href="/homepage">Trang chủ</a>
-            <a href="#">Giới thiệu</a>
             <Link to="/news">Tin tức</Link>
             <Link to="/handbook">Cẩm nang</Link>
             <Link to="/advise">Tư vấn</Link>
-            <a href="#">Đăng ký tiêm</a>
+            <Link to="/blogs">Blogs</Link>
+            {userRole === 'admin' ? (
+              <Link to="/admin">Quản trị</Link>
+            ) : (
+              <a href="#">Đăng ký tiêm</a>
+            )}
           </div>
         </nav>
       </div>

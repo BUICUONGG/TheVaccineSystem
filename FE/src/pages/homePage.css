@@ -1,0 +1,109 @@
+/* Dark Theme Variables */
+:root {
+  --dark-bg: #0a0a0a;
+  --dark-text: #ffffff;
+  --dark-primary: #1a1a1a;
+  --dark-secondary: #2d2d2d;
+  --dark-accent: #3700ff;
+  --dark-hover: #4a4a4a;
+}
+
+/* Dark Theme Classes */
+.dark-theme {
+  background-color: var(--dark-bg);
+  color: var(--dark-text);
+}
+
+.dark-theme .header-framework {
+  background-color: var(--dark-primary);
+  border-bottom: 1px solid var(--dark-secondary);
+}
+
+.dark-theme .navbar {
+  background-color: var(--dark-primary);
+}
+
+.dark-theme .nav-links a {
+  color: var(--dark-text);
+}
+
+.dark-theme .nav-links a:hover {
+  color: var(--dark-accent);
+}
+
+.dark-theme .quick-access .icon-item {
+  background-color: var(--dark-secondary);
+  transition: background-color 0.3s;
+}
+
+.dark-theme .quick-access .icon-item:hover {
+  background-color: var(--dark-hover);
+}
+
+.dark-theme .vaccine-card,
+.dark-theme .news-item {
+  background-color: var(--dark-secondary);
+  border: 1px solid var(--dark-hover);
+}
+
+.dark-theme .footer {
+  background-color: var(--dark-primary);
+  border-top: 1px solid var(--dark-secondary);
+}
+
+/* Theme Toggle Button */
+.theme-toggle-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid var(--dark-secondary);
+  background-color: transparent;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.theme-toggle-btn::before {
+  content: '🌙';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.theme-toggle-btn.dark::before {
+  content: '☀️';
+}
+
+/* Additional Dark Theme Styles */
+.dark-theme .banner-container {
+  background-color: var(--dark-bg);
+}
+
+.dark-theme .slider-button {
+  background-color: var(--dark-secondary);
+  color: var(--dark-text);
+}
+
+.dark-theme .indicator {
+  background-color: var(--dark-secondary);
+}
+
+.dark-theme .indicator.active {
+  background-color: var(--dark-accent);
+}
+
+.dark-theme .auth-buttons button {
+  background-color: var(--dark-secondary);
+  color: var(--dark-text);
+  border: 1px solid var(--dark-hover);
+}
+
+.dark-theme .auth-buttons button:hover {
+  background-color: var(--dark-hover);
+}
+
+/* Smooth Transitions */
+.homepage * {
+  transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+} 
