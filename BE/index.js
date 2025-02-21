@@ -44,13 +44,10 @@ app.use("/images", express.static(path.join(__dirname, "src", "public")));
 app.use("/user", usersRouter);
 app.use("/vaccine", vaccinesRouter);
 app.use("/child", childRouter);
-app.use("/blog", blogRoutes);
+app.use("/blogs", blogRoutes);
 app.use("/customer", customerRoutes);
 app.use("/appointment", aptLeRoutes);
 // app.use("appointment", aptGoiRoutes);
-// app.use("/admin", adminRouter);
-// app.use('staff', staffRouter);
-
 // Lắng nghe cổng
 app.listen(PORT, () => {
   console.log(`Server đang chạy tại http://localhost:${PORT}`);
