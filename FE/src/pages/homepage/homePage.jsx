@@ -219,8 +219,9 @@ const HomePage = () => {
             {userRole === 'admin' ? (
               <Link to="/admin">Quản trị</Link>
             ) : (
-              <a href="#">Đăng ký tiêm</a>
+              <a href="/registerinjection">Đăng ký tiêm</a>
             )}
+            {/* <a href="/registerinjection">Đăng ký tiêm</a> */}
           </div>
         </nav>
       </div>
