@@ -53,7 +53,7 @@ const VaccinesPage = () => {
     try {
       await axios.post("http://localhost:8080/vaccine/addVaccine", {
         ...values,
-        createdAt: new Date().toLocaleDateString('en-GB'), // DD/MM/YYYY format
+        createdAt: new Date().toLocaleDateString('en-GB'),
       });
       
       Modal.success({
@@ -73,11 +73,16 @@ const VaccinesPage = () => {
 
   const handleUpdate = async (values) => {
     try {
+      if (!editingVaccine?._id) {
+        throw new Error("Không tìm thấy ID vaccine");
+      }
+
+      // Validate data before sending
       const updatedData = {
-        vaccineName: values.vaccineName?.trim() || null,
-        description: values.description?.trim() || null,
-        manufacturer: values.manufacturer?.trim() || null,
-        imageUrl: values.imageUrl?.trim() || null,
+        vaccineName: values.vaccineName?.trim(),
+        description: values.description?.trim(),
+        manufacturer: values.manufacturer?.trim(),
+        imageUrl: values.imageUrl?.trim(),
       };
 
       await axios.post(
@@ -89,11 +94,12 @@ const VaccinesPage = () => {
         content: "Cập nhật vaccine thành công!",
       });
       setIsEditModalVisible(false);
+      editForm.resetFields();
       fetchVaccines();
     } catch (error) {
       console.error("Error updating vaccine:", error);
       Modal.error({
-        content: "Không thể cập nhật vaccine",
+        content: error.message || "Không thể cập nhật vaccine",
       });
     }
   };
@@ -138,11 +144,11 @@ const VaccinesPage = () => {
       dataIndex: "manufacturer",
       key: "manufacturer",
     },
-    {
-      title: "Ngày tạo",
-      dataIndex: "createdAt",
-      key: "createdAt",
-    },
+    // {
+    //   title: "Ngày tạo",
+    //   dataIndex: "createdAt",
+    //   key: "createdAt",
+    // },
     {
       title: "Hình ảnh",
       dataIndex: "imageUrl",
@@ -188,8 +194,15 @@ const VaccinesPage = () => {
   ];
 
   const showEditModal = (vaccine) => {
+    if (!vaccine?._id) {
+      Modal.error({
+        content: "Không tìm thấy thông tin vaccine",
+      });
+      return;
+    }
+    
     setEditingVaccine(vaccine);
-    form.setFieldsValue({
+    editForm.setFieldsValue({
       vaccineName: vaccine.vaccineName,
       description: vaccine.description,
       manufacturer: vaccine.manufacturer,
@@ -237,10 +250,13 @@ const VaccinesPage = () => {
       <Modal
         title="Chỉnh sửa Vaccine"
         open={isEditModalVisible}
-        onCancel={() => setIsEditModalVisible(false)}
+        onCancel={() => {
+          setIsEditModalVisible(false);
+          editForm.resetFields();
+        }}
         footer={null}
       >
-        <Form form={form} onFinish={handleUpdate} layout="vertical">
+        <Form form={editForm} onFinish={handleUpdate} layout="vertical">
           <Form.Item
             name="vaccineName"
             label="Tên Vaccine"

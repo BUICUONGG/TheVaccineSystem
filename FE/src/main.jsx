@@ -17,6 +17,7 @@ import CheckOutPrice from "./pages/homepage/vaccineShop/checkoutPrice";
 import Profile from "./pages/homepage/profile/profile";
 import BlogList from "./pages/blog/BlogList";
 import BlogManagement from "./pages/usersRole/admin/BlogManagement";
+import OverviewPage from "./pages/usersRole/admin/overviewPage";
 
 
 const router = createBrowserRouter([
@@ -74,7 +75,7 @@ const router = createBrowserRouter([
       },
       {
         path: "overview",
-        element: <div>Overview Page</div>,
+        element: <OverviewPage />,
       },
       {
         path: "accounts",
