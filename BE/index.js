@@ -11,6 +11,7 @@ import blogRoutes from "./src/routes/blogs.routes.js";
 import customerRoutes from "./src/routes/customers.routes.js";
 import { aptGoiRoutes, aptLeRoutes } from "./src/routes/appointments.routes.js";
 import { fileURLToPath } from "url";
+import vaccineImportRoutes from "./src/routes/vaccineImports.routes.js";
 const app = express();
 app.use(express.json());
 const PORT =
@@ -47,7 +48,9 @@ app.use("/child", childRouter);
 app.use("/blogs", blogRoutes);
 app.use("/customer", customerRoutes);
 app.use("/appointment", aptLeRoutes);
+app.use("/vaccineimport", vaccineImportRoutes);
 // app.use("appointment", aptGoiRoutes);
+
 // Lắng nghe cổng
 app.listen(PORT, () => {
   console.log(`Server đang chạy tại http://localhost:${PORT}`);
