@@ -87,9 +87,7 @@ const AdminLayout = () => {
           <li className="menu-item">
             <Link
               to="/admin/blog"
-              className={
-                location.pathname === "/admin/blog" ? "active" : ""
-              }
+              className={location.pathname === "/admin/blog" ? "active" : ""}
             >
               Blog
             </Link>
@@ -149,7 +147,7 @@ const AdminLayout = () => {
         </div>
       </div>
 
-      <div className="main-content">
+      <div className="main-contentt">
         <header className="header">
           <nav className="navigation">
             <Link to="/homepage">

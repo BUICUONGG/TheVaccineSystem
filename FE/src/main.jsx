@@ -13,11 +13,12 @@ import News from "./pages/homepage/news/news";
 import Handbook from "./pages/homepage/handbook/handbook";
 import Advise from "./pages/homepage/Advise/advise";
 import VaccinePriceList from "./pages/homepage/vaccineShop/vaccineShopPage";
-import CheckOutPrice from "./pages/homepage/vaccineShop/checkoutPrice";
+// import CheckOutPrice from "./pages/homepage/vaccineShop/checkoutPrice";
 import Profile from "./pages/homepage/profile/profile";
 import BlogList from "./pages/blog/BlogList";
 import BlogManagement from "./pages/usersRole/admin/BlogManagement";
 import OverviewPage from "./pages/usersRole/admin/overviewPage";
+import RegisterInjection from "./pages/homepage/registeInjection/registerInjection";
 
 
 const router = createBrowserRouter([
@@ -38,9 +39,13 @@ const router = createBrowserRouter([
       element: <VaccinePriceList />,
   },
   {
-    path: "/checkoutprice",
-    element: <CheckOutPrice />,
+    path: "/registerinjection",
+    element: <RegisterInjection />,
 },
+//   {
+//     path: "/checkoutprice",
+//     element: <CheckOutPrice />,
+// },
   {
     path: "/register",
     element: <RegisterPage />,
