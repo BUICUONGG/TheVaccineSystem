@@ -10,7 +10,7 @@
   left: 0;
   width: 100%;
   background: white;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   z-index: 1001;
   padding: 10px 0;
 }
@@ -32,7 +32,7 @@
 .header-title h1 {
   font-size: 28px;
   font-weight: 700;
-  color: #4A90E2;
+  color: #4a90e2;
   margin: 0;
   padding: 0;
   letter-spacing: 0.5px;
@@ -54,7 +54,7 @@
 }
 
 .login-btn {
-  background: #87CEEB !important;
+  background: #87ceeb !important;
   color: white !important;
 }
 
@@ -70,9 +70,9 @@
 
 /* Navigation bar styles */
 .sub-navbar {
-  background-color: #87CEEB;
+  background-color: #87ceeb;
   padding: 5px 0;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   position: fixed;
   top: 70px;
   width: 100%;
@@ -130,17 +130,17 @@
   padding: 30px;
   background: white;
   border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .form-title {
   text-align: center;
   font-size: 24px;
   font-weight: bold;
-  color: #4A90E2;
+  color: #4a90e2;
   margin-bottom: 30px;
   padding-bottom: 15px;
-  border-bottom: 2px solid #4A90E2;
+  border-bottom: 2px solid #4a90e2;
 }
 
 .form-section {
@@ -167,7 +167,7 @@
   height: 40px;
   font-size: 16px;
   font-weight: 500;
-  background: #4A90E2;
+  background: #4a90e2;
   border: none;
 }
 
