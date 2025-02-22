@@ -8,7 +8,7 @@ class CustomerService {
         userId: new ObjectId(id),
       });
       if (!result) {
-        throw new Error("khong cos customer nao", error);
+        throw new Error("khong cos customer nao");
       }
       return result;
     } catch (error) {
