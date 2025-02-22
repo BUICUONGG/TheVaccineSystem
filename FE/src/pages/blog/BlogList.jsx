@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
-import { Card, Row, Col, Space, Typography } from "antd";
-import { EyeOutlined, HeartOutlined } from "@ant-design/icons";
+import { Card, Row, Col, Typography } from "antd";
+import { EyeOutlined, HeartOutlined, HeartFilled, CommentOutlined, ShareAltOutlined } from "@ant-design/icons";
+import { Link } from "react-router-dom";
 import axios from "axios";
 import "./BlogList.css";
 
@@ -8,63 +9,84 @@ const { Title, Paragraph } = Typography;
 
 const BlogList = () => {
   const [blogs, setBlogs] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [likedStates, setLikedStates] = useState({});
+  const [visible, setVisible] = useState(false);
 
   useEffect(() => {
     fetchBlogs();
+    setVisible(true);
   }, []);
 
   const fetchBlogs = async () => {
     try {
+      setLoading(true);
       const response = await axios.get("http://localhost:8080/blogs/showBlog");
-      setBlogs(response.data);
+      const blogsWithViews = response.data.map(blog => ({
+        ...blog,
+        views: 1000
+      }));
+      setBlogs(blogsWithViews);
     } catch (error) {
       console.error("Failed to fetch blogs:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
+  const toggleLike = (blogId) => {
+    setLikedStates(prev => ({
+      ...prev,
+      [blogId]: !prev[blogId]
+    }));
+  };
+
   return (
-    <div className="blog-list-container">
-      <div className="blog-header">
-        <Title level={1}>Câu Chuyện Vaccine</Title>
-        <Paragraph>
-          Những câu chuyện ý nghĩa về việc tiêm chủng đã cứu sống nhiều trẻ em
-        </Paragraph>
+    <div className="blog-container">
+      <div className="back-home-wrapper">
+        <Link to="/homepage" className="back-home">
+          Back home
+        </Link>
       </div>
 
-      <Row gutter={[24, 24]} className="blog-grid">
+      <Title level={1} className={`main-title ${visible ? 'fade-in' : ''}`}>
+        Câu Chuyện Vaccine
+      </Title>
+      
+      <Row gutter={[16, 16]}>
         {blogs.map((blog, index) => (
-          <Col xs={24} sm={12} lg={8} key={blog._id} className="blog-card-wrapper">
-            <Card
-              hoverable
-              className="blog-card"
-              cover={<img alt="blog cover" src="./images/blog1.jpg" className="blog-image" />}
+          <Col span={8} key={blog._id}>
+            <Card 
+              loading={loading}
+              className={`fade-in-blog`}
+              style={{ animationDelay: `${index * 0.2}s` }}
             >
-              <div className="blog-content">
-                <Title level={3} className="blog-title">{blog.blogTitle}</Title>
-                <Paragraph className="blog-excerpt">{blog.blogContent}</Paragraph>
-                
-                <div className="blog-meta">
-                  <Space>
-                    <span className="author">By {blog.author}</span>
-                    <span className="date">
-                      {new Date(blog.createDate).toLocaleDateString()}
-                    </span>
-                  </Space>
-                  <Space className="blog-stats">
-                    <span className="views">
-                      <EyeOutlined /> {blog.views}
-                    </span>
-                    <span className="likes">
-                      <HeartOutlined /> {blog.likes}
-                    </span>
-                  </Space>
+              <img 
+                src={blog.imageUrl || "./images/blog1.png"} 
+                alt="blog" 
+                style={{ width: '100%', height: '200px', objectFit: 'cover' }}
+              />
+              <Title level={4}>{blog.blogTitle}</Title>
+              <Paragraph>{blog.blogContent}</Paragraph>
+              <div className="author-spoiler">
+                <div className="author-content">
+                  <span>Tác giả: {blog.author}</span>
+                  <br />
+                  <span>Ngày: {new Date(blog.createDate).toLocaleDateString()}</span>
                 </div>
-
-                <div className="blog-status">
-                  <span className={`status-tag ${blog.status}`}>
-                    {blog.status}
-                  </span>
-                </div>
+              </div>
+              <div className="blog-actions">
+                <span 
+                  className={`like-button ${likedStates[blog._id] ? 'liked' : ''}`} 
+                  onClick={() => toggleLike(blog._id)}
+                >
+                  {likedStates[blog._id] ? <HeartFilled /> : <HeartOutlined />}
+                </span>
+                <CommentOutlined />
+                <ShareAltOutlined />
+                <span className="views-count">
+                  <EyeOutlined /> 1000
+                </span>
               </div>
             </Card>
           </Col>

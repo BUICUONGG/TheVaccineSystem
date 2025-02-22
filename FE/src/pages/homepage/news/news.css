@@ -10,6 +10,30 @@
     --shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
+
+.back-home-wrapper {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    z-index: 10;
+}
+
+.back-home {
+    text-decoration: none;
+    font-size: 18px;
+    color: #333;
+    padding: 8px 12px;
+    border-radius: 4px;
+    transition: background 0.3s ease, color 0.3s ease, font-weight 0.3s ease;
+}
+
+.back-home:hover {
+    background: #333;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+}
+
 /* Header styles */
 .header-framework {
     position: fixed;

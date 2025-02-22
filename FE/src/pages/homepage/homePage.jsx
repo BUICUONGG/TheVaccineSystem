@@ -140,7 +140,7 @@ const HomePage = () => {
         <div className="header-content">
           <div className="header-title">
             <Link to="/homepage">
-            <h1>Nhật Ký Tiêm Chủng</h1>
+            <h1>Diary Vaccine</h1>
             </Link>          
             <div className="header-subtitle">
               AN TOÀN - UY TÍN - CHẤT LƯỢNG HÀNG ĐẦU VIỆT NAM
@@ -301,7 +301,7 @@ const HomePage = () => {
         <div className="news-grid">
           <div className="news-item">
             <div className="news-image">
-              <img src="/images/news1.jpg" alt="COVID-19 News" />
+              <img src="/images/news1.jpeg" alt="COVID-19 News" />
             </div>
             <div className="news-content">
               <h3>
@@ -360,7 +360,7 @@ const HomePage = () => {
       <footer className="footer">
         <div className="footer-content">
           <div className="footer-section">
-            <h3>NHẬT KÝ TIÊM CHỦNG</h3>
+            <h3>DiVac</h3>
             <p>Hệ thống quản lý tiêm chủng toàn diện</p>
           </div>
           <div className="footer-section">

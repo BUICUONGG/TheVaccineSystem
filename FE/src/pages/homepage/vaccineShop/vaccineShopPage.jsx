@@ -156,12 +156,16 @@ const VaccinePriceList = () => {
 
   return (
     <div className="new-page">
+      <div className="back-home-wrapper">
+        <Link to="/homepage" className="back-home">
+          Back home
+        </Link>
+      </div>
+
       <header className="header-framework">
         <div className="header-content">
           <div className="header-title">
-            <Link to="/homepage">
-              <h1>Nhật Ký Tiêm Chủng</h1>
-            </Link>
+            <h1>Nhật Ký Tiêm Chủng</h1>
           </div>
           <div className="auth-buttons">
             {/* <div className="cart-dropdown">

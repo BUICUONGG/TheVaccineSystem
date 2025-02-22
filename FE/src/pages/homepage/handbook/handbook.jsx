@@ -131,48 +131,11 @@ const Handbook = () => {
 
   return (
     <div className="handbook-page">
-      <header className="header-framework">
-        <div className="header-content">
-          <div className="header-title">
-            <Link to="/homepage">
-              <h1>Nhật Ký Tiêm Chủng</h1>
-            </Link>
-          </div>
-          <div className="auth-buttons">
-            {isLoggedIn ? (
-              <>
-                <button className="logout-btn" onClick={handleLogout}>
-                  Logout
-                </button>
-                <img
-                  src="../icons/adminIcon.png"
-                  alt="User Avatar"
-                  className="avatar-icon"
-                />
-              </>
-            ) : (
-              <>
-                <button className="login-btn" onClick={handleLogin}>
-                  Đăng nhập
-                </button>
-                <button className="register-btn" onClick={handleRegister}>
-                  Đăng ký
-                </button>
-              </>
-            )}
-          </div>
-        </div>
-      </header>
-
-      <nav className="sub-navbar">
-        <div className="nav-links">
-          <a href="/homepage">Trang chủ</a>
-          <a href="#">Giới thiệu</a>
-          <a href="/news">Tin tức</a>
-          <a href="/advise">Tư vấn</a>
-          <a href="#">Đăng ký tiêm</a>
-        </div>
-      </nav>
+      <div className="back-home-wrapper">
+        <Link to="/homepage" className="back-home">
+          Back home
+        </Link>
+      </div>
 
       <div className="guide-container">
         <div className="guide-header">

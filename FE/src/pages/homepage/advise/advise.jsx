@@ -195,39 +195,11 @@ const Advise = () => {
 
   return (
     <div className="advise-page">
-      <header className="header-framework">
-        <div className="header-content">
-          <div className="header-title">
-            <Link to="/homepage">
-              <h1>Nhật Ký Tiêm Chủng</h1>
-            </Link>
-          </div>
-          <div className="auth-buttons">
-            {isLoggedIn && (
-              <>
-                <button className="logout-btn" onClick={handleLogout}>
-                  Đăng xuất
-                </button>
-                <img
-                  src="../icons/adminIcon.png"
-                  alt="User Avatar"
-                  className="avatar-icon"
-                />
-              </>
-            )}
-          </div>
-        </div>
-      </header>
-
-      <nav className="sub-navbar">
-        <div className="nav-links">
-          <a href="/homepage">Trang chủ</a>
-          <a href="#">Giới thiệu</a>
-          <a href="/news">Tin tức</a>
-          <a href="/handbook">Cẩm nang</a>
-          <a href="#">Đăng ký tiêm</a>
-        </div>
-      </nav>
+      <div className="back-home-wrapper">
+        <Link to="/homepage" className="back-home">
+          Back home
+        </Link>
+      </div>
 
       <div className="advise-container">
         <div className="advise-header">

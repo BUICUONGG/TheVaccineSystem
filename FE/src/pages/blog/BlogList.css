@@ -10,14 +10,14 @@
 }
 
 .blog-list-container {
-  padding: 2rem;
-  max-width: 1200px;
+  padding: 24px;
+  max-width: 1400px;
   margin: 0 auto;
 }
 
 .blog-header {
   text-align: center;
-  margin-bottom: 3rem;
+  margin-bottom: 48px;
   animation: fadeInUp 0.8s ease-out forwards;
 }
 
@@ -31,20 +31,27 @@
   font-size: 1.1rem;
   color: #666;
 }
-
+.blog-author{
+  font-style: italic;
+}
 .blog-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 30px;
+  margin-bottom: 48px;
 }
 
 .blog-card-wrapper {
   animation: fadeInUp 0.8s ease-out forwards;
   opacity: 0;
+  margin-bottom: 24px;
 }
 
 .blog-card {
   height: 100%;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
   transition: all 0.3s ease;
 }
 
@@ -54,8 +61,9 @@
 }
 
 .blog-image {
-  height: 200px;
-  overflow: hidden;
+  height: 300px;
+  width: 100%;
+  object-fit: cover;
 }
 
 .blog-image img {
@@ -65,38 +73,84 @@
 }
 
 .blog-content {
-  padding: 1rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
 }
 
 .blog-title {
-  font-size: 1.5rem;
-  margin-bottom: 0.5rem;
-  color: #1a1a1a;
+  margin-bottom: 16px !important;
+  font-size: 24px !important;
+  max-height: 60px;
+  line-height: 1.25;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  position: relative;
+}
+
+.blog-title::after {
+  content: "...";
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  padding-left: 40px;
+  background: linear-gradient(to right, transparent, white 50%);
 }
 
 .blog-excerpt {
-  color: #666;
-  margin-bottom: 1rem;
+  flex: 1;
+  margin-bottom: 16px;
+  font-size: 16px;
+  max-height: 72px;
+  line-height: 1.5;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  position: relative;
+}
+
+.blog-excerpt::after {
+  content: "...";
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  padding-left: 40px;
+  background: linear-gradient(to right, transparent, white 50%);
 }
 
 .blog-meta {
+  margin-bottom: 16px;
+  color: #8c8c8c;
+}
+
+.blog-interactions {
   display: flex;
+  align-items: center;
   justify-content: space-between;
-  align-items: center;
-  margin-top: 1rem;
-  color: #888;
-  font-size: 0.9rem;
+  padding-top: 16px;
+  border-top: 1px solid #f0f0f0;
 }
 
-.blog-stats {
-  display: flex;
-  gap: 1rem;
+.blog-interactions .ant-btn {
+  padding: 0 8px;
+  height: 32px;
+  color: #8c8c8c;
 }
 
-.views, .likes {
-  display: flex;
-  align-items: center;
-  gap: 0.3rem;
+.blog-interactions .ant-btn:hover {
+  color: #1890ff;
+}
+
+.views {
+  color: #8c8c8c;
+}
+
+.author {
+  font-weight: 500;
+}
+
+.date {
+  color: #8c8c8c;
 }
 
 .status-tag {
@@ -157,4 +211,121 @@
   .blog-grid {
     grid-template-columns: 1fr;
   }
-} 
+}
+
+.blog-container {
+  padding: 20px;
+  min-height: 100vh;
+  background: 
+  linear-gradient(135deg, rgba(245, 247, 250, 0.8) 0%, rgba(195, 207, 226, 0.8) 100%),
+  url('https://www.lindau-nobel.org/wp-content/uploads/2023/12/Header_Vaccines.png') no-repeat center center fixed;
+background-size: cover;
+}
+
+.back-home-wrapper {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  z-index: 10;
+}
+
+.back-home {
+  text-decoration: none;
+  font-size: 18px;
+  color: #333;
+  padding: 8px 12px;
+  border-radius: 4px;
+  transition: background 0.3s ease, color 0.3s ease, font-weight 0.3s ease;
+}
+
+.back-home:hover {
+  background: #333;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.main-title {
+  text-align: center;
+  margin-bottom: 40px !important;
+  opacity: 0;
+  transform: translateY(-20px);
+}
+
+.main-title.fade-in {
+  animation: fadeInDown 1s forwards;
+}
+
+.fade-in-blog {
+  opacity: 0;
+  animation: fadeIn 0.5s forwards;
+}
+
+.blog-actions {
+  margin-top: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.like-button {
+  cursor: pointer;
+  font-size: 18px;
+  transition: all 0.3s;
+}
+
+.like-button:hover {
+  transform: scale(1.2);
+}
+
+.like-button.liked {
+  color: #ff4d4f;
+}
+
+.views-count {
+  color: #8c8c8c;
+  font-size: 14px;
+}
+
+.views-count .anticon {
+  margin-right: 5px;
+}
+
+.author-spoiler {
+  position: relative;
+  height: 0;
+  overflow: hidden;
+  transition: height 0.3s ease;
+}
+
+.author-content {
+  padding: 10px;
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 4px;
+}
+
+.blog-card:hover .author-spoiler {
+  height: 60px;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
