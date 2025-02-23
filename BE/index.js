@@ -47,9 +47,9 @@ app.use("/vaccine", vaccinesRoutes);
 app.use("/child", childRoutes);
 app.use("/blogs", blogRoutes);
 app.use("/customer", customerRoutes);
-app.use("/appointment", aptLeRoutes);
+app.use("/appointmentLe", aptLeRoutes);
 app.use("/vaccineimport", vaccineImportRoutes);
-// app.use("appointment", aptGoiRoutes);
+app.use("/appointmentGoi", aptGoiRoutes);
 
 // Lắng nghe cổng
 app.listen(PORT, () => {

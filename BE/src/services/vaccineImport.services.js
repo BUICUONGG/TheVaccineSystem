@@ -23,17 +23,16 @@ class VaccineImportService {
 
   async createVaccineImport(data) {
     try {
-      {
-        // const existingBatch = await connectToDatabase.vaccineImports.findOne({
-        //   batchNumber,
-        // });
-        // if (existingBatch) {
-        //   throw new Error("batchNumber is exists");
-        // }
-        // await newData.validate();
-        const result = await connectToDatabase.vaccineImports.insertOne(data);
-        return { _id: result.insertedId, ...data };
-      }
+      // Chuyển đổi danh sách vaccine ID thành ObjectId
+      const transformedData = {
+        ...data,
+        vaccines: data.vaccines.map((id) => new ObjectId(id)),
+      };
+
+      const result = await connectToDatabase.vaccineImports.insertOne(
+        transformedData
+      );
+      return { _id: result.insertedId, ...transformedData };
     } catch (error) {
       console.log(error.message);
       throw new Error(error.message);
