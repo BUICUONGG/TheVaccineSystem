@@ -1,15 +1,15 @@
 import { Router } from "express";
 import {
-    showChildController,
-    createChildController
-    // updateChildController,
-    // deleteChildController,
+  showChildController,
+  createChildController,
+  updateChildController,
+  // updateChildController,
+  // deleteChildController,
 } from "../controllers/child.controllers.js";
 
-const childRouter = Router();
+const childRoutes = Router();
 
-childRouter.get("/showChildren", showChildController);
-childRouter.post("/create", createChildController);
-
-export default childRouter;
-
+childRoutes.get("/showChildren", showChildController);
+childRoutes.post("/create", createChildController);
+childRoutes.post("/update/:id", updateChildController);
+export default childRoutes;

@@ -23,7 +23,6 @@ export const getOneByIdController = async (req, res) => {
 export const createVaccineImportController = async (req, res) => {
   try {
     const data = req.body;
-
     const result = await vaccineImportService.createVaccineImport(data);
 
     res.status(200).json(result);

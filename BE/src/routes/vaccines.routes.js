@@ -8,13 +8,12 @@ import {
   showVaccineAndImportController,
 } from "../controllers/vaccines.controllers.js";
 
-const vaccinesRouter = Router();
+const vaccinesRoutes = Router();
 
-vaccinesRouter.get("/listVaccine", getVaccinesController);
-vaccinesRouter.post("/addVaccine", addVaccineController);
-vaccinesRouter.post("/updateVaccine/:id", updateVaccineController);
-vaccinesRouter.post("/delete/:id", deleteVaccineController);
+vaccinesRoutes.get("/listVaccine", getVaccinesController);
+vaccinesRoutes.post("/addVaccine", addVaccineController);
+vaccinesRoutes.post("/updateVaccine/:id", updateVaccineController);
+vaccinesRoutes.post("/delete/:id", deleteVaccineController);
+vaccinesRoutes.get("/showInfo", showVaccineAndImportController);
 
-vaccinesRouter.get("/showInfo", showVaccineAndImportController);
-
-export default vaccinesRouter;
+export default vaccinesRoutes;

@@ -13,3 +13,5 @@ export const createChildController = async (req, res) => {
     res.status(500).json(error.message);
   }
 };
+
+export const updateChildController = async (req, res) => {};

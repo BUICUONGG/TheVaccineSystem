@@ -1,6 +1,7 @@
 import connectToDatabase from "../config/database.js";
 import { ObjectId } from "mongodb";
 import AppointmentLe from "../model/appointmentSchemaLe.js";
+import Child from "../model/childSchema.js";
 
 class AppointmentService {
   async listAptLe() {
@@ -18,7 +19,30 @@ class AppointmentService {
 
   async createAptLe(data) {
     try {
-      const aptLe = new AppointmentLe(data);
+      const { cusId, childId, childInfo, vaccineId, date, createAt, status } =
+        data;
+      let finalChildId = childId;
+
+      // Nếu không có childId, tạo mới Child
+      if (!childId && childInfo) {
+        const newChild = new Child({
+          cusId,
+          childName: childInfo.name || "", // Hoặc nhận từ data nếu có
+          birthday: childInfo.birthday || "", // Chỉnh lại theo yêu cầu
+          healthNote: childInfo.healthNote || "",
+          gender: childInfo.gender || "", // Chỉnh lại theo yêu cầu
+        });
+        const saveChild = await connectToDatabase.childs.insertOne(newChild);
+      }
+      // console.log(finalChildId);
+      const aptLe = new AppointmentLe({
+        cusId,
+        childId: finalChildId,
+        vaccineId,
+        date,
+        createAt,
+        status,
+      });
       await aptLe.validate();
       // await aptLevalidate();
       const result = await connectToDatabase.appointmentLes.insertOne(aptLe);
