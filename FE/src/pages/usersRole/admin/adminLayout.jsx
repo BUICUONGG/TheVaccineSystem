@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation, Outlet } from "react-router-dom";
-import { Button, Modal } from "antd";
+import { Button } from "antd";
 import { LogoutOutlined } from "@ant-design/icons";
-import axios from "axios";
 import "./adminLayout.css";
 
 const AdminLayout = () => {
@@ -11,41 +10,39 @@ const AdminLayout = () => {
   const [adminName, setAdminName] = useState("");
 
   useEffect(() => {
-    const username = localStorage.getItem("username");
-    if (username) {
-      setAdminName(`Admin: ${username}`);
-    }
-  }, []);
+    // Kiểm tra authentication và authorization
+    const accessToken = localStorage.getItem("accesstoken");
 
-  const handleLogout = async () => {
+    if (!accessToken) {
+      navigate("/login");
+      return;
+    }
+
     try {
-      const userId = localStorage.getItem("userId");
-      const accesstoken = localStorage.getItem("accesstoken");
-      
-      if (userId && accesstoken) {
-        await axios.post(
-          `http://localhost:8080/user/logout/${userId}`,
-          {},
-          {
-            headers: {
-              Authorization: `Bearer ${accesstoken}`,
-            },
-          }
-        );
+      // Decode token để kiểm tra role
+      const tokenParts = accessToken.split(".");
+      const payload = JSON.parse(atob(tokenParts[1]));
+
+      if (payload.role !== "admin") {
+        navigate("/homepage");
+        return;
       }
 
-      // Xóa toàn bộ localStorage
-      localStorage.removeItem("accesstoken");
-      localStorage.removeItem("username");
-      localStorage.removeItem("userId");
-      
-      navigate("/login");
+      // Nếu là admin, set tên admin
+      const username = localStorage.getItem("username");
+      if (username) {
+        setAdminName(`Admin: ${username}`);
+      }
     } catch (error) {
-      console.error("Logout error:", error);
-      Modal.error({
-        content: "Logout failed. Please try again.",
-      });
+      console.error("Invalid token:", error);
+      navigate("/login");
     }
+  }, [navigate]);
+
+  const handleLogout = () => {
+    localStorage.removeItem("accesstoken");
+    localStorage.removeItem("username");
+    navigate("/login");
   };
 
   return (
@@ -58,49 +55,79 @@ const AdminLayout = () => {
 
         <ul className="menu-items">
           <li className="menu-item">
-            <Link 
+            <Link
               to="/admin/overview"
-              className={location.pathname === "/admin/overview" ? "active" : ""}
+              className={
+                location.pathname === "/admin/overview" ? "active" : ""
+              }
             >
               Overview
             </Link>
           </li>
           <li className="menu-item">
-            <Link 
+            <Link
               to="/admin/accounts"
-              className={location.pathname === "/admin/accounts" ? "active" : ""}
+              className={
+                location.pathname === "/admin/accounts" ? "active" : ""
+              }
             >
               Accounts
             </Link>
           </li>
           <li className="menu-item">
-            <Link 
+            <Link
+              to="/admin/customers"
+              className={
+                location.pathname === "/admin/customers" ? "active" : ""
+              }
+            >
+              Customers
+            </Link>
+          </li>
+          <li className="menu-item">
+            <Link
+              to="/admin/blog"
+              className={location.pathname === "/admin/blog" ? "active" : ""}
+            >
+              Blog
+            </Link>
+          </li>
+          <li className="menu-item">
+            <Link
               to="/admin/vaccines"
-              className={location.pathname === "/admin/vaccines" ? "active" : ""}
+              className={
+                location.pathname === "/admin/vaccines" ? "active" : ""
+              }
             >
               Vaccines
             </Link>
           </li>
           <li className="menu-item">
-            <Link 
+            <Link
               to="/admin/feedback"
-              className={location.pathname === "/admin/feedback" ? "active" : ""}
+              className={
+                location.pathname === "/admin/feedback" ? "active" : ""
+              }
             >
               Feedback
             </Link>
           </li>
           <li className="menu-item">
-            <Link 
+            <Link
               to="/admin/appointments"
-              className={location.pathname === "/admin/appointments" ? "active" : ""}
+              className={
+                location.pathname === "/admin/appointments" ? "active" : ""
+              }
             >
               Appointments
             </Link>
           </li>
           <li className="menu-item">
-            <Link 
+            <Link
               to="/admin/consultations"
-              className={location.pathname === "/admin/consultations" ? "active" : ""}
+              className={
+                location.pathname === "/admin/consultations" ? "active" : ""
+              }
             >
               Consultations
             </Link>
@@ -120,10 +147,12 @@ const AdminLayout = () => {
         </div>
       </div>
 
-      <div className="main-content">
+      <div className="main-contentt">
         <header className="header">
           <nav className="navigation">
-            <span className="nav-item">Home</span>
+            <Link to="/homepage">
+              <span className="nav-item">Home</span>
+            </Link>
             <span className="nav-item">Contact</span>
           </nav>
         </header>

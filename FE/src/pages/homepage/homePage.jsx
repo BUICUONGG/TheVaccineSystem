@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
-import { Modal } from "antd";
-
+//import axios from "axios";
+//import { Modal } from "antd";
+import { FaRegCalendarAlt, FaRegListAlt, FaRegThumbsUp, FaRegSmileBeam } from "react-icons/fa";
+import { FaSyringe, FaBook, FaUserCheck, FaMoneyBillWave } from "react-icons/fa";
+import "@fortawesome/fontawesome-free/css/all.min.css";
 import "./homePage.css";
 import { useNavigate } from "react-router-dom";
 
@@ -15,6 +17,7 @@ const HomePage = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userRole, setUserRole] = useState('');
 
   const banners = [
     "/images/banner1.png",
@@ -25,7 +28,17 @@ const HomePage = () => {
   useEffect(() => {
     const token = localStorage.getItem("accesstoken");
     if (token) {
-      setIsLoggedIn(true);
+      try {
+        // Decode token để lấy role giống như trong loginPage.jsx
+        const tokenParts = token.split(".");
+        const payload = JSON.parse(atob(tokenParts[1]));
+        setUserRole(payload.role);
+        setIsLoggedIn(true);
+      } catch (error) {
+        console.error("Invalid token:", error);
+        setIsLoggedIn(false);
+        setUserRole('');
+      }
     }
     document.title = "Trang chủ";
     const timer = setInterval(() => {
@@ -44,36 +57,15 @@ const HomePage = () => {
     setCurrentSlide(currentSlide === 0 ? banners.length - 1 : currentSlide - 1);
   };
 
-  const handleLogout = async () => {
-    try {
-      const userId = localStorage.getItem("userId");
-      const accesstoken = localStorage.getItem("accesstoken");
-
-      if (userId && accesstoken) {
-        await axios.post(
-          `http://localhost:8080/user/logout/${userId}`,
-          {},
-          {
-            headers: {
-              Authorization: `Bearer ${accesstoken}`,
-            },
-          }
-        );
-      }
-
-      // Xóa toàn bộ localStorage
-      localStorage.removeItem("accesstoken");
-      localStorage.removeItem("username");
-      localStorage.removeItem("userId");
-      setIsLoggedIn(false);
-
-      navigate("/login");
-    } catch (error) {
-      console.error("Logout error:", error);
-      Modal.error({
-        content: "Logout failed. Please try again.",
-      });
-    }
+  const handleLogout = () => {
+    // Xóa toàn bộ thông tin authentication khỏi localStorage
+    localStorage.removeItem("accesstoken");
+    localStorage.removeItem("username");
+    localStorage.removeItem("userId");
+    setIsLoggedIn(false);
+    
+    // Chuyển hướng về trang login
+    navigate("/login");
   };
 
   const handleLogin = () => {
@@ -82,6 +74,10 @@ const HomePage = () => {
 
   const handleRegister = () => {
     navigate("/register");
+  };
+
+  const handleProfile = () => {
+    navigate("/profile");
   };
 
   const toggleTheme = () => {
@@ -143,24 +139,24 @@ const HomePage = () => {
       <header className="header-framework">
         <div className="header-content">
           <div className="header-title">
-            <h1>Nhật Ký Tiêm Chủng</h1>
+            <Link to="/homepage">
+            <h1>Diary Vaccine</h1>
+            </Link>          
             <div className="header-subtitle">
               AN TOÀN - UY TÍN - CHẤT LƯỢNG HÀNG ĐẦU VIỆT NAM
             </div>
           </div>
-
+          
           <div className="auth-buttons">
             <FaShoppingCart className="cart-icon" />
             {isLoggedIn ? (
               <>
-                <button className="logout-btn" onClick={handleLogout}>
-                  Logout
+                <button className="profile-btn" onClick={handleProfile}>
+                  Profile
                 </button>
-                <img
-                  src="../icons/adminIcon.png"
-                  alt="User Avatar"
-                  className="avatar-icon"
-                />
+                <button className="logout-btn" onClick={handleLogout}>
+                  Đăng xuất
+                </button>
               </>
             ) : (
               <>
@@ -215,33 +211,43 @@ const HomePage = () => {
 
         <nav className="navbar">
           <div className="nav-links">
-            <a href="#">Trang chủ</a>
-            <a href="#">Giới thiệu</a>
-            <a href="#">Tin tức</a>
-            <Link to="/camnang">Cẩm nang</Link>
-            <a href="#">Đăng ký tiêm</a>
+            <a href="/homepage">Trang chủ</a>
+            <Link to="/news">Tin tức</Link>
+            <Link to="/handbook">Cẩm nang</Link>
+            <Link to="/advise">Tư vấn</Link>
+            <Link to="/blogs">Blogs</Link>
+            {userRole === 'admin' ? (
+              <Link to="/admin">Quản trị</Link>
+            ) : (
+              <a href="/registerinjection">Đăng ký tiêm</a>
+            )}
+            {/* <a href="/registerinjection">Đăng ký tiêm</a> */}
           </div>
         </nav>
       </div>
 
       <div className="quick-access">
-        <div className="icon-item">
-          <img src="/icons/injection.png" alt="Các gói tiêm" />
-          <span>CÁC GÓI TIÊM</span>
-        </div>
-        <div className="icon-item">
-          <img src="/icons/handbook.png" alt="Cẩm nang" />
-          <Link to="/camnang">Cẩm nang</Link>
-        </div>
-        <div className="icon-item">
-          <img src="/icons/register.png" alt="Đăng ký tiêm" />
-          <span>ĐĂNG KÝ TIÊM</span>
-        </div>
-        <div className="icon-item">
-          <img src="/icons/price.png" alt="Giá tiêm" />
-          <span>GIÁ TIÊM</span>
-        </div>
-      </div>
+  <div className="icon-item">
+    <FaSyringe size={50} style={{ color: "#4A90E2" }} />
+    <span>CÁC GÓI TIÊM</span>
+  </div>
+  <div className="icon-item">
+    <Link to="/camnang">
+      <FaBook size={50} style={{ color: "#4A90E2" }} />
+      <span>CẨM NANG</span>
+    </Link>
+  </div>
+  <div className="icon-item">
+    <FaUserCheck size={50} style={{ color: "#4A90E2" }} />
+    <span>ĐĂNG KÝ TIÊM</span>
+  </div>
+  <div className="icon-item">
+    <Link to="/pricelist">
+      <FaMoneyBillWave size={50} style={{ color: "#4A90E2" }} />
+      <span>GIÁ TIÊM</span>
+    </Link>
+  </div>
+</div>
 
       <div className="vaccine-info">
         <h2>THÔNG TIN VACCINE</h2>
@@ -267,33 +273,36 @@ const HomePage = () => {
       </div>
 
       <div className="vaccination-guide">
-        <h2>CẨM NANG TIÊM CHỦNG</h2>
-        <div className="guide-icons">
-          <div className="guide-item">
-            <img src="/icons/calendar.png" alt="Lịch tiêm chủng" />
-            <span>LỊCH TIÊM CHỦNG</span>
-          </div>
-          <div className="guide-item">
-            <img src="/icons/process.png" alt="Quy trình tiêm chủng" />
-            <span>QUY TRÌNH TIÊM CHỦNG</span>
-          </div>
-          <div className="guide-item">
-            <img src="/icons/benefits.png" alt="Lưu ý trước khi tiêm" />
-            <span>LƯU Ý TRƯỚC KHI TIÊM</span>
-          </div>
-          <div className="guide-item">
-            <img src="/icons/after-care.png" alt="Lưu ý sau khi tiêm" />
-            <span>LƯU Ý SAU KHI TIÊM</span>
-          </div>
+      <h2>CẨM NANG TIÊM CHỦNG</h2>
+      <div className="guide-icons">
+        <div className="guide-item">
+          <FaRegCalendarAlt size={50} style={{ color: "#4A90E2" }} />
+          <span>LỊCH TIÊM CHỦNG</span>
+        </div>
+
+        <div className="guide-item">
+          <FaRegListAlt size={50} style={{ color: "#4A90E2" }} />
+          <span>QUY TRÌNH TIÊM CHỦNG</span>
+        </div>
+
+        <div className="guide-item">
+          <FaRegThumbsUp size={50} style={{ color: "#4A90E2" }} />
+          <span>LƯU Ý TRƯỚC KHI TIÊM</span>
+        </div>
+
+        <div className="guide-item">
+          <FaRegSmileBeam size={50} style={{ color: "#4A90E2" }} />
+          <span>LƯU Ý SAU KHI TIÊM</span>
         </div>
       </div>
+    </div>
 
       <div className="news-section">
         <h2>TIN TỨC SỨC KHỎE</h2>
         <div className="news-grid">
           <div className="news-item">
             <div className="news-image">
-              <img src="/images/news1.jpg" alt="COVID-19 News" />
+              <img src="/images/news1.jpeg" alt="COVID-19 News" />
             </div>
             <div className="news-content">
               <h3>
@@ -352,7 +361,7 @@ const HomePage = () => {
       <footer className="footer">
         <div className="footer-content">
           <div className="footer-section">
-            <h3>NHẬT KÝ TIÊM CHỦNG</h3>
+            <h3>DiVac</h3>
             <p>Hệ thống quản lý tiêm chủng toàn diện</p>
           </div>
           <div className="footer-section">

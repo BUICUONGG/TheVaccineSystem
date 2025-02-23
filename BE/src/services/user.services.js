@@ -5,7 +5,7 @@ import { hashPassword, comparePassword } from "../utils/bcrypt.js";
 import { ObjectId } from "mongodb";
 import "dotenv/config";
 import { signToken } from "../utils/jwt.js";
-import { config } from "dotenv";
+import "dotenv/config";
 
 class UserService {
   //đăng kí tài khoản chỉ cần username password và email thôi. tự động lưu vào bảng customer khi nào cần cập nhật thông tin thì vào đó cập nhật sau
@@ -19,7 +19,7 @@ class UserService {
         userId: result.insertedId,
         customerName: "", // Nếu user có name thì lấy
         phone: "",
-        birthDate: "",
+        birthday: "",
         address: "",
         gender: "", // Liên kết với user
       };
@@ -56,7 +56,7 @@ class UserService {
     return await signToken({
       payload: { id: user._id.toString(), role: user.role },
       privateKey: process.env.JWT_REFRESH_TOKEN,
-      options: { expiresIn: "1d" },
+      options: { expiresIn: "5h" },
     });
   }
 
@@ -101,6 +101,9 @@ class UserService {
       // console.log(userId);
       const user = await connectToDatabase.users.findOneAndDelete({
         _id: new ObjectId(userId),
+      });
+      const cus = await connectToDatabase.customers.findOneAndDelete({
+        userId: new ObjectId(userId),
       });
       if (!user) {
         throw new Error(`Không tìm thấy user với id: ${userId}`);

@@ -60,6 +60,7 @@ const LoginPage = () => {
 
         // Lưu token và username vào localStorage
         localStorage.setItem("accesstoken", response.data.accesstoken);
+        localStorage.setItem("userId", response.data.userId);
 
         // Decode token để lấy role
         const tokenParts = response.data.accesstoken.split(".");

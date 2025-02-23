@@ -14,8 +14,8 @@ const vaccinePackageSchema = new mongoose.Schema({
     },
   ],
   price: { type: Number, required: true }, // Giá gói vaccine
-  createdAt: { type: Date, default: Date.now }, // Ngày tạo gói vaccine
+  createdAt: { type: String }, // Ngày tạo gói vaccine
 });
-const Package = mongoose.model("Package", vaccinePackageSchema);
+const VaccinePackage = mongoose.model("VaccinePackage", vaccinePackageSchema);
 
-export default Package;
+export default VaccinePackage;

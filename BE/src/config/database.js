@@ -1,7 +1,7 @@
 import { MongoClient } from "mongodb";
 import "dotenv/config";
 
-const uri = "mongodb+srv://cuongbui10704:cuongbui10704@swp.lg53w.mongodb.net/?retryWrites=true&w=majority&appName=SWP";
+const uri = process.env.MONGO_URI;
 // const client = new MongoClient(uri);
 
 const dbName = "test";
@@ -25,47 +25,67 @@ class ConnectDatabaseService {
   }
 
   //getter
+
+  // get vaccines() {
+  //   return this.db.collection(String("vaccines"));
+  // }
+
+  get appointmentLes() {
+    return this.db.collection(String("appointmentsLes"));
+  }
+
+  get appointmentGois() {
+    return this.db.collection(String("appointmentsGois"));
+  }
+
+  get blogs() {
+    return this.db.collection(String("blogs"));
+  }
+
+  get childs() {
+    return this.db.collection(String("childs"));
+  }
+
+  get comments() {
+    return this.db.collection(String("comments"));
+  }
+
+  get feedbacks() {
+    return this.db.collection(String("feedbacks"));
+  }
+
+  get vaccinepackages() {
+    return this.db.collection(String("vaccinepackages"));
+  }
+
+  get payments() {
+    return this.db.collection(String("payments"));
+  }
+
+  get customers() {
+    return this.db.collection(String("customers"));
+  }
+
+  get staffs() {
+    return this.db.collection(String("staffs"));
+  }
+
   get users() {
     return this.db.collection(String("users"));
   }
 
-  get vaccines() {
-    return this.db.collection(String("vaccines"));
+  // get types() {
+  //   return this.db.collection(String("types"));
+  // }
+
+  get admins() {
+    return this.db.collection(String("admins"));
   }
 
-  get appointments() {
-    return this.db.collection(String("appointments"));
+  get vaccineImports() {
+    return this.db.collection(String("vaccineImports"));
   }
-  get blogs() {
-    return this.db.collection(String("blogs"));
-  }
-  get childs() {
-    return this.db.collection(String("childs"));
-  }
-  get comments() {
-    return this.db.collection(String("comments"));
-  }
-  get customers() {
-    return this.db.collection(String("customers"));
-  }
-  get feedbacks() {
-    return this.db.collection(String("feedbacks"));
-  }
-  get packages() {
-    return this.db.collection(String("packages"));
-  }
-  get payments() {
-    return this.db.collection(String("payments"));
-  }
-  get staffs() {
-    return this.db.collection(String("staffs"));
-  }
-  get types() {
-    return this.db.collection(String("types"));
-  }
-  get vaccinceImports() {
-    return this.db.collection(String("vaccinceImports"));
-  }
+
   get vaccinceInventorys() {
     return this.db.collection(String("vaccinceInventorys"));
   }

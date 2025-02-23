@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registation Form  Html CSS JavaScript</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="wrapper">
+            <div class="input_box">
+                <input type="text" id="fname" placeholder="First name"> 
+            </div>
+            <div class="input_box">
+                <input type="text" id="lname" placeholder="Last name"> 
+            </div>
+            <div class="input_box">
+                <input type="text" id="emailF" placeholder="Email"> 
+            </div>
+            <div class="input_box">
+                <input type="text" id="passwordF" placeholder="Password"> 
+            </div>
+            <button id="submit">Submitting</button>
+        </div>
+    </div>
+    <script>
+        document.getElementById('submit').addEventListener('click', () => {
+            const Finame = document.getElementById('fname').value.trim();
+            const laname = document.getElementById('lname').value.trim();
+            const email = document.getElementById('emailF').value.trim();
+            const paField = document.getElementById('passwordF').value.trim();
+            
+            if (Finame === '' || laname === '' || email === '' || paField === '') {
+                alert('Please fill in all fields');
+                return;
+            } else {
+                localStorage.setItem('firstName', Finame);
+                localStorage.setItem('lastName', laname);
+            
+                window.location = 'thanks.html';
+            }
+        });
+    </script>
+</body>
+</html>

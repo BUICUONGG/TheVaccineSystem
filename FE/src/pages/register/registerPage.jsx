@@ -6,14 +6,14 @@ import { toast } from "react-toastify";
 const RegistrationForm = () => {
   const [formData, setFormData] = useState({
     username: "",
-    fullname: "",
     email: "",
-    phone: "",
     password: "",
+    confirmPassword: "",
   });
 
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -26,13 +26,7 @@ const RegistrationForm = () => {
 
   const validateEmail = (email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) return "Please enter a valid email address";
-    return "";
-  };
-
-  const validatePhone = (phone) => {
-    if (!/^\d+$/.test(phone)) return "Phone number must contain only digits";
-    if (phone.length < 10) return "Phone number must be at least 10 digits";
+    if (!emailRegex.test(email)) return "Invalid email address";
     return "";
   };
 
@@ -44,12 +38,9 @@ const RegistrationForm = () => {
     return "";
   };
 
-  const validateFullname = (fullname) => {
-    if (fullname.length < 2) return "Full name must be at least 2 characters";
-    if (!/^[A-Za-z\s]+$/.test(fullname))
-      return "Full name can only contain letters and spaces";
-    if (fullname.replace(/\s/g, "").length < 6)
-      return "Full name must contain at least 2 letters";
+  const validateConfirmPassword = (confirmPassword, password) => {
+    if (!password) return "Password is required";
+    if (confirmPassword !== password) return "Passwords do not match";
     return "";
   };
 
@@ -62,17 +53,14 @@ const RegistrationForm = () => {
       case "username":
         validationError = validateUsername(value);
         break;
-      case "fullname":
-        validationError = validateFullname(value);
-        break;
       case "email":
         validationError = validateEmail(value);
         break;
-      case "phone":
-        validationError = validatePhone(value);
-        break;
       case "password":
         validationError = validatePassword(value);
+        break;
+      case "confirmPassword":
+        validationError = validateConfirmPassword(value, formData.password);
         break;
       default:
         break;
@@ -85,10 +73,12 @@ const RegistrationForm = () => {
     e.preventDefault();
     const newErrors = {
       username: validateUsername(formData.username),
-      fullname: validateFullname(formData.fullname),
       email: validateEmail(formData.email),
-      phone: validatePhone(formData.phone),
       password: validatePassword(formData.password),
+      confirmPassword: validateConfirmPassword(
+        formData.confirmPassword,
+        formData.password
+      ),
     };
 
     if (Object.values(newErrors).some((error) => error !== "")) {
@@ -107,15 +97,15 @@ const RegistrationForm = () => {
       });
 
       const data = await response.json();
+      console.log(formData);
 
       if (response.ok) {
         // Đăng ký thành công
         setFormData({
           username: "",
-          fullname: "",
           email: "",
-          phone: "",
           password: "",
+          confirmPassword: "",
         });
         toast.success("Registration successful:", data);
         // Có thể thêm thông báo thành công hoặc chuyển hướng người dùng
@@ -138,7 +128,7 @@ const RegistrationForm = () => {
       <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-xl shadow-lg">
         <div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Create your account
+            Tạo tài khoản của bạn
           </h2>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
@@ -148,7 +138,7 @@ const RegistrationForm = () => {
                 htmlFor="username"
                 className="block text-sm font-medium text-gray-700"
               >
-                Username
+                Tên đăng nhập
               </label>
               <div className="mt-1 relative">
                 <input
@@ -176,41 +166,10 @@ const RegistrationForm = () => {
 
             <div>
               <label
-                htmlFor="fullname"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Full Name
-              </label>
-              <div className="mt-1 relative">
-                <input
-                  id="fullname"
-                  name="fullname"
-                  type="text"
-                  value={formData.fullname}
-                  onChange={handleChange}
-                  className={`appearance-none block w-full px-3 py-2 border ${
-                    errors.fullname ? "border-red-300" : "border-gray-300"
-                  } rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm transition-colors`}
-                />
-                {errors.fullname && (
-                  <div className="absolute right-0 top-2">
-                    <FaTimesCircle className="h-5 w-5 text-red-500" />
-                  </div>
-                )}
-              </div>
-              {errors.fullname && (
-                <p className="mt-2 text-sm text-red-600" role="alert">
-                  {errors.fullname}
-                </p>
-              )}
-            </div>
-
-            <div>
-              <label
                 htmlFor="email"
                 className="block text-sm font-medium text-gray-700"
               >
-                Email address
+                Email
               </label>
               <div className="mt-1 relative">
                 <input
@@ -235,44 +194,13 @@ const RegistrationForm = () => {
                 </p>
               )}
             </div>
-
-            <div>
-              <label
-                htmlFor="phone"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Phone number
-              </label>
-              <div className="mt-1 relative">
-                <input
-                  id="phone"
-                  name="phone"
-                  type="tel"
-                  value={formData.phone}
-                  onChange={handleChange}
-                  className={`appearance-none block w-full px-3 py-2 border ${
-                    errors.phone ? "border-red-300" : "border-gray-300"
-                  } rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm transition-colors`}
-                />
-                {errors.phone && (
-                  <div className="absolute right-0 top-2">
-                    <FaTimesCircle className="h-5 w-5 text-red-500" />
-                  </div>
-                )}
-              </div>
-              {errors.phone && (
-                <p className="mt-2 text-sm text-red-600" role="alert">
-                  {errors.phone}
-                </p>
-              )}
-            </div>
-
+       
             <div>
               <label
                 htmlFor="password"
                 className="block text-sm font-medium text-gray-700"
               >
-                Password
+                Mật khẩu
               </label>
               <div className="mt-1 relative">
                 <input
@@ -300,6 +228,48 @@ const RegistrationForm = () => {
               {errors.password && (
                 <p className="mt-2 text-sm text-red-600" role="alert">
                   {errors.password}
+                </p>
+              )}
+            </div>
+
+            <div>
+              <label
+                htmlFor="confirmPassword"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Xác nhận mật khẩu
+              </label>
+              <div className="mt-1 relative">
+                <input
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  type={showConfirmPassword ? "text" : "password"}
+                  value={formData.confirmPassword}
+                  onChange={handleChange}
+                  className={`appearance-none block w-full px-3 py-2 border ${
+                    errors.confirmPassword ? "border-red-300" : "border-gray-300"
+                  } rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm transition-colors`}
+                />
+                <button
+                  type="button"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                >
+                  {showConfirmPassword ? (
+                    <FaEyeSlash className="h-5 w-5 text-gray-400" />
+                  ) : (
+                    <FaEye className="h-5 w-5 text-gray-400" />
+                  )}
+                </button>
+                {errors.confirmPassword && (
+                  <div className="absolute right-0 top-2">
+                    <FaTimesCircle className="h-5 w-5 text-red-500" />
+                  </div>
+                )}
+              </div>
+              {errors.confirmPassword && (
+                <p className="mt-2 text-sm text-red-600" role="alert">
+                  {errors.confirmPassword}
                 </p>
               )}
             </div>
@@ -339,22 +309,22 @@ const RegistrationForm = () => {
                       d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                     ></path>
                   </svg>
-                  Registering...
+                  Đang xử lý...
                 </span>
               ) : (
-                "Register"
+                "Đăng ký"
               )}
             </button>
           </div>
 
           <div className="text-center mt-4">
             <p className="text-sm text-gray-600">
-              Already have an account?{" "}
+              Đã có tài khoản?{" "}
               <a
                 href="/login"
                 className="font-medium text-indigo-600 hover:text-indigo-500 transition-colors"
               >
-                Sign in
+                Đăng nhập
               </a>
             </p>
           </div>

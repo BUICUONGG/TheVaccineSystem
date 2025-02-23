@@ -7,29 +7,28 @@ import {
   // updateController,
   logoutController,
   refreshTokenController,
-  // logoutController,
 } from "../controllers/users.controllers.js";
 import {
   registerValidate,
   loginValidate,
   validateAccessToken,
-  verifyAdmin,
+  // verifyAdmin,
   validateRefreshToken,
   // verifyStaff,
 } from "../middlewares/user.middleware.js";
 
-const usersRouter = Router();
+const usersRoutes = Router();
 
-usersRouter.get("/showInfo", validateAccessToken, showInFoController);
+usersRoutes.get("/showInfo", validateAccessToken, showInFoController);
 
-usersRouter.post("/login", loginValidate, loginController);
+usersRoutes.post("/login", loginValidate, loginController);
 
-usersRouter.post("/register", registerValidate, registerController);
+usersRoutes.post("/register", registerValidate, registerController);
 
-usersRouter.post(
+usersRoutes.post(
   "/delete/:id",
   validateAccessToken,
-  verifyAdmin,
+  // verifyAdmin,
   deleteController
 );
 
@@ -40,11 +39,11 @@ usersRouter.post(
 //   updateController
 // );
 
-usersRouter.post("/logout/:id", logoutController);
+usersRoutes.post("/logout/:id", validateAccessToken, logoutController);
 
-usersRouter.post(
+usersRoutes.post(
   "/refresh-token",
   validateRefreshToken,
   refreshTokenController
 );
-export default usersRouter;
+export default usersRoutes;
