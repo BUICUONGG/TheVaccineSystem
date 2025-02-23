@@ -82,8 +82,8 @@ class ConnectDatabaseService {
     return this.db.collection(String("admins"));
   }
 
-  get vaccinceImports() {
-    return this.db.collection(String("vaccinceImports"));
+  get vaccineImports() {
+    return this.db.collection(String("vaccineImports"));
   }
 
   get vaccinceInventorys() {

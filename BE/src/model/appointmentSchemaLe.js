@@ -6,17 +6,18 @@ const appointmentLeSchema = new mongoose.Schema({
     ref: "Customer",
     required: true,
   },
-  date: { type: String, required: true }, // ngayf đặt lịch hẹn
+  childId: { type: mongoose.Schema.Types.ObjectId, ref: "Child" },
   vaccineId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "VaccineInventory",
     required: true,
   },
+  date: { type: String, required: true }, // ngayf cus nđặt lịch hẹn
   createAt: { type: String, required: true },
   status: {
     type: String,
-    enum: ["completed", "incomplete"],
-    default: "incomplete",
+    enum: ["completed", "incomplete", "pending", "apporove"],
+    default: "pending",
   },
 });
 

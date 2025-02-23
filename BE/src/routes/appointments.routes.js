@@ -1,9 +1,11 @@
 import { Router } from "express";
 import {
+  createAptGoiController,
   createAptLeController,
   deleteAptLeController,
   getAppointmentsController,
   getAppointmentsWithDetailsByIdController,
+  listAllAptGoiController,
   listAllAptLeController,
   searchAppointmentsController,
   updateAptLeController,
@@ -38,8 +40,8 @@ aptLeRoutes.post("/delete/:id", deleteAptLeController);
 // tìm kiếm 1 hoá đơn chi tiết theo id
 aptLeRoutes.post("/searchDetail/:id", searchAppointmentsController);
 //-----------------Apt Gois ------------------------------------------
-// aptGoiRoutes.get("/showInfo", listAllAptGoiController);
-// aptGoiRoutes.post("/create", createAptGoiController);
+aptGoiRoutes.get("/showInfo", listAllAptGoiController);
+aptGoiRoutes.post("/create", createAptGoiController);
 // aptGoiRoutes.post("/update/:id", updateAptGoiController);
 // aptGoiRoutes.post("/delete/:id", deleteAptGoiController);
 

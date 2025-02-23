@@ -84,8 +84,45 @@ export const searchAppointmentsController = async (req, res) => {
 
 // ======================================================================================================
 
-// export const listAllAptGoiController = async (req, res) => {};
+export const listAllAptGoiController = async (req, res) => {
+  try {
+    const result = await appointmentService.listAptGoi();
+    res.status(200).json(result);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json(error.message);
+  }
+};
 
-// export const createAptGoiController = async (req, res) => {}
-// export const updateAptGoiController = async (req, res) => {};
-// export const deleteAptGoiController = async (req, res) => {};
+export const createAptGoiController = async (req, res) => {
+  try {
+    const data = req.body;
+    const result = await appointmentService.createAptGoi(data);
+    res.status(200).json(result);
+  } catch (error) {
+    console.log();
+    res.status(500).json(error.message);
+  }
+};
+
+export const updateAptGoiController = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const dataUpdate = req.body;
+    const result = await appointmentService.updateAptGoi(id, dataUpdate);
+    if (!result) throw new Error("khong thee updates");
+    res.status(200).json(result);
+  } catch (error) {
+    console.log(" ko the update ");
+    res.status(500).json(error.message);
+  }
+};
+export const deleteAptGoiController = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const result = await appointmentService.deleteGoi(id);
+    res.status(200).json(result);
+  } catch (error) {
+    res.status(500).json(error.message);
+  }
+};

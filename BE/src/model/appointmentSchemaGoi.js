@@ -1,22 +1,23 @@
 import mongoose from "mongoose";
 
 const appointmentGoiSchema = new mongoose.Schema({
-  cusIds: {
+  cusId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Customer",
     required: true,
   },
-  date: { type: String, required: true }, // ngayf đặt lịch hẹn
-  vaccineId: {
+  childId: { type: mongoose.Schema.Types.ObjectId, ref: "Child" },
+  vaccinePakageId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "VaccineInventory",
+    ref: "VaccinePackage",
     required: true,
   },
+  date: { type: String, required: true }, // ngayf cus nđặt lịch hẹn
   createAt: { type: String, required: true },
   status: {
     type: String,
-    enum: ["completed", "incoplete"],
-    default: "incoplete",
+    enum: ["completed", "incomplete", "pending", "apporove"],
+    default: "pending",
   },
 });
 
