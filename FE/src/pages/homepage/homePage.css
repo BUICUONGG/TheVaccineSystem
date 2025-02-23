@@ -11,10 +11,9 @@ body {
   top: 0;
   left: 0;
   width: 100%;
-  background: white;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  z-index: 1001;
-  padding: 10px 0;
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  z-index: 1000;
 }
 
 .header-content {
@@ -28,9 +27,11 @@ body {
 
 .header-left h1 {
   font-family: 'Saira Stencil One', sans-serif;
+  font-weight: 600;
+  line-height: 41.6px;
   font-size: 32px;
   color: #4A90E2;
-  margin: 0;
+  display: inline;
 }
 
 .header-right .nav-menu {
@@ -68,6 +69,7 @@ body {
 .swiper-slide {
   position: relative;
   width: 100%;
+  margin-top: 80px;
   flex-shrink: 0;
   display: flex;
   justify-content: center;
@@ -100,14 +102,30 @@ body {
   width: 100%;
   padding: 0 20px;
   opacity: 0;
-  transform: translateY(20px);
-  transition: all 0.5s ease;
-  z-index: 2; /* Đảm bảo content hiển thị trên overlay */
+  transform: translateX(100px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  z-index: 2;
 }
 
 .slide-content.active {
+  opacity: 0; /* Bắt đầu với opacity 0 */
+}
+
+.slide-content.active.fade-in {
   opacity: 1;
-  transform: translateY(0);
+  transform: translateX(0);
+  animation: slideInFromLeft;
+}
+
+@keyframes slideInFromLeft {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 .elementor-slide-heading {
@@ -390,13 +408,32 @@ body {
   font-size: 14px;
 }
 
-
-
+/* Nav menu hover effect */
 .nav-menu a {
-  text-decoration: none;
+  position: relative;
+  padding: 10px 15px;
   color: #333;
-  font-family: sans-serif;
-  font-weight: 500;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.nav-menu a::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: #4A90E2; /* Màu xanh của line */
+  transition: width 0.3s ease;
+}
+
+.nav-menu a:hover {
+  color: #4A90E2;
+}
+
+.nav-menu a:hover::after {
+  width: 100%;
 }
 
 /* Dropdown styles */
@@ -496,6 +533,26 @@ body {
 
 .avatar-dropdown:hover .avatar-dropdown-content {
   display: block;
+}
+
+/* Avatar dropdown hover effect */
+.avatar-dropdown .avatar-container {
+  position: relative;
+}
+
+.avatar-dropdown .avatar-container::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: #4A90E2;
+  transition: width 0.3s ease;
+}
+
+.avatar-dropdown:hover .avatar-container::after {
+  width: 100%;
 }
 
 /* Responsive Design */

@@ -15,6 +15,7 @@ import { FaSearch, FaShoppingCart } from "react-icons/fa";
 const HomePage = () => {
   const navigate = useNavigate();
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [fadeIn, setFadeIn] = useState(true);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userRole, setUserRole] = useState('');
 
@@ -50,20 +51,34 @@ const HomePage = () => {
       setUserRole(role);
     }
     document.title = "Trang chủ";
+    
     const timer = setInterval(() => {
-      setCurrentSlide((prevSlide) =>
-        prevSlide === banners.length - 1 ? 0 : prevSlide + 1
-      );
-    }, 5000); // Change slide every 5 seconds
+      setFadeIn(false);
+      setTimeout(() => {
+        setCurrentSlide((prevSlide) =>
+          prevSlide === banners.length - 1 ? 0 : prevSlide + 1
+        );
+        setFadeIn(true);
+      }, 200);
+    }, 3000);
+    
     return () => clearInterval(timer);
   }, [banners.length]);
 
   const nextSlide = () => {
-    setCurrentSlide(currentSlide === banners.length - 1 ? 0 : currentSlide + 1);
+    setFadeIn(false);
+    setTimeout(() => {
+      setCurrentSlide(currentSlide === banners.length - 1 ? 0 : currentSlide + 1);
+      setFadeIn(true);
+    }, 200);
   };
 
   const prevSlide = () => {
-    setCurrentSlide(currentSlide === 0 ? banners.length - 1 : currentSlide - 1);
+    setFadeIn(false);
+    setTimeout(() => {
+      setCurrentSlide(currentSlide === 0 ? banners.length - 1 : currentSlide - 1);
+      setFadeIn(true);
+    }, 200);
   };
 
   const handleLogout = () => {
@@ -175,7 +190,7 @@ const HomePage = () => {
             <div key={index} className="swiper-slide">
               <div className="banner-overlay"></div>
               <img src={banner.image} alt={banner.title} className="banner-image" />
-              <div className={`slide-content ${currentSlide === index ? 'active' : ''}`}>
+              <div className={`slide-content ${currentSlide === index ? 'active' : ''} ${fadeIn && currentSlide === index ? 'fade-in' : ''}`}>
                 <div className="elementor-slide-heading">{banner.title}</div>
                 <div className="elementor-slide-description">{banner.description}</div>
                 <Link to={banner.link} className="slide-button">
@@ -315,14 +330,14 @@ const HomePage = () => {
       <footer className="footer">
         <div className="footer-content">
           <div className="footer-section">
-            <h3>DiVac</h3>
-            <p>Hệ thống quản lý tiêm chủng toàn diện</p>
+            <h3>Giới Thiệu</h3>
+            <p>Hệ thống quản lý tiêm chủng cho trẻ em</p>
           </div>
           <div className="footer-section">
             <h3>LIÊN HỆ</h3>
             <p>Email: contact@nhatkytiemchung.vn</p>
             <p>Hotline: 1900 xxxx</p>
-            <p>Địa chỉ: Hà Nội, Việt Nam</p>
+            <p>Địa chỉ: Nhà Văn Hóa Sinh Viên</p>
           </div>
           <div className="footer-section">
             <h3>THEO DÕI CHÚNG TÔI</h3>
@@ -336,11 +351,21 @@ const HomePage = () => {
               <a href="#">
                 <i className="fab fa-instagram"></i>
               </a>
+              <a href="#">
+                <i className="fab fa-youtube"></i>
+              </a>
+              <a href="#">
+                <i className="fab fa-tiktok"></i>
+              </a>
+              <a href="#">
+                <i className="fab fa-linkedin"></i>
+              </a>
+              
             </div>
           </div>
         </div>
         <div className="footer-bottom">
-          <p>&copy; 2024 Nhật Ký Tiêm Chủng. All rights reserved.</p>
+          <p>CopyRight &copy; 2025 Diary Vaccine | All rights reserved</p>
         </div>
       </footer>
     </div>

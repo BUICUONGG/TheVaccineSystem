@@ -94,37 +94,6 @@ const VaccinePriceList = () => {
         </Link>
       </div>
 
-      <header className="header-framework">
-        <div className="header-content">
-          <div className="header-title">
-            <h1>Nhật Ký Tiêm Chủng</h1>
-          </div>
-          <div className="auth-buttons">
-            {isLoggedIn ? (
-              <>
-                <button className="logout-btn" onClick={handleLogout}>Logout</button>
-                <img src="../icons/adminIcon.png" alt="User Avatar" className="avatar-icon" />
-              </>
-            ) : (
-              <>
-                <button className="login-btn" onClick={handleLogin}>Đăng nhập</button>
-                <button className="register-btn" onClick={handleRegister}>Đăng ký</button>
-              </>
-            )}
-          </div>
-        </div>
-      </header>
-
-      <nav className="sub-navbar">
-        <div className="nav-links">
-          <a href="/homepage">Trang chủ</a>
-          <a href="#">Giới thiệu</a>
-          <a href="#">Tin tức</a>
-          <a href="#">Cẩm nang</a>
-          <a href="#">Đăng ký tiêm</a>
-        </div>
-      </nav>
-
       <div className="product-filter">
         <label htmlFor="category">Chọn loại sản phẩm:</label>
         <select id="category" value={selectedCategory} onChange={handleCategoryChange}>
