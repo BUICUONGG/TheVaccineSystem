@@ -6,39 +6,48 @@ import { FaSyringe, FaBook, FaUserCheck, FaMoneyBillWave } from "react-icons/fa"
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import "./homePage.css";
 import { useNavigate } from "react-router-dom";
+import { UserOutlined } from '@ant-design/icons';
+import { Link } from "react-router-dom";
 
 // eslint-disable-next-line no-unused-vars
 import { FaSearch, FaShoppingCart } from "react-icons/fa";
-import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
-import { Link } from "react-router-dom";
 
 const HomePage = () => {
   const navigate = useNavigate();
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [isDarkMode, setIsDarkMode] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userRole, setUserRole] = useState('');
 
   const banners = [
-    "/images/banner1.png",
-    "/images/banner2.jpg",
-    "/images/banner3.png",
+    {
+      image: "/images/banner1.png",
+      title: "Đăng Ký Tiêm Chủng",
+      description: "Bảo vệ sức khỏe cho bạn và gia đình",
+      link: "/registerinjection",
+      buttonText: "Đăng Ký Tiêm"
+    },
+    {
+      image: "/images/banner2.jpg",
+      title: "Blog Sức Khỏe",
+      description: "Cập nhật thông tin y tế mới nhất",
+      link: "/blogs",
+      buttonText: "Xem Blog"
+    },
+    {
+      image: "/images/banner3.png",
+      title: "Tư Vấn Y Tế",
+      description: "Đội ngũ bác sĩ chuyên nghiệp",
+      link: "/advise",
+      buttonText: "Tư Vấn Ngay"
+    }
   ];
 
   useEffect(() => {
-    const token = localStorage.getItem("accesstoken");
+    const token = localStorage.getItem('accesstoken');
     if (token) {
-      try {
-        // Decode token để lấy role giống như trong loginPage.jsx
-        const tokenParts = token.split(".");
-        const payload = JSON.parse(atob(tokenParts[1]));
-        setUserRole(payload.role);
-        setIsLoggedIn(true);
-      } catch (error) {
-        console.error("Invalid token:", error);
-        setIsLoggedIn(false);
-        setUserRole('');
-      }
+      setIsLoggedIn(true);
+      const role = localStorage.getItem('role');
+      setUserRole(role);
     }
     document.title = "Trang chủ";
     const timer = setInterval(() => {
@@ -58,14 +67,12 @@ const HomePage = () => {
   };
 
   const handleLogout = () => {
-    // Xóa toàn bộ thông tin authentication khỏi localStorage
-    localStorage.removeItem("accesstoken");
-    localStorage.removeItem("username");
-    localStorage.removeItem("userId");
+    localStorage.removeItem('accesstoken');
+    localStorage.removeItem('role');
+    localStorage.removeItem('userId');
     setIsLoggedIn(false);
-    
-    // Chuyển hướng về trang login
-    navigate("/login");
+    setUserRole('');
+    navigate('/homepage');
   };
 
   const handleLogin = () => {
@@ -79,21 +86,6 @@ const HomePage = () => {
   const handleProfile = () => {
     navigate("/profile");
   };
-
-  const toggleTheme = () => {
-    setIsDarkMode(!isDarkMode);
-    if (!isDarkMode) {
-      document.body.classList.add("dark-mode");
-    } else {
-      document.body.classList.remove("dark-mode");
-    }
-  };
-
-  useEffect(() => {
-    return () => {
-      document.body.classList.remove("dark-mode");
-    };
-  }, []);
 
   useEffect(() => {
     // Thêm script cho Chatbase
@@ -135,119 +127,106 @@ const HomePage = () => {
   }, []); // Empty dependency array means this runs once when component mounts
 
   return (
-    <div className={`homepage ${isDarkMode ? "dark-mode" : ""}`}>
+    <div className="homepage">
       <header className="header-framework">
         <div className="header-content">
-          <div className="header-title">
+          <div className="header-left">
             <Link to="/homepage">
-            <h1>Diary Vaccine</h1>
-            </Link>          
-            <div className="header-subtitle">
-              AN TOÀN - UY TÍN - CHẤT LƯỢNG HÀNG ĐẦU VIỆT NAM
-            </div>
+              <h1>Diary Vaccine</h1>
+            </Link>
           </div>
-          
-          <div className="auth-buttons">
-            <FaShoppingCart className="cart-icon" />
-            {isLoggedIn ? (
-              <>
-                <button className="profile-btn" onClick={handleProfile}>
-                  Profile
-                </button>
-                <button className="logout-btn" onClick={handleLogout}>
-                  Đăng xuất
-                </button>
-              </>
-            ) : (
-              <>
-                <button className="login-btn" onClick={handleLogin}>
-                  Đăng nhập
-                </button>
-                <button className="register-btn" onClick={handleRegister}>
-                  Đăng ký
-                </button>
-              </>
-            )}
-            <button
-              className={`theme-toggle-btn ${isDarkMode ? "dark" : ""}`}
-              onClick={toggleTheme}
-              aria-label="Toggle theme"
-            />
+          <div className="header-right">
+            <nav className="nav-menu">
+              <Link to="/homepage">Home</Link>
+              
+                <Link to="/blogs">Blog</Link>
+            
+              
+                <Link to="/news">News</Link>
+              
+              <Link to="/about">About</Link>
+              <Link to="/contact">Contact Us</Link>
+              <div className="avatar-dropdown">
+                <div className="avatar-container">
+                  <UserOutlined className="avatar-icon" />
+                </div>
+                <div className="avatar-dropdown-content">
+                  {!isLoggedIn ? (
+                    <>
+                      <Link to="/login">Login</Link>
+                      <Link to="/register">Register</Link>
+                    </>
+                  ) : (
+                    <>
+                      <Link to="/profile">Profile</Link>
+                      <button onClick={handleLogout}>Logout</button>
+                    </>
+                  )}
+                </div>
+              </div>
+            </nav>
           </div>
         </div>
       </header>
 
       <div className="banner-container">
-        <div
-          className="banner-slider"
-          style={{ transform: `translateX(-${currentSlide * 100}%)` }}
-        >
+        <div className="banner-slider" style={{ transform: `translateX(-${currentSlide * 100}%)` }}>
           {banners.map((banner, index) => (
-            <img
-              key={index}
-              src={banner}
-              alt={`Banner ${index + 1}`}
-              className="banner-image"
-            />
+            <div key={index} className="swiper-slide">
+              <div className="banner-overlay"></div>
+              <img src={banner.image} alt={banner.title} className="banner-image" />
+              <div className={`slide-content ${currentSlide === index ? 'active' : ''}`}>
+                <div className="elementor-slide-heading">{banner.title}</div>
+                <div className="elementor-slide-description">{banner.description}</div>
+                <Link to={banner.link} className="slide-button">
+                  {banner.buttonText}
+                </Link>
+              </div>
+            </div>
           ))}
         </div>
 
         <button className="slider-button prev" onClick={prevSlide}>
-          <IoIosArrowBack className="arrow-icon" />
+          <i className="fas fa-chevron-left" aria-hidden="true"></i>
         </button>
         <button className="slider-button next" onClick={nextSlide}>
-          <IoIosArrowForward className="arrow-icon" />
+          <i className="fas fa-chevron-right" aria-hidden="true"></i>
         </button>
 
-        <div className="slider-indicators">
+        <div className="swiper-pagination">
           {banners.map((_, index) => (
-            <button
-              key={index}
-              className={`indicator ${currentSlide === index ? "active" : ""}`}
+            <span 
+              key={index} 
+              className={`swiper-pagination-bullet ${currentSlide === index ? 'active' : ''}`}
               onClick={() => setCurrentSlide(index)}
-            />
+            ></span>
           ))}
         </div>
 
-        <nav className="navbar">
+        {/* <nav className="navbar">
           <div className="nav-links">
             <a href="/homepage">Trang chủ</a>
             <Link to="/news">Tin tức</Link>
             <Link to="/handbook">Cẩm nang</Link>
             <Link to="/advise">Tư vấn</Link>
             <Link to="/blogs">Blogs</Link>
-            {userRole === 'admin' ? (
+            userRole === 'admin' ? (
               <Link to="/admin">Quản trị</Link>
             ) : (
               <a href="/registerinjection">Đăng ký tiêm</a>
-            )}
-            {/* <a href="/registerinjection">Đăng ký tiêm</a> */}
+            )
           </div>
-        </nav>
+        </nav> */}
       </div>
 
       <div className="quick-access">
-  <div className="icon-item">
-    <FaSyringe size={50} style={{ color: "#4A90E2" }} />
-    <span>CÁC GÓI TIÊM</span>
-  </div>
-  <div className="icon-item">
-    <Link to="/camnang">
-      <FaBook size={50} style={{ color: "#4A90E2" }} />
-      <span>CẨM NANG</span>
-    </Link>
-  </div>
-  <div className="icon-item">
-    <FaUserCheck size={50} style={{ color: "#4A90E2" }} />
-    <span>ĐĂNG KÝ TIÊM</span>
-  </div>
-  <div className="icon-item">
-    <Link to="/pricelist">
-      <FaMoneyBillWave size={50} style={{ color: "#4A90E2" }} />
-      <span>GIÁ TIÊM</span>
-    </Link>
-  </div>
-</div>
+        <div className="icon-item">
+          <Link to="/pricelist">
+            <FaMoneyBillWave size={50} style={{ color: "#4A90E2" }} />
+            <span>GIÁ TIÊM</span>
+          </Link>
+        </div>
+      </div>
 
       <div className="vaccine-info">
         <h2>THÔNG TIN VACCINE</h2>
@@ -271,31 +250,6 @@ const HomePage = () => {
           </div>
         </div>
       </div>
-
-      <div className="vaccination-guide">
-      <h2>CẨM NANG TIÊM CHỦNG</h2>
-      <div className="guide-icons">
-        <div className="guide-item">
-          <FaRegCalendarAlt size={50} style={{ color: "#4A90E2" }} />
-          <span>LỊCH TIÊM CHỦNG</span>
-        </div>
-
-        <div className="guide-item">
-          <FaRegListAlt size={50} style={{ color: "#4A90E2" }} />
-          <span>QUY TRÌNH TIÊM CHỦNG</span>
-        </div>
-
-        <div className="guide-item">
-          <FaRegThumbsUp size={50} style={{ color: "#4A90E2" }} />
-          <span>LƯU Ý TRƯỚC KHI TIÊM</span>
-        </div>
-
-        <div className="guide-item">
-          <FaRegSmileBeam size={50} style={{ color: "#4A90E2" }} />
-          <span>LƯU Ý SAU KHI TIÊM</span>
-        </div>
-      </div>
-    </div>
 
       <div className="news-section">
         <h2>TIN TỨC SỨC KHỎE</h2>
