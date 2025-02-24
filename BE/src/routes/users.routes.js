@@ -19,6 +19,8 @@ import {
 
 const usersRoutes = Router();
 
+//PATH:             http://localhost:8080/user/.........
+
 usersRoutes.get("/showInfo", validateAccessToken, showInFoController);
 
 usersRoutes.post("/login", loginValidate, loginController);

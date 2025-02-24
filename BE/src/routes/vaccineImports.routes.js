@@ -9,6 +9,8 @@ import {
 
 const vaccineImportRoutes = Router();
 
+//PATH:             http://localhost:8080/vaccineimport/.........
+
 // lấy hết thông tin trong lô db
 vaccineImportRoutes.get("/getfullData", getFullDataController);
 

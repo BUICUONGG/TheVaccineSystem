@@ -15,6 +15,9 @@ import { validateAccessToken } from "../middlewares/user.middleware.js";
 const aptLeRoutes = Router();
 const aptGoiRoutes = Router();
 
+//PATH:    hoá đơn lẻ       http://localhost:8080/appointmentLe/.......
+//PATH     hoá đơn gói      http://localhost:8080/appointmentGoi/.......
+
 //------------------Apt Lẻ -------------------------------------------
 // show ra list cac hoa don
 aptLeRoutes.get("/showInfo", listAllAptLeController);

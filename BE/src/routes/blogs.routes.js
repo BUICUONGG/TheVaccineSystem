@@ -10,6 +10,8 @@ import {
 
 const blogRoutes = Router();
 
+//PATH:          http://localhost:8080/blog/......
+
 blogRoutes.get("/showBlog", showBlogsController);
 blogRoutes.post("/createBlog", createBlogController);
 blogRoutes.put("/incrementViews/:blogId", incrementViewsController);
