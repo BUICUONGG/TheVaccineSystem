@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 //import axios from "axios";
 //import { Modal } from "antd";
 import { FaRegCalendarAlt, FaRegListAlt, FaRegThumbsUp, FaRegSmileBeam } from "react-icons/fa";
@@ -18,6 +18,7 @@ const HomePage = () => {
   const [fadeIn, setFadeIn] = useState(true);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userRole, setUserRole] = useState('');
+  const [showBackToTop, setShowBackToTop] = useState(false);
 
   const banners = [
     {
@@ -145,6 +146,31 @@ const HomePage = () => {
     };
   }, []); // Empty dependency array means this runs once when component mounts
 
+  // Thêm ref cho footer
+  const footerRef = useRef(null);
+
+  // Thêm function scroll
+  const scrollToFooter = () => {
+    footerRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  useEffect(() => {
+    const handleScroll = () => {
+        if (window.scrollY > 300) {
+            setShowBackToTop(true);
+        } else {
+            setShowBackToTop(false);
+        }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   return (
     <div className="homepage">
       <header className="header-framework">
@@ -164,7 +190,7 @@ const HomePage = () => {
                 <Link to="/news">News</Link>
               
               <Link to="/registerInjection">Đăng Ký Tiêm</Link>
-              <Link to="/contact">Contact Us</Link>
+              <Link to="#" onClick={scrollToFooter}>Contact Us</Link>
               <div className="avatar-dropdown">
                 <div className="avatar-container">
                   <UserOutlined className="avatar-icon" />
@@ -335,11 +361,21 @@ const HomePage = () => {
         </div>
       </div>
 
-      <footer className="footer">
+      <footer className="footer" ref={footerRef}>
         <div className="footer-content">
           <div className="footer-section">
             <h3>Giới Thiệu</h3>
             <p>Hệ thống quản lý tiêm chủng cho trẻ em</p>
+          </div>
+          <div className="footer-section">
+          <h3>PHÁP LÝ & CÂU HỎI</h3>
+          <div className="legal-links">
+                <Link to="/search">Tìm kiếm</Link>
+                <Link to="/about">Giới thiệu</Link>
+                <Link to="/return-policy">Chính sách đổi trả</Link>
+                <Link to="/privacy-policy">Chính sách bảo mật</Link>
+                <Link to="/terms">Điều khoản dịch vụ</Link>
+            </div>
           </div>
           <div className="footer-section">
             <h3>LIÊN HỆ</h3>
@@ -375,7 +411,21 @@ const HomePage = () => {
         <div className="footer-bottom">
           <p>CopyRight &copy; 2025 Diary Vaccine | All rights reserved</p>
         </div>
+        <div className="footer-legal">
+            
+            
+        </div>
       </footer>
+
+      {showBackToTop && (
+        <button 
+          className="back-to-top"
+          onClick={scrollToTop}
+          aria-label="Back to top"
+        >
+          <i className="fas fa-arrow-up"></i>
+        </button>
+      )}
     </div>
   );
 };

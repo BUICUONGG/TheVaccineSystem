@@ -183,40 +183,12 @@ const RegisterInjection = () => {
 
   return (
     <div className="register-injection-page">
-      <header className="header-framework">
-        <div className="header-content">
-          <div className="header-title">
-            <Link to="/homepage">
-              <h1>Diary Vaccine</h1>
-            </Link>
-          </div>
-          <div className="auth-buttons">
-            {isLoggedIn ? (
-              <>
-                <button className="logout-btn" onClick={handleLogout}>
-                  Logout
-                </button>
-                <img
-                  src="../icons/adminIcon.png"
-                  alt="User Avatar"
-                  className="avatar-icon"
-                />
-              </>
-            ) : (
-              <>
-                <button className="login-btn" onClick={handleLogin}>
-                  Đăng nhập
-                </button>
-                <button className="register-btn" onClick={handleRegister}>
-                  Đăng ký
-                </button>
-              </>
-            )}
-          </div>
-        </div>
-      </header>
+      <Link to="/homepage" className="login-back-home">
+        Back home
+      </Link>
+      
 
-      <nav className="sub-navbar">
+      {/* <nav className="sub-navbar">
         <div className="nav-links">
           <a href="/homepage">Trang chủ</a>
           <a href="#">Giới thiệu</a>
@@ -224,7 +196,7 @@ const RegisterInjection = () => {
           <a href="#">Cẩm nang</a>
           <a href="#">Đăng ký tiêm</a>
         </div>
-      </nav>
+      </nav> */}
 
       <div className="main-content">
         <div className="form-container">
@@ -398,7 +370,7 @@ const RegisterInjection = () => {
         </div>
       </div>
 
-      <footer className="footer">
+      {/* <footer className="footer">
         <div className="footer-content">
           <div className="footer-section">
             <h3>NHẬT KÝ TIÊM CHỦNG</h3>
@@ -422,7 +394,7 @@ const RegisterInjection = () => {
         <div className="footer-bottom">
           <p>&copy; 2024 Nhật Ký Tiêm Chủng. All rights reserved.</p>
         </div>
-      </footer>
+      </footer> */}
     </div>
   );
 };
