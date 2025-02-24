@@ -104,7 +104,7 @@ class VaccineService {
 
       // Lặp qua từng vaccine để tìm lô nhập tương ứng
       for (let vaccine of vaccines) {
-        let vaccineImports = await connectToDatabase.vaccinceImports
+        let vaccineImports = await connectToDatabase.vaccineImports
           .find({
             "vaccines.vaccineId": vaccine._id, // Tìm lô nhập chứa vaccine này
           })
