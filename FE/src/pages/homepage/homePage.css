@@ -676,3 +676,13 @@ body {
   color: white;
   font-size: 24px;
 }
+
+.avatar-dropdown-content a[href="/admin"] {
+  color: #4A90E2;
+  font-weight: bold;
+}
+
+.avatar-dropdown-content a[href="/admin"]:hover {
+  background-color: #4A90E2;
+  color: white;
+}

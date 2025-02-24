@@ -47,8 +47,12 @@ const HomePage = () => {
     const token = localStorage.getItem('accesstoken');
     if (token) {
       setIsLoggedIn(true);
-      const role = localStorage.getItem('role');
+      // Decode token để lấy role
+      const tokenParts = token.split('.');
+      const payload = JSON.parse(atob(tokenParts[1]));
+      const role = payload.role;
       setUserRole(role);
+      localStorage.setItem('role', role); // Lưu role vào localStorage
     }
     document.title = "Trang chủ";
     
@@ -159,7 +163,7 @@ const HomePage = () => {
               
                 <Link to="/news">News</Link>
               
-              <Link to="/about">About</Link>
+              <Link to="/registerInjection">Đăng Ký Tiêm</Link>
               <Link to="/contact">Contact Us</Link>
               <div className="avatar-dropdown">
                 <div className="avatar-container">
@@ -173,7 +177,11 @@ const HomePage = () => {
                     </>
                   ) : (
                     <>
-                      <Link to="/profile">Profile</Link>
+                      {userRole === 'admin' ? (
+                        <Link to="/admin">Admin</Link>
+                      ) : (
+                        <Link to="/profile">Profile</Link>
+                      )}
                       <button onClick={handleLogout}>Logout</button>
                     </>
                   )}

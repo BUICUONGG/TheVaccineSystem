@@ -25,8 +25,9 @@ const RegisterInjection = () => {
   useEffect(() => {
     const fetchVaccines = async () => {
       try {
-        const response = await axios.get("http://localhost:8080/vaccine/showInfo");
-        setVaccineList(response.data);
+        const response = await axios.get("http://localhost:8080/vaccine/listVaccine");
+        console.log("API Response:", response.data); // Kiểm tra response
+        setVaccineList(response.data.result); // Đảm bảo lấy đúng data
       } catch (error) {
         console.error("Error fetching vaccines:", error);
         toast.error('Không thể tải danh sách vaccine', {
@@ -255,11 +256,15 @@ const RegisterInjection = () => {
                 rules={[{ required: true, message: 'Vui lòng chọn loại vắc xin!' }]}
               >
                 <Select placeholder="Chọn loại vắc xin">
-                  {vaccineList.map(vaccine => (
-                    <Select.Option key={vaccine._id} value={vaccine._id}>
-                      {vaccine.vaccineName} - {vaccine.vaccineImports?.[0]?.price || "Chưa có giá"} VNĐ
-                    </Select.Option>
-                  ))}
+                  {Array.isArray(vaccineList) && vaccineList.length > 0 ? (
+                    vaccineList.map((vaccine) => (
+                      <Select.Option key={vaccine._id} value={vaccine._id}>
+                        {vaccine.vaccineName} - {vaccine.vaccineImports?.[0]?.price || "Chưa có giá"} VNĐ
+                      </Select.Option>
+                    ))
+                  ) : (
+                    <Select.Option value="">Loading vaccines...</Select.Option>
+                  )}
                 </Select>
               </Form.Item>
 
