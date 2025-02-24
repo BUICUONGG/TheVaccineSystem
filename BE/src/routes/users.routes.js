@@ -4,9 +4,10 @@ import {
   registerController,
   loginController,
   deleteController,
-  // updateController,
+  updateController,
   logoutController,
   refreshTokenController,
+  checkUsernameController,
 } from "../controllers/users.controllers.js";
 import {
   registerValidate,
@@ -34,12 +35,10 @@ usersRoutes.post(
   deleteController
 );
 
-// usersRouter.post(
-//   "/update/:id",
-//   validateRefreshToken,
-//   verifyAdmin,
-//   updateController
-// );
+usersRoutes.post(
+  "/update/:id",
+  updateController
+);
 
 usersRoutes.post("/logout/:id", validateAccessToken, logoutController);
 
@@ -48,4 +47,7 @@ usersRoutes.post(
   validateRefreshToken,
   refreshTokenController
 );
+
+usersRoutes.post("/check-username", checkUsernameController);
+
 export default usersRoutes;

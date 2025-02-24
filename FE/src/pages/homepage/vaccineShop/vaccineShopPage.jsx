@@ -7,27 +7,46 @@ import "./vaccineShopPage.css";
 const VaccinePriceList = () => {
   const navigate = useNavigate();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userRole, setUserRole] = useState('');
   const [selectedCategory, setSelectedCategory] = useState("Single");
   const [products, setProducts] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const productsPerPage = 9;
 
   useEffect(() => {
+    // Kiểm tra authentication
+    const token = localStorage.getItem('accesstoken');
+    if (token) {
+      setIsLoggedIn(true);
+      // Decode token để lấy role
+      const tokenParts = token.split('.');
+      const payload = JSON.parse(atob(tokenParts[1]));
+      setUserRole(payload.role);
+    }
+
+    // Fetch products
     const fetchProducts = async () => {
       try {
-        const response = await axios.get("http://localhost:8080/vaccine/listVaccine");
+        const response = await axios.get(
+          "http://localhost:8080/vaccine/listVaccine",
+          {
+            headers: {
+              Authorization: `Bearer ${token}` // Thêm token vào header
+            }
+          }
+        );
         setProducts(response.data.result);
       } catch (error) {
         console.error("Error fetching products:", error);
+        if (error.response?.status === 401) {
+          // Unauthorized - redirect to login
+          navigate('/login');
+        }
       }
     };
+
     fetchProducts();
-  }, []);
-
- 
-
-
- 
+  }, [navigate]);
 
   useEffect(() => {
     document.title = "Bảng giá vắc-xin";

@@ -76,7 +76,7 @@ const LoginPage = () => {
   return (
     <div className="login-min-h-screen">
       <Link to="/homepage" className="login-back-home">
-        Back home
+        Về trang chủ
       </Link>
       <div className="login-container">
         <div className="login-image-container">
@@ -84,8 +84,8 @@ const LoginPage = () => {
         </div>
         <div className="login-form-container">
           <div className="login-form-header">
-            <h2>Welcome back</h2>
-            <p>Please sign in to your account</p>
+            <h2>Welcome</h2>
+            <p>Vui lòng đăng nhập để tiếp tục</p>
           </div>
           <form onSubmit={handleSubmit}>
             <div className="login-input-group">
@@ -115,13 +115,18 @@ const LoginPage = () => {
                 {showPassword ? <FiEyeOff /> : <FiEye />}
               </button>
             </div>
-            <div className="login-input-group">
-              <input
-                type="checkbox"
-                checked={rememberMe}
-                onChange={(e) => setRememberMe(e.target.checked)}
-              />
-              <label>Remember me</label>
+            <div className="login-input-group login-options">
+              <div className="login-remember">
+                <input
+                  type="checkbox"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                />
+                <label>Nhớ mật khẩu</label>
+              </div>
+              <Link to="/forgot-password" className="login-forgot">
+                Quên mật khẩu?
+              </Link>
             </div>
             <div className="login-button-group">
               <button
@@ -129,25 +134,25 @@ const LoginPage = () => {
                 className="login-btn login-btn-secondary"
                 onClick={handleRegisterButton}
               >
-                Sign Up
+                Đăng Ký
               </button>
               <button
                 type="submit"
                 disabled={isLoading}
                 className="login-btn login-btn-primary"
               >
-                {isLoading ? "Signing in..." : "Sign in"}
+                {isLoading ? "Signing in..." : "Đăng Nhập"}
               </button>
             </div>
             <div className="login-divider">
-              <span>Or continue with</span>
+              <span>hoặc đăng nhập bằng</span>
             </div>
             <div className="login-button-group">
               <button
                 type="button"
                 className="login-btn login-btn-secondary"
               >
-                <FcGoogle className="h-5 w-5 mr-2" /> Sign in with Google
+                <FcGoogle className="h-5 w-5 mr-2" /> Google
               </button>
             </div>
           </form>

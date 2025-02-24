@@ -64,19 +64,30 @@ export const deleteController = async (req, res) => {
   }
 };
 
-// export const updateController = async (req, res) => {
-//   try {
-//     const { id } = req.params;
-//     const updateData = req.body;
-//     const result = await userService.update(id, updateData);
-//     if (!id || !result) {
-//       throw new Error("Cannot update user");
-//     }
-//     res.status(200).json("User update successfully");
-//   } catch (error) {
-//     res.status(500).json(error.message);
-//   }
-// };
+export const checkUsernameController = async (req, res) => {
+  try {
+    const { username } = req.body;
+    const user = await userService.findByUsername(username);
+    if (user) {
+      res.json({ exists: true, userId: user._id });
+    } else {
+      res.status(404).json({ exists: false, message: "Username not found" });
+    }
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const updateController = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updateData = req.body;
+    const result = await userService.update(id, updateData);
+    res.status(200).json({ message: "Password updated successfully" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
 
 export const logoutController = async (req, res) => {
   try {

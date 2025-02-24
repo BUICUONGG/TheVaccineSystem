@@ -242,3 +242,28 @@
         flex-direction: column;
     }
 }
+
+.login-options {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.login-remember {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.login-forgot {
+    color: #4A90E2;
+    text-decoration: none;
+    font-size: 14px;
+    transition: color 0.3s ease;
+}
+
+.login-forgot:hover {
+    color: #357ABD;
+    text-decoration: underline;
+}

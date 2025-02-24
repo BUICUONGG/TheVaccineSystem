@@ -29,8 +29,8 @@ const RegisterInjection = () => {
   useEffect(() => {
     const fetchVaccines = async () => {
       try {
-        const response = await axios.get("http://localhost:8080/vaccine/listVaccine");
-        setVaccineList(response.data.result);
+        const response = await axios.get("http://localhost:8080/vaccine/showInfo");
+        setVaccineList(response.data);
       } catch (error) {
         console.error("Error fetching vaccines:", error);
         toast.error('Không thể tải danh sách vaccine', {
@@ -183,40 +183,12 @@ const RegisterInjection = () => {
 
   return (
     <div className="register-injection-page">
-      <header className="header-framework">
-        <div className="header-content">
-          <div className="header-title">
-            <Link to="/homepage">
-              <h1>Diary Vaccine</h1>
-            </Link>
-          </div>
-          <div className="auth-buttons">
-            {isLoggedIn ? (
-              <>
-                <button className="logout-btn" onClick={handleLogout}>
-                  Logout
-                </button>
-                <img
-                  src="../icons/adminIcon.png"
-                  alt="User Avatar"
-                  className="avatar-icon"
-                />
-              </>
-            ) : (
-              <>
-                <button className="login-btn" onClick={handleLogin}>
-                  Đăng nhập
-                </button>
-                <button className="register-btn" onClick={handleRegister}>
-                  Đăng ký
-                </button>
-              </>
-            )}
-          </div>
-        </div>
-      </header>
+      <Link to="/homepage" className="login-back-home">
+        Back home
+      </Link>
+      
 
-      <nav className="sub-navbar">
+      {/* <nav className="sub-navbar">
         <div className="nav-links">
           <a href="/homepage">Trang chủ</a>
           <a href="#">Giới thiệu</a>
@@ -224,7 +196,7 @@ const RegisterInjection = () => {
           <a href="#">Cẩm nang</a>
           <a href="#">Đăng ký tiêm</a>
         </div>
-      </nav>
+      </nav> */}
 
       <div className="main-content">
         <div className="form-container">
@@ -348,20 +320,10 @@ const RegisterInjection = () => {
                 label="Vaccine"
                 rules={[{ required: true, message: 'Vui lòng chọn vaccine!' }]}
               >
-                <Select 
-                  placeholder="Chọn loại vaccine"
-                  className="vaccine-select"
-                >
+                <Select placeholder="Chọn loại vắc xin">
                   {vaccineList.map(vaccine => (
                     <Select.Option key={vaccine._id} value={vaccine._id}>
-                      <div className="vaccine-option">
-                        <span className="vaccine-name">{vaccine.vaccineName}</span>
-                        <span className="vaccine-price">
-                          {vaccine.vaccineImports?.[0]?.price 
-                            ? `${vaccine.vaccineImports[0].price.toLocaleString()} VNĐ` 
-                            : "Chưa có giá"}
-                        </span>
-                      </div>
+                      {vaccine.vaccineName} - {vaccine.vaccineImports?.[0]?.price || "Chưa có giá"} VNĐ
                     </Select.Option>
                   ))}
                 </Select>
@@ -408,7 +370,7 @@ const RegisterInjection = () => {
         </div>
       </div>
 
-      <footer className="footer">
+      {/* <footer className="footer">
         <div className="footer-content">
           <div className="footer-section">
             <h3>NHẬT KÝ TIÊM CHỦNG</h3>
@@ -432,7 +394,7 @@ const RegisterInjection = () => {
         <div className="footer-bottom">
           <p>&copy; 2024 Nhật Ký Tiêm Chủng. All rights reserved.</p>
         </div>
-      </footer>
+      </footer> */}
     </div>
   );
 };
