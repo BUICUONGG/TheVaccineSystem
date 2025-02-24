@@ -1,10 +1,11 @@
 import mongoose from "mongoose";
 
 const adminSchema = new mongoose.Schema({
-  adminName: { type: String, required: true },
-  email: { type: String, required: true },
-  password: { type: String, required: true },
+  username: { type: String, required: true }, //taif khoản
+  password: { type: String, required: true }, //mk
+  role: "admin",
 });
+//tạo admin chỉ cần tài khoản và mk không cần thứ khác
 
 const Admin = mongoose.model("Admin", adminSchema);
 

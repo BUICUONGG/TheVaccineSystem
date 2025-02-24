@@ -12,6 +12,8 @@ import { refreshTokenController } from "../controllers/users.controllers.js";
 
 const customerRoutes = Router();
 
+//PATH:            http://localhost:8080/customer/........
+
 customerRoutes.get(
   "/getOneCustomer/:id",
   validateAccessToken,
