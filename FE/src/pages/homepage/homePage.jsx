@@ -182,15 +182,15 @@ const HomePage = () => {
           </div>
           <div className="header-right">
             <nav className="nav-menu">
-              <Link to="/homepage">Home</Link>
+              <Link to="/homepage">Trang chủ</Link>
               
                 <Link to="/blogs">Blog</Link>
             
               
-                <Link to="/news">News</Link>
+                <Link to="/news">Tin tức</Link>
               
               <Link to="/registerInjection">Đăng Ký Tiêm</Link>
-              <Link to="#" onClick={scrollToFooter}>Contact Us</Link>
+              <Link to="#" onClick={scrollToFooter}>Liên hệ</Link>
               <div className="avatar-dropdown">
                 <div className="avatar-container">
                   <UserOutlined className="avatar-icon" />
@@ -198,8 +198,8 @@ const HomePage = () => {
                 <div className="avatar-dropdown-content">
                   {!isLoggedIn ? (
                     <>
-                      <Link to="/login">Login</Link>
-                      <Link to="/register">Register</Link>
+                      <Link to="/login">Đăng Nhập</Link>
+                      <Link to="/register">Đăng Ký</Link>
                     </>
                   ) : (
                     <>
@@ -410,10 +410,6 @@ const HomePage = () => {
         </div>
         <div className="footer-bottom">
           <p>CopyRight &copy; 2025 Diary Vaccine | All rights reserved</p>
-        </div>
-        <div className="footer-legal">
-            
-            
         </div>
       </footer>
 

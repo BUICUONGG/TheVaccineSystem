@@ -19,6 +19,7 @@ import BlogList from "./pages/blog/BlogList";
 import BlogManagement from "./pages/usersRole/admin/BlogManagement";
 import OverviewPage from "./pages/usersRole/admin/overviewPage";
 import RegisterInjection from "./pages/homepage/registeInjection/registerInjection";
+import ForgotPassword from "./pages/login/forgotPassword";
 
 
 const router = createBrowserRouter([
@@ -119,6 +120,10 @@ const router = createBrowserRouter([
   {
     path: "/profile",
     element: <Profile />,
+  },
+  {
+    path: "/forgot-password",
+    element: <ForgotPassword />,
   },
 ]);
 
