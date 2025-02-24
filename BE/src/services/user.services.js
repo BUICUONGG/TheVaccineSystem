@@ -117,6 +117,9 @@ class UserService {
 
   async update(id, updateData) {
     try {
+      if (updateData.password) {
+        updateData.password = await hashPassword(updateData.password);
+      }
       const result = await connectToDatabase.users.findOneAndUpdate(
         { _id: new ObjectId(id) },
         { $set: updateData },
@@ -125,8 +128,8 @@ class UserService {
       if (!result) {
         throw new Error("User not found");
       }
+      return result;
     } catch (error) {
-      console.error("Delete error:", error);
       throw new Error(error.message);
     }
   }
@@ -146,6 +149,15 @@ class UserService {
     } catch (error) {
       console.error("Lỗi khi logout:", error);
       return null;
+    }
+  }
+
+  async findByUsername(username) {
+    try {
+      const user = await connectToDatabase.users.findOne({ username });
+      return user;
+    } catch (error) {
+      throw new Error("Error finding user");
     }
   }
 }
