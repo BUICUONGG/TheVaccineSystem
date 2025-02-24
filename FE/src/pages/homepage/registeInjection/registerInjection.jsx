@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Form, Input, Select, Button } from 'antd';
-import { toast } from 'react-toastify'; // Thêm toast
+import { Form, Select, Button, DatePicker, Input, Radio, Switch } from 'antd';
+import { UserOutlined, UserAddOutlined } from '@ant-design/icons';
+import dayjs from 'dayjs'; // Thay moment bằng dayjs
+import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import axios from "axios";
 import "@fortawesome/fontawesome-free/css/all.min.css";
@@ -12,6 +14,8 @@ const RegisterInjection = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [form] = Form.useForm();
   const [vaccineList, setVaccineList] = useState([]); // Chỉ giữ lại các states cần thiết
+  const [parentInfo, setParentInfo] = useState(null);
+  const [isChildRegistration, setIsChildRegistration] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem("accesstoken");
@@ -25,8 +29,8 @@ const RegisterInjection = () => {
   useEffect(() => {
     const fetchVaccines = async () => {
       try {
-        const response = await axios.get("http://localhost:8080/vaccine/showInfo");
-        setVaccineList(response.data);
+        const response = await axios.get("http://localhost:8080/vaccine/listVaccine");
+        setVaccineList(response.data.result);
       } catch (error) {
         console.error("Error fetching vaccines:", error);
         toast.error('Không thể tải danh sách vaccine', {
@@ -64,11 +68,10 @@ const RegisterInjection = () => {
   
         // Cập nhật form nếu có dữ liệu trả về
         if (response.data) {
-          form.setFieldsValue({
-            customerName: response.data.customerName,
-            birthday: response.data.birthday, // Giữ nguyên dạng string từ API
-            phone: response.data.phone,
-          });
+          setParentInfo(response.data); // Lưu thông tin phụ huynh
+          
+          // Nếu không phải đăng ký cho trẻ em thì điền form
+
         }
       } catch (error) {
         console.error("Error fetching user info:", error);
@@ -127,24 +130,28 @@ const RegisterInjection = () => {
       const today = new Date();
       const createAt = `${String(today.getDate()).padStart(2, '0')}/${String(today.getMonth() + 1).padStart(2, '0')}/${today.getFullYear()}`;
 
-      // Format appointment date (date field)
-      const dateInput = values.date;
-      const [inputDay, inputMonth, inputYear] = dateInput.split('-');
-      const formattedDate = `${inputDay}/${inputMonth}/${inputYear}`; // Convert from DD-MM-YYYY to DD/MM/YYYY
+      // Format appointment date từ Dayjs object
+      const selectedDate = values.date;
+      const formattedDate = selectedDate.format('DD/MM/YYYY');
 
-      // Prepare data according to database schema
       const registrationData = {
         cusId: userId,
         vaccineId: values.vaccineId,
         date: formattedDate,
         createAt: createAt,
-        status: "incomplete"
+        status: "pending",
+        ...(isChildRegistration && {
+          childInfo: {
+            ...values.childInfo,
+            birthday: values.childInfo.birthday.format('DD/MM/YYYY')
+          }
+        })
       };
 
       console.log("Sending data to server:", registrationData);
 
       const response = await axios.post(
-        "http://localhost:8080/appointment/create",
+        "http://localhost:8080/appointmentLe/create",
         registrationData,
         {
           headers: {
@@ -169,13 +176,18 @@ const RegisterInjection = () => {
     }
   };
 
+  // Sửa lại hàm disabledDate
+  const disabledDate = (current) => {
+    return current && current < dayjs().startOf('day');
+  };
+
   return (
     <div className="register-injection-page">
       <header className="header-framework">
         <div className="header-content">
           <div className="header-title">
             <Link to="/homepage">
-              <h1>Nhật Ký Tiêm Chủng</h1>
+              <h1>Diary Vaccine</h1>
             </Link>
           </div>
           <div className="auth-buttons">
@@ -217,47 +229,139 @@ const RegisterInjection = () => {
       <div className="main-content">
         <div className="form-container">
           <h2 className="form-title">Đăng Ký Tiêm Chủng</h2>
+
+          <div className="registration-type-switch">
+            <span className={!isChildRegistration ? 'active-type' : ''}>
+              <UserOutlined /> Đăng ký cho bản thân
+            </span>
+            <Switch 
+              checked={isChildRegistration}
+              onChange={(checked) => {
+                setIsChildRegistration(checked);
+                form.resetFields();
+              }}
+            />
+            <span className={isChildRegistration ? 'active-type' : ''}>
+              <UserAddOutlined /> Đăng ký cho trẻ em
+            </span>
+          </div>
+
           <Form
             form={form}
             layout="vertical"
-            onFinish={onFinish} // Chỉ để onFinish ở đây, bỏ onClick ở button
+            onFinish={onFinish}
             className="registration-form"
           >
-            <div className="form-section">
-              <h3>Thông tin người đăng ký</h3>
-              <Form.Item
-                label="Họ và tên"
-                name="customerName"
-              >
-                <Input disabled />
-              </Form.Item>
+            {/* Phần thông tin cá nhân đơn giản hóa */}
+            {isChildRegistration ? (
+              <div className="form-section child-info-section">
+                <h3>Thông Tin Trẻ Em</h3>
+                <div className="child-info-container">
+                  <Form.Item
+                    name={["childInfo", "name"]}
+                    label="Họ và tên trẻ"
+                    rules={[{ required: true, message: 'Vui lòng nhập tên trẻ!' }]}
+                  >
+                    <Input placeholder="Nhập họ và tên trẻ" />
+                  </Form.Item>
 
-              <Form.Item
-                label="Ngày sinh"
-                name="birthday"
-              >
-                <Input disabled /> {/* Thay DatePicker bằng Input disabled */}
-              </Form.Item>
+                  <Form.Item
+                    name={["childInfo", "birthday"]}
+                    label="Ngày sinh"
+                    rules={[{ required: true, message: 'Vui lòng chọn ngày sinh!' }]}
+                  >
+                    <DatePicker 
+                      format="DD/MM/YYYY"
+                      placeholder="Chọn ngày sinh"
+                      className="date-picker"
+                    />
+                  </Form.Item>
 
-              <Form.Item
-                label="Số điện thoại"
-                name="phone"
-              >
-                <Input disabled />
-              </Form.Item>
-            </div>
+                  <Form.Item
+                    name={["childInfo", "gender"]}
+                    label="Giới tính"
+                    rules={[{ required: true, message: 'Vui lòng chọn giới tính!' }]}
+                  >
+                    <Radio.Group className="gender-select">
+                      <Radio.Button value="male">Nam</Radio.Button>
+                      <Radio.Button value="female">Nữ</Radio.Button>
+                    </Radio.Group>
+                  </Form.Item>
 
-            <div className="form-section">
-              <h3>Thông tin tiêm chủng</h3>
+                  <Form.Item
+                    name={["childInfo", "healthNote"]}
+                    label="Ghi chú sức khỏe"
+                  >
+                    <Input.TextArea 
+                      placeholder="Nhập ghi chú về tình trạng sức khỏe của trẻ (nếu có)"
+                      rows={4}
+                    />
+                  </Form.Item>
+                </div>
+
+                <div className="guardian-info">
+                  <h4>Thông Tin Người Giám Hộ</h4>
+                  <div className="info-display-grid">
+                    <div className="info-item">
+                      <label>Người giám hộ:</label>
+                      <div className="info-value">{parentInfo?.customerName}</div>
+                    </div>
+                    <div className="info-item">
+                      <label>Số điện thoại:</label>
+                      <div className="info-value">{parentInfo?.phone}</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="form-section personal-info-section">
+                <h3>Thông Tin Cá Nhân</h3>
+                <div className="personal-info-container">
+                  <Form.Item label="Họ và tên">
+                    <Input disabled value={parentInfo?.customerName} />
+                  </Form.Item>
+                  <Form.Item label="Ngày sinh">
+                    <Input disabled value={parentInfo?.birthday} />
+                  </Form.Item>
+                  <Form.Item label="Số điện thoại">
+                    <Input disabled value={parentInfo?.phone} />
+                  </Form.Item>
+                  <Form.Item label="Địa chỉ">
+                    <Input disabled value={parentInfo?.address} />
+                  </Form.Item>
+                </div>
+                {(!parentInfo?.customerName || !parentInfo?.phone || !parentInfo?.address) && (
+                  <div className="update-info-notice">
+                    <span className="notice-text">Vui lòng cập nhật đầy đủ thông tin cá nhân!</span>
+                    <Link to="/profile" className="update-link">Cập nhật ngay</Link>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Phần đăng ký tiêm chủng */}
+            <div className="form-section vaccine-registration-section">
+              <h3>Thông Tin Đăng Ký Tiêm</h3>
+              
               <Form.Item
-                label="Loại vắc xin"
-                name="vaccineId" // Đổi thành vaccineId để lưu ID của vaccine
-                rules={[{ required: true, message: 'Vui lòng chọn loại vắc xin!' }]}
+                name="vaccineId"
+                label="Vaccine"
+                rules={[{ required: true, message: 'Vui lòng chọn vaccine!' }]}
               >
-                <Select placeholder="Chọn loại vắc xin">
+                <Select 
+                  placeholder="Chọn loại vaccine"
+                  className="vaccine-select"
+                >
                   {vaccineList.map(vaccine => (
                     <Select.Option key={vaccine._id} value={vaccine._id}>
-                      {vaccine.vaccineName} - {vaccine.vaccineImports?.[0]?.price || "Chưa có giá"} VNĐ
+                      <div className="vaccine-option">
+                        <span className="vaccine-name">{vaccine.vaccineName}</span>
+                        <span className="vaccine-price">
+                          {vaccine.vaccineImports?.[0]?.price 
+                            ? `${vaccine.vaccineImports[0].price.toLocaleString()} VNĐ` 
+                            : "Chưa có giá"}
+                        </span>
+                      </div>
                     </Select.Option>
                   ))}
                 </Select>
@@ -267,34 +371,25 @@ const RegisterInjection = () => {
                 label="Ngày mong muốn tiêm"
                 name="date"
                 rules={[
-                  { required: true, message: 'Vui lòng nhập ngày tiêm!' },
-                  {
-                    pattern: /^\d{2}-\d{2}-\d{4}$/,
-                    message: 'Vui lòng nhập đúng định dạng DD-MM-YYYY'
-                  },
+                  { required: true, message: 'Vui lòng chọn ngày tiêm!' },
                   {
                     validator: (_, value) => {
-                      if (!value) return Promise.resolve();
-                      
-                      const [day, month, year] = value.split('-').map(Number);
-                      const date = new Date(year, month - 1, day);
-                      
-                      if (
-                        date.getDate() === day &&
-                        date.getMonth() === month - 1 &&
-                        date.getFullYear() === year &&
-                        date >= new Date() // Kiểm tra ngày phải từ hiện tại trở đi
-                      ) {
+                      if (!value) {
                         return Promise.resolve();
                       }
-                      return Promise.reject('Ngày không hợp lệ hoặc đã qua');
+                      if (value.isBefore(dayjs().startOf('day'))) {
+                        return Promise.reject('Không thể chọn ngày trong quá khứ');
+                      }
+                      return Promise.resolve();
                     }
                   }
                 ]}
               >
-                <Input 
-                  placeholder="DD-MM-YYYY"
-                  style={{ width: '100%' }}
+                <DatePicker 
+                  className="date-picker"
+                  format="DD-MM-YYYY"
+                  disabledDate={disabledDate}
+                  placeholder="Chọn ngày tiêm"
                 />
               </Form.Item>
             </div>
@@ -304,8 +399,9 @@ const RegisterInjection = () => {
                 type="primary" 
                 htmlType="submit" 
                 className="submit-btn"
+                size="large"
               >
-                Đăng ký
+                Xác Nhận Đăng Ký
               </Button>
             </Form.Item>
           </Form>
