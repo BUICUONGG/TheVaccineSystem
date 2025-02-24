@@ -16,7 +16,7 @@ const appointmentGoiSchema = new mongoose.Schema({
   createAt: { type: String, required: true },
   status: {
     type: String,
-    enum: ["completed", "incomplete", "pending", "apporove"],
+    enum: ["completed", "incomplete", "pending", "approve"],
     default: "pending",
   },
 });

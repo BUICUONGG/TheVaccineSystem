@@ -4,7 +4,6 @@ import {
   getVaccinesController,
   updateVaccineController,
   deleteVaccineController,
-  // showInfoVaccineController,
   showVaccineAndImportController,
 } from "../controllers/vaccines.controllers.js";
 

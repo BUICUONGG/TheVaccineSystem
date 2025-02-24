@@ -85,44 +85,73 @@ class VaccineService {
     }
   }
 
-  async getAllVaccineImports() {
-    try {
-      const vaccineImports = await connectToDatabase.vaccinceImports
-        .find()
-        .toArray();
-      return vaccineImports;
-    } catch (error) {
-      console.error("Error fetching vaccine imports:", error);
-    }
-  }
+  // async getVaccineWithImportsDetail() {
+  //   try {
+  //     // Lấy danh sách tất cả vaccine
+  //     const vaccines = await connectToDatabase.vaccinceInventorys
+  //       .find()
+  //       .toArray();
+
+  //     // Lặp qua từng vaccine để tìm lô nhập tương ứng
+  //     for (let vaccine of vaccines) {
+  //       let vaccineImports = await connectToDatabase.vaccineImports
+  //         .find({
+  //           "vaccines.vaccineId": vaccine._id, // Tìm lô nhập chứa vaccine này
+  //         })
+  //         .toArray();
+  //       console.log(vaccine._id);
+  //       // Loại bỏ vaccineId khỏi từng phần tử trong vaccines của vaccineImports
+  //       vaccineImports = vaccineImports.map((importRecord) => {
+  //         return {
+  //           ...importRecord,
+  //           vaccines: importRecord.vaccines.map(
+  //             ({ vaccineId, ...rest }) => rest
+  //           ), // Xóa vaccineId khỏi từng phần tử trong mảng vaccines
+  //         };
+  //       });
+
+  //       // Gắn danh sách lô nhập vào từng vaccine
+  //       vaccine.vaccineImports = vaccineImports;
+  //     }
+
+  //     return vaccines;
+  //   } catch (error) {
+  //     console.error("Error fetching vaccine with imports:", error);
+  //   }
+  // }
 
   async getVaccineWithImportsDetail() {
     try {
       // Lấy danh sách tất cả vaccine
-      const vaccines =
-        (await connectToDatabase.vaccinceInventorys.find().toArray()) || [];
+      const vaccines = await connectToDatabase.vaccinceInventorys
+        .find()
+        .toArray();
 
-      // Lặp qua từng vaccine để tìm lô nhập tương ứng
       for (let vaccine of vaccines) {
+        let vaccineId;
+        try {
+          vaccineId = new ObjectId(vaccine._id);
+        } catch (error) {
+          continue; // Bỏ qua nếu lỗi
+        }
+
+        // Truy vấn chính xác bằng ObjectId trực tiếp trong mảng `vaccines`
         let vaccineImports = await connectToDatabase.vaccineImports
           .find({
-            "vaccines.vaccineId": vaccine._id, // Tìm lô nhập chứa vaccine này
+            vaccines: vaccineId, // 🔥 Tìm trực tiếp trong mảng ObjectId
           })
           .toArray();
 
-        // Loại bỏ vaccineId khỏi từng phần tử trong vaccines của vaccineImports
-        vaccineImports = vaccineImports.map((importRecord) => {
-          const { vaccines, ...rest } = importRecord; // Xóa vaccines
-          return rest;
-        });
+        // Loại bỏ trường vaccines trong từng import
+        vaccineImports = vaccineImports.map(({ vaccines, ...rest }) => rest);
 
-        // Gắn danh sách lô nhập vào từng vaccine
+        // Gắn danh sách lô nhập vào vaccine
         vaccine.vaccineImports = vaccineImports;
       }
 
       return vaccines;
     } catch (error) {
-      console.error("Error fetching vaccine with imports:", error);
+      return [];
     }
   }
 }

@@ -12,11 +12,12 @@ const appointmentLeSchema = new mongoose.Schema({
     ref: "VaccineInventory",
     required: true,
   },
+
   date: { type: String, required: true }, // ngayf cus nđặt lịch hẹn
   createAt: { type: String, required: true },
   status: {
     type: String,
-    enum: ["completed", "incomplete", "pending", "apporove"],
+    enum: ["completed", "incomplete", "pending", "approve"],
     default: "pending",
   },
 });
