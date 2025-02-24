@@ -1,15 +1,12 @@
 import mongoose from "mongoose";
 
 const staffSchema = new mongoose.Schema({
-  userId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
-    required: true,
-    unique: true,
-  },
-  staffname: { type: String, default: null },
-  phone: { type: String, default: null },
+  username: { type: String, required: true },
+  password: { type: String, required: true },
+  staffname: { type: String, required: true },
+  phone: { type: String, required: true },
   gender: { type: String, enum: ["male", "female", "other"] },
+  role: "staff",
 });
 const Staff = mongoose.model("Staff", staffSchema);
 

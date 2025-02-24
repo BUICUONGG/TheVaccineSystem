@@ -10,6 +10,8 @@ import {
 
 const vaccinesRoutes = Router();
 
+//PATH:       http://localhost:8080/vaccine
+
 vaccinesRoutes.get("/listVaccine", getVaccinesController);
 vaccinesRoutes.post("/addVaccine", addVaccineController);
 vaccinesRoutes.post("/updateVaccine/:id", updateVaccineController);

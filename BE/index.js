@@ -12,11 +12,11 @@ import vaccineImportRoutes from "./src/routes/vaccineImports.routes.js";
 import childRoutes from "./src/routes/child.routes.js";
 import usersRoutes from "./src/routes/users.routes.js";
 import vaccinesRoutes from "./src/routes/vaccines.routes.js";
+import staffRoutes from "./src/routes/staffs.routes.js";
 const app = express();
 app.use(express.json());
-const PORT =
-  8080 ||
-  "mongodb+srv://cuongbui10704:cuongbui10704@swp.lg53w.mongodb.net/?retryWrites=true&w=majority&appName=SWP";
+const PORT = 8080 || process.env.PORT;
+
 app.use(
   cors({
     origin: "http://localhost:5173", // Allow only this frontend
@@ -50,7 +50,7 @@ app.use("/customer", customerRoutes);
 app.use("/appointmentLe", aptLeRoutes);
 app.use("/vaccineimport", vaccineImportRoutes);
 app.use("/appointmentGoi", aptGoiRoutes);
-
+app.use("/staff", staffRoutes);
 // Lắng nghe cổng
 app.listen(PORT, () => {
   console.log(`Server đang chạy tại http://localhost:${PORT}`);

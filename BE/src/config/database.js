@@ -74,6 +74,10 @@ class ConnectDatabaseService {
     return this.db.collection(String("users"));
   }
 
+  get newss() {
+    return this.db.collection(String("newss"));
+  }
+
   // get types() {
   //   return this.db.collection(String("types"));
   // }
