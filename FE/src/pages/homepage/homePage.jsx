@@ -87,12 +87,15 @@ const HomePage = () => {
   };
 
   const handleLogout = () => {
+    // Xóa thông tin người dùng khỏi localStorage
     localStorage.removeItem('accesstoken');
     localStorage.removeItem('role');
     localStorage.removeItem('userId');
     setIsLoggedIn(false);
     setUserRole('');
-    navigate('/homepage');
+    
+    // Điều hướng đến trang Thank thay vì homepage
+    navigate('/thank-you');
   };
 
   const handleLogin = () => {

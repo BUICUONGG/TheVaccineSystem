@@ -55,11 +55,8 @@ const LoginPage = () => {
         toast.success("Đăng nhập thành công!");
 
         // Kiểm tra role và điều hướng
-        if (userRole === "admin") {
-          navigate("/admin");
-        } else {
-          navigate("/homepage");
-        }
+        // 
+        navigate("/welcome");
       } catch (error) {
         setIsLoading(false);
         console.error("Login failed:", error);

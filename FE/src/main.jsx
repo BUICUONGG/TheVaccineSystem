@@ -13,24 +13,20 @@ import News from "./pages/homepage/news/news";
 import Handbook from "./pages/homepage/handbook/handbook";
 import Advise from "./pages/homepage/Advise/advise";
 import VaccinePriceList from "./pages/homepage/vaccineShop/vaccineShopPage";
-// import CheckOutPrice from "./pages/homepage/vaccineShop/checkoutPrice";
 import Profile from "./pages/homepage/profile/profile";
 import BlogList from "./pages/blog/BlogList";
 import BlogManagement from "./pages/usersRole/admin/BlogManagement";
 import OverviewPage from "./pages/usersRole/admin/overviewPage";
 import RegisterInjection from "./pages/homepage/registeInjection/registerInjection";
 import ForgotPassword from "./pages/login/forgotPassword";
-
+import Welcome from "./pages/welcome/Welcome";
+import Thank from "./pages/thanks/Thank";
 
 const router = createBrowserRouter([
   {
     path: "/",
     element: <HomePage />,
   },
-  // {
-  //   path: "/testPage",
-  //   element: <TestPage />,
-  // },
   {
     path: "/homepage",
     element: <HomePage />,
@@ -40,17 +36,21 @@ const router = createBrowserRouter([
     element: <LoginPage />,
   },
   {
-      path: "/pricelist",
-      element: <VaccinePriceList />,
+    path: "/welcome",
+    element: <Welcome />,
+  },
+  {
+    path: "/thank-you",
+    element: <Thank />,
+  },
+  {
+    path: "/pricelist",
+    element: <VaccinePriceList />,
   },
   {
     path: "/registerinjection",
     element: <RegisterInjection />,
-},
-//   {
-//     path: "/checkoutprice",
-//     element: <CheckOutPrice />,
-// },
+  },
   {
     path: "/register",
     element: <RegisterPage />,
@@ -71,10 +71,6 @@ const router = createBrowserRouter([
     path: "/blogs",
     element: <BlogList />,
   },
-  // {
-  //   path: "/camnang",
-  //   element: <CamnangPage />,
-  // },
   {
     path: "/admin",
     element: <AdminLayout />,

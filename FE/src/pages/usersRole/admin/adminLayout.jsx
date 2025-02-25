@@ -40,9 +40,14 @@ const AdminLayout = () => {
   }, [navigate]);
 
   const handleLogout = () => {
-    localStorage.removeItem("accesstoken");
-    localStorage.removeItem("username");
-    navigate("/login");
+    // Xóa tất cả thông tin người dùng khỏi localStorage
+    localStorage.removeItem('accesstoken');
+    localStorage.removeItem('role');
+    localStorage.removeItem('userId');
+    localStorage.removeItem('username');
+    
+    // Điều hướng đến trang Thank
+    navigate('/thank-you');
   };
 
   return (
