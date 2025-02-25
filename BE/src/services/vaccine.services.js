@@ -85,41 +85,6 @@ class VaccineService {
     }
   }
 
-  // async getVaccineWithImportsDetail() {
-  //   try {
-  //     // Lấy danh sách tất cả vaccine
-  //     const vaccines = await connectToDatabase.vaccinceInventorys
-  //       .find()
-  //       .toArray();
-
-  //     // Lặp qua từng vaccine để tìm lô nhập tương ứng
-  //     for (let vaccine of vaccines) {
-  //       let vaccineImports = await connectToDatabase.vaccineImports
-  //         .find({
-  //           "vaccines.vaccineId": vaccine._id, // Tìm lô nhập chứa vaccine này
-  //         })
-  //         .toArray();
-  //       console.log(vaccine._id);
-  //       // Loại bỏ vaccineId khỏi từng phần tử trong vaccines của vaccineImports
-  //       vaccineImports = vaccineImports.map((importRecord) => {
-  //         return {
-  //           ...importRecord,
-  //           vaccines: importRecord.vaccines.map(
-  //             ({ vaccineId, ...rest }) => rest
-  //           ), // Xóa vaccineId khỏi từng phần tử trong mảng vaccines
-  //         };
-  //       });
-
-  //       // Gắn danh sách lô nhập vào từng vaccine
-  //       vaccine.vaccineImports = vaccineImports;
-  //     }
-
-  //     return vaccines;
-  //   } catch (error) {
-  //     console.error("Error fetching vaccine with imports:", error);
-  //   }
-  // }
-
   async getVaccineWithImportsDetail() {
     try {
       // Lấy danh sách tất cả vaccine

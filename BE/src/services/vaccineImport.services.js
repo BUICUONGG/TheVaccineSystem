@@ -28,9 +28,10 @@ class VaccineImportService {
         ...data,
         vaccines: data.vaccines.map((id) => new ObjectId(id)),
       };
-
+      const vaccineImport = new VaccineImport(transformedData);
+      await vaccineImport.validate();
       const result = await connectToDatabase.vaccineImports.insertOne(
-        transformedData
+        vaccineImport
       );
       return { _id: result.insertedId, ...transformedData };
     } catch (error) {

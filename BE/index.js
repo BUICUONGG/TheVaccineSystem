@@ -13,6 +13,7 @@ import childRoutes from "./src/routes/child.routes.js";
 import usersRoutes from "./src/routes/users.routes.js";
 import vaccinesRoutes from "./src/routes/vaccines.routes.js";
 import staffRoutes from "./src/routes/staffs.routes.js";
+import vaccinePakageRoutes from "./src/routes/vaccinePakages.routes.js";
 const app = express();
 app.use(express.json());
 const PORT = 8080 || process.env.PORT;
@@ -51,6 +52,7 @@ app.use("/appointmentLe", aptLeRoutes);
 app.use("/vaccineimport", vaccineImportRoutes);
 app.use("/appointmentGoi", aptGoiRoutes);
 app.use("/staff", staffRoutes);
+app.use("/vaccinepakage", vaccinePakageRoutes);
 // Lắng nghe cổng
 app.listen(PORT, () => {
   console.log(`Server đang chạy tại http://localhost:${PORT}`);
