@@ -1,0 +1,50 @@
+.appointment-management {
+  padding: 20px;
+}
+
+.appointment-management h1 {
+  margin-bottom: 20px;
+  color: #1890ff;
+}
+
+.search-container {
+  margin-bottom: 20px;
+}
+
+.search-input {
+  width: 300px;
+}
+
+.action-buttons {
+  display: flex;
+  align-items: center;
+}
+
+.id-column {
+  font-family: monospace;
+  background-color: #f0f0f0;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.appointment-details {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.detail-row {
+  display: flex;
+  border-bottom: 1px solid #f0f0f0;
+  padding-bottom: 8px;
+}
+
+.detail-label {
+  width: 150px;
+  font-weight: bold;
+  color: #555;
+}
+
+.detail-value {
+  flex: 1;
+} 

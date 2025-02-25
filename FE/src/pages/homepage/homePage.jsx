@@ -210,6 +210,8 @@ const HomePage = () => {
                     <>
                       {userRole === 'admin' ? (
                         <Link to="/admin">Admin</Link>
+                      ) : userRole === 'staff' ? (
+                        <Link to="/staffLayout">Quản lý KH</Link>
                       ) : (
                         <Link to="/profile">Profile</Link>
                       )}
