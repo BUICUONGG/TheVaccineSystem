@@ -6,6 +6,7 @@ const vaccineInventorySchema = new mongoose.Schema({
   manufacturer: { type: String, required: true }, // Nhà sản xuất
   createdAt: { type: String }, // Ngày tạo
   imageUrl: { type: String }, // url hinh anh
+  information: { type: String },
 });
 
 const VaccineInventory = mongoose.model(
