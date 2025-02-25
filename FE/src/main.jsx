@@ -21,6 +21,9 @@ import RegisterInjection from "./pages/homepage/registeInjection/registerInjecti
 import ForgotPassword from "./pages/login/forgotPassword";
 import Welcome from "./pages/welcome/Welcome";
 import Thank from "./pages/thanks/Thank";
+import StaffLayout from "./pages/usersRole/staff/staffLayout";
+import AppointmentManagement from "./pages/usersRole/staff/appointmentManagement";
+// import AdminAppointmentManagement from "./pages/usersRole/admin/adminAppointmentManagement";
 
 const router = createBrowserRouter([
   {
@@ -72,6 +75,29 @@ const router = createBrowserRouter([
     element: <BlogList />,
   },
   {
+    path: "/staffLayout",
+    element: <StaffLayout />,
+    children: [
+      {
+        path: "",
+        element: <div>Chào mừng đến trang quản lý của Staff</div>,
+      },
+      {
+        path: "overview",
+        element: <div>Tổng quan</div>,
+      },
+      {
+        path: "appointments",
+        element: <AppointmentManagement />,
+      },
+      {
+        path: "customers",
+        element: <AllCustomerPage />,
+      },
+    ],
+  },
+
+  {
     path: "/admin",
     element: <AdminLayout />,
     children: [
@@ -95,10 +121,7 @@ const router = createBrowserRouter([
         path: "feedback",
         element: <div>Feedback Management</div>,
       },
-      {
-        path: "appointments",
-        element: <div>Appointments Management</div>,
-      },
+
       {
         path: "consultations",
         element: <div>Consultations Management</div>,
