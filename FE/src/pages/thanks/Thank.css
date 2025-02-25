@@ -3,15 +3,15 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    background: url('/images/vd2.jpg') center center;
-    background-size: cover;
+    /* background: url('/images/vd2.jpg') center center; */
+    background-color: whitesmoke;
     position: relative;
     opacity: 0;
 }
 
 .thanks-content {
     text-align: center;
-    color: white;
+    color: #4A90E2;
 }
 
 .thanks-content h1 {
@@ -33,7 +33,7 @@
 .loading-dots span {
     width: 10px;
     height: 10px;
-    background-color: white;
+    background-color:  #4A90E2;
     border-radius: 50%;
     animation: bounce 1s infinite ease-in-out;
 }

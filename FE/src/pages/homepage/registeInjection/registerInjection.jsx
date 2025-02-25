@@ -183,22 +183,15 @@ const RegisterInjection = () => {
 
   return (
     <div className="register-injection-page">
-      <Link to="/homepage" className="login-back-home">
-        Back home
-      </Link>
+      
       
 
-      {/* <nav className="sub-navbar">
-        <div className="nav-links">
-          <a href="/homepage">Trang chủ</a>
-          <a href="#">Giới thiệu</a>
-          <a href="#">Tin tức</a>
-          <a href="#">Cẩm nang</a>
-          <a href="#">Đăng ký tiêm</a>
-        </div>
-      </nav> */}
-
       <div className="main-content">
+      <div className="back-home-wrapper">
+        <Link to="/homepage" className="back-home">
+          Back home
+        </Link>
+      </div>
         <div className="form-container">
           <h2 className="form-title">Đăng Ký Tiêm Chủng</h2>
 
@@ -370,31 +363,6 @@ const RegisterInjection = () => {
         </div>
       </div>
 
-      {/* <footer className="footer">
-        <div className="footer-content">
-          <div className="footer-section">
-            <h3>NHẬT KÝ TIÊM CHỦNG</h3>
-            <p>Hệ thống quản lý tiêm chủng toàn diện</p>
-          </div>
-          <div className="footer-section">
-            <h3>LIÊN HỆ</h3>
-            <p>Email: contact@nhatkytiemchung.vn</p>
-            <p>Hotline: 1900 xxxx</p>
-            <p>Địa chỉ: Hà Nội, Việt Nam</p>
-          </div>
-          <div className="footer-section">
-            <h3>THEO DÕI CHÚNG TÔI</h3>
-            <div className="social-links">
-              <a href="#"><i className="fab fa-facebook"></i></a>
-              <a href="#"><i className="fab fa-twitter"></i></a>
-              <a href="#"><i className="fab fa-instagram"></i></a>
-            </div>
-          </div>
-        </div>
-        <div className="footer-bottom">
-          <p>&copy; 2024 Nhật Ký Tiêm Chủng. All rights reserved.</p>
-        </div>
-      </footer> */}
     </div>
   );
 };

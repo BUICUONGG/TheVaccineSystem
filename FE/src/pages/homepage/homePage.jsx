@@ -19,6 +19,8 @@ const HomePage = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userRole, setUserRole] = useState('');
   const [showBackToTop, setShowBackToTop] = useState(false);
+  const [vaccines, setVaccines] = useState([]);
+  const [currentVaccineIndex, setCurrentVaccineIndex] = useState(0);
 
   const banners = [
     {
@@ -375,15 +377,14 @@ const HomePage = () => {
           <div className="legal-links">
                 <Link to="/search">Tìm kiếm</Link>
                 <Link to="/about">Giới thiệu</Link>
-                <Link to="/return-policy">Chính sách đổi trả</Link>
                 <Link to="/privacy-policy">Chính sách bảo mật</Link>
                 <Link to="/terms">Điều khoản dịch vụ</Link>
             </div>
           </div>
           <div className="footer-section">
             <h3>LIÊN HỆ</h3>
-            <p>Email: contact@nhatkytiemchung.vn</p>
-            <p>Hotline: 1900 xxxx</p>
+            <p>Email: DiaryVaccine@gmail.com</p>
+            <p>Hotline: 1900 0000</p>
             <p>Địa chỉ: Nhà Văn Hóa Sinh Viên</p>
           </div>
           <div className="footer-section">

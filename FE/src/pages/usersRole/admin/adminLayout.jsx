@@ -12,7 +12,7 @@ const AdminLayout = () => {
   useEffect(() => {
     // Kiểm tra authentication và authorization
     const accessToken = localStorage.getItem("accesstoken");
-
+    document.title = "Quản trị viên";
     if (!accessToken) {
       navigate("/login");
       return;

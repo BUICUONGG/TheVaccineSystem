@@ -89,7 +89,7 @@ body {
 
 .banner-image {
   width: 100%;
-  height: 400px;
+  height: 600px;
   object-fit: cover;
   background-position: 50% 50%;
 }
@@ -791,4 +791,102 @@ body {
         width: 45px;
         height: 45px;
     }
+}
+
+.vaccine-slider-section {
+  padding: 40px 0;
+  background: #f5f5f5;
+}
+
+.vaccine-slider-section h2 {
+  text-align: center;
+  margin-bottom: 30px;
+  color: #333;
+}
+
+.vaccine-slider-container {
+  position: relative;
+  max-width: 1200px;
+  margin: 0 auto;
+  height: 400px;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+}
+
+.vaccine-slider {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.vaccine-slide {
+  position: absolute;
+  width: 100%;
+  max-width: 600px;
+  left: 50%;
+  transform: translateX(-50%);
+  transition: all 0.5s ease;
+  padding: 20px;
+  text-align: center;
+}
+
+.vaccine-slide img {
+  width: 100%;
+  height: 250px;
+  object-fit: cover;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.vaccine-slide h3 {
+  margin: 15px 0;
+  color: #333;
+  font-size: 1.5rem;
+}
+
+.vaccine-slide p {
+  color: #666;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.vaccine-slide.active {
+  z-index: 2;
+  transform: translateX(-50%) scale(1);
+  opacity: 1;
+}
+
+.vaccine-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255,255,255,0.8);
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.vaccine-nav.prev {
+  left: 20px;
+}
+
+.vaccine-nav.next {
+  right: 20px;
+}
+
+.vaccine-nav:hover {
+  background: white;
+}
+
+.vaccine-nav i {
+  color: #333;
+  font-size: 1.2rem;
 }

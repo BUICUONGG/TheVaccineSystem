@@ -26,47 +26,31 @@ const Profile = () => {
       // Decode token để lấy userId
       const tokenParts = accesstoken.split('.');
       const payload = JSON.parse(atob(tokenParts[1]));
-      const userId = payload.id; // "67b53056af240f16ecf58a5c"
+      const userId = payload.id;
 
-      try {
-        // Fetch user data
-        const [userResponse, customerResponse] = await Promise.all([
-          axios.get("http://localhost:8080/users/showInfo", {
-            headers: { Authorization: `Bearer ${accesstoken}` },
-          }),
-          axios.get(`http://localhost:8080/customer/getOneCustomer/${userId}`, {
-            headers: { Authorization: `Bearer ${accesstoken}` },
-          })
-        ]);
+      // Fetch customer data
+      const response = await axios.get(
+        `http://localhost:8080/customer/getOneCustomer/${userId}`,
+        {
+          headers: { Authorization: `Bearer ${accesstoken}` }
+        }
+      );
 
-        console.log('Customer Response:', customerResponse.data); // Để debug
+      const customerData = response.data;
 
-        const customerData = customerResponse.data;
-        const userData = userResponse.data;
+      // Set form values với dữ liệu từ response
+      form.setFieldsValue({
+        customerName: customerData.customerName,
+        phone: customerData.phone,
+        birthday: customerData.birthday,
+        address: customerData.address,
+        gender: customerData.gender
+      });
 
-        // Set form values với dữ liệu từ response
-        form.setFieldsValue({
-          // username: userData.username,
-          // email: userData.email,
-          customerName: customerData.customerName,
-          phone: customerData.phone,
-          birthday: customerData.birthday,
-          address: customerData.address,
-          gender: customerData.gender
-        });
-
-        setUserData({
-          ...userData,
-          ...customerData
-        });
-
-      } catch (error) {
-        console.error("Error in data fetching:", error);
-        message.error("Không thể tải thông tin người dùng");
-      }
+      setUserData(customerData);
 
     } catch (error) {
-      console.error("Error in token processing:", error);
+      console.error("Error fetching user data:", error);
       if (error.response?.status === 401) {
         message.error("Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại");
         navigate("/login");
@@ -99,11 +83,11 @@ const Profile = () => {
       }
 
       const updatedData = {
-        customerName: values.customerName?.trim() || null,
-        phone: values.phone?.trim() || null,
-        address: values.address?.trim() || null,
-        gender: values.gender || null,
-        birthday: values.birthday?.trim() || null
+        customerName: values.customerName?.trim(),
+        phone: values.phone?.trim(),
+        address: values.address?.trim(),
+        gender: values.gender,
+        birthday: values.birthday?.trim()
       };
 
       await axios.post(
@@ -115,8 +99,9 @@ const Profile = () => {
       );
 
       message.success("Cập nhật thông tin thành công");
-      fetchUserData(); // Refresh data after update
-      navigate("/homepage");
+      // Refresh data after update
+      await fetchUserData();
+
     } catch (error) {
       console.error("Error updating profile:", error);
       message.error("Không thể cập nhật thông tin");
@@ -136,24 +121,6 @@ const Profile = () => {
           className="profile-form"
           initialValues={userData}
         >
-          {/* <div className="form-row">
-            <Form.Item
-              name="username"
-              label="Tên đăng nhập"
-              className="form-item"
-            >
-              <Input disabled />
-            </Form.Item>
-
-            <Form.Item
-              name="email"
-              label="Email"
-              className="form-item"
-            >
-              <Input disabled />
-            </Form.Item>
-          </div> */}
-
           <div className="form-row">
             <Form.Item
               name="customerName"

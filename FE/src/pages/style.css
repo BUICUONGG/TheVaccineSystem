@@ -2,89 +2,45 @@
     padding: 0;
     margin: 0;
     box-sizing: border-box;
-    font-family: Arial, Helvetica, sans-serif;
 }
-html,
+
 body {
-    display: grid;
-    height: 100%;
-    place-items: center;
-}
-body {
-    width: 100%;
-}
-.container {
-    position: relative;
-    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     height: 100vh;
-    background: url('/images/img.png') center center;
-    background-size: cover;
+    margin: 0;
+    background: #f0f0f0;
+    font-family: Arial, sans-serif;
+}
+
+.wrapper {
+    text-align: center;
+}
+
+.circular-progress {
+    position: relative;
+    width: 150px;
+    height: 150px;
+    background: conic-gradient(#a411ff 0deg, #ccc 0deg);
+    border-radius: 50%;
+    padding: 10px;
     display: flex;
     justify-content: center;
     align-items: center;
 }
-.container::after {
-    content: '';
+
+.circle {
+    width: 82%;
+    height: 82%;
+    background: #e8e8e8;
     position: absolute;
-    width: 100%;
-    height: 100%;
-    background: rgb(0, 0, 0, 0.4);
+    border-radius: 50%;
 }
-.wrapper {
-    width: 300px;
-    padding: 20px;
-    box-shadow: 5px 5px 2px rgba(0, 0, 0, 0.15);
+
+.circular-progress .number {
+    position: absolute;
+    font-size: 24px;
+    font-weight: bold;
     z-index: 99;
-    background: #ffffff35;
-    backdrop-filter: blur(10px);
-    border-radius: 15px;
-}
-.input_box {
-    margin: 15px 0px;
-}
-input {
-    width: 100%;
-    padding: 12px 10px;
-    border: 0;
-    outline: none;
-    background: transparent;
-    color: #ffffffc9;
-    font-size: 12px;
-    letter-spacing: 1px;
-    border: 1px solid #fff;
-    border-radius: 5px;
-}
-input::placeholder {
-    color: #ffffffc9;
-    font-size: 12px;
-    letter-spacing: 1px;
-}
-button {
-    border: 0;
-    outline: none;
-    width: 100%;
-    padding: 15px;
-    box-shadow: 5px 5px 3px rgba(0, 0, 0, 0.15);
-    border-radius: 7px;
-    color: #000;
-    background: #fff;
-    transition: background 0.3s;
-    cursor: pointer;
-}
-button:hover {
-    background: #ffffffe5;
-}
-.card {
-    z-index: 99;
-    color: #fff;
-    text-align: center;
-    margin-top: -100px;
-}
-#greetings {
-    margin-bottom: 20px;
-    font-weight: 300;
-}
-b {
-    font-weight: 500;
-    color: yellow;
 }

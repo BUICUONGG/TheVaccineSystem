@@ -12,7 +12,7 @@ const Welcome = () => {
     // Start fade out after 2.5 seconds
     const fadeTimer = setTimeout(() => {
       setFadeOut(true);
-    }, 2500);
+    }, 1500);
 
     // Navigate after fade out (3 seconds total)
     const navigationTimer = setTimeout(() => {
@@ -21,7 +21,7 @@ const Welcome = () => {
       } else {
         navigate('/homepage');
       }
-    }, 3000);
+    }, 2000);
 
     return () => {
       clearTimeout(fadeTimer);
