@@ -8,6 +8,7 @@ import {
   listAllAptGoiController,
   listAllAptLeController,
   searchAppointmentsController,
+  showDetailAptGoiController,
   updateAptLeController,
 } from "../controllers/appointment.controllers.js";
 import { validateAccessToken } from "../middlewares/user.middleware.js";
@@ -44,7 +45,12 @@ aptLeRoutes.post("/delete/:id", deleteAptLeController);
 aptLeRoutes.post("/searchDetail/:id", searchAppointmentsController);
 //-----------------Apt Gois ------------------------------------------
 aptGoiRoutes.get("/showInfo", listAllAptGoiController);
+
 aptGoiRoutes.post("/create", createAptGoiController);
+
+//show chi tiet hoa ddon cua goi
+aptGoiRoutes.get("/showDetailAptGoi", showDetailAptGoiController);
+
 // aptGoiRoutes.post("/update/:id", updateAptGoiController);
 // aptGoiRoutes.post("/delete/:id", deleteAptGoiController);
 

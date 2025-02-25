@@ -6,7 +6,7 @@ const staffSchema = new mongoose.Schema({
   staffname: { type: String, required: true },
   phone: { type: String, required: true },
   gender: { type: String, enum: ["male", "female", "other"] },
-  role: "staff",
+  role: { type: String, default: "staff" },
 });
 const Staff = mongoose.model("Staff", staffSchema);
 

@@ -141,12 +141,42 @@ class AppointmentService {
     }
   }
 
-  //--------------------------------------------------------------------------------------------------------------------------------------
+  //-----------------------------------------------Gois-------------------------------------------------------------------------
 
   async listAptGoi() {
     try {
       const result = await connectToDatabase.appointmentGois.find().toArray();
       return result;
+    } catch (error) {
+      throw new Error(error.message);
+    }
+  }
+
+  async showDetailAptGoi() {
+    try {
+      const appointments = await connectToDatabase.appointmentGois
+        .find()
+        .toArray();
+      for (let appointment of appointments) {
+        const customer = await connectToDatabase.customers.findOne({
+          _id: appointment.cusId,
+        });
+        const vaccinePakage = await connectToDatabase.vaccinepackages.findOne({
+          _id: appointment.vaccinePakageId,
+        });
+        const child = await connectToDatabase.childs.findOne({
+          _id: appointment.childId,
+        });
+        appointment.customer = customer;
+        appointment.vaccinePakage = vaccinePakage;
+        appointment.child = child;
+
+        delete appointment.cusId;
+        delete appointment.vaccinePakageId;
+        delete appointment.childId;
+      }
+
+      return appointments;
     } catch (error) {
       throw new Error(error.message);
     }
