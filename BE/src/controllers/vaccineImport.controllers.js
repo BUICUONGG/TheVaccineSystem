@@ -1,3 +1,4 @@
+import connectToDatabase from "../config/database.js";
 import vaccineImportService from "../services/vaccineImport.services.js";
 
 export const getFullDataController = async (req, res) => {
@@ -65,5 +66,14 @@ export const deleteVaccineimportController = async (req, res) => {
     res.status(200).json(result);
   } catch (error) {
     throw new Error(error.message);
+  }
+};
+
+export const countVaccineIdController = async (req, res) => {
+  try {
+    const result = await vaccineImportService.countVaccineIdWithDetails();
+    res.status(200).json(result);
+  } catch (error) {
+    res.status(500).json(error.message);
   }
 };

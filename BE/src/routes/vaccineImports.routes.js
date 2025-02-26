@@ -1,5 +1,6 @@
 import Router from "express";
 import {
+  countVaccineIdController,
   createVaccineImportController,
   deleteVaccineimportController,
   getFullDataController,
@@ -35,4 +36,5 @@ vaccineImportRoutes.post(
   deleteVaccineimportController
 );
 
+vaccineImportRoutes.get("/getCountVaccineId", countVaccineIdController);
 export default vaccineImportRoutes;
