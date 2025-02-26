@@ -5,6 +5,7 @@ const vaccinePackageSchema = new mongoose.Schema({
   description: { type: String }, // Mô tả gói vaccine
   vaccines: [
     {
+      _id: false,
       vaccineId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "VaccineInventory",
