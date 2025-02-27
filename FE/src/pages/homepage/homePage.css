@@ -5,15 +5,22 @@ body {
   overflow-x: hidden;
   /* Ngăn scroll ngang */
 }
+
 /* Header Framework */
 .header-framework {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
-  background: rgba(255, 255, 255, 0.95);
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  background: rgba(12, 12, 12, 0.1);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
   z-index: 1000;
+  transition: background 0.5s ease-in-out;
+}
+
+.header-framework:hover {
+  background: rgba(12, 12, 12, 0.1);
 }
 
 .header-content {
@@ -32,44 +39,51 @@ body {
   font-size: 32px;
   color: #4A90E2;
   display: inline;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .header-right .nav-menu {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 2rem;
 }
+
 .header-right .nav-menu a {
   text-decoration: none;
   color: #4A90E2;
- 
   font-weight: 500;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .homepage {
   width: 100%;
   overflow-x: hidden;
+  background-color: #e6f2ff;
   /* Ngăn scroll ngang */
 }
 
 /* Banner and Navigation */
 .banner-container {
-  max-width: 1200px;
-  margin: 80px auto 0;
   position: relative;
   overflow: hidden;
-  border-radius: 10px;
+  margin-top: 0;
+  /* Add curved bottom effect */
+  border-bottom-left-radius: 30% 50%;
+  border-bottom-right-radius: 50% 10%;
 }
 
 .banner-slider {
   display: flex;
   transition: transform 0.5s ease;
+  /* Ensure the curved effect is visible */
+  margin-bottom: -2px;
 }
 
 .swiper-slide {
   position: relative;
   width: 100%;
-  margin-top: 80px;
+  /* margin-top: 80px; */
   flex-shrink: 0;
   display: flex;
   justify-content: center;
@@ -83,8 +97,11 @@ body {
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.5); /* Điều chỉnh độ tối tại đây */
+  background-color: rgba(0, 0, 0, 0.5);
+  /* Điều chỉnh độ tối tại đây */
   z-index: 1;
+  border-bottom-left-radius: 50% 10%;
+  border-bottom-right-radius: 50% 10%;
 }
 
 .banner-image {
@@ -92,13 +109,16 @@ body {
   height: 600px;
   object-fit: cover;
   background-position: 50% 50%;
+  /* Add same curved bottom effect to images */
+  border-bottom-left-radius: 50% 10%;
+  border-bottom-right-radius: 50% 10%;
 }
 
 .slide-content {
   position: absolute;
   text-align: center;
   color: white;
-  text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
   width: 100%;
   padding: 0 20px;
   opacity: 0;
@@ -108,7 +128,8 @@ body {
 }
 
 .slide-content.active {
-  opacity: 0; /* Bắt đầu với opacity 0 */
+  opacity: 0;
+  /* Bắt đầu với opacity 0 */
 }
 
 .slide-content.active.fade-in {
@@ -122,6 +143,7 @@ body {
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateX(0);
@@ -143,7 +165,7 @@ body {
 .slide-button {
   display: inline-block;
   padding: 12px 24px;
-  background: rgba(255,255,255,0.2);
+  background: rgba(255, 255, 255, 0.2);
   border: 2px solid white;
   border-radius: 8px;
   color: white;
@@ -424,7 +446,8 @@ body {
   left: 0;
   width: 0;
   height: 2px;
-  background: #4A90E2; /* Màu xanh của line */
+  background: #4A90E2;
+  /* Màu xanh của line */
   transition: width 0.3s ease;
 }
 
@@ -456,7 +479,7 @@ body {
   position: absolute;
   background-color: white;
   min-width: 160px;
-  box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
   z-index: 1;
 }
 
@@ -479,6 +502,7 @@ body {
   height: 40px;
   border-radius: 50%;
   cursor: pointer;
+  color: #fff !important;
 }
 
 /* Avatar dropdown styles */
@@ -494,7 +518,7 @@ body {
 
 .avatar-icon {
   font-size: 24px;
-  color: #333;
+  color: #fff;
   padding: 8px;
   border-radius: 50%;
   background-color: #f0f0f0;
@@ -506,7 +530,7 @@ body {
   right: 0;
   background-color: white;
   min-width: 160px;
-  box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
   z-index: 1;
   border-radius: 4px;
 }
@@ -557,6 +581,7 @@ body {
 
 /* Responsive Design */
 @media (max-width: 768px) {
+
   .quick-access,
   .vaccine-types,
   .guide-icons {
@@ -688,109 +713,109 @@ body {
 }
 
 .avatar-dropdown-content button {
-    position: relative;
-    padding: 10px 15px;
-    color: #333;
-    text-decoration: none;
-    transition: color 0.3s ease;
-    background: none;
-    border: none;
-    cursor: pointer;
-    width: 100%;
-    text-align: left;
+  position: relative;
+  padding: 10px 15px;
+  color: #333;
+  text-decoration: none;
+  transition: color 0.3s ease;
+  background: none;
+  border: none;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
 }
 
 .avatar-dropdown-content button::after {
-    content: '';
-    position: absolute;
-    bottom: -2px;
-    left: 0;
-    width: 0;
-    height: 2px;
-    background: #4A90E2;
-    transition: width 0.3s ease;
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: #4A90E2;
+  transition: width 0.3s ease;
 }
 
 .avatar-dropdown-content button:hover {
-    color: #4A90E2;
+  color: #4A90E2;
 }
 
 .avatar-dropdown-content button:hover::after {
-    width: 100%;
+  width: 100%;
 }
 
 .footer-legal {
-    padding: 20px 0;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-    margin-top: 20px;
+  padding: 20px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  margin-top: 20px;
 }
 
 .footer-legal h3 {
-    color: #fff;
-    margin-bottom: 15px;
-    font-size: 18px;
+  color: #fff;
+  margin-bottom: 15px;
+  font-size: 18px;
 }
 
 .legal-links {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
 }
 
 .legal-links a {
-    color: #fff;
-    text-decoration: none;
-    font-size: 14px;
-    opacity: 0.8;
-    transition: opacity 0.3s ease;
+  color: #fff;
+  text-decoration: none;
+  font-size: 14px;
+  opacity: 0.8;
+  transition: opacity 0.3s ease;
 }
 
 .legal-links a:hover {
-    opacity: 1;
-    text-decoration: underline;
+  opacity: 1;
+  text-decoration: underline;
 }
 
 .back-to-top {
-    position: fixed;
-    bottom: 20px;
-    left: 20px;
-    background: #4A90E2;
-    color: white;
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    border: none;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    transition: all 0.3s ease;
-    z-index: 998;
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  background: #4A90E2;
+  color: white;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
+  z-index: 998;
 }
 
 .back-to-top:hover {
-    background: #357ABD;
-    transform: scale(1.1);
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+  background: #357ABD;
+  transform: scale(1.1);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
 }
 
 .back-to-top i {
-    font-size: 20px;
-    transition: transform 0.3s ease;
+  font-size: 20px;
+  transition: transform 0.3s ease;
 }
 
 .back-to-top:hover i {
-    transform: translateY(-2px);
+  transform: translateY(-2px);
 }
 
 @media (max-width: 768px) {
-    .back-to-top {
-        bottom: 90px;
-        left: 20px;
-        width: 45px;
-        height: 45px;
-    }
+  .back-to-top {
+    bottom: 90px;
+    left: 20px;
+    width: 45px;
+    height: 45px;
+  }
 }
 
 .vaccine-slider-section {
@@ -836,7 +861,7 @@ body {
   height: 250px;
   object-fit: cover;
   border-radius: 10px;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .vaccine-slide h3 {
@@ -861,7 +886,7 @@ body {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  background: rgba(255,255,255,0.8);
+  background: rgba(255, 255, 255, 0.8);
   border: none;
   width: 40px;
   height: 40px;
@@ -871,7 +896,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .vaccine-nav.prev {

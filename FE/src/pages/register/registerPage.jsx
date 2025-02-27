@@ -108,7 +108,7 @@ const RegistrationForm = () => {
           password: "",
           confirmPassword: "",
         });
-        toast.success("Registration successful:", data);
+        //toast.success("Registration successful:", data);
         // Có thể thêm thông báo thành công hoặc chuyển hướng người dùng
         navigate("/login");
       } else {

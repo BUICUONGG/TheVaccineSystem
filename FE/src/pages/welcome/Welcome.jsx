@@ -18,9 +18,9 @@ const Welcome = () => {
     const navigationTimer = setTimeout(() => {
       if (userRole === 'admin') {
         navigate('/admin');
-      } else {
-        navigate('/homepage');
-      }
+      }// } else {
+      //   navigate('/homepage');
+      // }
     }, 2000);
 
     return () => {
