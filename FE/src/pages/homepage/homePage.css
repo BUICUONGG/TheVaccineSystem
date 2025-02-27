@@ -33,11 +33,11 @@ body {
 }
 
 .header-left h1 {
-  font-family: 'Saira Stencil One', sans-serif;
+  font-family: "Saira Stencil One", sans-serif;
   font-weight: 600;
   line-height: 41.6px;
   font-size: 32px;
-  color: #4A90E2;
+  color: #4a90e2;
   display: inline;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
 }
@@ -51,7 +51,7 @@ body {
 
 .header-right .nav-menu a {
   text-decoration: none;
-  color: #4A90E2;
+  color: #4a90e2;
   font-weight: 500;
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
 }
@@ -177,7 +177,7 @@ body {
 
 .slide-button:hover {
   background: white;
-  color: #4A90E2;
+  color: #4a90e2;
 }
 
 /* Quick Access Icons Section */
@@ -246,7 +246,7 @@ body {
 .read-more {
   display: inline-block;
   padding: 0.5rem 1rem;
-  background-color: #87CEEB;
+  background-color: #87ceeb;
   color: #333;
   text-decoration: none;
   border-radius: 4px;
@@ -304,7 +304,7 @@ body {
 
 .news-section h2 {
   text-align: center;
-  color: #4A90E2;
+  color: #4a90e2;
   font-size: 24px;
   margin-bottom: 2rem;
 }
@@ -365,7 +365,7 @@ body {
 }
 
 .news-content .read-more {
-  color: #4A90E2;
+  color: #4a90e2;
   text-decoration: none;
   font-weight: 500;
   display: inline-block;
@@ -393,7 +393,7 @@ body {
 }
 
 .footer-section h3 {
-  color: #4A90E2;
+  color: #4a90e2;
   margin-bottom: 1.5rem;
   font-size: 18px;
 }
@@ -415,7 +415,7 @@ body {
 }
 
 .social-links a:hover {
-  color: #4A90E2;
+  color: #4a90e2;
 }
 
 .footer-bottom {
@@ -440,19 +440,19 @@ body {
 }
 
 .nav-menu a::after {
-  content: '';
+  content: "";
   position: absolute;
   bottom: -2px;
   left: 0;
   width: 0;
   height: 2px;
-  background: #4A90E2;
+  background: #4a90e2;
   /* Màu xanh của line */
   transition: width 0.3s ease;
 }
 
 .nav-menu a:hover {
-  color: #4A90E2;
+  color: #4a90e2;
 }
 
 .nav-menu a:hover::after {
@@ -565,13 +565,13 @@ body {
 }
 
 .avatar-dropdown .avatar-container::after {
-  content: '';
+  content: "";
   position: absolute;
   bottom: -2px;
   left: 0;
   width: 0;
   height: 2px;
-  background: #4A90E2;
+  background: #4a90e2;
   transition: width 0.3s ease;
 }
 
@@ -581,7 +581,6 @@ body {
 
 /* Responsive Design */
 @media (max-width: 768px) {
-
   .quick-access,
   .vaccine-types,
   .guide-icons {
@@ -703,12 +702,12 @@ body {
 }
 
 .avatar-dropdown-content a[href="/admin"] {
-  color: #4A90E2;
+  color: #4a90e2;
   font-weight: bold;
 }
 
 .avatar-dropdown-content a[href="/admin"]:hover {
-  background-color: #4A90E2;
+  background-color: #4a90e2;
   color: white;
 }
 
@@ -726,18 +725,18 @@ body {
 }
 
 .avatar-dropdown-content button::after {
-  content: '';
+  content: "";
   position: absolute;
   bottom: -2px;
   left: 0;
   width: 0;
   height: 2px;
-  background: #4A90E2;
+  background: #4a90e2;
   transition: width 0.3s ease;
 }
 
 .avatar-dropdown-content button:hover {
-  color: #4A90E2;
+  color: #4a90e2;
 }
 
 .avatar-dropdown-content button:hover::after {
@@ -779,7 +778,7 @@ body {
   position: fixed;
   bottom: 20px;
   left: 20px;
-  background: #4A90E2;
+  background: #4a90e2;
   color: white;
   width: 50px;
   height: 50px;
@@ -795,7 +794,7 @@ body {
 }
 
 .back-to-top:hover {
-  background: #357ABD;
+  background: #357abd;
   transform: scale(1.1);
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
 }

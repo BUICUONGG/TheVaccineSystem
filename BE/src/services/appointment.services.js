@@ -182,6 +182,39 @@ class AppointmentService {
     }
   }
 
+  // tinh ngay tiem
+  async calculateVaccinationSchedule(startDate, schedule) {
+    if (!startDate || typeof startDate !== "string") {
+      throw new Error("Ngày bắt đầu không hợp lệ!");
+    }
+
+    const [day, month, year] = startDate.split("/");
+    let lastDate = new Date(`${year}-${month}-${day}`); // Chuyển sang Date object đúng
+
+    let dates = [];
+
+    schedule.forEach((days, index) => {
+      let nextDate = new Date(lastDate);
+      nextDate.setDate(nextDate.getDate() + days);
+
+      // Chuyển lại về dạng "dd/mm/yyyy"
+      let nextDay = nextDate.getDate().toString().padStart(2, "0");
+      let nextMonth = (nextDate.getMonth() + 1).toString().padStart(2, "0");
+      let nextYear = nextDate.getFullYear();
+
+      dates.push({
+        doseNumber: index + 1, // Mũi tiêm thứ mấy
+        date: `${nextDay}/${nextMonth}/${nextYear}`, // Giữ nguyên định dạng
+        status: "pending",
+      });
+
+      lastDate = nextDate;
+    });
+
+    console.log("Dose Schedule:", dates);
+    return dates;
+  }
+
   async createAptGoi(data) {
     try {
       const {
@@ -199,27 +232,37 @@ class AppointmentService {
       if (!childId && childInfo) {
         const newChild = new Child({
           cusId,
-          childName: childInfo.name || "", // Hoặc nhận từ data nếu có
-          birthday: childInfo.birthday || "", // Chỉnh lại theo yêu cầu
+          childName: childInfo.name || "",
+          birthday: childInfo.birthday || "",
           healthNote: childInfo.healthNote || "",
-          gender: childInfo.gender || "", // Chỉnh lại theo yêu cầu
+          gender: childInfo.gender || "",
         });
         const saveChild = await connectToDatabase.childs.insertOne(newChild);
         finalChildId = saveChild.insertedId;
       }
-      console.log(finalChildId);
+
+      const vaccinePackage = await connectToDatabase.vaccinepackages.findOne({
+        _id: new ObjectId(vaccinePakageId),
+      });
+
+      const doseSchedule = await this.calculateVaccinationSchedule(
+        date,
+        vaccinePackage.schedule
+      );
+
       const aptGoi = new AppointmentGoi({
         cusId,
         childId: finalChildId,
         vaccinePakageId,
         date,
+        doseSchedule,
         createAt,
         status,
       });
-      await aptGoi.validate();
+      // await aptGoi.validate();
       // await aptLevalidate();
       const result = await connectToDatabase.appointmentGois.insertOne(aptGoi);
-      return { _id: result.insertedId, ...data };
+      return { _id: result.insertedId, doseSchedule, ...data };
     } catch (error) {
       throw new Error(error.message);
     }
