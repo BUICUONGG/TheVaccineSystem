@@ -94,6 +94,15 @@ export const listAllAptGoiController = async (req, res) => {
   }
 };
 
+export const showDetailAptGoiController = async (req, res) => {
+  try {
+    const result = await appointmentService.showDetailAptGoi();
+    res.status(200).json(result);
+  } catch (error) {
+    res.status(500).json(error.message);
+  }
+};
+
 export const createAptGoiController = async (req, res) => {
   try {
     const data = req.body;

@@ -4,12 +4,13 @@ const vaccineImportSchema = new mongoose.Schema({
   batchNumber: { type: String, required: true, unique: true }, // Mã số lô
   vaccines: [
     {
+      _id: false,
       vaccineId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "VaccineInventory", // Mối liên kết với VaccineInventory
         required: true,
       },
-      quantity: { type: String, required: true }, // Số lượng mỗi loại vaccine trong lô
+      quantity: { type: Number, required: true }, // Số lượng mỗi loại vaccine trong lô
     },
   ],
   price: { type: Number, required: true }, // Giá nhập của từng loại vaccine
