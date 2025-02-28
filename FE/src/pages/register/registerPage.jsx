@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { FaEye, FaEyeSlash, FaTimesCircle } from "react-icons/fa";
-import { useNavigate } from "react-router-dom";
+import { FiUser, FiMail, FiLock, FiEye, FiEyeOff } from "react-icons/fi";
+import { FcGoogle } from "react-icons/fc";
+import { useNavigate, Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import "./registerPage.css";
 
@@ -108,166 +109,135 @@ const RegistrationForm = () => {
           password: "",
           confirmPassword: "",
         });
-        //toast.success("Registration successful:", data);
-        // Có thể thêm thông báo thành công hoặc chuyển hướng người dùng
+        toast.success("Đăng ký thành công!");
         navigate("/login");
       } else {
         // Xử lý lỗi từ server
-        toast.error("Registration failed:", data.message);
-        // Có thể hiển thị thông báo lỗi cho người dùng
+        toast.error(data.message || "Đăng ký thất bại!");
       }
     } catch (error) {
-      toast.error("Submission error:", error);
-      // Xử lý lỗi kết nối
+      toast.error("Lỗi kết nối: " + error.message);
     } finally {
       setLoading(false);
     }
   };
 
+  const handleLoginButton = () => {
+    navigate("/login");
+  };
+
   return (
     <div className="regis-min-h-screen">
-      <div className="regis-max-w-md">
-        <div>
-          <h2 className="regis-text-3xl">Tạo tài khoản của bạn</h2>
+      <Link to="/homepage" className="regis-back-home">
+        Về trang chủ
+      </Link>
+      <div className="regis-container">
+        <div className="regis-image-container">
+          <div className="regis-image-overlay"></div>
         </div>
-        <form onSubmit={handleSubmit}>
-          <div>
-            <label htmlFor="username" className="regis-block">
-              Tên đăng nhập
-            </label>
-            <div className="regis-relative">
+        <div className="regis-form-container">
+          <div className="regis-form-header">
+            <h2>Tạo tài khoản mới</h2>
+            <p>Đăng ký để trải nghiệm dịch vụ của chúng tôi</p>
+          </div>
+          <form onSubmit={handleSubmit}>
+            <div className="regis-input-group">
+              <FiUser className="regis-input-icon" />
               <input
-                className="regis-input"
-                id="username"
-                name="username"
                 type="text"
+                className="regis-input"
+                placeholder="Tên đăng nhập"
+                name="username"
                 value={formData.username}
                 onChange={handleChange}
               />
-              {errors.username && (
-                <div className="regis-absolute">
-                  <FaTimesCircle />
-                </div>
-              )}
+              {errors.username && <div className="regis-error">{errors.username}</div>}
             </div>
-            {errors.username && (
-              <p className="regis-text-red-600">{errors.username}</p>
-            )}
-          </div>
-
-          <div>
-            <label htmlFor="email" className="regis-block">
-              Email
-            </label>
-            <div className="regis-relative">
+            
+            <div className="regis-input-group">
+              <FiMail className="regis-input-icon" />
               <input
-                className="regis-input"
-                id="email"
-                name="email"
                 type="email"
+                className="regis-input"
+                placeholder="Email"
+                name="email"
                 value={formData.email}
                 onChange={handleChange}
               />
-              {errors.email && (
-                <div className="regis-absolute">
-                  <FaTimesCircle />
-                </div>
-              )}
+              {errors.email && <div className="regis-error">{errors.email}</div>}
             </div>
-            {errors.email && (
-              <p className="regis-text-red-600">{errors.email}</p>
-            )}
-          </div>
-
-          <div>
-            <label htmlFor="password" className="regis-block">
-              Mật khẩu
-            </label>
-            <div className="regis-relative">
+            
+            <div className="regis-input-group">
+              <FiLock className="regis-input-icon" />
               <input
-                className="regis-input"
-                id="password"
-                name="password"
                 type={showPassword ? "text" : "password"}
+                className="regis-input"
+                placeholder="Mật khẩu"
+                name="password"
                 value={formData.password}
                 onChange={handleChange}
               />
               <button
                 type="button"
-                className="regis-absolute inset-y-0 right-0 pr-3 flex items-center"
                 onClick={() => setShowPassword(!showPassword)}
+                className="regis-password-toggle"
               >
-                {showPassword ? (
-                  <FaEyeSlash />
-                ) : (
-                  <FaEye />
-                )}
+                {showPassword ? <FiEyeOff /> : <FiEye />}
               </button>
+              {errors.password && <div className="regis-error">{errors.password}</div>}
             </div>
-            {errors.password && (
-              <p className="regis-text-red-600">{errors.password}</p>
-            )}
-          </div>
-
-          <div>
-            <label htmlFor="confirmPassword" className="regis-block">
-              Xác nhận mật khẩu
-            </label>
-            <div className="regis-relative">
+            
+            <div className="regis-input-group">
+              <FiLock className="regis-input-icon" />
               <input
-                className="regis-input"
-                id="confirmPassword"
-                name="confirmPassword"
                 type={showConfirmPassword ? "text" : "password"}
+                className="regis-input"
+                placeholder="Xác nhận mật khẩu"
+                name="confirmPassword"
                 value={formData.confirmPassword}
                 onChange={handleChange}
               />
               <button
                 type="button"
-                className="regis-absolute inset-y-0 right-0 pr-3 flex items-center"
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                className="regis-password-toggle"
               >
-                {showConfirmPassword ? (
-                  <FaEyeSlash />
-                ) : (
-                  <FaEye />
-                )}
+                {showConfirmPassword ? <FiEyeOff /> : <FiEye />}
               </button>
-              {errors.confirmPassword && (
-                <div className="regis-absolute">
-                  <FaTimesCircle />
-                </div>
-              )}
+              {errors.confirmPassword && <div className="regis-error">{errors.confirmPassword}</div>}
             </div>
-            {errors.confirmPassword && (
-              <p className="regis-text-red-600">{errors.confirmPassword}</p>
-            )}
-          </div>
-
-          <button
-            type="submit"
-            className="regis-button"
-            disabled={loading || Object.values(errors).some((error) => error !== "")}
-          >
-            {loading ? (
-              <span>
-                <svg className="regis-animate-spin" {...props} />
-                Đang xử lý...
-              </span>
-            ) : (
-              "Đăng ký"
-            )}
-          </button>
-
-          <div className="regis-text-center">
-            <p className="regis-text-gray-600">
-              Đã có tài khoản?
-              <a href="/login" className="regis-text-indigo-600">
-                Đăng nhập
-              </a>
-            </p>
-          </div>
-        </form>
+            
+            <div className="regis-button-group">
+              <button
+                type="button"
+                className="regis-btn regis-btn-secondary"
+                onClick={handleLoginButton}
+              >
+                Đăng Nhập
+              </button>
+              <button
+                type="submit"
+                disabled={loading}
+                className="regis-btn regis-btn-primary"
+              >
+                {loading ? "Đang xử lý..." : "Đăng Ký"}
+              </button>
+            </div>
+            
+            <div className="regis-divider">
+              <span>hoặc đăng ký bằng</span>
+            </div>
+            
+            <div className="regis-button-group">
+              <button
+                type="button"
+                className="regis-btn regis-btn-secondary"
+              >
+                <FcGoogle className="h-5 w-5 mr-2" /> Google
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   );

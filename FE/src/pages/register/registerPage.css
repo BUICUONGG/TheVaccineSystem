@@ -1,15 +1,14 @@
 * {
-    padding: 0;
     margin: 0;
+    padding: 0;
     box-sizing: border-box;
-    font-family: Arial, Helvetica, sans-serif;
 }
 
 .regis-min-h-screen {
     position: relative;
     width: 100%;
     height: 100vh;
-    background: url('/images/vaccineInfo1.webp') center center;
+    background: url('/images/vd2.jpg') center center;
     background-size: cover;
     display: flex;
     justify-content: center;
@@ -21,134 +20,220 @@
     position: absolute;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.4);
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(5px);
 }
 
-.regis-max-w-md {
-    width: 400px;
-    padding: 30px;
-    box-shadow: 5px 5px 2px rgba(0, 0, 0, 0.15);
-    z-index: 99;
-    background: rgba(219, 219, 219, 0.949);
-    backdrop-filter: blur(10px);
-    border-radius: 15px;
+/* Main registration container */
+.regis-container {
+    width: 1000px;
+    height: 600px;
+    position: relative;
+    z-index: 1;
+    display: flex;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
 }
 
-.regis-text-3xl {
-    color:#4A90E2;
-    margin-bottom: 20px;
-    text-align: center;
-    font-size: 24px;
+/* Left side - Image container */
+.regis-image-container {
+    width: 50%;
+    background: url('/images/registerBanner.jpg') center center;
+    background-size: cover;
+    position: relative;
 }
 
-.regis-block {
-    color: #4A90E2(255, 255, 255, 0.9);
-    margin-bottom: 5px;
-    font-size: 14px;
-}
-
-.regis-input {
+.regis-image-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
-    padding: 12px 10px;
-    border: 0;
-    outline: none;
-    background: transparent;
-    color: rgba(255, 255, 255, 0.9);
-    font-size: 14px;
-    letter-spacing: 1px;
-    border: 1px solid rgba(255, 255, 255, 0.8);
-    border-radius: 5px;
-    margin-bottom: 15px;
+    height: 100%;
+    background: linear-gradient(45deg, rgba(44, 82, 130, 0.7), rgba(0, 150, 255, 0.4));
 }
 
-.regis-input::placeholder {
-    color: rgba(255, 255, 255, 0.8);
+/* Right side - Form container */
+.regis-form-container {
+    width: 50%;
+    padding: 40px;
+    background: rgba(255, 255, 255, 0.95);
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
 }
 
-.regis-relative {
+/* Form elements styling */
+.regis-form-header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.regis-form-header h2 {
+    color: #2c5282;
+    font-size: 28px;
+    margin-bottom: 10px;
+}
+
+.regis-form-header p {
+    color: #718096;
+    font-size: 16px;
+}
+
+.regis-input-group {
     position: relative;
     margin-bottom: 20px;
 }
 
-.regis-absolute {
-    position: absolute;
-    right: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: rgba(255, 255, 255, 0.8);
-    cursor: pointer;
+.regis-input {
+    width: 100%;
+    padding: 12px 40px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: all 0.3s ease;
 }
 
-.regis-button {
-    border: 0;
-    outline: none;
-    width: 100%;
-    padding: 15px;
-    box-shadow: 5px 5px 3px rgba(0, 0, 0, 0.15);
-    border-radius: 7px;
-    color: #000;
-    background: #fff;
-    transition: background 0.3s;
+.regis-input:focus {
+    border-color: #2c5282;
+    box-shadow: 0 0 0 3px rgba(66, 225, 153, 0.1);
+}
+
+.regis-input-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #a0aec0;
+}
+
+.regis-password-toggle {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
     cursor: pointer;
-    font-weight: 600;
+    color: #a0aec0;
+    background: none;
+    border: none;
+}
+
+/* Error message styling */
+.regis-error {
+    color: #e53e3e;
+    font-size: 12px;
+    margin-top: 5px;
+}
+
+/* Button styling */
+.regis-button-group {
+    display: flex;
+    gap: 10px;
     margin-top: 20px;
 }
 
-.regis-button:hover {
-    background: rgba(255, 255, 255, 0.9);
+.regis-btn {
+    flex: 1;
+    padding: 12px;
+    border-radius: 8px;
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
 }
 
-.regis-button:disabled {
-    background: rgba(255, 255, 255, 0.5);
+.regis-btn-primary {
+    background: #4299e1;
+    color: white;
+}
+
+.regis-btn-primary:hover {
+    background: #2c5282;
+}
+
+.regis-btn-primary:disabled {
+    background: #4299e1;
     cursor: not-allowed;
 }
 
-.regis-text-red-600 {
-    color: #ff4444;
-    font-size: 12px;
-    margin-top: -10px;
-    margin-bottom: 10px;
+.regis-btn-secondary {
+    background: #4299e1;
+    color: white;
 }
 
-.regis-text-center {
-    text-align: center;
-    margin-top: 20px;
+.regis-btn-secondary:hover {
+    background: #3182ce;
 }
 
-.regis-text-gray-600 {
-    color: rgba(255, 255, 255, 0.9);
+/* Divider */
+.regis-divider {
+    display: flex;
+    align-items: center;
+    margin: 20px 0;
+}
+
+.regis-divider::before,
+.regis-divider::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.regis-divider span {
+    padding: 0 10px;
+    color: #718096;
     font-size: 14px;
 }
 
-.regis-text-indigo-600 {
-    color: #fff;
+/* Back home button */
+.regis-back-home {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    z-index: 2;
+    padding: 10px 20px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    color: white;
     text-decoration: none;
-    font-weight: 600;
-    margin-left: 5px;
+    font-weight: 500;
+    backdrop-filter: blur(5px);
+    transition: all 0.3s ease;
 }
 
-.regis-text-indigo-600:hover {
-    text-decoration: underline;
+.regis-back-home:hover {
+    background: white;
+    color: #2c8252;
 }
 
-/* Animation cho loading spinner */
-.regis-animate-spin {
-    animation: regisSpin 1s linear infinite;
-}
-
-@keyframes regisSpin {
-    from {
-        transform: rotate(0deg);
-    }
-    to {
-        transform: rotate(360deg);
-    }
-}
-
-/* Responsive */
-@media (max-width: 480px) {
-    .regis-max-w-md {
+/* Responsive design */
+@media (max-width: 1024px) {
+    .regis-container {
         width: 90%;
+        height: auto;
+        flex-direction: column;
+    }
+
+    .regis-image-container,
+    .regis-form-container {
+        width: 100%;
+    }
+
+    .regis-image-container {
+        height: 200px;
+    }
+}
+
+@media (max-width: 640px) {
+    .regis-container {
+        width: 95%;
+    }
+
+    .regis-form-container {
         padding: 20px;
+    }
+
+    .regis-button-group {
+        flex-direction: column;
     }
 }
