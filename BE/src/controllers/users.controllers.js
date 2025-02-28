@@ -108,3 +108,14 @@ export const logoutController = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+export const forgotPasswordController = async (req, res) => {
+  try {
+    const username = req.body;
+    const newPassword = req.body;
+    const result = await userService.forgotPassword(username, newPassword);
+    res.status(200).json(result);
+  } catch (error) {
+    res.status(200).json(error.message);
+  }
+};

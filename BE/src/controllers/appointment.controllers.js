@@ -109,7 +109,6 @@ export const createAptGoiController = async (req, res) => {
     const result = await appointmentService.createAptGoi(data);
     res.status(200).json(result);
   } catch (error) {
-    console.log();
     res.status(500).json(error.message);
   }
 };

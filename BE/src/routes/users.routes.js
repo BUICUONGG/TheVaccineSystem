@@ -8,6 +8,7 @@ import {
   logoutController,
   refreshTokenController,
   checkUsernameController,
+  forgotPasswordController,
 } from "../controllers/users.controllers.js";
 import {
   registerValidate,
@@ -35,12 +36,11 @@ usersRoutes.post(
   deleteController
 );
 
-usersRoutes.post(
-  "/update/:id",
-  updateController
-);
+usersRoutes.post("/update/:id", updateController);
 
 usersRoutes.post("/logout/:id", validateAccessToken, logoutController);
+
+usersRoutes.post("/forgot-password", forgotPasswordController);
 
 usersRoutes.post(
   "/refresh-token",

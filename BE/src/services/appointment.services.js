@@ -210,8 +210,6 @@ class AppointmentService {
 
       lastDate = nextDate;
     });
-
-    console.log("Dose Schedule:", dates);
     return dates;
   }
 
@@ -260,7 +258,6 @@ class AppointmentService {
         status,
       });
       // await aptGoi.validate();
-      // await aptLevalidate();
       const result = await connectToDatabase.appointmentGois.insertOne(aptGoi);
       return { _id: result.insertedId, doseSchedule, ...data };
     } catch (error) {

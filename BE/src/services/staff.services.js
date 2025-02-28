@@ -1,6 +1,6 @@
 import connectToDatabase from "../config/database.js";
 import Staff from "../model/staffSchema.js";
-
+import { ObjectId } from "mongodb";
 class StaffService {
   async createStaff(data) {
     try {
@@ -22,9 +22,30 @@ class StaffService {
     }
   }
 
-  async updateStaff(id, dataupdate) {
+  async updateStaff(id, dataUpdate) {
     try {
-    } catch (error) {}
+      const result = await connectToDatabase.staffs.findOneAndUpdate(
+        {
+          _id: new ObjectId(id),
+        },
+        { $set: dataUpdate },
+        { returnDocument: "after" }
+      );
+      return result;
+    } catch (error) {
+      throw new Error(error.message);
+    }
+  }
+
+  async deleteStaff(id) {
+    try {
+      const result = await connectToDatabase.staffs.findOneAndDelete({
+        _id: new ObjectId(id),
+      });
+      return "Xoa thanh cong";
+    } catch (error) {
+      throw new Error(error.message);
+    }
   }
 }
 

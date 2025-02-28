@@ -10,8 +10,6 @@ export const createStaffController = async (req, res) => {
   }
 };
 
-export const updateStaffController = async (req, res) => {};
-export const deleteStaffController = async (req, res) => {};
 export const getListStaffController = async (req, res) => {
   try {
     const result = await staffService.listStaff();
@@ -20,3 +18,14 @@ export const getListStaffController = async (req, res) => {
     res.status(500).json(error.message);
   }
 };
+export const updateStaffController = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const dataUpdate = req.body;
+    const result = await staffService.updateStaff(id, dataUpdate);
+    res.status(200).json(result);
+  } catch (error) {
+    res.status(500).json(error.message);
+  }
+};
+export const deleteStaffController = async (req, res) => {};

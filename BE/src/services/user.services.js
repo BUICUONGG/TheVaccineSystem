@@ -152,6 +152,20 @@ class UserService {
     }
   }
 
+  async forgotPassword(username, newPassword) {
+    try {
+      const passwordHashed = await hashPassword(newPassword);
+      const result = await connectToDatabase.users.findOneAndUpdate(
+        { username },
+        { $set: passwordHashed },
+        { returnDocument: "after" }
+      );
+      return result;
+    } catch (error) {
+      throw new Error(error.message);
+    }
+  }
+
   async findByUsername(username) {
     try {
       const user = await connectToDatabase.users.findOne({ username });
