@@ -1,16 +1,16 @@
 import { useState, useEffect, useRef } from "react";
 //import axios from "axios";
 //import { Modal } from "antd";
-import { FaRegCalendarAlt, FaRegListAlt, FaRegThumbsUp, FaRegSmileBeam } from "react-icons/fa";
+// import { FaRegCalendarAlt, FaRegListAlt, FaRegThumbsUp, FaRegSmileBeam } from "react-icons/fa";
 import { FaSyringe, FaBook, FaUserCheck, FaMoneyBillWave, FaBaby, FaChild } from "react-icons/fa";
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import "./homePage.css";
 import { useNavigate } from "react-router-dom";
-import { UserOutlined } from '@ant-design/icons';
+// import { UserOutlined } from '@ant-design/icons';
 import { Link } from "react-router-dom";
 
 // eslint-disable-next-line no-unused-vars
-import { FaSearch, FaShoppingCart } from "react-icons/fa";
+// import { FaSearch, FaShoppingCart } from "react-icons/fa";
 
 const HomePage = () => {
   const navigate = useNavigate();
@@ -20,7 +20,7 @@ const HomePage = () => {
   const [userRole, setUserRole] = useState('');
   const [showBackToTop, setShowBackToTop] = useState(false);
   const [vaccines, setVaccines] = useState([]);
-  const [currentVaccineIndex, setCurrentVaccineIndex] = useState(0);
+  // const [currentVaccineIndex, setCurrentVaccineIndex] = useState(0);
 
   const banners = [
     {
@@ -50,15 +50,14 @@ const HomePage = () => {
     const token = localStorage.getItem('accesstoken');
     if (token) {
       setIsLoggedIn(true);
-      // Decode token để lấy role
       const tokenParts = token.split('.');
       const payload = JSON.parse(atob(tokenParts[1]));
       const role = payload.role;
       setUserRole(role);
-      localStorage.setItem('role', role); // Lưu role vào localStorage
+      localStorage.setItem('role', role);
     }
     document.title = "Trang chủ";
-    
+
     const timer = setInterval(() => {
       setFadeIn(false);
       setTimeout(() => {
@@ -68,7 +67,7 @@ const HomePage = () => {
         setFadeIn(true);
       }, 200);
     }, 3000);
-    
+
     return () => clearInterval(timer);
   }, [banners.length]);
 
@@ -89,14 +88,11 @@ const HomePage = () => {
   };
 
   const handleLogout = () => {
-    // Xóa thông tin người dùng khỏi localStorage
     localStorage.removeItem('accesstoken');
     localStorage.removeItem('role');
     localStorage.removeItem('userId');
     setIsLoggedIn(false);
     setUserRole('');
-    
-    // Điều hướng đến trang Thank thay vì homepage
     navigate('/thank-you');
   };
 
@@ -161,11 +157,11 @@ const HomePage = () => {
 
   useEffect(() => {
     const handleScroll = () => {
-        if (window.scrollY > 300) {
-            setShowBackToTop(true);
-        } else {
-            setShowBackToTop(false);
-        }
+      if (window.scrollY > 300) {
+        setShowBackToTop(true);
+      } else {
+        setShowBackToTop(false);
+      }
     };
 
     window.addEventListener('scroll', handleScroll);
@@ -186,7 +182,6 @@ const HomePage = () => {
           <li><Link to="/homepage">Trang chủ</Link></li>
           <li><Link to="/blogs">Blog</Link></li>
           <li><Link to="/news">Tin tức</Link></li>
-          {/* <li><Link to="/registerInjection">Đăng Ký Tiêm</Link></li> */}
           <li><Link to="#" onClick={scrollToFooter}>Liên hệ</Link></li>
           {!isLoggedIn ? (
             <>
@@ -234,14 +229,14 @@ const HomePage = () => {
 
         <div className="swiper-pagination">
           {banners.map((_, index) => (
-            <span 
-              key={index} 
+            <span
+              key={index}
               className={`swiper-pagination-bullet ${currentSlide === index ? 'active' : ''}`}
               onClick={() => setCurrentSlide(index)}
             ></span>
           ))}
         </div>
-        
+
         {/* Banner Cards */}
         <div className="banner-cards">
           <div className="banner-card">
@@ -256,7 +251,7 @@ const HomePage = () => {
               Xem Thêm
             </Link>
           </div>
-          
+
           <div className="banner-card">
             <div className="card-icon">
               <FaMoneyBillWave size={50} style={{ color: "#4A90E2" }} />
@@ -272,14 +267,14 @@ const HomePage = () => {
         </div>
       </div>
 
-      <div className="quick-access">
+      {/* <div className="quick-access">
         <div className="icon-item">
           <Link to="/pricelist">
             <FaMoneyBillWave size={50} style={{ color: "#4A90E2" }} />
             <span>GIÁ TIÊM</span>
           </Link>
         </div>
-      </div>
+      </div> */}
 
       <div className="vaccine-info">
         <h2>THÔNG TIN VACCINE</h2>
@@ -372,12 +367,12 @@ const HomePage = () => {
             <p>Hệ thống quản lý tiêm chủng cho trẻ em</p>
           </div>
           <div className="footer-section">
-          <h3>PHÁP LÝ & CÂU HỎI</h3>
-          <div className="legal-links">
-                <Link to="/search">Tìm kiếm</Link>
-                <Link to="/about">Giới thiệu</Link>
-                <Link to="/privacy-policy">Chính sách bảo mật</Link>
-                <Link to="/terms">Điều khoản dịch vụ</Link>
+            <h3>PHÁP LÝ & CÂU HỎI</h3>
+            <div className="legal-links">
+              <Link to="/search">Tìm kiếm</Link>
+              <Link to="/about">Giới thiệu</Link>
+              <Link to="/privacy-policy">Chính sách bảo mật</Link>
+              <Link to="/terms">Điều khoản dịch vụ</Link>
             </div>
           </div>
           <div className="footer-section">
@@ -407,7 +402,7 @@ const HomePage = () => {
               <a href="#">
                 <i className="fab fa-linkedin"></i>
               </a>
-              
+
             </div>
           </div>
         </div>
@@ -417,7 +412,7 @@ const HomePage = () => {
       </footer>
 
       {showBackToTop && (
-        <button 
+        <button
           className="back-to-top"
           onClick={scrollToTop}
           aria-label="Back to top"
