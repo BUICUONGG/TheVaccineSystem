@@ -2,6 +2,7 @@ import { Router } from "express";
 import {
   createAptGoiController,
   createAptLeController,
+  deleteAptGoiController,
   deleteAptLeController,
   getAppointmentsController,
   getAppointmentsWithDetailsByIdController,
@@ -9,9 +10,10 @@ import {
   listAllAptLeController,
   searchAppointmentsController,
   showDetailAptGoiController,
+  updateAptGoiController,
   updateAptLeController,
 } from "../controllers/appointment.controllers.js";
-import { validateAccessToken } from "../middlewares/user.middleware.js";
+// import { validateAccessToken } from "../middlewares/user.middleware.js";
 
 const aptLeRoutes = Router();
 const aptGoiRoutes = Router();
@@ -51,7 +53,8 @@ aptGoiRoutes.post("/create", createAptGoiController);
 //show chi tiet hoa ddon cua goi
 aptGoiRoutes.get("/showDetailAptGoi", showDetailAptGoiController);
 
-// aptGoiRoutes.post("/update/:id", updateAptGoiController);
-// aptGoiRoutes.post("/delete/:id", deleteAptGoiController);
+aptGoiRoutes.post("/update/:id", updateAptGoiController);
+
+aptGoiRoutes.post("/delete/:id", deleteAptGoiController);
 
 export { aptGoiRoutes, aptLeRoutes };

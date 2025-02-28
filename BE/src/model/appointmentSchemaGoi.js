@@ -13,6 +13,18 @@ const appointmentGoiSchema = new mongoose.Schema({
     required: true,
   },
   date: { type: String, required: true }, // ngayf cus nđặt lịch hẹn
+  doseSchedule: [
+    {
+      _id: false,
+      doseNumber: { type: Number, required: true }, // Mũi tiêm thứ mấy
+      date: { type: String, required: true }, // Ngày tiêm dự kiến (YYYY-MM-DD)
+      status: {
+        type: String,
+        enum: ["pending", "completed"],
+        default: "pending",
+      },
+    },
+  ],
   createAt: { type: String, required: true },
   status: {
     type: String,
