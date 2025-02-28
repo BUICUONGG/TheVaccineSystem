@@ -16,6 +16,8 @@ const RegisterInjection = () => {
   const [vaccineList, setVaccineList] = useState([]); // Chỉ giữ lại các states cần thiết
   const [parentInfo, setParentInfo] = useState(null);
   const [isChildRegistration, setIsChildRegistration] = useState(false);
+  const [vaccinePackages, setVaccinePackages] = useState([]); // Thêm state cho vaccine gói
+  const [selectedVaccineType, setSelectedVaccineType] = useState('single'); // 'single' hoặc 'package'
 
   useEffect(() => {
     const token = localStorage.getItem("accesstoken");
@@ -40,6 +42,23 @@ const RegisterInjection = () => {
       }
     };
     fetchVaccines();
+  }, []);
+
+  // Thêm useEffect để fetch vaccine packages
+  useEffect(() => {
+    const fetchVaccinePackages = async () => {
+      try {
+        const response = await axios.get("http://localhost:8080/vaccinepakage/showVaccinePakage");
+        setVaccinePackages(response.data);
+      } catch (error) {
+        console.error("Error fetching vaccine packages:", error);
+        toast.error('Không thể tải danh sách gói vaccine', {
+          position: "top-right",
+          autoClose: 3000
+        });
+      }
+    };
+    fetchVaccinePackages();
   }, []);
 
   // Fetch user info khi component mount và user đã đăng nhập
@@ -125,18 +144,13 @@ const RegisterInjection = () => {
     try {
       const accesstoken = localStorage.getItem("accesstoken");
       const userId = localStorage.getItem("userId");
-
-      // Get current date for createAt
       const today = new Date();
       const createAt = `${String(today.getDate()).padStart(2, '0')}/${String(today.getMonth() + 1).padStart(2, '0')}/${today.getFullYear()}`;
-
-      // Format appointment date từ Dayjs object
-      const selectedDate = values.date;
-      const formattedDate = selectedDate.format('DD/MM/YYYY');
-
-      const registrationData = {
+      const formattedDate = values.date.format('DD/MM/YYYY');
+  
+      // Chuẩn bị dữ liệu chung
+      const requestData = {
         cusId: userId,
-        vaccineId: values.vaccineId,
         date: formattedDate,
         createAt: createAt,
         status: "pending",
@@ -147,29 +161,30 @@ const RegisterInjection = () => {
           }
         })
       };
-
-      console.log("Sending data to server:", registrationData);
-
-      const response = await axios.post(
-        "http://localhost:8080/appointmentLe/create",
-        registrationData,
-        {
-          headers: {
-            Authorization: `Bearer ${accesstoken}`,
-          },
-        }
-      );
-
-      if (response.status === 200 || response.status === 201) {
-        toast.success('Đăng ký tiêm chủng thành công!', {
-          position: "top-center",
-          autoClose: 2000,
-          onClose: () => navigate("/homepage")
+  
+      // Kiểm tra loại vaccine để gửi đúng API
+      if (selectedVaccineType === 'single') {
+        requestData.vaccineId = values.vaccineId;  // Nếu chọn vaccine lẻ, thêm vaccineId
+        await axios.post("http://localhost:8080/appointmentLe/create", requestData, {
+          headers: { Authorization: `Bearer ${accesstoken}` }
+        });
+      } else {
+        requestData.vaccinePakageId = values.vaccinePackageId; // Nếu chọn gói, thêm vaccinePakageId
+        await axios.post("http://localhost:8080/appointmentGoi/create", requestData, {
+          headers: { Authorization: `Bearer ${accesstoken}` }
         });
       }
+  
+      // Thông báo thành công
+      toast.success(`Đăng ký tiêm chủng ${selectedVaccineType === 'single' ? 'vaccine lẻ' : 'gói vaccine'} thành công!`, {
+        position: "top-center",
+        autoClose: 2000,
+        onClose: () => navigate("/homepage")
+      });
+  
     } catch (error) {
       console.error("Registration error:", error);
-      toast.error(error.response?.data?.message || 'Đăng ký thất bại, vui lòng thử lại', {
+      toast.error(`Đăng ký ${selectedVaccineType === 'single' ? 'vaccine lẻ' : 'gói vaccine'} thất bại, vui lòng thử lại`, {
         position: "top-right",
         autoClose: 3000
       });
@@ -308,17 +323,38 @@ const RegisterInjection = () => {
             <div className="form-section vaccine-registration-section">
               <h3>Thông Tin Đăng Ký Tiêm</h3>
               
+              {/* Thêm Radio để chọn loại vaccine */}
               <Form.Item
-                name="vaccineId"
-                label="Vaccine"
+                name="vaccineType"
+                className="vaccine-type-selector"
+              >
+                <Radio.Group 
+                  onChange={(e) => setSelectedVaccineType(e.target.value)}
+                  value={selectedVaccineType}
+                >
+                  <Radio.Button value="single">Vaccine Lẻ</Radio.Button>
+                  <Radio.Button value="package">Vaccine Gói</Radio.Button>
+                </Radio.Group>
+              </Form.Item>
+
+              <Form.Item
+                name={selectedVaccineType === 'single' ? "vaccineId" : "vaccinePackageId"}
+                label="Chọn Vaccine"
                 rules={[{ required: true, message: 'Vui lòng chọn vaccine!' }]}
               >
                 <Select placeholder="Chọn loại vắc xin">
-                  {vaccineList.map(vaccine => (
-                    <Select.Option key={vaccine._id} value={vaccine._id}>
-                      {vaccine.vaccineName} - {vaccine.vaccineImports?.[0]?.price || "Chưa có giá"} VNĐ
-                    </Select.Option>
-                  ))}
+                  {selectedVaccineType === 'single' 
+                    ? vaccineList.map(vaccine => (
+                        <Select.Option key={vaccine._id} value={vaccine._id}>
+                          {vaccine.vaccineName} - {vaccine.vaccineImports?.[0]?.price || "Chưa có giá"} VNĐ
+                        </Select.Option>
+                      ))
+                    : vaccinePackages.map(pack => (
+                        <Select.Option key={pack._id} value={pack._id}>
+                          {pack.packageName} - {pack.price || "Chưa có giá"} VNĐ
+                        </Select.Option>
+                      ))
+                  }
                 </Select>
               </Form.Item>
 
