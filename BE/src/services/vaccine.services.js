@@ -93,29 +93,20 @@ class VaccineService {
         .toArray();
 
       for (let vaccine of vaccines) {
-        let vaccineId;
         try {
-          vaccineId = new ObjectId(vaccine._id);
-        } catch (error) {
-          continue; // Bỏ qua nếu lỗi
-        }
-
-        // Truy vấn chính xác bằng ObjectId trực tiếp trong mảng `vaccines`
-        let vaccineImports = await connectToDatabase.vaccineImports
-          .find({
-            vaccines: vaccineId, // 🔥 Tìm trực tiếp trong mảng ObjectId
-          })
-          .toArray();
-
-        // Loại bỏ trường vaccines trong từng import
-        vaccineImports = vaccineImports.map(({ vaccines, ...rest }) => rest);
-
-        // Gắn danh sách lô nhập vào vaccine
-        vaccine.vaccineImports = vaccineImports;
+          let vaccineId = vaccine._id;
+          let vaccineImports = await connectToDatabase.vaccineImports
+            .find({ "vaccines.vaccineId": vaccineId })
+            .toArray();
+          vaccine.vaccineImports = vaccineImports.map(
+            ({ vaccines, ...rest }) => rest
+          );
+        } catch (error) {}
       }
 
       return vaccines;
     } catch (error) {
+      console.error("Lỗi khi lấy danh sách vaccine:", error);
       return [];
     }
   }
