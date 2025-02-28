@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 //import axios from "axios";
 //import { Modal } from "antd";
 import { FaRegCalendarAlt, FaRegListAlt, FaRegThumbsUp, FaRegSmileBeam } from "react-icons/fa";
-import { FaSyringe, FaBook, FaUserCheck, FaMoneyBillWave } from "react-icons/fa";
+import { FaSyringe, FaBook, FaUserCheck, FaMoneyBillWave, FaBaby, FaChild } from "react-icons/fa";
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import "./homePage.css";
 import { useNavigate } from "react-router-dom";
@@ -178,52 +178,35 @@ const HomePage = () => {
 
   return (
     <div className="homepage">
-      <header className="header-framework">
-        <div className="header-content">
-          <div className="header-left">
-            <Link to="/homepage">
-              <h1>Diary Vaccine</h1>
-            </Link>
-          </div>
-          <div className="header-right">
-            <nav className="nav-menu">
-              <Link to="/homepage">Trang chủ</Link>
-              
-                <Link to="/blogs">Blog</Link>
-            
-              
-                <Link to="/news">Tin tức</Link>
-              
-              <Link to="/registerInjection">Đăng Ký Tiêm</Link>
-              <Link to="#" onClick={scrollToFooter}>Liên hệ</Link>
-              <div className="avatar-dropdown">
-                <div className="avatar-container">
-                  <UserOutlined className="avatar-icon" />
-                </div>
-                <div className="avatar-dropdown-content">
-                  {!isLoggedIn ? (
-                    <>
-                      <Link to="/login">Đăng Nhập</Link>
-                      <Link to="/register">Đăng Ký</Link>
-                    </>
-                  ) : (
-                    <>
-                      {userRole === 'admin' ? (
-                        <Link to="/admin">Admin</Link>
-                      ) : userRole === 'staff' ? (
-                        <Link to="/staffLayout">Quản lý KH</Link>
-                      ) : (
-                        <Link to="/profile">Profile</Link>
-                      )}
-                      <button onClick={handleLogout}>Logout</button>
-                    </>
-                  )}
-                </div>
-              </div>
-            </nav>
-          </div>
+      <nav>
+        <div className="logo">
+          <Link to="/homepage">Diary Vaccine</Link>
         </div>
-      </header>
+        <ul>
+          <li><Link to="/homepage">Trang chủ</Link></li>
+          <li><Link to="/blogs">Blog</Link></li>
+          <li><Link to="/news">Tin tức</Link></li>
+          {/* <li><Link to="/registerInjection">Đăng Ký Tiêm</Link></li> */}
+          <li><Link to="#" onClick={scrollToFooter}>Liên hệ</Link></li>
+          {!isLoggedIn ? (
+            <>
+              <li><Link to="/login">Đăng Nhập</Link></li>
+              <li><Link to="/register">Đăng Ký</Link></li>
+            </>
+          ) : (
+            <>
+              {userRole === 'admin' ? (
+                <li><Link to="/admin">Admin</Link></li>
+              ) : userRole === 'staff' ? (
+                <li><Link to="/staffLayout">Quản lý KH</Link></li>
+              ) : (
+                <li><Link to="/profile">Profile</Link></li>
+              )}
+              <li><button onClick={handleLogout}>Logout</button></li>
+            </>
+          )}
+        </ul>
+      </nav>
 
       <div className="banner-container">
         <div className="banner-slider" style={{ transform: `translateX(-${currentSlide * 100}%)` }}>
@@ -258,21 +241,35 @@ const HomePage = () => {
             ></span>
           ))}
         </div>
-
-        {/* <nav className="navbar">
-          <div className="nav-links">
-            <a href="/homepage">Trang chủ</a>
-            <Link to="/news">Tin tức</Link>
-            <Link to="/handbook">Cẩm nang</Link>
-            <Link to="/advise">Tư vấn</Link>
-            <Link to="/blogs">Blogs</Link>
-            userRole === 'admin' ? (
-              <Link to="/admin">Quản trị</Link>
-            ) : (
-              <a href="/registerinjection">Đăng ký tiêm</a>
-            )
+        
+        {/* Banner Cards */}
+        <div className="banner-cards">
+          <div className="banner-card">
+            <div className="card-icon">
+              <FaChild size={50} style={{ color: "#4A90E2" }} />
+            </div>
+            <div className="card-content">
+              <h3>Đăng Ký Tiêm Chủng</h3>
+              <p>Bảo vệ sức khỏe cho trẻ em với dịch vụ tiêm chủng an toàn</p>
+            </div>
+            <Link to="/registerInjection" className="card-button">
+              Xem Thêm
+            </Link>
           </div>
-        </nav> */}
+          
+          <div className="banner-card">
+            <div className="card-icon">
+              <FaMoneyBillWave size={50} style={{ color: "#4A90E2" }} />
+            </div>
+            <div className="card-content">
+              <h3>Bảng Giá Tiêm Chủng</h3>
+              <p>Tham khảo bảng giá các gói tiêm chủng và vaccine</p>
+            </div>
+            <Link to="/pricelist" className="card-button">
+              Xem Thêm
+            </Link>
+          </div>
+        </div>
       </div>
 
       <div className="quick-access">

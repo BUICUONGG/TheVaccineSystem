@@ -16,11 +16,11 @@ const Welcome = () => {
 
     // Navigate after fade out (3 seconds total)
     const navigationTimer = setTimeout(() => {
-      if (userRole === 'admin') {
+      if (userRole == 'admin') {
         navigate('/admin');
-      }// } else {
-      //   navigate('/homepage');
-      // }
+      } else {
+       navigate('/homepage');
+      }
     }, 2000);
 
     return () => {
