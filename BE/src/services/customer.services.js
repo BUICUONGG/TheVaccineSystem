@@ -26,15 +26,18 @@ class CustomerService {
         throw new Error("Không có ai");
       }
 
+      // Lọc user hợp lệ (không phải admin hoặc staff)
       const userMap = new Map(
-        users.map((user) => [user._id.toString(), user.username])
+        users
+          .filter((user) => user.role !== "admin" && user.role !== "staff")
+          .map((user) => [user._id.toString(), user.username])
       );
 
-      const result = customers.map((customer) => ({
-        ...customer,
-        username:
-          userMap.get(customer.userId?.toString()) || "Không có username",
-      }));
+      // Chỉ gán username nếu có, không thì giữ nguyên customer
+      const result = customers.map(({ userId, ...customer }) => {
+        const username = userMap.get(userId?.toString());
+        return username ? { ...customer, username } : customer;
+      });
 
       return result;
     } catch (error) {
