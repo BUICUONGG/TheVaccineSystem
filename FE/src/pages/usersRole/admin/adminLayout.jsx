@@ -154,12 +154,12 @@ const AdminLayout = () => {
 
       <div className="main-contentt">
         <header className="header">
-          <nav className="navigation">
+          <div className="navigation">
             <Link to="/homepage">
               <span className="nav-item">Home</span>
             </Link>
             <span className="nav-item">Contact</span>
-          </nav>
+          </div>
         </header>
         <main className="content">
           <Outlet />

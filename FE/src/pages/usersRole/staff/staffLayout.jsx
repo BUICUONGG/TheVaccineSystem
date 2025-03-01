@@ -106,12 +106,12 @@ const StaffLayout = () => {
 
       <div className="main-content">
         <header className="header">
-          <nav className="navigation">
+          <div className="navigation">
             <Link to="/homepage">
               <span className="nav-item">Trang chủ</span>
             </Link>
             <span className="nav-item">Liên hệ</span>
-          </nav>
+          </div>
         </header>
         <main className="content">
           <Outlet />

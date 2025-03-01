@@ -22,7 +22,8 @@ const AllCustomerPage = () => {
 
   useEffect(() => {
     const filtered = customerList.filter((customer) =>
-      customer.customerName?.toLowerCase().includes(searchText.toLowerCase())
+      customer.customerName?.toLowerCase().includes(searchText.toLowerCase()) ||
+      customer.username?.toLowerCase().includes(searchText.toLowerCase())
     );
     setFilteredCustomers(filtered);
   }, [customerList, searchText]);
@@ -146,6 +147,12 @@ const AllCustomerPage = () => {
       width: 70,
     },
     {
+      title: "Username",
+      dataIndex: "username",
+      key: "username",
+      render: (text) => text || "Chưa cập nhật"
+    },
+    {
       title: "Họ và tên",
       dataIndex: "customerName",
       key: "customerName",
@@ -218,7 +225,7 @@ const AllCustomerPage = () => {
     <div style={{ padding: "20px" }}>
       <h2>Customer Information Management</h2>
       <Input
-        placeholder="Search by customer name"
+        placeholder="Search by username or customer name"
         allowClear
         onChange={handleSearch}
         style={{ width: 300, marginBottom: 16 }}
