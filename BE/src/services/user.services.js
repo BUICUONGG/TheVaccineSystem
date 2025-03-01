@@ -86,7 +86,6 @@ class UserService {
           userId: user._id,
         });
         const cusId = customer._id;
-        console.log(cusId);
         return {
           userId,
           cusId,
