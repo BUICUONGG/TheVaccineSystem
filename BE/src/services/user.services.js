@@ -15,15 +15,18 @@ class UserService {
       const user = new User(userData);
       await user.validate(); // Kiểm tra dữ liệu hợp lệ
       const result = await connectToDatabase.users.insertOne(user);
-      const customerData = {
-        userId: result.insertedId,
-        customerName: "", // Nếu user có name thì lấy
-        phone: "",
-        birthday: "",
-        address: "",
-        gender: "", // Liên kết với user
-      };
-      await connectToDatabase.customers.insertOne(customerData);
+
+      if (!user.role == "admin" || !user.role == "staff") {
+        const customerData = {
+          userId: result.insertedId,
+          customerName: "", // Nếu user có name thì lấy
+          phone: "",
+          birthday: "",
+          address: "",
+          gender: "", // Liên kết với user
+        };
+        await connectToDatabase.customers.insertOne(customerData);
+      }
       return { _id: result.insertedId, ...userData };
     } catch (error) {
       console.error("Không tạo được tài khoản", error.message);
