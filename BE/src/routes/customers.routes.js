@@ -20,7 +20,7 @@ customerRoutes.get(
   getOneCusController
 );
 
-customerRoutes.get("/getAllCustomer", validateAccessToken, getAllCusController);
+customerRoutes.get("/getAllCustomer", getAllCusController);
 
 customerRoutes.post("/update/:id", validateAccessToken, updatemeController);
 

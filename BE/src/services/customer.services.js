@@ -19,34 +19,26 @@ class CustomerService {
 
   async getAllCustomer() {
     try {
-      // Using aggregation to join with users collection to get username
-      const result = await connectToDatabase.customers.aggregate([
-        {
-          $lookup: {
-            from: "users",
-            localField: "userId",
-            foreignField: "_id",
-            as: "userInfo"
-          }
-        },
-        {
-          $addFields: {
-            username: { $arrayElemAt: ["$userInfo.username", 0] }
-          }
-        },
-        {
-          $project: {
-            userInfo: 0 // Remove the userInfo array from results
-          }
-        }
-      ]).toArray();
-      
-      if (!result) {
-        throw new Error("Khong co ai");
+      const customers = await connectToDatabase.customers.find().toArray();
+      const users = await connectToDatabase.users.find().toArray();
+
+      if (!customers.length) {
+        throw new Error("Không có ai");
       }
+
+      const userMap = new Map(
+        users.map((user) => [user._id.toString(), user.username])
+      );
+
+      const result = customers.map((customer) => ({
+        ...customer,
+        username:
+          userMap.get(customer.userId?.toString()) || "Không có username",
+      }));
+
       return result;
     } catch (error) {
-      console.log("trong danh sach khong co ai");
+      console.log("Lỗi:", error.message);
       throw new Error(error.message);
     }
   }
