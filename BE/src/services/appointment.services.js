@@ -9,7 +9,7 @@ class AppointmentService {
     try {
       const listAptle = await connectToDatabase.appointmentLes.find().toArray();
       if (!listAptle) {
-        throw new Error("khong thee in danh sach");
+        throw new Error("Danh sách trống");
       }
       return listAptle;
     } catch (error) {
@@ -28,15 +28,15 @@ class AppointmentService {
       if (!childId && childInfo) {
         const newChild = new Child({
           cusId,
-          childName: childInfo.name || "", // Hoặc nhận từ data nếu có
-          birthday: childInfo.birthday || "", // Chỉnh lại theo yêu cầu
+          childName: childInfo.name || "",
+          birthday: childInfo.birthday || "",
           healthNote: childInfo.healthNote || "",
-          gender: childInfo.gender || "", // Chỉnh lại theo yêu cầu
+          gender: childInfo.gender || "",
         });
         const saveChild = await connectToDatabase.childs.insertOne(newChild);
         finalChildId = saveChild.insertedId;
       }
-      // console.log(finalChildId);
+
       const aptLe = new AppointmentLe({
         cusId,
         childId: finalChildId,
@@ -48,8 +48,12 @@ class AppointmentService {
       await aptLe.validate();
       // await aptLevalidate();
       const result = await connectToDatabase.appointmentLes.insertOne(aptLe);
+      if (!result) {
+        throw new Error("Không thể tạo appointment Lẻ");
+      }
       return { _id: result.insertedId, ...data };
     } catch (error) {
+      console.log(error.message);
       throw new Error(error.message);
     }
   }
@@ -62,10 +66,11 @@ class AppointmentService {
         { returnDocument: "after" }
       );
       if (!result) {
-        throw new Error("Không thể update");
+        throw new Error("Không thể cập nhật/ Cập nhật lỗi");
       }
       return result;
     } catch (error) {
+      console.log(error.message);
       throw new Error(error.message); // Ném lỗi chỉ khi có lỗi xảy ra
     }
   }
@@ -78,6 +83,7 @@ class AppointmentService {
       if (!result) throw new Error("Khong tim thay id nay");
       return { message: "Delete successfully" };
     } catch (error) {
+      console.log(error.message);
       throw new Error(error.message);
     }
   }
@@ -97,8 +103,12 @@ class AppointmentService {
         appointment.customer = customer;
         appointment.vaccine = vaccine;
       }
+      if (!appointments) {
+        throw new Error("Không thể xem chi tiết");
+      }
       return appointments;
     } catch (error) {
+      console.log(error.message);
       throw new Error(error.message);
     }
   }
@@ -122,9 +132,12 @@ class AppointmentService {
       // Gán thông tin vào result
       result.customer = customer;
       result.vaccine = vaccine;
-
+      if (!result) {
+        throw new Error(`Không tìm thấy đơn này ${id}`);
+      }
       return result;
     } catch (error) {
+      console.log(error.message);
       throw new Error(error.message);
     }
   }
@@ -146,8 +159,10 @@ class AppointmentService {
   async listAptGoi() {
     try {
       const result = await connectToDatabase.appointmentGois.find().toArray();
+      if (!result) throw new Error("Danh sách trống");
       return result;
     } catch (error) {
+      console.log(error.message);
       throw new Error(error.message);
     }
   }
@@ -157,6 +172,11 @@ class AppointmentService {
       const appointments = await connectToDatabase.appointmentGois
         .find()
         .toArray();
+      if (!appointments) {
+        throw new Error(
+          "Danh sachs trống / Không lấy được danh dách appointment"
+        );
+      }
       for (let appointment of appointments) {
         const customer = await connectToDatabase.customers.findOne({
           _id: appointment.cusId,
@@ -175,9 +195,12 @@ class AppointmentService {
         delete appointment.vaccinePakageId;
         delete appointment.childId;
       }
-
+      if (!appointments) {
+        throw new Error("Khoong thể show");
+      }
       return appointments;
     } catch (error) {
+      console.log(error.message);
       throw new Error(error.message);
     }
   }
@@ -247,6 +270,9 @@ class AppointmentService {
         date,
         vaccinePackage.schedule
       );
+      if (!doseSchedule) {
+        throw new Error("Không thể tính được chu kì tiêm");
+      }
 
       const aptGoi = new AppointmentGoi({
         cusId,
@@ -259,8 +285,10 @@ class AppointmentService {
       });
       // await aptGoi.validate();
       const result = await connectToDatabase.appointmentGois.insertOne(aptGoi);
+      if (!result) throw new Error("không thể tạo appointment Gói");
       return { _id: result.insertedId, doseSchedule, ...data };
     } catch (error) {
+      console.log(error.message);
       throw new Error(error.message);
     }
   }
@@ -272,8 +300,10 @@ class AppointmentService {
         { $set: updateGoi },
         { returnDocument: "after" }
       );
+      if (!result) throw new Error("Không thể cập nhật Gói");
       return result;
     } catch (error) {
+      console.log(error.message);
       throw new Error(error.message);
     }
   }
@@ -283,8 +313,10 @@ class AppointmentService {
       const result = await connectToDatabase.appointmentGois.findOneAndDelete({
         _id: new ObjectId(id),
       });
+      if (!result) throw new Error("Không xoá được / xoá không thành công");
       return "Xoa thanh cong";
     } catch (error) {
+      console.log(error.message);
       throw new Error(error.message);
     }
   }

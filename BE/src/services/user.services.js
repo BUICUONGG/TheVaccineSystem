@@ -148,7 +148,7 @@ class UserService {
         { returnDocument: "after" }
       );
       if (!result) {
-        throw new Error("User not found");
+        throw new Error("Không tìm thấy user");
       }
       return result;
     } catch (error) {
@@ -182,6 +182,9 @@ class UserService {
         { $set: passwordHashed },
         { returnDocument: "after" }
       );
+      if (!result) {
+        throw new Error("Khong tim thay username");
+      }
       return result;
     } catch (error) {
       throw new Error(error.message);

@@ -4,13 +4,8 @@ import appointmentService from "../services/appointment.services.js";
 export const listAllAptLeController = async (req, res) => {
   try {
     const result = await appointmentService.listAptLe();
-    if (!result) {
-      throw new Error("khong the in danh sach");
-    }
-
     return res.status(200).json(result);
   } catch (error) {
-    console.log("loi o controller");
     res.status(500).json(error.message);
   }
 };
@@ -21,7 +16,6 @@ export const createAptLeController = async (req, res) => {
     const result = await appointmentService.createAptLe(data);
     res.status(200).json(result);
   } catch (error) {
-    console.log("Loi khong create được");
     res.status(500).json(error.message);
   }
 };
@@ -31,10 +25,8 @@ export const updateAptLeController = async (req, res) => {
     const id = req.params.id;
     const dataUpdate = req.body;
     const result = await appointmentService.updateAptLe(id, dataUpdate);
-    if (!result) throw new Error("khong thee updates");
     res.status(200).json(result);
   } catch (error) {
-    console.log(" ko the update ");
     res.status(500).json(error.message);
   }
 };
@@ -56,7 +48,7 @@ export const getAppointmentsController = async (req, res) => {
     const appointments = await appointmentService.getAppointmentsWithDetails();
     res.status(200).json(appointments);
   } catch (error) {
-    res.status(500).json({ message: "Error fetching appointments", error });
+    res.status(500).json(error.message);
   }
 };
 
@@ -64,7 +56,6 @@ export const getAppointmentsWithDetailsByIdController = async (req, res) => {
   try {
     const id = req.params.id;
     const result = await appointmentService.getAppointmentsWithDetailsById(id);
-    // console.log(result);
     res.status(200).json(result);
   } catch (error) {
     res.status(500).json(error.message);
@@ -89,7 +80,6 @@ export const listAllAptGoiController = async (req, res) => {
     const result = await appointmentService.listAptGoi();
     res.status(200).json(result);
   } catch (error) {
-    console.log(error);
     res.status(500).json(error.message);
   }
 };
@@ -121,7 +111,6 @@ export const updateAptGoiController = async (req, res) => {
     if (!result) throw new Error("khong thee updates");
     res.status(200).json(result);
   } catch (error) {
-    console.log(" ko the update ");
     res.status(500).json(error.message);
   }
 };

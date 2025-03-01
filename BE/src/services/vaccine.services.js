@@ -11,6 +11,7 @@ class VaccineService {
       const result = await connectToDatabase.vaccinceInventorys.insertOne(
         vaccine
       );
+      if (!result) throw new Error("Không tạo được vaccine Inventory");
       return { _id: result.insertedId, ...vaccineData };
     } catch (error) {
       console.error("Error adding vaccine:", error.message);
@@ -101,13 +102,15 @@ class VaccineService {
           vaccine.vaccineImports = vaccineImports.map(
             ({ vaccines, ...rest }) => rest
           );
-        } catch (error) {}
+        } catch (error) {
+          throw new Error(error.message);
+        }
       }
-
+      if (!vaccines) throw new Error("Không thể xem được chi tiếts");
       return vaccines;
     } catch (error) {
       console.error("Lỗi khi lấy danh sách vaccine:", error);
-      return [];
+      throw new Error(error.message);
     }
   }
 }
