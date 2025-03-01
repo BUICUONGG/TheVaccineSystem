@@ -35,17 +35,15 @@ export const loginController = async (req, res) => {
     const { username, password } = req.body;
     if (!username || !password)
       throw new Error("Vui lòng nhập email và mật khẩu");
-    const { userId, role, accesstoken, refreshtoken } = await userService.login(
-      username,
-      password
-    );
+    const { userId, cusId, role, accesstoken, refreshtoken } =
+      await userService.login(username, password);
     res.cookie("refreshToken", refreshtoken, {
       httpOnly: true, // Chặn truy cập từ JavaScript (Bảo mật XSS)
       secure: true, // Chỉ gửi qua HTTPS
       sameSite: "None", // Chống CSRF
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 ngày
     });
-    res.status(200).json({ userId, role, accesstoken, refreshtoken });
+    res.status(200).json({ userId, cusId, role, accesstoken, refreshtoken });
   } catch (error) {
     res.status(500).json(error.message);
   }

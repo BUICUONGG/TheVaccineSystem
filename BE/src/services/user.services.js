@@ -82,9 +82,14 @@ class UserService {
           { _id: user._id },
           { $set: { refreshToken: refreshtoken } }
         );
-
+        const customer = await connectToDatabase.customers.findOne({
+          userId: user._id,
+        });
+        const cusId = customer._id;
+        console.log(cusId);
         return {
           userId,
+          cusId,
           role: user.role,
           accesstoken,
           refreshtoken,
