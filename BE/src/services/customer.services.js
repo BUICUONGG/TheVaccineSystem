@@ -19,7 +19,28 @@ class CustomerService {
 
   async getAllCustomer() {
     try {
-      const result = await connectToDatabase.customers.find().toArray();
+      // Using aggregation to join with users collection to get username
+      const result = await connectToDatabase.customers.aggregate([
+        {
+          $lookup: {
+            from: "users",
+            localField: "userId",
+            foreignField: "_id",
+            as: "userInfo"
+          }
+        },
+        {
+          $addFields: {
+            username: { $arrayElemAt: ["$userInfo.username", 0] }
+          }
+        },
+        {
+          $project: {
+            userInfo: 0 // Remove the userInfo array from results
+          }
+        }
+      ]).toArray();
+      
       if (!result) {
         throw new Error("Khong co ai");
       }
