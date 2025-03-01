@@ -11,21 +11,36 @@ class UserService {
   //đăng kí tài khoản chỉ cần username password và email thôi. tự động lưu vào bảng customer khi nào cần cập nhật thông tin thì vào đó cập nhật sau
   async resgister(userData) {
     try {
+      const existingUser = await connectToDatabase.users.findOne({
+        username: userData.username,
+      });
+      if (existingUser) {
+        throw new Error("Username đã tồn tại");
+      }
       userData.password = await hashPassword(userData.password);
       const user = new User(userData);
       await user.validate(); // Kiểm tra dữ liệu hợp lệ
       const result = await connectToDatabase.users.insertOne(user);
-
-      if (!user.role == "admin" || !user.role == "staff") {
-        const customerData = {
-          userId: result.insertedId,
-          customerName: "", // Nếu user có name thì lấy
-          phone: "",
-          birthday: "",
-          address: "",
-          gender: "", // Liên kết với user
-        };
-        await connectToDatabase.customers.insertOne(customerData);
+      const customer = {
+        userId: result.insertedId,
+        customerName: "", // Nếu user có name thì lấy
+        phone: "",
+        birthday: "",
+        address: "",
+        gender: "", // Liên kết với user
+      };
+      const staff = {
+        username: userData.username,
+        password: userData.password,
+        email: userData.email,
+        staffName: "",
+        phone: "",
+        gender: "",
+      };
+      if (!(userData.role == "staff" || userData.role == "admin")) {
+        await connectToDatabase.customers.insertOne(customer);
+      } else if (userData.role == "staff") {
+        await connectToDatabase.staffs.insertOne(staff);
       }
       return { _id: result.insertedId, ...userData };
     } catch (error) {
