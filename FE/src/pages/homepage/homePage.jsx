@@ -220,14 +220,21 @@ const HomePage = () => {
       indices.push(index);
     }
     
-    return indices.map(index => ({
-      vaccine: vaccines[index],
-      position: index - currentVaccineIndex,
-      // Nếu vị trí là card chính (0) thì opacity = 1, còn lại giảm dần theo khoảng cách
-      opacity: Math.abs(index - currentVaccineIndex) === 0 ? 1 : 
-               Math.abs(index - currentVaccineIndex) === 1 ? 0.7 : 
-               Math.abs(index - currentVaccineIndex) === 2 ? 0.4 : 0.2
-    }));
+    // Tính toán vị trí hiển thị cho mỗi card
+    return indices.map((index, arrayIndex) => {
+      // Tính position dựa trên vị trí trong mảng indices thay vì dựa vào index - currentVaccineIndex
+      // Điều này đảm bảo luôn có card ở vị trí -2, -1, 0, 1, 2 bất kể currentVaccineIndex là gì
+      const position = arrayIndex - offset;
+      
+      return {
+        vaccine: vaccines[index],
+        position: position, // Vị trí tương đối: -2, -1, 0, 1, 2
+        // Nếu vị trí là card chính (0) thì opacity = 1, còn lại giảm dần theo khoảng cách
+        opacity: Math.abs(position) === 0 ? 1 : 
+                 Math.abs(position) === 1 ? 0.7 : 
+                 Math.abs(position) === 2 ? 0.4 : 0.2
+      };
+    });
   };
 
   return (
@@ -325,14 +332,6 @@ const HomePage = () => {
         </div>
       </div>
 
-      {/* <div className="quick-access">
-        <div className="icon-item">
-          <Link to="/pricelist">
-            <FaMoneyBillWave size={50} style={{ color: "#4A90E2" }} />
-            <span>GIÁ TIÊM</span>
-          </Link>
-        </div>
-      </div> */}
 
       <div className="vaccine-info">
         <h2>THÔNG TIN VACCINE</h2>
@@ -371,8 +370,8 @@ const HomePage = () => {
                 key={item.vaccine._id} 
                 className={`vaccine-card-item ${item.position === 0 ? 'center' : ''}`}
                 style={{
-                  transform: `translateX(${item.position * 100}%) scale(${item.position === 0 ? 1 : 0.85})`,
-                  zIndex: item.position === 0 ? 2 : 1,
+                  transform: `translateX(${item.position * 220}px) scale(${item.position === 0 ? 1 : 0.85})`,
+                  zIndex: item.position === 0 ? 10 : 5 - Math.abs(item.position),
                   opacity: item.opacity
                 }}
               >
