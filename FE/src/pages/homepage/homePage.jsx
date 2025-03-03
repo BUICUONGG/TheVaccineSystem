@@ -1,16 +1,12 @@
 import { useState, useEffect, useRef } from "react";
-//import axios from "axios";
-//import { Modal } from "antd";
-// import { FaRegCalendarAlt, FaRegListAlt, FaRegThumbsUp, FaRegSmileBeam } from "react-icons/fa";
+import axios from "axios";
+import { Modal, Spin } from "antd";
 import { FaSyringe, FaBook, FaUserCheck, FaMoneyBillWave, FaBaby, FaChild } from "react-icons/fa";
+import { FaArrowLeft, FaArrowRight } from "react-icons/fa";
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import "./homePage.css";
 import { useNavigate } from "react-router-dom";
-// import { UserOutlined } from '@ant-design/icons';
 import { Link } from "react-router-dom";
-
-// eslint-disable-next-line no-unused-vars
-// import { FaSearch, FaShoppingCart } from "react-icons/fa";
 
 const HomePage = () => {
   const navigate = useNavigate();
@@ -20,7 +16,12 @@ const HomePage = () => {
   const [userRole, setUserRole] = useState('');
   const [showBackToTop, setShowBackToTop] = useState(false);
   const [vaccines, setVaccines] = useState([]);
-  // const [currentVaccineIndex, setCurrentVaccineIndex] = useState(0);
+  const [vaccinePackages, setVaccinePackages] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  
+  // Refs cho swiper
+  const singleVaccineRef = useRef(null);
+  const packageVaccineRef = useRef(null);
 
   const banners = [
     {
@@ -68,8 +69,45 @@ const HomePage = () => {
       }, 200);
     }, 3000);
 
-    return () => clearInterval(timer);
+    // Fetch vaccine data
+    fetchVaccineData();
+
+    return () => {
+      clearInterval(timer);
+    };
   }, [banners.length]);
+
+  // Fetch vaccine data from API
+  const fetchVaccineData = async () => {
+    setIsLoading(true);
+    try {
+      const token = localStorage.getItem('accesstoken');
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
+      // Fetch single vaccines
+      const vaccineResponse = await axios.get(
+        "http://localhost:8080/vaccine/showInfo", 
+        { headers }
+      );
+      
+      // Fetch vaccine packages
+      const packageResponse = await axios.get(
+        "http://localhost:8080/vaccinepakage/showVaccinePakage", 
+        { headers }
+      );
+
+      setVaccines(vaccineResponse.data);
+      setVaccinePackages(packageResponse.data);
+    } catch (error) {
+      console.error("Error fetching vaccine data:", error);
+      if (error.response?.status === 401) {
+        // Handle unauthorized error if needed
+        console.log("Unauthorized access, but continuing as guest");
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const nextSlide = () => {
     setFadeIn(false);
@@ -170,6 +208,27 @@ const HomePage = () => {
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // Swiper navigation functions
+  const scrollSingleVaccines = (direction) => {
+    if (singleVaccineRef.current) {
+      const scrollAmount = direction === 'left' ? -300 : 300;
+      singleVaccineRef.current.scrollBy({
+        left: scrollAmount,
+        behavior: 'smooth'
+      });
+    }
+  };
+
+  const scrollPackageVaccines = (direction) => {
+    if (packageVaccineRef.current) {
+      const scrollAmount = direction === 'left' ? -300 : 300;
+      packageVaccineRef.current.scrollBy({
+        left: scrollAmount,
+        behavior: 'smooth'
+      });
+    }
   };
 
   return (
@@ -297,6 +356,111 @@ const HomePage = () => {
             </a>
           </div>
         </div>
+      </div>
+
+      {/* Vaccine Swiper Sections */}
+      <div className="vaccine-swiper-section">
+        <div className="swiper-header">
+          <h2>VACCINE LẺ NỔI BẬT</h2>
+          <Link to="/pricelist" className="view-all">Xem tất cả</Link>
+        </div>
+        
+        {isLoading ? (
+          <div className="loading-container">
+            <Spin size="large" tip="Đang tải dữ liệu..." />
+          </div>
+        ) : (
+          <div className="swiper-container">
+            <button 
+              className="swiper-nav-button left" 
+              onClick={() => scrollSingleVaccines('left')}
+            >
+              <FaArrowLeft />
+            </button>
+            
+            <div className="swiper-wrapper" ref={singleVaccineRef}>
+              {vaccines.slice(0, 10).map((vaccine) => (
+                <div className="swiper-slide" key={vaccine._id}>
+                  <div className="vaccine-card-swiper">
+                    <img 
+                      src={vaccine.imageUrl || "/images/vaccine-default.jpg"} 
+                      alt={vaccine.vaccineName} 
+                      className="vaccine-image"
+                    />
+                    <h3>{vaccine.vaccineName}</h3>
+                    <p className="manufacturer">NSX: {vaccine.manufacturer}</p>
+                    <div className="price">
+                      {vaccine.vaccineImports && vaccine.vaccineImports.length > 0 ? (
+                        <span>{vaccine.vaccineImports[0].price.toLocaleString()} VNĐ</span>
+                      ) : (
+                        <span>Liên hệ</span>
+                      )}
+                    </div>
+                    <Link to={`/pricelist`} className="view-detail-btn">
+                      Chi tiết
+                    </Link>
+                  </div>
+                </div>
+              ))}
+            </div>
+            
+            <button 
+              className="swiper-nav-button right" 
+              onClick={() => scrollSingleVaccines('right')}
+            >
+              <FaArrowRight />
+            </button>
+          </div>
+        )}
+      </div>
+
+      <div className="vaccine-swiper-section package-section">
+        <div className="swiper-header">
+          <h2>GÓI VACCINE TIÊU BIỂU</h2>
+          <Link to="/pricelist" className="view-all">Xem tất cả</Link>
+        </div>
+        
+        {isLoading ? (
+          <div className="loading-container">
+            <Spin size="large" tip="Đang tải dữ liệu..." />
+          </div>
+        ) : (
+          <div className="swiper-container">
+            <button 
+              className="swiper-nav-button left" 
+              onClick={() => scrollPackageVaccines('left')}
+            >
+              <FaArrowLeft />
+            </button>
+            
+            <div className="swiper-wrapper" ref={packageVaccineRef}>
+              {vaccinePackages.slice(0, 10).map((pkg) => (
+                <div className="swiper-slide" key={pkg._id}>
+                  <div className="package-card-swiper">
+                    <h3>{pkg.packageName}</h3>
+                    <p className="package-description">{pkg.description.substring(0, 100)}...</p>
+                    <div className="package-price">
+                      <span>{pkg.price.toLocaleString()} VNĐ</span>
+                    </div>
+                    <div className="package-info">
+                      <span>Số mũi: {pkg.numberOfDoses || "N/A"}</span>
+                    </div>
+                    <Link to={`/pricelist`} className="view-detail-btn">
+                      Chi tiết
+                    </Link>
+                  </div>
+                </div>
+              ))}
+            </div>
+            
+            <button 
+              className="swiper-nav-button right" 
+              onClick={() => scrollPackageVaccines('right')}
+            >
+              <FaArrowRight />
+            </button>
+          </div>
+        )}
       </div>
 
       <div className="news-section">
