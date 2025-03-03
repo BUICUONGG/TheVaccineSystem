@@ -1,12 +1,16 @@
 import { useState, useEffect, useRef } from "react";
 import axios from "axios";
-import { Modal, Spin } from "antd";
-import { FaSyringe, FaBook, FaUserCheck, FaMoneyBillWave, FaBaby, FaChild } from "react-icons/fa";
-import { FaArrowLeft, FaArrowRight } from "react-icons/fa";
+//import { Modal } from "antd";
+// import { FaRegCalendarAlt, FaRegListAlt, FaRegThumbsUp, FaRegSmileBeam } from "react-icons/fa";
+import { FaSyringe, FaBook, FaUserCheck, FaMoneyBillWave, FaBaby, FaChild, FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import "./homePage.css";
 import { useNavigate } from "react-router-dom";
+// import { UserOutlined } from '@ant-design/icons';
 import { Link } from "react-router-dom";
+
+// eslint-disable-next-line no-unused-vars
+// import { FaSearch, FaShoppingCart } from "react-icons/fa";
 
 const HomePage = () => {
   const navigate = useNavigate();
@@ -16,12 +20,7 @@ const HomePage = () => {
   const [userRole, setUserRole] = useState('');
   const [showBackToTop, setShowBackToTop] = useState(false);
   const [vaccines, setVaccines] = useState([]);
-  const [vaccinePackages, setVaccinePackages] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
-  
-  // Refs cho swiper
-  const singleVaccineRef = useRef(null);
-  const packageVaccineRef = useRef(null);
+  const [currentVaccineIndex, setCurrentVaccineIndex] = useState(0);
 
   const banners = [
     {
@@ -69,45 +68,8 @@ const HomePage = () => {
       }, 200);
     }, 3000);
 
-    // Fetch vaccine data
-    fetchVaccineData();
-
-    return () => {
-      clearInterval(timer);
-    };
+    return () => clearInterval(timer);
   }, [banners.length]);
-
-  // Fetch vaccine data from API
-  const fetchVaccineData = async () => {
-    setIsLoading(true);
-    try {
-      const token = localStorage.getItem('accesstoken');
-      const headers = token ? { Authorization: `Bearer ${token}` } : {};
-
-      // Fetch single vaccines
-      const vaccineResponse = await axios.get(
-        "http://localhost:8080/vaccine/showInfo", 
-        { headers }
-      );
-      
-      // Fetch vaccine packages
-      const packageResponse = await axios.get(
-        "http://localhost:8080/vaccinepakage/showVaccinePakage", 
-        { headers }
-      );
-
-      setVaccines(vaccineResponse.data);
-      setVaccinePackages(packageResponse.data);
-    } catch (error) {
-      console.error("Error fetching vaccine data:", error);
-      if (error.response?.status === 401) {
-        // Handle unauthorized error if needed
-        console.log("Unauthorized access, but continuing as guest");
-      }
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const nextSlide = () => {
     setFadeIn(false);
@@ -210,25 +172,54 @@ const HomePage = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // Swiper navigation functions
-  const scrollSingleVaccines = (direction) => {
-    if (singleVaccineRef.current) {
-      const scrollAmount = direction === 'left' ? -300 : 300;
-      singleVaccineRef.current.scrollBy({
-        left: scrollAmount,
-        behavior: 'smooth'
-      });
+  // Fetch vaccines for the carousel
+  useEffect(() => {
+    const fetchVaccines = async () => {
+      try {
+        const response = await axios.get("http://localhost:8080/vaccine/showInfo");
+        setVaccines(response.data);
+      } catch (error) {
+        console.error("Error fetching vaccines:", error);
+      }
+    };
+    
+    fetchVaccines();
+  }, []);
+
+  // Handle vaccine carousel navigation
+  const nextVaccine = () => {
+    if (vaccines.length > 0) {
+      setCurrentVaccineIndex((prevIndex) => 
+        prevIndex === vaccines.length - 1 ? 0 : prevIndex + 1
+      );
     }
   };
 
-  const scrollPackageVaccines = (direction) => {
-    if (packageVaccineRef.current) {
-      const scrollAmount = direction === 'left' ? -300 : 300;
-      packageVaccineRef.current.scrollBy({
-        left: scrollAmount,
-        behavior: 'smooth'
-      });
+  const prevVaccine = () => {
+    if (vaccines.length > 0) {
+      setCurrentVaccineIndex((prevIndex) => 
+        prevIndex === 0 ? vaccines.length - 1 : prevIndex - 1
+      );
     }
+  };
+
+  // Calculate visible vaccines in the carousel
+  const getVisibleVaccines = () => {
+    if (vaccines.length === 0) return [];
+    
+    const visibleCount = Math.min(5, vaccines.length);
+    const halfCount = Math.floor(visibleCount / 2);
+    
+    let indices = [];
+    for (let i = -halfCount; i <= halfCount; i++) {
+      let index = (currentVaccineIndex + i + vaccines.length) % vaccines.length;
+      indices.push(index);
+    }
+    
+    return indices.map(index => ({
+      vaccine: vaccines[index],
+      position: index - currentVaccineIndex
+    }));
   };
 
   return (
@@ -358,109 +349,47 @@ const HomePage = () => {
         </div>
       </div>
 
-      {/* Vaccine Swiper Sections */}
-      <div className="vaccine-swiper-section">
-        <div className="swiper-header">
-          <h2>VACCINE LẺ NỔI BẬT</h2>
-          <Link to="/pricelist" className="view-all">Xem tất cả</Link>
-        </div>
-        
-        {isLoading ? (
-          <div className="loading-container">
-            <Spin size="large" tip="Đang tải dữ liệu..." />
-          </div>
-        ) : (
-          <div className="swiper-container">
-            <button 
-              className="swiper-nav-button left" 
-              onClick={() => scrollSingleVaccines('left')}
-            >
-              <FaArrowLeft />
-            </button>
-            
-            <div className="swiper-wrapper" ref={singleVaccineRef}>
-              {vaccines.slice(0, 10).map((vaccine) => (
-                <div className="swiper-slide" key={vaccine._id}>
-                  <div className="vaccine-card-swiper">
-                    <img 
-                      src={vaccine.imageUrl || "/images/vaccine-default.jpg"} 
-                      alt={vaccine.vaccineName} 
-                      className="vaccine-image"
-                    />
-                    <h3>{vaccine.vaccineName}</h3>
-                    <p className="manufacturer">NSX: {vaccine.manufacturer}</p>
-                    <div className="price">
-                      {vaccine.vaccineImports && vaccine.vaccineImports.length > 0 ? (
-                        <span>{vaccine.vaccineImports[0].price.toLocaleString()} VNĐ</span>
-                      ) : (
-                        <span>Liên hệ</span>
-                      )}
-                    </div>
-                    <Link to={`/pricelist`} className="view-detail-btn">
-                      Chi tiết
-                    </Link>
-                  </div>
+      {/* Vaccine Carousel Section */}
+      <div className="vaccine-carousel-section">
+        <h2>VACCINE NỔI BẬT</h2>
+        <div className="vaccine-carousel-container">
+          <button className="vaccine-nav prev" onClick={prevVaccine}>
+            <FaChevronLeft />
+          </button>
+          
+          <div className="vaccine-carousel">
+            {getVisibleVaccines().map((item, index) => (
+              <div 
+                key={item.vaccine._id} 
+                className={`vaccine-card-item ${item.position === 0 ? 'center' : ''}`}
+                style={{
+                  transform: `translateX(${item.position * 100}%) scale(${item.position === 0 ? 1 : 0.85})`,
+                  zIndex: item.position === 0 ? 2 : 1,
+                  opacity: Math.abs(item.position) > 2 ? 0.5 : 1
+                }}
+              >
+                <img 
+                  src={item.vaccine.imageUrl || "/images/vaccine-default.jpg"} 
+                  alt={item.vaccine.vaccineName} 
+                />
+                <h3>{item.vaccine.vaccineName}</h3>
+                <p>Nhà sản xuất: {item.vaccine.manufacturer}</p>
+                <div className="vaccine-price">
+                  {item.vaccine.vaccineImports && item.vaccine.vaccineImports.length > 0 
+                    ? `${item.vaccine.vaccineImports[0].price.toLocaleString()} VNĐ` 
+                    : "Liên hệ"}
                 </div>
-              ))}
-            </div>
-            
-            <button 
-              className="swiper-nav-button right" 
-              onClick={() => scrollSingleVaccines('right')}
-            >
-              <FaArrowRight />
-            </button>
+                <Link to="/pricelist" className="vaccine-view-more">
+                  XEM THÊM
+                </Link>
+              </div>
+            ))}
           </div>
-        )}
-      </div>
-
-      <div className="vaccine-swiper-section package-section">
-        <div className="swiper-header">
-          <h2>GÓI VACCINE TIÊU BIỂU</h2>
-          <Link to="/pricelist" className="view-all">Xem tất cả</Link>
+          
+          <button className="vaccine-nav next" onClick={nextVaccine}>
+            <FaChevronRight />
+          </button>
         </div>
-        
-        {isLoading ? (
-          <div className="loading-container">
-            <Spin size="large" tip="Đang tải dữ liệu..." />
-          </div>
-        ) : (
-          <div className="swiper-container">
-            <button 
-              className="swiper-nav-button left" 
-              onClick={() => scrollPackageVaccines('left')}
-            >
-              <FaArrowLeft />
-            </button>
-            
-            <div className="swiper-wrapper" ref={packageVaccineRef}>
-              {vaccinePackages.slice(0, 10).map((pkg) => (
-                <div className="swiper-slide" key={pkg._id}>
-                  <div className="package-card-swiper">
-                    <h3>{pkg.packageName}</h3>
-                    <p className="package-description">{pkg.description.substring(0, 100)}...</p>
-                    <div className="package-price">
-                      <span>{pkg.price.toLocaleString()} VNĐ</span>
-                    </div>
-                    <div className="package-info">
-                      <span>Số mũi: {pkg.numberOfDoses || "N/A"}</span>
-                    </div>
-                    <Link to={`/pricelist`} className="view-detail-btn">
-                      Chi tiết
-                    </Link>
-                  </div>
-                </div>
-              ))}
-            </div>
-            
-            <button 
-              className="swiper-nav-button right" 
-              onClick={() => scrollPackageVaccines('right')}
-            >
-              <FaArrowRight />
-            </button>
-          </div>
-        )}
       </div>
 
       <div className="news-section">

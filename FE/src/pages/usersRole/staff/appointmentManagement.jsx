@@ -562,13 +562,12 @@ const AppointmentManagement = () => {
                             type={item.status === "completed" ? "primary" : "default"}
                             icon={item.status === "completed" ? <CheckCircleFilled /> : null}
                             onClick={() => {
-                              // Toggle the status
-                              const newCompleted = item.status !== "completed";
-                              console.log(`Toggling dose ${item.doseNumber} to ${newCompleted ? "completed" : "pending"}`);
+                              const newStatus = item.status === "completed" ? "pending" : "completed";
+                              console.log(`Toggling status for dose ${item.doseNumber} from ${item.status} to ${newStatus}`);
                               handleDoseStatusChange(
                                 selectedAppointment._id,
                                 item.doseNumber,
-                                newCompleted
+                                newStatus === "completed"
                               );
                             }}
                             style={{ 
