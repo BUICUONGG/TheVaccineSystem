@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-import { Table, Tag, Button, Select, message, Modal, Tabs, Input } from "antd";
-import { SearchOutlined } from "@ant-design/icons";
+import { Table, Tag, Button, Select, message, Modal, Tabs, Input, List, Card, Typography, Checkbox } from "antd";
+import { SearchOutlined, CheckCircleFilled } from "@ant-design/icons";
 import "./appointmentManagement.css";
 
 const { Option } = Select;
 const { TabPane } = Tabs;
+const { Title, Text } = Typography;
 
 const AppointmentManagement = () => {
   const [loading, setLoading] = useState(false);
@@ -38,8 +39,30 @@ const AppointmentManagement = () => {
         }
       );
       
+      // For package appointments, fetch customer details for each appointment
+      const appointmentsGoiWithCustomers = await Promise.all(
+        (responseGoi.data || []).map(async (appointment) => {
+          if (appointment.cusId) {
+            try {
+              const customerResponse = await axios.get(
+                `http://localhost:8080/customer/getone/${appointment.cusId}`,
+                { headers: { Authorization: `Bearer ${token}` } }
+              );
+              return {
+                ...appointment,
+                customerDetails: customerResponse.data
+              };
+            } catch (error) {
+              console.error("Error fetching customer details:", error);
+              return appointment;
+            }
+          }
+          return appointment;
+        })
+      );
+      
       setAppointmentsLe(responseLe.data || []);
-      setAppointmentsGoi(responseGoi.data || []);
+      setAppointmentsGoi(appointmentsGoiWithCustomers);
     } catch (error) {
       console.error("Error fetching appointments:", error);
       message.error("Không thể tải danh sách lịch hẹn");
@@ -111,6 +134,59 @@ const AppointmentManagement = () => {
     }
   };
 
+  const handleDoseStatusChange = async (appointmentId, doseNumber, completed) => {
+    try {
+      const token = localStorage.getItem("accesstoken");
+      
+      // Convert boolean to status string
+      const status = completed ? "completed" : "pending";
+      
+      console.log("Updating dose status:", { appointmentId, doseNumber, status });
+      
+      // Make API call to update dose status
+      const response = await axios.post(
+        `http://localhost:8080/appointmentGoi/updateDose/${appointmentId}`,
+        { 
+          doseNumber: parseInt(doseNumber),
+          status 
+        },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      
+      console.log("API response:", response.data);
+      
+      if (response.data) {
+        message.success(`Cập nhật trạng thái mũi ${doseNumber} thành công`);
+        
+        // Update the UI immediately
+        if (selectedAppointment && selectedAppointment._id === appointmentId) {
+          // Create a new dose schedule array with the updated status
+          const updatedDoseSchedule = selectedAppointment.doseSchedule.map(dose => {
+            if (dose.doseNumber === parseInt(doseNumber)) {
+              console.log(`Updating dose ${doseNumber} from ${dose.status} to ${status}`);
+              return { ...dose, status };
+            }
+            return dose;
+          });
+          
+          console.log("Updated dose schedule:", updatedDoseSchedule);
+          
+          // Update the selected appointment state with the new dose schedule
+          setSelectedAppointment({
+            ...selectedAppointment,
+            doseSchedule: updatedDoseSchedule
+          });
+        }
+        
+        // Refresh the appointments list to ensure consistency
+        fetchAppointments();
+      }
+    } catch (error) {
+      console.error("Error updating dose status:", error);
+      message.error(`Không thể cập nhật trạng thái mũi ${doseNumber}: ${error.response?.data?.message || error.message}`);
+    }
+  };
+
   const showAppointmentDetails = async (record, isPackage) => {
     try {
       setDetailLoading(true);
@@ -148,6 +224,21 @@ const AppointmentManagement = () => {
             console.error("Error fetching package details:", error);
           }
         }
+        
+        // Fetch thông tin chi tiết lịch hẹn gói nếu chưa có doseSchedule
+        if (!record.doseSchedule) {
+          try {
+            const appointmentResponse = await axios.get(
+              `http://localhost:8080/appointmentGoi/getone/${record._id}`,
+              { headers: { Authorization: `Bearer ${token}` } }
+            );
+            
+            // Merge the detailed data with our record
+            record = { ...record, ...appointmentResponse.data };
+          } catch (error) {
+            console.error("Error fetching appointment details:", error);
+          }
+        }
       } else {
         // Nếu là lịch hẹn lẻ, có thể đã có đủ thông tin từ API getdetailallaptle
         // Nhưng nếu cần thêm thông tin chi tiết, có thể fetch thêm
@@ -176,20 +267,24 @@ const AppointmentManagement = () => {
 
   const columnsLe = [
     {
-      title: "Mã lịch hẹn",
-      dataIndex: "_id",
-      key: "_id",
-      render: (id) => <span className="id-column">{id.substring(0, 8)}...</span>,
+      title: "STT",
+      key: "stt",
+      render: (_, record, index) => index + 1,
+      width: 50,
     },
     {
       title: "Khách hàng",
       dataIndex: "cusId",
       key: "cusId",
       render: (cusId, record) => {
-        if (record.customer?.customerName) return record.customer.customerName;
-        if (cusId?.customerName) return cusId.customerName;
-        if (cusId?.name) return cusId.name;
-        return cusId ? cusId.toString().substring(0, 8) + "..." : "N/A";
+        // Try to get customer name from all possible sources
+        const customerName = 
+          record.customer?.customerName || 
+          cusId?.customerName || 
+          cusId?.name || 
+          "N/A";
+        
+        return customerName;
       },
     },
     {
@@ -246,18 +341,22 @@ const AppointmentManagement = () => {
 
   const columnsGoi = [
     {
-      title: "Mã lịch hẹn",
-      dataIndex: "_id",
-      key: "_id",
-      render: (id) => <span className="id-column">{id.substring(0, 8)}...</span>,
+      title: "STT",
+      key: "stt",
+      render: (_, record, index) => index + 1,
+      width: 50,
     },
     {
       title: "Khách hàng",
       dataIndex: "cusId",
       key: "cusId",
       render: (cusId, record) => {
-        if (record.customerDetails?.customerName) return record.customerDetails.customerName;
-        return cusId ? cusId.toString().substring(0, 8) + "..." : "N/A";
+        // Try to get customer name from all possible sources
+        const customerName = 
+          record.customerDetails?.customerName || 
+          "N/A";
+        
+        return customerName;
       },
     },
     {
@@ -295,16 +394,7 @@ const AppointmentManagement = () => {
           >
             Chi tiết
           </Button>
-          <Select
-            defaultValue={record.status}
-            style={{ width: 140, marginLeft: 8 }}
-            onChange={(value) => handleStatusChange(record._id, value, true)}
-          >
-            <Option value="pending">Đang chờ</Option>
-            <Option value="approve">Đã duyệt</Option>
-            <Option value="completed">Hoàn thành</Option>
-            <Option value="incomplete">Chưa hoàn thành</Option>
-          </Select>
+          
         </div>
       ),
     },
@@ -444,7 +534,58 @@ const AppointmentManagement = () => {
                 </Tag>
               </span>
             </div>
-            <div className="detail-row">
+            
+            {/* Hiển thị lịch tiêm cho từng mũi (chỉ với lịch hẹn gói) */}
+            {selectedAppointment.isPackage && selectedAppointment.doseSchedule && selectedAppointment.doseSchedule.length > 0 && (
+              <div className="dose-schedule-section">
+                <Title level={5} style={{ marginTop: 20, marginBottom: 10 }}>Lịch tiêm các mũi</Title>
+                <List
+                  grid={{ gutter: 16, column: 1 }}
+                  dataSource={selectedAppointment.doseSchedule}
+                  renderItem={item => (
+                    <List.Item>
+                      <Card 
+                        title={`Mũi ${item.doseNumber}`} 
+                        size="small"
+                        style={{ marginBottom: 8 }}
+                        extra={
+                          <Tag color={getStatusColor(item.status)}>
+                            {getStatusText(item.status)}
+                          </Tag>
+                        }
+                      >
+                        <div className="dose-detail-row">
+                          <Text strong>Ngày tiêm:</Text> {item.date}
+                        </div>
+                        <div className="dose-detail-row" style={{ marginTop: 8, display: 'flex', alignItems: 'center' }}>
+                          <Button
+                            type={item.status === "completed" ? "primary" : "default"}
+                            icon={item.status === "completed" ? <CheckCircleFilled /> : null}
+                            onClick={() => {
+                              const newStatus = item.status === "completed" ? "pending" : "completed";
+                              console.log(`Toggling status for dose ${item.doseNumber} from ${item.status} to ${newStatus}`);
+                              handleDoseStatusChange(
+                                selectedAppointment._id,
+                                item.doseNumber,
+                                newStatus === "completed"
+                              );
+                            }}
+                            style={{ 
+                              backgroundColor: item.status === "completed" ? "#52c41a" : undefined,
+                              borderColor: item.status === "completed" ? "#52c41a" : undefined
+                            }}
+                          >
+                            {item.status === "completed" ? "Đã hoàn thành" : "Đánh dấu hoàn thành"}
+                          </Button>
+                        </div>
+                      </Card>
+                    </List.Item>
+                  )}
+                />
+              </div>
+            )}
+            
+            <div className="detail-row" style={{ marginTop: 20 }}>
               <span className="detail-label">Cập nhật trạng thái:</span>
               <span className="detail-value">
                 <Select

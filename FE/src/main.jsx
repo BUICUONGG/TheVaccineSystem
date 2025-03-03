@@ -103,10 +103,6 @@ const router = createBrowserRouter([
     children: [
       {
         path: "",
-        element: <div>Welcome to Admin Dashboard</div>,
-      },
-      {
-        path: "overview",
         element: <OverviewPage />,
       },
       {

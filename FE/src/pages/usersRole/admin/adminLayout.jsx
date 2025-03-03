@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation, Outlet } from "react-router-dom";
 import { Button } from "antd";
-import { LogoutOutlined } from "@ant-design/icons";
+import { LogoutOutlined, DashboardOutlined } from "@ant-design/icons";
 import "./adminLayout.css";
 
 const AdminLayout = () => {
@@ -50,6 +50,10 @@ const AdminLayout = () => {
     navigate('/thank-you');
   };
 
+  const handleDashboard = () => {
+    navigate('/admin');
+  };
+
   return (
     <div className="container">
       <div className="sidebar">
@@ -61,12 +65,12 @@ const AdminLayout = () => {
         <ul className="menu-items">
           <li className="menu-item">
             <Link
-              to="/admin/overview"
+              to="/admin"
               className={
-                location.pathname === "/admin/overview" ? "active" : ""
+                location.pathname === "/admin" && !location.pathname.includes("/admin/") ? "active" : ""
               }
             >
-              Overview
+              Dashboard
             </Link>
           </li>
           <li className="menu-item">
@@ -140,6 +144,15 @@ const AdminLayout = () => {
         </ul>
 
         <div className="logout-section">
+          {/* <Button
+            type="primary"
+            icon={<DashboardOutlined />}
+            onClick={handleDashboard}
+            className="dashboard-button"
+            style={{ marginBottom: "10px" }}
+          >
+            Dashboard
+          </Button> */}
           <Button
             type="primary"
             danger
@@ -159,6 +172,7 @@ const AdminLayout = () => {
               <span className="nav-item">Home</span>
             </Link>
             <span className="nav-item">Contact</span>
+            
           </div>
         </header>
         <main className="content">

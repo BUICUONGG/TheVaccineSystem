@@ -142,12 +142,35 @@
   bottom: 20px;
   left: 20px;
   width: calc(100% - 40px);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
-.logout-button {
+.logout-button, .dashboard-button {
   width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
+}
+
+.logout-button {
+  background-color: #2c3e50;
+  border-color: #2c3e50;
+}
+
+.logout-button:hover {
+  background-color: #34495e;
+  border-color: #34495e;
+}
+
+.dashboard-button {
+  background-color: #1890ff;
+  border-color: #1890ff;
+}
+
+.dashboard-button:hover {
+  background-color: #40a9ff;
+  border-color: #40a9ff;
 }
