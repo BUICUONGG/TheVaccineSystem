@@ -1,0 +1,802 @@
+/* Header Framework styles */
+.register-injection-page {
+  background: #f5f5f5;
+}
+
+.login-back-home {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  z-index: 2;
+  padding: 10px 20px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  color: black;
+  text-decoration: none;
+  font-weight: 500;
+  backdrop-filter: blur(5px);
+  transition: all 0.3s ease;
+}
+
+.login-back-home:hover {
+  background: white;
+  color: #2c5282;
+}
+
+.header-framework {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background: white;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  z-index: 1001;
+  padding: 10px 0;
+}
+
+.header-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 15px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header-title {
+  display: flex;
+  align-items: center;
+}
+
+.header-title h1 {
+  font-size: 28px;
+  font-weight: 700;
+  color: #4a90e2;
+  margin: 0;
+  padding: 0;
+  letter-spacing: 0.5px;
+}
+
+/* Auth buttons styles */
+.auth-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.auth-buttons button {
+  padding: 8px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.login-btn {
+  background: #87ceeb !important;
+  color: white !important;
+}
+
+.register-btn {
+  background: #ff4d4d !important;
+  color: white !important;
+}
+
+.logout-btn {
+  background: #dc3545 !important;
+  color: white !important;
+}
+
+/* Navigation bar styles */
+.sub-navbar {
+  background-color: #87ceeb;
+  padding: 5px 0;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  position: fixed;
+  top: 70px;
+  width: 100%;
+  height: 90px;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+}
+
+
+
+/* Main content area */
+.main-content {
+  margin-top: 160px; /* Header height + navbar height */
+  padding: 20px;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Form styles */
+.form-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 30px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.form-title {
+  text-align: center;
+  font-size: 24px;
+  font-weight: bold;
+  color: #4a90e2;
+  margin-bottom: 30px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid #4a90e2;
+}
+
+.form-section {
+  margin-bottom: 30px;
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 5px;
+}
+
+.form-section h3 {
+  color: #2c3e50;
+  margin-bottom: 20px;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.registration-form .ant-form-item-label label {
+  font-weight: 500;
+  color: #333;
+}
+
+.submit-btn {
+  width: 100%;
+  height: 40px;
+  font-size: 16px;
+  font-weight: 500;
+  background: #4a90e2;
+  border: none;
+}
+
+.submit-btn:hover {
+  background: #357abd;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  .form-container {
+    padding: 20px;
+    margin: 20px;
+  }
+}
+
+/* Registration type switch styles */
+.registration-type-switch {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 20px 0;
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.registration-type-switch span {
+  color: #4A90E2;
+  font-weight: 500;
+}
+
+.ant-switch-checked {
+  background-color: #4A90E2 !important;
+}
+
+/* Thêm styles cho phần thông tin phụ huynh */
+.parent-info {
+  background: #e6f7ff;
+  border: 1px solid #91d5ff;
+  margin-bottom: 20px;
+}
+
+.info-row {
+  display: flex;
+  margin-bottom: 10px;
+}
+
+.info-row label {
+  font-weight: 600;
+  width: 120px;
+  color: #333;
+}
+
+.info-row span {
+  color: #1890ff;
+}
+
+/* Customer Info Section Styles */
+.customer-info-section {
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  padding: 20px;
+}
+
+.info-display-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+  margin-top: 15px;
+}
+
+.info-item {
+  padding: 10px;
+  background: white;
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.info-item label {
+  display: block;
+  color: #6c757d;
+  font-size: 0.9em;
+  margin-bottom: 5px;
+}
+
+.info-value {
+  color: #2c3e50;
+  font-weight: 500;
+  font-size: 1.1em;
+}
+
+/* Vaccine Registration Section Styles */
+.vaccine-registration-section {
+  background: #fff;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  padding: 20px;
+  margin-top: 20px;
+}
+
+.vaccine-select {
+  width: 100%;
+  height: 40px;
+}
+
+.vaccine-option {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+}
+
+.vaccine-name {
+  font-weight: 500;
+  color: #2c3e50;
+}
+
+.vaccine-price {
+  color: #2c3e50;
+  font-weight: 600;
+}
+
+.date-input {
+  height: 40px;
+  font-size: 16px;
+}
+
+.submit-btn {
+  margin-top: 20px;
+  height: 45px;
+  font-size: 16px;
+  font-weight: 500;
+  background: #4CAF50;
+  border: none;
+  width: 100%;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.submit-btn:hover {
+  background: #45a049;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .info-display-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .vaccine-registration-section {
+    padding: 15px;
+  }
+}
+
+/* Styles mới cho phần thông tin cá nhân */
+.personal-info-section {
+  background: #ffffff;
+  border: 1px solid #e8e8e8;
+  border-radius: 8px;
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+.personal-info-container {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+  margin-bottom: 15px;
+}
+
+.personal-info-container .ant-form-item {
+  margin-bottom: 0;
+}
+
+.personal-info-container .ant-input[disabled] {
+  color: #666;
+  background-color: #f5f5f5;
+  border: 1px solid #d9d9d9;
+  cursor: not-allowed;
+}
+
+.info-warning {
+  margin-top: 15px;
+  padding: 15px;
+  background-color: #fff3e0;
+  border: 1px solid #ffcc80;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.warning-message {
+  color: #f57c00;
+  font-size: 14px;
+}
+
+.update-profile-btn {
+  color: #1890ff;
+  font-weight: 500;
+}
+
+.update-profile-btn:hover {
+  color: #40a9ff;
+  text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+  .personal-info-container {
+    grid-template-columns: 1fr;
+  }
+  
+  .info-warning {
+    flex-direction: column;
+    text-align: center;
+    gap: 10px;
+  }
+}
+
+.info-group {
+  padding: 12px;
+  background: #f8f9fa;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+}
+
+.info-group:hover {
+  background: #f0f7ff;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+
+.info-label {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.info-content {
+  background: white;
+  padding: 10px 12px;
+  border-radius: 4px;
+  border: 1px solid #e1e1e1;
+}
+
+.info-text {
+  color: #2c3e50;
+  font-size: 15px;
+  font-weight: 500;
+  display: block;
+  min-height: 24px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .personal-info-container {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Thêm styles cho DatePicker */
+.date-picker {
+  width: 100% !important;
+  height: 40px;
+  font-size: 16px;
+}
+
+.ant-picker-input > input {
+  font-size: 15px;
+}
+
+.ant-picker:hover {
+  border-color: #4a90e2;
+}
+
+.ant-picker-focused {
+  border-color: #4a90e2;
+  box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
+}
+
+/* Thay thế styles cho phần thông báo cập nhật */
+.update-info-notice {
+  margin-top: 10px;
+  text-align: left;
+}
+
+.notice-text {
+  color: #ff4d4f;
+  font-size: 14px;
+  font-weight: 500;
+  margin-right: 10px;
+}
+
+.update-link {
+  color: #1890ff;
+  text-decoration: underline;
+  font-weight: 500;
+}
+
+.update-link:hover {
+  color: #40a9ff;
+}
+
+/* Styles for registration type switch */
+.registration-type-switch {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  margin-bottom: 20px;
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 8px;
+}
+
+.registration-type-switch span {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #666;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.registration-type-switch .active-type {
+  color: #1890ff;
+  font-weight: 500;
+}
+
+/* Child registration form styles */
+.child-info-section {
+  background: #ffffff;
+  border: 1px solid #e8e8e8;
+  border-radius: 8px;
+  padding: 30px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.child-info-container {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+}
+
+.child-info-container .ant-form-item {
+  margin-bottom: 0;
+}
+
+/* Căn chỉnh label form */
+.child-info-container .ant-form-item-label {
+  padding-bottom: 8px;
+}
+
+.child-info-container .ant-form-item-label > label {
+  font-weight: 500;
+  color: #333;
+  font-size: 14px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+}
+
+/* Style cho input fields */
+.child-info-container .ant-input {
+  height: 40px;
+  padding: 8px 12px;
+  border-radius: 6px;
+}
+
+.child-info-container .ant-input:hover {
+  border-color: #40a9ff;
+}
+
+.child-info-container .ant-input:focus {
+  box-shadow: 0 0 0 2px rgba(24,144,255,0.2);
+}
+
+/* Style cho gender select buttons */
+.gender-select {
+  width: 100%;
+  display: flex;
+  gap: 0;
+}
+
+.gender-select .ant-radio-button-wrapper {
+  width: 50%;
+  height: 40px;
+  line-height: 38px;
+  text-align: center;
+  transition: all 0.3s ease;
+  font-weight: 500;
+}
+
+.gender-select .ant-radio-button-wrapper:first-child {
+  border-radius: 6px 0 0 6px;
+}
+
+.gender-select .ant-radio-button-wrapper:last-child {
+  border-radius: 0 6px 6px 0;
+}
+
+/* Style cho nút Nam */
+.gender-select .ant-radio-button-wrapper[value="male"].ant-radio-button-wrapper-checked {
+  background: #1890ff;
+  border-color: #1890ff;
+  color: white;
+}
+
+.gender-select .ant-radio-button-wrapper[value="male"]:hover {
+  color: #1890ff;
+}
+
+/* Style cho nút Nữ */
+.gender-select .ant-radio-button-wrapper[value="female"].ant-radio-button-wrapper-checked {
+  background: #ff69b4;
+  border-color: #ff69b4;
+  color: white;
+}
+
+.gender-select .ant-radio-button-wrapper[value="female"]:hover {
+  color: #ff69b4;
+}
+
+/* Style cho text area ghi chú */
+.child-info-container .ant-input-textarea textarea {
+  border-radius: 6px;
+  padding: 12px;
+  min-height: 100px;
+}
+
+/* Style cho phần thông tin người giám hộ */
+.guardian-info {
+  margin-top: 30px;
+  padding-top: 24px;
+  border-top: 1px dashed #e8e8e8;
+}
+
+.guardian-info h4 {
+  color: #333;
+  margin-bottom: 20px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.guardian-info .info-display-grid {
+  background: #f8f9fa;
+  padding: 16px;
+  border-radius: 8px;
+}
+
+.guardian-info .info-item {
+  background: white;
+  padding: 12px 16px;
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.guardian-info .info-item label {
+  color: #666;
+  font-size: 13px;
+  margin-bottom: 6px;
+}
+
+.guardian-info .info-value {
+  color: #1890ff;
+  font-weight: 500;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .child-info-container {
+    grid-template-columns: 1fr;
+  }
+  
+  .child-info-section {
+    padding: 20px;
+  }
+}
+
+/* TextArea styles */
+.ant-input-textarea {
+  width: 100%;
+}
+
+/* Responsive styles for child form */
+@media (max-width: 768px) {
+  .child-info-container {
+    grid-template-columns: 1fr;
+  }
+  
+  .registration-type-switch {
+    flex-direction: column;
+    text-align: center;
+    padding: 10px;
+  }
+}
+
+
+.back-home-wrapper {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  z-index: 10;
+}
+
+.back-home {
+  text-decoration: none;
+  font-size: 18px;
+  color: #333;
+  padding: 8px 12px;
+  border-radius: 4px;
+  transition: background 0.3s ease, color 0.3s ease, font-weight 0.3s ease;
+}
+
+.back-home:hover {
+  background: #333;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+/* Styles cho vaccine type selector */
+.vaccine-type-selector {
+  margin-bottom: 20px;
+}
+
+.vaccine-type-selector .ant-radio-group {
+  width: 100%;
+  display: flex;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.vaccine-type-selector .ant-radio-button-wrapper {
+  flex: 1;
+  text-align: center;
+  height: 40px;
+  line-height: 38px;
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 6px;
+}
+
+.vaccine-type-selector .ant-radio-button-wrapper:first-child {
+  border-radius: 6px 0 0 6px;
+}
+
+.vaccine-type-selector .ant-radio-button-wrapper:last-child {
+  border-radius: 0 6px 6px 0;
+}
+
+.vaccine-type-selector .ant-radio-button-wrapper-checked {
+  background: #4A90E2;
+  border-color: #4A90E2;
+  color: white;
+}
+
+.vaccine-type-selector .ant-radio-button-wrapper:hover {
+  color: #4A90E2;
+}
+
+/* Tinh chỉnh vaccine type selector */
+.vaccine-type-selector {
+  margin-bottom: 20px;
+}
+
+.vaccine-type-selector .ant-radio-group {
+  width: 100%;
+  display: flex;
+  margin-bottom: 15px;
+  border: 1px solid #e8e8e8;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.vaccine-type-selector .ant-radio-button-wrapper {
+  flex: 1;
+  text-align: center;
+  height: 36px;
+  line-height: 34px;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 0 15px;
+  border: none;
+  background: #f5f5f5;
+  transition: all 0.3s ease;
+  position: relative;
+  margin: 0;
+}
+
+.vaccine-type-selector .ant-radio-button-wrapper:first-child {
+  border-right: 1px solid #e8e8e8;
+}
+
+.vaccine-type-selector .ant-radio-button-wrapper-checked {
+  background: #4A90E2;
+  color: white;
+  z-index: 1;
+}
+
+.vaccine-type-selector .ant-radio-button-wrapper-checked::before {
+  display: none;
+}
+
+.vaccine-type-selector .ant-radio-button-wrapper:hover {
+  color: #4A90E2;
+  background: #f0f7ff;
+}
+
+.vaccine-type-selector .ant-radio-button-wrapper-checked:hover {
+  color: white;
+  background: #4A90E2;
+}
+
+/* Điều chỉnh khoảng cách trong vaccine registration section */
+.vaccine-registration-section {
+  background: #fff;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  padding: 20px;
+  margin-top: 20px;
+}
+
+.vaccine-registration-section h3 {
+  margin-bottom: 15px;
+  font-size: 16px;
+  color: #333;
+}
+
+/* Căn chỉnh khoảng cách các phần tử trong form */
+.vaccine-registration-section .ant-form-item {
+  margin-bottom: 15px;
+}
+
+.vaccine-registration-section .ant-form-item-label {
+  padding-bottom: 4px;
+}
+
+.vaccine-registration-section .ant-form-item-label > label {
+  font-size: 14px;
+  color: #666;
+}

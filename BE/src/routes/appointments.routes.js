@@ -12,6 +12,7 @@ import {
   showDetailAptGoiController,
   updateAptGoiController,
   updateAptLeController,
+  updateDoseController,
 } from "../controllers/appointment.controllers.js";
 // import { validateAccessToken } from "../middlewares/user.middleware.js";
 
@@ -56,5 +57,8 @@ aptGoiRoutes.get("/showDetailAptGoi", showDetailAptGoiController);
 aptGoiRoutes.post("/update/:id", updateAptGoiController);
 
 aptGoiRoutes.post("/delete/:id", deleteAptGoiController);
+
+// New route for updating individual doses
+aptGoiRoutes.post("/updateDose/:id", updateDoseController);
 
 export { aptGoiRoutes, aptLeRoutes };
