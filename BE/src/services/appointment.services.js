@@ -288,6 +288,52 @@ class AppointmentService {
       throw new Error(error.message);
     }
   }
+
+  // New service method for updating individual doses
+  async updateDose(id, doseNumber, status) {
+    try {
+      console.log(`Updating dose ${doseNumber} to ${status} for appointment ${id}`);
+      
+      // First, get the current appointment to verify it exists
+      const appointment = await connectToDatabase.appointmentGois.findOne({
+        _id: new ObjectId(id)
+      });
+      
+      if (!appointment) {
+        throw new Error("Appointment not found");
+      }
+      
+      // Find the dose in the doseSchedule array
+      const doseIndex = appointment.doseSchedule.findIndex(
+        dose => dose.doseNumber === parseInt(doseNumber)
+      );
+      
+      if (doseIndex === -1) {
+        throw new Error(`Dose ${doseNumber} not found in appointment`);
+      }
+      
+      // Update the specific dose in the doseSchedule array
+      const result = await connectToDatabase.appointmentGois.findOneAndUpdate(
+        { 
+          _id: new ObjectId(id),
+          "doseSchedule.doseNumber": parseInt(doseNumber)
+        },
+        { 
+          $set: { 
+            "doseSchedule.$.status": status 
+          } 
+        },
+        { returnDocument: "after" }
+      );
+      
+      console.log("Update result:", result);
+      
+      return result;
+    } catch (error) {
+      console.error("Error in updateDose service:", error);
+      throw new Error(error.message);
+    }
+  }
 }
 
 const appointmentService = new AppointmentService();
