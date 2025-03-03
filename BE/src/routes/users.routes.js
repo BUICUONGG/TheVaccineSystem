@@ -7,7 +7,7 @@ import {
   updateController,
   logoutController,
   refreshTokenController,
-  checkUsernameController,
+  // checkUsernameController,
   forgotPasswordController,
 } from "../controllers/users.controllers.js";
 import {
@@ -48,6 +48,6 @@ usersRoutes.post(
   refreshTokenController
 );
 
-usersRoutes.post("/check-username", checkUsernameController);
+// usersRoutes.post("/check-username", checkUsernameController);
 
 export default usersRoutes;

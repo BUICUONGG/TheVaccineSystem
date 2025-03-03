@@ -4,8 +4,11 @@ import VaccineImport from "../model/vaccineImportSchema.js";
 class VaccineImportService {
   async getFullData() {
     try {
-      return (result = await connectToDatabase.vaccineImports.find().toArray());
+      const result = await connectToDatabase.vaccineImports.find().toArray();
+      if (!result) throw new Error("Danh sachs trống");
+      return result;
     } catch (error) {
+      console.log(error.message);
       throw new Error(error.message);
     }
   }
@@ -15,8 +18,10 @@ class VaccineImportService {
       const result = await connectToDatabase.vaccineImports.findOne({
         _id: new ObjectId(id),
       });
+      if (!result) throw new Error(`Không lấy được ${id} này`);
       return result;
     } catch (error) {
+      console.log(error.message);
       throw new Error("Khong tim thay thong tin nay");
     }
   }
@@ -33,6 +38,7 @@ class VaccineImportService {
       const result = await connectToDatabase.vaccineImports.insertOne(
         vaccineImport
       );
+      if (!result) throw new Error("Không tạo lô vaccine");
       return { _id: result.insertedId, ...data };
     } catch (error) {
       console.log(error.message);
@@ -66,19 +72,23 @@ class VaccineImportService {
         },
         { returnDocument: "after" }
       );
+      if (!result) throw new Error(`Không cập nhật được lô vaccine ${id}`);
       return result;
     } catch (error) {
+      console.log(error.message);
       throw new Error(error.message);
     }
   }
 
   async deleteVaccineimport(id) {
     try {
-      await connectToDatabase.vaccineImports.findOneAndDelete({
+      const result = await connectToDatabase.vaccineImports.findOneAndDelete({
         _id: new ObjectId(id),
       });
+      if (!result) throw new Error(`Không thể xoá id ${id} này`);
       return "Xoa thanh cong";
     } catch (error) {
+      console.log(error.message);
       throw new Error(error.message);
     }
   }
@@ -118,9 +128,10 @@ class VaccineImportService {
         // imageUrl: vaccine.imageUrl,
         // information: vaccine.information,
       }));
-
+      if (!result) throw new Error("Không thống kê được vaccine có trong lô");
       return result;
     } catch (error) {
+      console.log(error.message);
       throw new Error(error.message);
     }
   }

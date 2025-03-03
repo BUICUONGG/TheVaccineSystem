@@ -1,8 +1,12 @@
 import childService from "../services/child.services.js";
 
 export const showChildController = async (req, res) => {
-  const result = await childService.showData();
-  return res.json(result);
+  try {
+    const result = await childService.showData();
+    res.status(200).json(result);
+  } catch (error) {
+    res.status(500).json(error.message);
+  }
 };
 
 export const createChildController = async (req, res) => {
@@ -21,7 +25,6 @@ export const updateChildController = async (req, res) => {
     const result = await childService.updateChild(id, data);
     res.status(200).json(result);
   } catch (error) {
-    console.log(error.message);
     res.status(500).json(error.message);
   }
 };
@@ -32,7 +35,6 @@ export const deleteChildController = async (req, res) => {
     const result = await childService.deleteChild(id);
     res.status(200).json("Xoa thanh cong");
   } catch (error) {
-    console.log(error.message);
     res.status(500).json(error.message);
   }
 };

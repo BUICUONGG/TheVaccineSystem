@@ -28,4 +28,11 @@ export const updateStaffController = async (req, res) => {
     res.status(500).json(error.message);
   }
 };
-export const deleteStaffController = async (req, res) => {};
+export const deleteStaffController = async (req, res) => {
+  try {
+    const result = await staffService.deleteStaff(req.params.id);
+    res.status(200).json(result);
+  } catch (error) {
+    res.status(500).json(error.message);
+  }
+};

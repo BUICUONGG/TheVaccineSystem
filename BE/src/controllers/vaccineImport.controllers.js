@@ -6,7 +6,6 @@ export const getFullDataController = async (req, res) => {
     const result = await vaccineImportService.getFullData();
     res.status(200).json(result);
   } catch (error) {
-    console.log("KHong co thong tin ");
     res.status(500).json(error.message);
   }
 };
@@ -25,7 +24,6 @@ export const createVaccineImportController = async (req, res) => {
   try {
     const data = req.body;
     const result = await vaccineImportService.createVaccineImport(data);
-
     res.status(200).json(result);
   } catch (error) {
     res.status(500).json(error.message);

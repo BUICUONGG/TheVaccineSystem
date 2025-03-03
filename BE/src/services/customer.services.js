@@ -8,7 +8,7 @@ class CustomerService {
         userId: new ObjectId(id),
       });
       if (!result) {
-        throw new Error("khong cos customer nao");
+        throw new Error("Không có customer nào");
       }
       return result;
     } catch (error) {
@@ -38,7 +38,7 @@ class CustomerService {
         const username = userMap.get(userId?.toString());
         return username ? { ...customer, username } : customer;
       });
-
+      if (!result) throw new Error("Khong thể show được ");
       return result;
     } catch (error) {
       console.log("Lỗi:", error.message);

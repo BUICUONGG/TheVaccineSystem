@@ -21,9 +21,10 @@ class ChildService {
       const child = new Child(childData);
       await child.validate();
       const result = await connectToDatabase.childs.insertOne(child);
+      if (!result) throw new Error("Không tạo được child");
       return { _id: result.insertedId, ...childData };
     } catch (error) {
-      console.error("Create child error:", error);
+      console.error("Create child error:", error.message);
       throw new Error(error.message);
     }
   }
@@ -37,19 +38,26 @@ class ChildService {
         { $set: dataUpdate },
         { returnDocument: "after" }
       );
+      if (!result) throw new Error("Không cập nhật được child");
       return result;
     } catch (error) {
+      console.log(error.message);
       throw new Error(error.message);
     }
   }
 
   async deleteChild(id) {
     try {
-      return (result = await connectToDatabase.childs.findOneAndDelete({
+      const result = await connectToDatabase.childs.findOneAndDelete({
         _id: new ObjectId(id),
-      }));
+      });
+      if (!result) {
+        throw new Error("Không tìm thấy bản ghi để xóa");
+      }
+      return result;
     } catch (error) {
-      throw new Error("Server ko the xoa");
+      console.log(error.message);
+      throw new Error(error.message);
     }
   }
 }

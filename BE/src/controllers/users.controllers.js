@@ -2,8 +2,12 @@ import connectToDatabase from "../config/database.js";
 import userService from "../services/user.services.js";
 
 export const showInFoController = async (req, res) => {
-  const result = await userService.showDataUser();
-  return res.json({ result });
+  try {
+    const result = await userService.showDataUser();
+    res.status(200).json(result);
+  } catch (error) {
+    res.status(500).json(error.message);
+  }
 };
 
 export const registerController = async (req, res) => {
@@ -62,19 +66,19 @@ export const deleteController = async (req, res) => {
   }
 };
 
-export const checkUsernameController = async (req, res) => {
-  try {
-    const { username } = req.body;
-    const user = await userService.findByUsername(username);
-    if (user) {
-      res.json({ exists: true, userId: user._id });
-    } else {
-      res.status(404).json({ exists: false, message: "Username not found" });
-    }
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
+// export const checkUsernameController = async (req, res) => {
+//   try {
+//     const { username } = req.body;
+//     const user = await userService.findByUsername(username);
+//     if (user) {
+//       res.json({ exists: true, userId: user._id });
+//     } else {
+//       res.status(404).json({ exists: false, message: "Username not found" });
+//     }
+//   } catch (error) {
+//     res.status(500).json({ message: error.message });
+//   }
+// };
 
 export const updateController = async (req, res) => {
   try {
