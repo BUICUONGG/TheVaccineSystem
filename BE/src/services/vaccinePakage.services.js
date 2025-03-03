@@ -7,6 +7,7 @@ class VaccinePakageService {
     try {
       const result = await connectToDatabase.vaccinepackages.find().toArray();
       if (!result) throw new Error("Không có gói nào cả");
+      return result;
     } catch (error) {
       console.log(error.message);
       throw new Error(error.message);
