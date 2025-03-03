@@ -207,18 +207,26 @@ const HomePage = () => {
   const getVisibleVaccines = () => {
     if (vaccines.length === 0) return [];
     
-    const visibleCount = Math.min(5, vaccines.length);
-    const halfCount = Math.floor(visibleCount / 2);
+    // Luôn hiển thị 5 card (hoặc tất cả nếu ít hơn 5)
+    const totalVisible = Math.min(5, vaccines.length);
     
+    // Đảm bảo luôn có card ở cả hai bên của card chính
     let indices = [];
-    for (let i = -halfCount; i <= halfCount; i++) {
+    const offset = Math.floor(totalVisible / 2);
+    
+    for (let i = -offset; i <= offset; i++) {
+      // Sử dụng phép toán modulo để tạo hiệu ứng vòng lặp
       let index = (currentVaccineIndex + i + vaccines.length) % vaccines.length;
       indices.push(index);
     }
     
     return indices.map(index => ({
       vaccine: vaccines[index],
-      position: index - currentVaccineIndex
+      position: index - currentVaccineIndex,
+      // Nếu vị trí là card chính (0) thì opacity = 1, còn lại giảm dần theo khoảng cách
+      opacity: Math.abs(index - currentVaccineIndex) === 0 ? 1 : 
+               Math.abs(index - currentVaccineIndex) === 1 ? 0.7 : 
+               Math.abs(index - currentVaccineIndex) === 2 ? 0.4 : 0.2
     }));
   };
 
@@ -365,7 +373,7 @@ const HomePage = () => {
                 style={{
                   transform: `translateX(${item.position * 100}%) scale(${item.position === 0 ? 1 : 0.85})`,
                   zIndex: item.position === 0 ? 2 : 1,
-                  opacity: Math.abs(item.position) > 2 ? 0.5 : 1
+                  opacity: item.opacity
                 }}
               >
                 <img 
