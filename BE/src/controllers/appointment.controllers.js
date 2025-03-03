@@ -114,36 +114,36 @@ export const updateAptGoiController = async (req, res) => {
     res.status(500).json(error.message);
   }
 };
-
 export const deleteAptGoiController = async (req, res) => {
   try {
     const id = req.params.id;
     const result = await appointmentService.deleteGoi(id);
-    if (!result) throw new Error("khong the deletee");
     res.status(200).json(result);
   } catch (error) {
-    console.log(" ko the delete ");
     res.status(500).json(error.message);
   }
 };
 
-// New controller for updating individual doses
 export const updateDoseController = async (req, res) => {
   try {
     const id = req.params.id;
     const { doseNumber, status } = req.body;
-    
+
     if (!doseNumber || !status) {
-      return res.status(400).json({ message: "Dose number and status are required" });
+      return res
+        .status(400)
+        .json({ message: "Dose number and status are required" });
     }
-    
+
     if (!["pending", "completed"].includes(status)) {
-      return res.status(400).json({ message: "Status must be either 'pending' or 'completed'" });
+      return res
+        .status(400)
+        .json({ message: "Status must be either 'pending' or 'completed'" });
     }
-    
+
     const result = await appointmentService.updateDose(id, doseNumber, status);
     if (!result) throw new Error("Cannot update dose");
-    
+
     res.status(200).json(result);
   } catch (error) {
     console.log("Error updating dose:", error);
