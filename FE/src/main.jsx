@@ -23,7 +23,7 @@ import Welcome from "./pages/welcome/Welcome";
 import Thank from "./pages/thanks/Thank";
 import StaffLayout from "./pages/usersRole/staff/staffLayout";
 import AppointmentManagement from "./pages/usersRole/staff/appointmentManagement";
-// import AdminAppointmentManagement from "./pages/usersRole/admin/adminAppointmentManagement";
+import AdminAppointmentManagement from "./pages/usersRole/admin/adminAppointmentManagement";
 
 const router = createBrowserRouter([
   {
@@ -117,7 +117,10 @@ const router = createBrowserRouter([
         path: "feedback",
         element: <div>Feedback Management</div>,
       },
-
+      {
+        path: "appointments",
+        element: <AdminAppointmentManagement />,
+      },
       {
         path: "consultations",
         element: <div>Consultations Management</div>,

@@ -370,8 +370,8 @@ const HomePage = () => {
                 key={item.vaccine._id} 
                 className={`vaccine-card-item ${item.position === 0 ? 'center' : ''}`}
                 style={{
-                  transform: `translateX(${item.position * 220}px) scale(${item.position === 0 ? 1 : 0.85})`,
-                  zIndex: item.position === 0 ? 10 : 5 - Math.abs(item.position),
+                  transform: `translateX(${item.position * 100}%) scale(${item.position === 0 ? 1 : 0.85})`,
+                  zIndex: item.position === 0 ? 2 : 1,
                   opacity: item.opacity
                 }}
               >

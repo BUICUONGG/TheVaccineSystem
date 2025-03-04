@@ -288,6 +288,52 @@ class AppointmentService {
       throw new Error(error.message);
     }
   }
+
+  async updateDose(appointmentId, doseNumber, status) {
+    try {
+      // Tìm appointment gói theo ID
+      const appointment = await connectToDatabase.appointmentGois.findOne({
+        _id: new ObjectId(appointmentId)
+      });
+
+      if (!appointment) {
+        throw new Error(`Không tìm thấy lịch hẹn với ID: ${appointmentId}`);
+      }
+
+      // Kiểm tra xem doseSchedule có tồn tại không
+      if (!appointment.doseSchedule || !Array.isArray(appointment.doseSchedule)) {
+        throw new Error("Lịch hẹn không có thông tin lịch tiêm");
+      }
+
+      // Tìm vị trí của dose cần cập nhật
+      const doseIndex = appointment.doseSchedule.findIndex(
+        dose => dose.doseNumber === parseInt(doseNumber)
+      );
+
+      if (doseIndex === -1) {
+        throw new Error(`Không tìm thấy mũi tiêm số ${doseNumber}`);
+      }
+
+      // Cập nhật trạng thái của dose
+      const updatedDoseSchedule = [...appointment.doseSchedule];
+      updatedDoseSchedule[doseIndex] = {
+        ...updatedDoseSchedule[doseIndex],
+        status
+      };
+
+      // Cập nhật lịch hẹn với doseSchedule mới
+      const result = await connectToDatabase.appointmentGois.findOneAndUpdate(
+        { _id: new ObjectId(appointmentId) },
+        { $set: { doseSchedule: updatedDoseSchedule } },
+        { returnDocument: "after" }
+      );
+
+      return result;
+    } catch (error) {
+      console.error("Error updating dose:", error);
+      throw new Error(error.message);
+    }
+  }
 }
 
 const appointmentService = new AppointmentService();
