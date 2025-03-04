@@ -225,7 +225,7 @@ const AllCustomerPage = () => {
     <div style={{ padding: "20px" }}>
       <h2>Customer Information Management</h2>
       <Input
-        placeholder="Search by username or customer name"
+        placeholder="Search by customer name"
         allowClear
         onChange={handleSearch}
         style={{ width: 300, marginBottom: 16 }}

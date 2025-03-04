@@ -93,9 +93,9 @@ const AppointmentManagement = () => {
   const getStatusText = (status) => {
     switch (status) {
       case "completed":
-        return "Hoàn thành";
+        return "Đã duyệt";
       case "incomplete":
-        return "Chưa hoàn thành";
+        return "Đã hủy";
       case "pending":
         return "Đang chờ";
       case "approve":
@@ -118,7 +118,7 @@ const AppointmentManagement = () => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
       
-      message.success("Cập nhật trạng thái thành công");
+      message.success(`Đã ${status === "completed" ? "duyệt" : "hủy"} đơn thành công`);
       fetchAppointments();
       
       // Cập nhật trạng thái trong modal nếu đang mở
@@ -130,7 +130,7 @@ const AppointmentManagement = () => {
       }
     } catch (error) {
       console.error("Error updating status:", error);
-      message.error("Không thể cập nhật trạng thái");
+      message.error(`Không thể ${status === "completed" ? "duyệt" : "hủy"} đơn`);
     }
   };
 
@@ -183,7 +183,17 @@ const AppointmentManagement = () => {
       }
     } catch (error) {
       console.error("Error updating dose status:", error);
-      message.error(`Không thể cập nhật trạng thái mũi ${doseNumber}: ${error.response?.data?.message || error.message}`);
+      
+      // Hiển thị thông báo lỗi chi tiết hơn
+      if (error.response) {
+        console.log("Error response:", error.response);
+        message.error(`Không thể cập nhật trạng thái mũi ${doseNumber}: ${error.response.data?.message || error.response.statusText}`);
+      } else if (error.request) {
+        console.log("Error request:", error.request);
+        message.error(`Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng.`);
+      } else {
+        message.error(`Lỗi: ${error.message}`);
+      }
     }
   };
 
@@ -321,19 +331,23 @@ const AppointmentManagement = () => {
           <Button 
             type="primary" 
             onClick={() => showAppointmentDetails(record, false)}
+            style={{ marginRight: 8 }}
           >
             Chi tiết
           </Button>
-          <Select
-            defaultValue={record.status}
-            style={{ width: 140, marginLeft: 8 }}
-            onChange={(value) => handleStatusChange(record._id, value, false)}
+          <Button 
+            type="primary" 
+            style={{ backgroundColor: '#52c41a', borderColor: '#52c41a', marginRight: 8 }}
+            onClick={() => handleStatusChange(record._id, "completed", false)}
           >
-            <Option value="pending">Đang chờ</Option>
-            <Option value="approve">Đã duyệt</Option>
-            <Option value="completed">Hoàn thành</Option>
-            <Option value="incomplete">Chưa hoàn thành</Option>
-          </Select>
+            Duyệt
+          </Button>
+          <Button 
+            danger
+            onClick={() => handleStatusChange(record._id, "incomplete", false)}
+          >
+            Hủy Đơn
+          </Button>
         </div>
       ),
     },
@@ -391,10 +405,23 @@ const AppointmentManagement = () => {
           <Button 
             type="primary" 
             onClick={() => showAppointmentDetails(record, true)}
+            style={{ marginRight: 8 }}
           >
             Chi tiết
           </Button>
-          
+          <Button 
+            type="primary" 
+            style={{ backgroundColor: '#52c41a', borderColor: '#52c41a', marginRight: 8 }}
+            onClick={() => handleStatusChange(record._id, "completed", true)}
+          >
+            Duyệt
+          </Button>
+          <Button 
+            danger
+            onClick={() => handleStatusChange(record._id, "incomplete", true)}
+          >
+            Hủy Đơn
+          </Button>
         </div>
       ),
     },
@@ -588,20 +615,27 @@ const AppointmentManagement = () => {
             <div className="detail-row" style={{ marginTop: 20 }}>
               <span className="detail-label">Cập nhật trạng thái:</span>
               <span className="detail-value">
-                <Select
-                  defaultValue={selectedAppointment.status}
-                  style={{ width: 140 }}
-                  onChange={(value) => handleStatusChange(
+                <Button 
+                  type="primary" 
+                  style={{ backgroundColor: '#52c41a', borderColor: '#52c41a', marginRight: 8 }}
+                  onClick={() => handleStatusChange(
                     selectedAppointment._id, 
-                    value, 
+                    "completed", 
                     selectedAppointment.isPackage
                   )}
                 >
-                  <Option value="pending">Đang chờ</Option>
-                  <Option value="approve">Đã duyệt</Option>
-                  <Option value="completed">Hoàn thành</Option>
-                  <Option value="incomplete">Chưa hoàn thành</Option>
-                </Select>
+                  Duyệt
+                </Button>
+                <Button 
+                  danger
+                  onClick={() => handleStatusChange(
+                    selectedAppointment._id, 
+                    "incomplete", 
+                    selectedAppointment.isPackage
+                  )}
+                >
+                  Hủy Đơn
+                </Button>
               </span>
             </div>
           </div>
