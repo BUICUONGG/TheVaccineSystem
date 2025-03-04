@@ -1,34 +1,30 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
-import { useNavigate } from "react-router-dom";
-import { Form, Input, Select, message, Spin } from "antd";
+import { useNavigate, Outlet, useLocation } from "react-router-dom";
+import { Layout, Menu, message } from 'antd';
+import { UserOutlined, HistoryOutlined, KeyOutlined, HomeOutlined } from '@ant-design/icons';
+import axios from 'axios';
 import "./Profile.css";
 
-const { Option } = Select;
+const { Sider, Content } = Layout;
 
 const Profile = () => {
   const navigate = useNavigate();
-  const [form] = Form.useForm();
-  const [loading, setLoading] = useState(false);
+  const location = useLocation();
   const [userData, setUserData] = useState(null);
 
   const fetchUserData = async () => {
     try {
-      setLoading(true);
       const accesstoken = localStorage.getItem("accesstoken");
-
       if (!accesstoken) {
         message.error("Vui lòng đăng nhập để xem thông tin");
         navigate("/login");
         return;
       }
 
-      // Decode token để lấy userId
       const tokenParts = accesstoken.split('.');
       const payload = JSON.parse(atob(tokenParts[1]));
       const userId = payload.id;
 
-      // Fetch customer data
       const response = await axios.get(
         `http://localhost:8080/customer/getOneCustomer/${userId}`,
         {
@@ -36,164 +32,74 @@ const Profile = () => {
         }
       );
 
-      const customerData = response.data;
-
-      // Set form values với dữ liệu từ response
-      form.setFieldsValue({
-        customerName: customerData.customerName,
-        phone: customerData.phone,
-        birthday: customerData.birthday,
-        address: customerData.address,
-        gender: customerData.gender
-      });
-
-      setUserData(customerData);
-
+      setUserData(response.data);
     } catch (error) {
       console.error("Error fetching user data:", error);
       if (error.response?.status === 401) {
-        message.error("Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại");
         navigate("/login");
-      } else {
-        message.error("Không thể tải thông tin người dùng");
       }
-    } finally {
-      setLoading(false);
     }
   };
 
   useEffect(() => {
     fetchUserData();
-  }, []);
+  }, [location.pathname]);
 
-  const onFinish = async (values) => {
-    try {
-      setLoading(true);
-      const accesstoken = localStorage.getItem("accesstoken");
-      
-      // Decode token để lấy userId
-      const tokenParts = accesstoken.split('.');
-      const payload = JSON.parse(atob(tokenParts[1]));
-      const userId = payload.id;
-
-      if (!accesstoken) {
-        message.error("Vui lòng đăng nhập lại");
-        navigate("/login");
-        return;
-      }
-
-      const updatedData = {
-        customerName: values.customerName?.trim(),
-        phone: values.phone?.trim(),
-        address: values.address?.trim(),
-        gender: values.gender,
-        birthday: values.birthday?.trim()
-      };
-
-      await axios.post(
-        `http://localhost:8080/customer/update/${userId}`,
-        updatedData,
-        {
-          headers: { Authorization: `Bearer ${accesstoken}` }
-        }
-      );
-
-      message.success("Cập nhật thông tin thành công");
-      // Refresh data after update
-      await fetchUserData();
-
-    } catch (error) {
-      console.error("Error updating profile:", error);
-      message.error("Không thể cập nhật thông tin");
-    } finally {
-      setLoading(false);
-    }
+  const getSelectedKey = () => {
+    const path = location.pathname;
+    if (path === '/homepage') return 'home';
+    if (path.includes('/profile/history')) return 'history';
+    if (path.includes('/profile/account')) return 'account';
+    return 'profile';
   };
 
+  const menuItems = [
+    {
+      key: 'home',
+      icon: <HomeOutlined />,
+      label: 'Trang chủ',
+      onClick: () => navigate('/homepage')
+    },
+    {
+      key: 'profile',
+      icon: <UserOutlined />,
+      label: 'Thông tin cá nhân',
+      onClick: () => navigate('/profile')
+    },
+    {
+      key: 'account',
+      icon: <KeyOutlined />,
+      label: 'Thông tin tài khoản',
+      onClick: () => navigate('/profile/account')
+    },
+    {
+      key: 'history',
+      icon: <HistoryOutlined />,
+      label: 'Lịch sử tiêm chủng',
+      onClick: () => navigate('/profile/history')
+    } 
+  ];
+
   return (
-    <div className="profile-container">
-      <h2 className="profile-title">Thông Tin Cá Nhân</h2>
-      <Spin spinning={loading}>
-        <Form
-          form={form}
-          layout="vertical"
-          onFinish={onFinish}
-          className="profile-form"
-          initialValues={userData}
-        >
-          <div className="form-row">
-            <Form.Item
-              name="customerName"
-              label="Họ và tên"
-              className="form-item"
-              rules={[
-                { required: true, message: "Vui lòng nhập họ tên!" },
-                { whitespace: true, message: "Không được chỉ nhập khoảng trắng!" }
-              ]}
-            >
-              <Input maxLength={100} />
-            </Form.Item>
-
-            <Form.Item
-              name="phone"
-              label="Số điện thoại"
-              className="form-item"
-              rules={[
-                { required: true, message: "Vui lòng nhập số điện thoại!" },
-                { pattern: /^[0-9]{10}$/, message: "Số điện thoại phải có 10 chữ số!" }
-              ]}
-            >
-              <Input maxLength={10} />
-            </Form.Item>
+    <Layout className="profile-layout">
+      <Sider className="profile-sider" width={280}>
+        <div className="profile-menu-header">
+          <div className="user-info">
+            <h3>{userData?.customerName || 'Người dùng'}</h3>
+            <p>{userData?.email || 'Email chưa cập nhật'}</p>
           </div>
-
-          <Form.Item
-            name="address"
-            label="Địa chỉ"
-            rules={[
-              { required: true, message: "Vui lòng nhập địa chỉ!" }
-            ]}
-          >
-            <Input.TextArea maxLength={200} rows={4} />
-          </Form.Item>
-
-          <div className="form-row">
-            <Form.Item
-              name="gender"
-              label="Giới tính"
-              className="form-item"
-              rules={[{ required: true, message: "Vui lòng chọn giới tính!" }]}
-            >
-              <Select>
-                <Option value="Male">Nam</Option>
-                <Option value="Female">Nữ</Option>
-                <Option value="Other">Khác</Option>
-              </Select>
-            </Form.Item>
-
-            <Form.Item
-              name="birthday"
-              label="Ngày sinh"
-              className="form-item"
-              rules={[
-                {
-                  pattern: /^(0[1-9]|[12][0-9]|3[01])\/(0[1-9]|1[0-2])\/\d{4}$/,
-                  message: "Định dạng ngày sinh không hợp lệ (DD/MM/YYYY)!"
-                }
-              ]}
-            >
-              <Input placeholder="DD/MM/YYYY" />
-            </Form.Item>
-          </div>
-
-          <Form.Item className="submit-button">
-            <button type="submit" className="update-btn" disabled={loading}>
-              {loading ? "Đang cập nhật..." : "Cập nhật thông tin"}
-            </button>
-          </Form.Item>
-        </Form>
-      </Spin>
-    </div>
+        </div>
+        <Menu
+          mode="inline"
+          selectedKeys={[getSelectedKey()]}
+          items={menuItems}
+          className="profile-menu"
+        />
+      </Sider>
+      <Content className="profile-content">
+        <Outlet context={{ userData, refreshUserData: fetchUserData }} />
+      </Content>
+    </Layout>
   );
 };
 

@@ -165,7 +165,7 @@ const AdminLayout = () => {
         </div>
       </div>
 
-      <div className="main-contentt">
+      <div className="main-contentt-admin">
         <header className="header">
           <div className="navigation">
             <Link to="/homepage">
