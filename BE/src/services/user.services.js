@@ -103,7 +103,7 @@ class UserService {
         const customer = await connectToDatabase.customers.findOne({
           userId: user._id,
         });
-        const cusId = customer._id;
+        const cusId = customer ? customer._id.toString() : null;
         return {
           userId,
           cusId,
@@ -117,6 +117,7 @@ class UserService {
       throw new Error(error.message);
     }
   }
+
 
   async delete(userId) {
     try {
