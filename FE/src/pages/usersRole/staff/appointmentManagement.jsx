@@ -31,38 +31,17 @@ const AppointmentManagement = () => {
         }
       );
       
-      // Fetch appointments gói
+      // Fetch appointments gói - sử dụng API chi tiết
       const responseGoi = await axios.get(
-        "http://localhost:8080/appointmentGoi/showInfo",
+        "http://localhost:8080/appointmentGoi/showDetailAptGoi",
         {
           headers: { Authorization: `Bearer ${token}` }
         }
       );
       
-      // For package appointments, fetch customer details for each appointment
-      const appointmentsGoiWithCustomers = await Promise.all(
-        (responseGoi.data || []).map(async (appointment) => {
-          if (appointment.cusId) {
-            try {
-              const customerResponse = await axios.get(
-                `http://localhost:8080/customer/getone/${appointment.cusId}`,
-                { headers: { Authorization: `Bearer ${token}` } }
-              );
-              return {
-                ...appointment,
-                customerDetails: customerResponse.data
-              };
-            } catch (error) {
-              console.error("Error fetching customer details:", error);
-              return appointment;
-            }
-          }
-          return appointment;
-        })
-      );
-      
+      // Không cần fetch thêm thông tin nếu API đã trả về đầy đủ
       setAppointmentsLe(responseLe.data || []);
-      setAppointmentsGoi(appointmentsGoiWithCustomers);
+      setAppointmentsGoi(responseGoi.data || []);
     } catch (error) {
       console.error("Error fetching appointments:", error);
       message.error("Không thể tải danh sách lịch hẹn");
@@ -205,67 +184,7 @@ const AppointmentManagement = () => {
       // Đánh dấu loại lịch hẹn
       record.isPackage = isPackage;
       
-      if (isPackage) {
-        // Nếu là lịch hẹn gói, cần fetch thêm thông tin chi tiết
-        const token = localStorage.getItem("accesstoken");
-        
-        // Fetch thông tin khách hàng
-        if (record.cusId) {
-          try {
-            const customerResponse = await axios.get(
-              `http://localhost:8080/customer/getone/${record.cusId}`,
-              { headers: { Authorization: `Bearer ${token}` } }
-            );
-            record.customerDetails = customerResponse.data;
-          } catch (error) {
-            console.error("Error fetching customer details:", error);
-          }
-        }
-        
-        // Fetch thông tin gói vaccine
-        if (record.vaccinePakageId) {
-          try {
-            const packageResponse = await axios.get(
-              `http://localhost:8080/vaccinepackage/getone/${record.vaccinePakageId}`,
-              { headers: { Authorization: `Bearer ${token}` } }
-            );
-            record.packageDetails = packageResponse.data;
-          } catch (error) {
-            console.error("Error fetching package details:", error);
-          }
-        }
-        
-        // Fetch thông tin chi tiết lịch hẹn gói nếu chưa có doseSchedule
-        if (!record.doseSchedule) {
-          try {
-            const appointmentResponse = await axios.get(
-              `http://localhost:8080/appointmentGoi/getone/${record._id}`,
-              { headers: { Authorization: `Bearer ${token}` } }
-            );
-            
-            // Merge the detailed data with our record
-            record = { ...record, ...appointmentResponse.data };
-          } catch (error) {
-            console.error("Error fetching appointment details:", error);
-          }
-        }
-      } else {
-        // Nếu là lịch hẹn lẻ, có thể đã có đủ thông tin từ API getdetailallaptle
-        // Nhưng nếu cần thêm thông tin chi tiết, có thể fetch thêm
-        if (!record.customer || !record.vaccine) {
-          const token = localStorage.getItem("accesstoken");
-          try {
-            const detailResponse = await axios.get(
-              `http://localhost:8080/appointmentLe/getdetailaptlee/${record._id}`,
-              { headers: { Authorization: `Bearer ${token}` } }
-            );
-            record = {...record, ...detailResponse.data};
-          } catch (error) {
-            console.error("Error fetching appointment details:", error);
-          }
-        }
-      }
-      
+      // Không cần fetch thêm thông tin nếu API đã trả về đầy đủ
       setSelectedAppointment(record);
     } catch (error) {
       console.error("Error showing appointment details:", error);
@@ -367,8 +286,11 @@ const AppointmentManagement = () => {
       render: (cusId, record) => {
         // Try to get customer name from all possible sources
         const customerName = 
+          record.customer?.customerName || 
           record.customerDetails?.customerName || 
-          "N/A";
+          cusId?.customerName || 
+          cusId?.name || 
+          (typeof cusId === 'string' ? cusId : "N/A");
         
         return customerName;
       },
@@ -378,8 +300,23 @@ const AppointmentManagement = () => {
       dataIndex: "vaccinePakageId",
       key: "vaccinePakageId",
       render: (pkg, record) => {
-        if (record.packageDetails?.packageName) return record.packageDetails.packageName;
-        return pkg ? pkg.toString().substring(0, 8) + "..." : "N/A";
+        // Try to get package name from all possible sources
+        const packageName = 
+          record.package?.packageName ||
+          record.vaccinePakage?.packageName ||
+          record.packageDetails?.packageName || 
+          pkg?.packageName || 
+          pkg?.name || 
+          (typeof pkg === 'string' ? pkg : "N/A");
+        
+        console.log("Vaccine Package Data:", {
+          package: record.package,
+          vaccinePakage: record.vaccinePakage,
+          packageDetails: record.packageDetails,
+          pkg: pkg
+        });
+        
+        return packageName;
       },
     },
     {
@@ -437,6 +374,8 @@ const AppointmentManagement = () => {
 
   const filteredAppointmentsGoi = appointmentsGoi.filter(apt => 
     apt._id?.toLowerCase().includes(searchText.toLowerCase()) ||
+    (apt.customer?.customerName || apt.customerDetails?.customerName || apt.cusId?.customerName || apt.cusId?.name || "")?.toLowerCase().includes(searchText.toLowerCase()) ||
+    (apt.package?.packageName || apt.vaccinePakage?.packageName || apt.packageDetails?.packageName || apt.vaccinePakageId?.packageName || apt.vaccinePakageId?.name || "")?.toLowerCase().includes(searchText.toLowerCase()) ||
     apt.date?.toLowerCase().includes(searchText.toLowerCase()) ||
     apt.status?.toLowerCase().includes(searchText.toLowerCase())
   );
@@ -498,8 +437,11 @@ const AppointmentManagement = () => {
               <span className="detail-label">Khách hàng:</span>
               <span className="detail-value">
                 {selectedAppointment.isPackage 
-                  ? (selectedAppointment.customerDetails?.customerName || 
-                     (selectedAppointment.cusId ? selectedAppointment.cusId.toString() : "N/A"))
+                  ? (selectedAppointment.customer?.customerName || 
+                     selectedAppointment.customerDetails?.customerName || 
+                     (selectedAppointment.cusId?.customerName || 
+                      selectedAppointment.cusId?.name || 
+                      (typeof selectedAppointment.cusId === 'string' ? selectedAppointment.cusId : "N/A")))
                   : (selectedAppointment.customer?.customerName || 
                      selectedAppointment.cusId?.customerName || 
                      selectedAppointment.cusId?.name || 
@@ -510,7 +452,9 @@ const AppointmentManagement = () => {
               <span className="detail-label">Số điện thoại:</span>
               <span className="detail-value">
                 {selectedAppointment.isPackage
-                  ? (selectedAppointment.customerDetails?.phone || "N/A")
+                  ? (selectedAppointment.customer?.phone || 
+                     selectedAppointment.customerDetails?.phone || 
+                     selectedAppointment.cusId?.phone || "N/A")
                   : (selectedAppointment.customer?.phone || 
                      selectedAppointment.cusId?.phone || "N/A")}
               </span>
@@ -519,7 +463,9 @@ const AppointmentManagement = () => {
               <span className="detail-label">Địa chỉ:</span>
               <span className="detail-value">
                 {selectedAppointment.isPackage
-                  ? (selectedAppointment.customerDetails?.address || "N/A")
+                  ? (selectedAppointment.customer?.address || 
+                     selectedAppointment.customerDetails?.address || 
+                     selectedAppointment.cusId?.address || "N/A")
                   : (selectedAppointment.customer?.address || 
                      selectedAppointment.cusId?.address || "N/A")}
               </span>
@@ -538,7 +484,11 @@ const AppointmentManagement = () => {
               </span>
               <span className="detail-value">
                 {selectedAppointment.isPackage 
-                  ? (selectedAppointment.packageDetails?.packageName || 
+                  ? (selectedAppointment.package?.packageName || 
+                     selectedAppointment.vaccinePakage?.packageName ||
+                     selectedAppointment.packageDetails?.packageName || 
+                     selectedAppointment.vaccinePakageId?.packageName || 
+                     selectedAppointment.vaccinePakageId?.name || 
                      (selectedAppointment.vaccinePakageId ? selectedAppointment.vaccinePakageId.toString() : "N/A"))
                   : (selectedAppointment.vaccine?.vaccineName || 
                      selectedAppointment.vaccineId?.vaccineName || 
