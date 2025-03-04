@@ -1,6 +1,8 @@
 import express from "express";
 import path from "path";
-import "dotenv/config";
+// import "dotenv/config";
+import dotenv from "dotenv";
+dotenv.config();
 import cookieParser from "cookie-parser";
 import connectToDatabase from "./src/config/database.js";
 import cors from "cors";

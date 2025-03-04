@@ -1,6 +1,7 @@
 .container {
   display: flex;
-  min-height: 100vh;
+  /* min-height: 100vh; */
+  width: 100vw;
 }
 
 .sidebar {
@@ -104,24 +105,7 @@
 }
 
 /* Responsive styles */
-@media (max-width: 768px) {
-  .container {
-    flex-direction: column;
-  }
-
-  .sidebar {
-    width: 100%;
-  }
-
-  .header {
-    flex-direction: column;
-    gap: 15px;
-  }
-
-  .search-bar {
-    width: 100%;
-  }
-}
+/* werwrwew */
 
 /* Optional: Add some animations */
 .menu-item a {
@@ -150,7 +134,12 @@
   width: calc(100% - 40px);
 }
 
+<<<<<<< HEAD
+.logout-button,
+.dashboard-button {
+=======
 .logout-button {
+>>>>>>> 3ef791bf1329cda31abe093eecfaf70a117401c8
   width: 100%;
   display: flex;
   align-items: center;

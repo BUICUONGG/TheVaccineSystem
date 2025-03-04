@@ -2,12 +2,14 @@ import { useState, useEffect } from "react";
 import { Table, Input, Button, Modal, Form, Popconfirm } from "antd";
 import { EditOutlined, DeleteOutlined, PlusOutlined } from "@ant-design/icons";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+// import { useNavigate } from "react-router-dom";
+
+import axiosInstance from "../../../service/api.js";
 
 const { Search } = Input;
 
 const BlogManagement = () => {
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
   const [blogs, setBlogs] = useState([]);
   const [loading, setLoading] = useState(false);
   const [searchText, setSearchText] = useState("");
@@ -16,7 +18,7 @@ const BlogManagement = () => {
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
   const [editingBlog, setEditingBlog] = useState(null);
   const [form] = Form.useForm();
-  const [editForm] = Form.useForm();
+  // const [editForm] = Form.useForm();
 
   useEffect(() => {
     fetchBlogs();
@@ -24,9 +26,10 @@ const BlogManagement = () => {
 
   // Filter blogs when searchText changes
   useEffect(() => {
-    const filtered = blogs.filter(blog => 
-      blog.blogTitle.toLowerCase().includes(searchText.toLowerCase()) ||
-      blog.author.toLowerCase().includes(searchText.toLowerCase())
+    const filtered = blogs.filter(
+      (blog) =>
+        blog.blogTitle.toLowerCase().includes(searchText.toLowerCase()) ||
+        blog.author.toLowerCase().includes(searchText.toLowerCase())
     );
     setFilteredBlogs(filtered);
   }, [blogs, searchText]);
@@ -38,7 +41,7 @@ const BlogManagement = () => {
   const fetchBlogs = async () => {
     try {
       setLoading(true);
-      const response = await axios.get("http://localhost:8080/blogs/showBlog");
+      const response = await axiosInstance.get("/blogs/showBlog");
       setBlogs(response.data);
       setFilteredBlogs(response.data);
     } catch (error) {
@@ -56,13 +59,13 @@ const BlogManagement = () => {
       await axios.post("http://localhost:8080/blogs/createBlog", {
         ...values,
         userId: "67b53056af240f16ecf58a5c", // Thay thế bằng userId thực tế
-        status: "active"
+        status: "active",
       });
-      
+
       Modal.success({
         content: "Blog created successfully",
       });
-      
+
       setIsModalVisible(false);
       form.resetFields();
       fetchBlogs(); // Refresh danh sách blog
@@ -81,7 +84,7 @@ const BlogManagement = () => {
         blogTitle: values.blogTitle?.trim() || null,
         blogContent: values.blogContent?.trim() || null,
         author: values.author?.trim() || null,
-        status: editingBlog.status
+        status: editingBlog.status,
       };
 
       await axios.post(
@@ -105,11 +108,11 @@ const BlogManagement = () => {
   const handleDelete = async (blogId) => {
     try {
       await axios.post(`http://localhost:8080/blogs/delete/${blogId}`);
-      
+
       Modal.success({
         content: "Xóa blog thành công!",
       });
-      
+
       fetchBlogs();
     } catch (error) {
       console.error("Error deleting blog:", error);
@@ -130,20 +133,20 @@ const BlogManagement = () => {
       title: "Title",
       dataIndex: "blogTitle",
       key: "blogTitle",
-      render: (text) => text || "Chưa cập nhật"
+      render: (text) => text || "Chưa cập nhật",
     },
     {
       title: "Content",
       dataIndex: "blogContent",
       key: "blogContent",
       ellipsis: true,
-      render: (text) => text || "Chưa cập nhật"
+      render: (text) => text || "Chưa cập nhật",
     },
     {
       title: "Author",
       dataIndex: "author",
       key: "author",
-      render: (text) => text || "Chưa cập nhật"
+      render: (text) => text || "Chưa cập nhật",
     },
     {
       title: "Views",
@@ -163,10 +166,12 @@ const BlogManagement = () => {
       key: "status",
       width: 100,
       render: (status) => (
-        <span style={{
-          color: status === "active" ? "#52c41a" : "#ff4d4f",
-          textTransform: "capitalize"
-        }}>
+        <span
+          style={{
+            color: status === "active" ? "#52c41a" : "#ff4d4f",
+            textTransform: "capitalize",
+          }}
+        >
           {status}
         </span>
       ),
@@ -196,11 +201,7 @@ const BlogManagement = () => {
             cancelText="Không"
             okType="danger"
           >
-            <Button
-              type="link"
-              danger
-              icon={<DeleteOutlined />}
-            />
+            <Button type="link" danger icon={<DeleteOutlined />} />
           </Popconfirm>
         </span>
       ),
@@ -219,7 +220,13 @@ const BlogManagement = () => {
 
   return (
     <div style={{ padding: "20px" }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px' }}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          marginBottom: "16px",
+        }}
+      >
         <h2>Blog Management</h2>
         <Button
           type="primary"
@@ -265,7 +272,10 @@ const BlogManagement = () => {
             label="Tiêu đề"
             rules={[
               { required: true, message: "Vui lòng nhập tiêu đề!" },
-              { whitespace: true, message: "Không được chỉ nhập khoảng trắng!" }
+              {
+                whitespace: true,
+                message: "Không được chỉ nhập khoảng trắng!",
+              },
             ]}
           >
             <Input maxLength={200} />
@@ -276,7 +286,10 @@ const BlogManagement = () => {
             label="Nội dung"
             rules={[
               { required: true, message: "Vui lòng nhập nội dung!" },
-              { whitespace: true, message: "Không được chỉ nhập khoảng trắng!" }
+              {
+                whitespace: true,
+                message: "Không được chỉ nhập khoảng trắng!",
+              },
             ]}
           >
             <Input.TextArea rows={4} maxLength={1000} />
@@ -287,7 +300,10 @@ const BlogManagement = () => {
             label="Tác giả"
             rules={[
               { required: true, message: "Vui lòng nhập tên tác giả!" },
-              { whitespace: true, message: "Không được chỉ nhập khoảng trắng!" }
+              {
+                whitespace: true,
+                message: "Không được chỉ nhập khoảng trắng!",
+              },
             ]}
           >
             <Input maxLength={100} />
@@ -344,4 +360,4 @@ const BlogManagement = () => {
   );
 };
 
-export default BlogManagement; 
+export default BlogManagement;

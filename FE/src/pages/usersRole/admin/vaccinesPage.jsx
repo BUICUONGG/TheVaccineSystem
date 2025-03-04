@@ -1,13 +1,14 @@
 import { useState, useEffect } from "react";
 import { Table, Input, Button, Modal, Form, Popconfirm } from "antd";
 import { EditOutlined, DeleteOutlined, PlusOutlined } from "@ant-design/icons";
-import axios from "axios";
-import { useNavigate } from "react-router-dom";
+// import axios from "axios";
+import axiosInstance from "../../../service/api.js";
+// import { useNavigate } from "react-router-dom";
 
 const { Search } = Input;
 
 const VaccinesPage = () => {
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
   const [vaccineList, setVaccineList] = useState([]);
   const [loading, setLoading] = useState(false);
   const [searchText, setSearchText] = useState("");
@@ -36,7 +37,7 @@ const VaccinesPage = () => {
   const fetchVaccines = async () => {
     try {
       setLoading(true);
-      const response = await axios.get("http://localhost:8080/vaccine/showInfo");
+      const response = await axiosInstance.get("/vaccine/showInfo");
       setVaccineList(response.data);
       setFilteredVaccines(response.data);
     } catch (error) {
@@ -51,15 +52,15 @@ const VaccinesPage = () => {
 
   const handleCreate = async (values) => {
     try {
-      await axios.post("http://localhost:8080/vaccine/addVaccine", {
+      await axiosInstance.post("/vaccine/addVaccine", {
         ...values,
-        createdAt: new Date().toLocaleDateString('en-GB'),
+        createdAt: new Date().toLocaleDateString("en-GB"),
       });
-      
+
       Modal.success({
         content: "Thêm vaccine thành công!",
       });
-      
+
       setIsModalVisible(false);
       form.resetFields();
       fetchVaccines();
@@ -85,8 +86,8 @@ const VaccinesPage = () => {
         imageUrl: values.imageUrl?.trim(),
       };
 
-      await axios.post(
-        `http://localhost:8080/vaccine/updateVaccine/${editingVaccine._id}`,
+      await axiosInstance.post(
+        `/vaccine/updateVaccine/${editingVaccine._id}`,
         updatedData
       );
 
@@ -106,12 +107,12 @@ const VaccinesPage = () => {
 
   const handleDelete = async (vaccineId) => {
     try {
-      await axios.post(`http://localhost:8080/vaccine/delete/${vaccineId}`);
-      
+      await axiosInstance.post(`/vaccine/delete/${vaccineId}`);
+
       Modal.success({
         content: "Xóa vaccine thành công!",
       });
-      
+
       fetchVaccines();
     } catch (error) {
       console.error("Error deleting vaccine:", error);
@@ -153,15 +154,16 @@ const VaccinesPage = () => {
       title: "Hình ảnh",
       dataIndex: "imageUrl",
       key: "imageUrl",
-      render: (imageUrl) => (
+      render: (imageUrl) =>
         imageUrl ? (
-          <img 
-            src={imageUrl} 
-            alt="Vaccine" 
-            style={{ width: 50, height: 50, objectFit: 'cover' }}
+          <img
+            src={imageUrl}
+            alt="Vaccine"
+            style={{ width: 50, height: 50, objectFit: "cover" }}
           />
-        ) : "Chưa có hình ảnh"
-      )
+        ) : (
+          "Chưa có hình ảnh"
+        ),
     },
     {
       title: "Thao tác",
@@ -182,11 +184,7 @@ const VaccinesPage = () => {
             cancelText="Không"
             okType="danger"
           >
-            <Button
-              type="link"
-              danger
-              icon={<DeleteOutlined />}
-            />
+            <Button type="link" danger icon={<DeleteOutlined />} />
           </Popconfirm>
         </span>
       ),
@@ -200,7 +198,7 @@ const VaccinesPage = () => {
       });
       return;
     }
-    
+
     setEditingVaccine(vaccine);
     editForm.setFieldsValue({
       vaccineName: vaccine.vaccineName,
@@ -213,7 +211,13 @@ const VaccinesPage = () => {
 
   return (
     <div style={{ padding: "20px" }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px' }}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          marginBottom: "16px",
+        }}
+      >
         <h2>Quản lý Vaccine</h2>
         <Button
           type="primary"
@@ -262,16 +266,16 @@ const VaccinesPage = () => {
             label="Tên Vaccine"
             rules={[
               { required: true, message: "Vui lòng nhập tên vaccine!" },
-              { whitespace: true, message: "Không được chỉ nhập khoảng trắng!" }
+              {
+                whitespace: true,
+                message: "Không được chỉ nhập khoảng trắng!",
+              },
             ]}
           >
             <Input maxLength={200} />
           </Form.Item>
 
-          <Form.Item
-            name="description"
-            label="Mô tả"
-          >
+          <Form.Item name="description" label="Mô tả">
             <Input.TextArea rows={4} maxLength={1000} />
           </Form.Item>
 
@@ -280,16 +284,16 @@ const VaccinesPage = () => {
             label="Nhà sản xuất"
             rules={[
               { required: true, message: "Vui lòng nhập tên nhà sản xuất!" },
-              { whitespace: true, message: "Không được chỉ nhập khoảng trắng!" }
+              {
+                whitespace: true,
+                message: "Không được chỉ nhập khoảng trắng!",
+              },
             ]}
           >
             <Input maxLength={200} />
           </Form.Item>
 
-          <Form.Item
-            name="imageUrl"
-            label="URL hình ảnh"
-          >
+          <Form.Item name="imageUrl" label="URL hình ảnh">
             <Input />
           </Form.Item>
 
@@ -317,25 +321,21 @@ const VaccinesPage = () => {
             <Input maxLength={200} />
           </Form.Item>
 
-          <Form.Item
-            name="description"
-            label="Mô tả"
-          >
+          <Form.Item name="description" label="Mô tả">
             <Input.TextArea rows={4} maxLength={1000} />
           </Form.Item>
 
           <Form.Item
             name="manufacturer"
             label="Nhà sản xuất"
-            rules={[{ required: true, message: "Vui lòng nhập tên nhà sản xuất!" }]}
+            rules={[
+              { required: true, message: "Vui lòng nhập tên nhà sản xuất!" },
+            ]}
           >
             <Input maxLength={200} />
           </Form.Item>
 
-          <Form.Item
-            name="imageUrl"
-            label="URL hình ảnh"
-          >
+          <Form.Item name="imageUrl" label="URL hình ảnh">
             <Input />
           </Form.Item>
 
