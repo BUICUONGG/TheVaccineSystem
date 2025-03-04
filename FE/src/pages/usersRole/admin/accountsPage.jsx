@@ -1,5 +1,14 @@
 import { useState, useEffect } from "react";
-import { Table, Input, Button, Modal, Popconfirm, Form, Select, message } from "antd";
+import {
+  Table,
+  Input,
+  Button,
+  Modal,
+  Popconfirm,
+  Form,
+  Select,
+  message,
+} from "antd";
 import { DeleteOutlined, UserAddOutlined } from "@ant-design/icons";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
@@ -26,7 +35,7 @@ const AccountsPage = () => {
 
   // Cập nhật filtered users khi userList hoặc searchText thay đổi
   useEffect(() => {
-    const filtered = userList.filter(user => 
+    const filtered = userList.filter((user) =>
       user.username.toLowerCase().includes(searchText.toLowerCase())
     );
     setFilteredUsers(filtered);
@@ -41,14 +50,11 @@ const AccountsPage = () => {
       setLoading(true);
       const accesstoken = localStorage.getItem("accesstoken");
 
-      const response = await axios.get(
-        "http://localhost:8080/user/showInfo",
-        {
-          headers: {
-            Authorization: `Bearer ${accesstoken}`,
-          },
-        }
-      );
+      const response = await axios.get("http://localhost:8080/user/showInfo", {
+        headers: {
+          Authorization: `Bearer ${accesstoken}`,
+        },
+      });
 
       const sortedUsers = (response.data.result || []).sort((a, b) => {
         const roleOrder = {
@@ -97,7 +103,7 @@ const AccountsPage = () => {
       Modal.success({
         content: "Xóa tài khoản thành công!",
       });
-      
+
       await fetchUsers(); // Refresh danh sách
     } catch (error) {
       console.error("Error deleting user:", error);
@@ -136,15 +142,11 @@ const AccountsPage = () => {
         return;
       }
 
-      await axios.post(
-        "http://localhost:8080/staff/createStaff",
-        values,
-        {
-          headers: {
-            Authorization: `Bearer ${accesstoken}`,
-          },
-        }
-      );
+      await axios.post("http://localhost:8080/staff/createStaff", values, {
+        headers: {
+          Authorization: `Bearer ${accesstoken}`,
+        },
+      });
 
       message.success("Tạo tài khoản nhân viên thành công!");
       setIsCreateModalVisible(false);
@@ -158,7 +160,9 @@ const AccountsPage = () => {
         navigate("/login");
       } else {
         Modal.error({
-          content: error.response?.data?.message || "Không thể tạo tài khoản nhân viên",
+          content:
+            error.response?.data?.message ||
+            "Không thể tạo tài khoản nhân viên",
         });
       }
     } finally {
@@ -192,7 +196,7 @@ const AccountsPage = () => {
       title: "Password",
       dataIndex: "password",
       key: "password",
-      render: () => "•••••••"
+      render: () => "•••••••",
     },
     // {
     //   title: "Email",
@@ -259,17 +263,23 @@ const AccountsPage = () => {
 
   return (
     <div style={{ padding: "20px" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "16px" }}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          marginBottom: "16px",
+        }}
+      >
         <h2>User Accounts Management</h2>
-        <Button 
-          type="primary" 
-          icon={<UserAddOutlined />} 
+        <Button
+          type="primary"
+          icon={<UserAddOutlined />}
           onClick={showCreateModal}
         >
           Create Staff
         </Button>
       </div>
-      
+
       <Search
         placeholder="Search by username"
         allowClear
@@ -277,7 +287,7 @@ const AccountsPage = () => {
         onSearch={handleSearch}
         style={{ width: 300, marginBottom: 16 }}
       />
-      
+
       <Table
         dataSource={filteredUsers}
         columns={columns}
@@ -297,11 +307,7 @@ const AccountsPage = () => {
         onCancel={handleCreateCancel}
         footer={null}
       >
-        <Form
-          form={createForm}
-          layout="vertical"
-          onFinish={handleCreateStaff}
-        >
+        <Form form={createForm} layout="vertical" onFinish={handleCreateStaff}>
           <Form.Item
             name="username"
             label="Username"
@@ -309,7 +315,7 @@ const AccountsPage = () => {
           >
             <Input placeholder="Enter username" />
           </Form.Item>
-          
+
           <Form.Item
             name="password"
             label="Password"
@@ -317,7 +323,7 @@ const AccountsPage = () => {
           >
             <Input.Password placeholder="Enter password" />
           </Form.Item>
-          
+
           <Form.Item
             name="staffname"
             label="Staff Name"
@@ -325,18 +331,21 @@ const AccountsPage = () => {
           >
             <Input placeholder="Enter full name" />
           </Form.Item>
-          
+
           <Form.Item
             name="phone"
             label="Phone Number"
             rules={[
               { required: true, message: "Please input phone number!" },
-              { pattern: /^[0-9]{10}$/, message: "Please enter a valid 10-digit phone number!" }
+              {
+                pattern: /^[0-9]{10}$/,
+                message: "Please enter a valid 10-digit phone number!",
+              },
             ]}
           >
             <Input placeholder="Enter phone number" />
           </Form.Item>
-          
+
           <Form.Item
             name="gender"
             label="Gender"
@@ -348,7 +357,7 @@ const AccountsPage = () => {
               <Option value="other">Other</Option>
             </Select>
           </Form.Item>
-          
+
           <Form.Item>
             <div style={{ display: "flex", justifyContent: "flex-end" }}>
               <Button onClick={handleCreateCancel} style={{ marginRight: 8 }}>
@@ -365,4 +374,4 @@ const AccountsPage = () => {
   );
 };
 
-export default AccountsPage; 
+export default AccountsPage;
