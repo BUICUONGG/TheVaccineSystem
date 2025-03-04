@@ -1,62 +1,66 @@
 import axios from "axios";
 
-// tạo api gốc
-const API = axios.create({
-  baseURL: "http://localhost:8080",
-  withCredentials: true,
+const API_URL = "http://localhost:8080";
+
+const axiosInstance = axios.create({
+  baseURL: API_URL,
+  headers: {
+    "Content-Type": "application/json",
+  },
+  withCredentials: true, // Gửi cookie chứa refreshToken
 });
 
-const getAccessToken = () => localStorage.getItem("accessToken");
-
-//Thêm accessToken vào req
-API.interceptors.request.use(
-  async (config) => {
-    const token = getAccessToken();
-    if (token) {
-      config.headers["Authorization"] = `Bearer ${token}`;
-    }
-    return config;
-  },
-  async (error) => {
-    return Promise.reject(error);
-  }
-);
-
-//refreshToken lấy từ  HTTP-only cookie
-const refreshToken = async () => {
-  try {
-    const response = await axios.post(
-      "http://localhost:8080/refreshToken",
-      {},
-      { withCredentials: true }
-    );
-    const newAccessToken = response.data.accessToken;
-    localStorage.setItem("accessToken", newAccessToken);
-    return newAccessToken;
-  } catch (error) {
-    console.error("Refresh token thất bại, yêu cầu đăng nhập lại");
-    localStorage.removeItem("accessToken");
-    window.location.href = "/login"; //
-    throw error;
-  }
+// Hàm lấy accessToken từ localStorage
+const getAccessToken = () => {
+  const token = localStorage.getItem("accesstoken");
+  console.log("Current AccessToken:", token);
+  return token;
 };
 
-API.interceptors.response.use(
-  async (response) => response,
+// Log mỗi khi gửi request
+axiosInstance.interceptors.request.use(
+  (config) => {
+    const token = getAccessToken();
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    console.log("Sending Request:", config);
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
+// Interceptor xử lý refresh token khi bị 401
+axiosInstance.interceptors.response.use(
+  (response) => response,
   async (error) => {
-    if (error.response && error.response.status === 401) {
-      console.log("Token hết hạn, thử refresh...");
+    console.error("API Error:", error);
+
+    const originalRequest = error.config;
+
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
+      console.log("Token expired, trying to refresh...");
 
       try {
-        const newAccessToken = await refreshToken();
+        const response = await axiosInstance.post("/user/refresh-token");
 
-        // Gửi lại request ban đầu với token mới
-        error.config.headers["Authorization"] = `Bearer ${newAccessToken}`;
-        return await axios(error.config);
+        const { accessToken } = response.data;
+        console.log("New AccessToken:", accessToken);
+
+        localStorage.setItem("accesstoken", accessToken);
+        originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+
+        return axiosInstance(originalRequest);
       } catch (refreshError) {
-        return Promise.reject(refreshError);
+        console.error("Refresh Token Failed:", refreshError);
+        localStorage.removeItem("accesstoken");
+        window.location.href = "/login"; // Chuyển về trang đăng nhập
       }
     }
+
     return Promise.reject(error);
   }
 );
+
+export default axiosInstance;

@@ -1,6 +1,7 @@
 .container {
   display: flex;
-  min-height: 100vh;
+  /* min-height: 100vh; */
+  width: 100vw;
 }
 
 .sidebar {
@@ -98,24 +99,7 @@
 }
 
 /* Responsive styles */
-@media (max-width: 768px) {
-  .container {
-    flex-direction: column;
-  }
-
-  .sidebar {
-    width: 100%;
-  }
-
-  .header {
-    flex-direction: column;
-    gap: 15px;
-  }
-
-  .search-bar {
-    width: 100%;
-  }
-}
+/* werwrwew */
 
 /* Optional: Add some animations */
 .menu-item a {
@@ -147,7 +131,8 @@
   gap: 10px;
 }
 
-.logout-button, .dashboard-button {
+.logout-button,
+.dashboard-button {
   width: 100%;
   display: flex;
   align-items: center;

@@ -21,7 +21,7 @@ const AccountsPage = () => {
   const [userList, setUserList] = useState([]);
   const [loading, setLoading] = useState(false);
   const [searchText, setSearchText] = useState("");
-  const [deleteLoading, setDeleteLoading] = useState(false);
+  // const [deleteLoading, setDeleteLoading] = useState(false);
   const [isCreateModalVisible, setIsCreateModalVisible] = useState(false);
   const [createForm] = Form.useForm();
   const [createLoading, setCreateLoading] = useState(false);
@@ -49,9 +49,11 @@ const AccountsPage = () => {
     try {
       setLoading(true);
       const accesstoken = localStorage.getItem("accesstoken");
+      console.log("acc", accesstoken);
 
       const response = await axios.get("http://localhost:8080/user/showInfo", {
         headers: {
+          // "Content-Type": "application/json",
           Authorization: `Bearer ${accesstoken}`,
         },
       });
@@ -76,6 +78,7 @@ const AccountsPage = () => {
 
       setUserList(sortedUsers);
       setFilteredUsers(sortedUsers);
+      setLoading(false);
     } catch (error) {
       console.error("Error fetching users:", error);
       if (error.response?.status === 401) {
@@ -91,10 +94,26 @@ const AccountsPage = () => {
             "Không thể tải danh sách người dùng",
         });
       }
-    } finally {
-      setLoading(false);
     }
   };
+
+  // const fetchUsers = async () => {
+  //   const acc = localStorage.getItem("accesstoken");
+  //   console.log(acc);
+  //   const res = await fetch("http://localhost:8080/user/showInfo", {
+  //     method: "GET",
+  //     headers: {
+  //       "Content-Type": "application/json",
+  //       Authorization: `Bearer ${acc}`,
+  //     },
+  //   });
+
+  //   const data = await res.json();
+
+  //   console.log(data);
+  //   setUserList(data);
+  //   setFilteredUsers(data);
+  // };
 
   const handleDelete = async (userId) => {
     try {
@@ -171,16 +190,12 @@ const AccountsPage = () => {
       };
 
       // Gọi API register giống như trong registerPage.jsx
-      const response = await axios.post(
-        "http://localhost:8080/user/register",
-        registerData,
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${accesstoken}`, // Vẫn giữ token để xác thực admin
-          },
-        }
-      );
+      await axios.post("http://localhost:8080/user/register", registerData, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accesstoken}`, // Vẫn giữ token để xác thực admin
+        },
+      });
 
       message.success("Tạo tài khoản nhân viên thành công!");
       setIsCreateModalVisible(false);
