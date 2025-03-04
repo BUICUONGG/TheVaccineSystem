@@ -128,12 +128,7 @@
   width: calc(100% - 40px);
 }
 
-<<<<<<< HEAD
-.logout-button,
-.dashboard-button {
-=======
 .logout-button {
->>>>>>> 3ef791bf1329cda31abe093eecfaf70a117401c8
   width: 100%;
   display: flex;
   align-items: center;
