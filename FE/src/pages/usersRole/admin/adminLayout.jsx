@@ -160,7 +160,7 @@ const AdminLayout = () => {
             onClick={handleLogout}
             className="logout-button"
           >
-            Logout
+            Đăng xuất 
           </Button>
         </div>
       </div>
