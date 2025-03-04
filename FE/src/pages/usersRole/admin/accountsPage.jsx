@@ -56,7 +56,16 @@ const AccountsPage = () => {
         },
       });
 
-      const sortedUsers = (response.data.result || []).sort((a, b) => {
+      // Kiểm tra cấu trúc dữ liệu trả về
+      console.log("API Response:", response.data);
+
+      // Lấy dữ liệu người dùng từ response
+      // Backend có thể trả về trực tiếp mảng users hoặc object có thuộc tính result
+      const users = Array.isArray(response.data)
+        ? response.data
+        : response.data.result || [];
+
+      const sortedUsers = users.sort((a, b) => {
         const roleOrder = {
           admin: 1,
           staff: 2,
@@ -64,6 +73,7 @@ const AccountsPage = () => {
         };
         return roleOrder[a.role] - roleOrder[b.role];
       });
+
       setUserList(sortedUsers);
       setFilteredUsers(sortedUsers);
     } catch (error) {
@@ -73,6 +83,13 @@ const AccountsPage = () => {
           content: "Unauthorized. Please login again.",
         });
         navigate("/login");
+      } else {
+        // Hiển thị thông báo lỗi cụ thể
+        Modal.error({
+          content:
+            error.response?.data?.message ||
+            "Không thể tải danh sách người dùng",
+        });
       }
     } finally {
       setLoading(false);
@@ -142,11 +159,28 @@ const AccountsPage = () => {
         return;
       }
 
-      await axios.post("http://localhost:8080/staff/createStaff", values, {
-        headers: {
-          Authorization: `Bearer ${accesstoken}`,
-        },
-      });
+      // Chuẩn bị dữ liệu để gửi đến API register
+      const registerData = {
+        username: values.username,
+        password: values.password,
+        email: values.email || `${values.username}@vaccinesystem.com`, // Tạo email mặc định nếu không có
+        role: "staff", // Thêm trường role để xác định đây là tài khoản staff
+        staffName: values.staffname,
+        phone: values.phone,
+        gender: values.gender,
+      };
+
+      // Gọi API register giống như trong registerPage.jsx
+      const response = await axios.post(
+        "http://localhost:8080/user/register",
+        registerData,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accesstoken}`, // Vẫn giữ token để xác thực admin
+          },
+        }
+      );
 
       message.success("Tạo tài khoản nhân viên thành công!");
       setIsCreateModalVisible(false);
@@ -159,6 +193,7 @@ const AccountsPage = () => {
         });
         navigate("/login");
       } else {
+        // Hiển thị thông báo lỗi cụ thể từ server
         Modal.error({
           content:
             error.response?.data?.message ||
@@ -322,6 +357,17 @@ const AccountsPage = () => {
             rules={[{ required: true, message: "Please input password!" }]}
           >
             <Input.Password placeholder="Enter password" />
+          </Form.Item>
+
+          <Form.Item
+            name="email"
+            label="Email"
+            rules={[
+              { required: true, message: "Please input email!" },
+              { type: "email", message: "Please enter a valid email!" },
+            ]}
+          >
+            <Input placeholder="Enter email" />
           </Form.Item>
 
           <Form.Item
