@@ -243,6 +243,9 @@ class AppointmentService {
         _id: new ObjectId(vaccinePakageId),
       });
 
+      console.log("Vaccine Package Schedule:", vaccinePackage?.schedule);
+
+
       const doseSchedule = await this.calculateVaccinationSchedule(
         date,
         vaccinePackage.schedule

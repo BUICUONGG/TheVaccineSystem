@@ -50,7 +50,13 @@
 .main-contentt {
   flex: 1;
   background-color: #f5f6fa;
+  padding: 30px; /* Đảm bảo khoảng cách nội dung */
+  margin: 0; /* Xóa mọi margin không mong muốn */
+  width: 100%; /* Đảm bảo chiếm toàn bộ không gian có thể */
+  min-height: 100vh; /* Đảm bảo chiều cao tối thiểu là toàn màn hình */
+  box-sizing: border-box; /* Ngăn chặn việc padding ảnh hưởng đến kích thước */
 }
+
 
 .header {
   display: flex;
