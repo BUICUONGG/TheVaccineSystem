@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { Table, Tag, Button, Select, message, Modal, Tabs, Input, List, Card, Typography, Checkbox } from "antd";
-import { SearchOutlined, CheckCircleFilled } from "@ant-design/icons";
+import { SearchOutlined, CheckCircleFilled, MenuOutlined } from "@ant-design/icons";
+import moment from 'moment';
 import "./appointmentManagement.css";
 
 const { Option } = Select;
@@ -231,6 +232,14 @@ const AppointmentManagement = () => {
       title: "Ngày hẹn",
       dataIndex: "date",
       key: "date",
+      sorter: (a, b) => {
+        // Parse dates using moment for reliable sorting
+        const dateA = moment(a.date, 'DD/MM/YYYY');
+        const dateB = moment(b.date, 'DD/MM/YYYY');
+        return dateA - dateB;
+      },
+      sortDirections: ['ascend', 'descend'],
+      defaultSortOrder: 'descend',
     },
     {
       title: "Trạng thái",
@@ -249,13 +258,6 @@ const AppointmentManagement = () => {
         <div className="action-buttons">
           <Button 
             type="primary" 
-            onClick={() => showAppointmentDetails(record, false)}
-            style={{ marginRight: 8 }}
-          >
-            Chi tiết
-          </Button>
-          <Button 
-            type="primary" 
             style={{ backgroundColor: '#52c41a', borderColor: '#52c41a', marginRight: 8 }}
             onClick={() => handleStatusChange(record._id, "completed", false)}
           >
@@ -268,6 +270,18 @@ const AppointmentManagement = () => {
             Hủy Đơn
           </Button>
         </div>
+      ),
+    },
+    {
+      title: "Chi tiết",
+      key: "details",
+      width: 80,
+      render: (_, record) => (
+        <Button 
+          type="primary" 
+          icon={<MenuOutlined />}
+          onClick={() => showAppointmentDetails(record, false)}
+        />
       ),
     },
   ];
@@ -323,6 +337,14 @@ const AppointmentManagement = () => {
       title: "Ngày hẹn",
       dataIndex: "date",
       key: "date",
+      sorter: (a, b) => {
+        // Parse dates using moment for reliable sorting
+        const dateA = moment(a.date, 'DD/MM/YYYY');
+        const dateB = moment(b.date, 'DD/MM/YYYY');
+        return dateA - dateB;
+      },
+      sortDirections: ['ascend', 'descend'],
+      defaultSortOrder: 'descend',
     },
     {
       title: "Trạng thái",
@@ -341,13 +363,6 @@ const AppointmentManagement = () => {
         <div className="action-buttons">
           <Button 
             type="primary" 
-            onClick={() => showAppointmentDetails(record, true)}
-            style={{ marginRight: 8 }}
-          >
-            Chi tiết
-          </Button>
-          <Button 
-            type="primary" 
             style={{ backgroundColor: '#52c41a', borderColor: '#52c41a', marginRight: 8 }}
             onClick={() => handleStatusChange(record._id, "completed", true)}
           >
@@ -360,6 +375,18 @@ const AppointmentManagement = () => {
             Hủy Đơn
           </Button>
         </div>
+      ),
+    },
+    {
+      title: "Chi tiết",
+      key: "details",
+      width: 80,
+      render: (_, record) => (
+        <Button 
+          type="primary" 
+          icon={<MenuOutlined />}
+          onClick={() => showAppointmentDetails(record, true)}
+        />
       ),
     },
   ];
@@ -561,33 +588,6 @@ const AppointmentManagement = () => {
                 />
               </div>
             )}
-            
-            <div className="detail-row" style={{ marginTop: 20 }}>
-              <span className="detail-label">Cập nhật trạng thái:</span>
-              <span className="detail-value">
-                <Button 
-                  type="primary" 
-                  style={{ backgroundColor: '#52c41a', borderColor: '#52c41a', marginRight: 8 }}
-                  onClick={() => handleStatusChange(
-                    selectedAppointment._id, 
-                    "completed", 
-                    selectedAppointment.isPackage
-                  )}
-                >
-                  Duyệt
-                </Button>
-                <Button 
-                  danger
-                  onClick={() => handleStatusChange(
-                    selectedAppointment._id, 
-                    "incomplete", 
-                    selectedAppointment.isPackage
-                  )}
-                >
-                  Hủy Đơn
-                </Button>
-              </span>
-            </div>
           </div>
         ) : (
           <div className="loading-details">Đang tải thông tin chi tiết...</div>

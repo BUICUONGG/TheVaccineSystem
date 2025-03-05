@@ -21,6 +21,7 @@ const HomePage = () => {
   const [showBackToTop, setShowBackToTop] = useState(false);
   const [vaccines, setVaccines] = useState([]);
   const [currentVaccineIndex, setCurrentVaccineIndex] = useState(0);
+  const [flippedCardIndex, setFlippedCardIndex] = useState(null);
 
   const banners = [
     {
@@ -237,6 +238,24 @@ const HomePage = () => {
     });
   };
 
+  // Hàm xử lý khi click vào thẻ
+  const handleCardFlip = (index) => {
+    if (flippedCardIndex === index) {
+      setFlippedCardIndex(null);
+    } else {
+      setFlippedCardIndex(index);
+    }
+  };
+
+  // Cập nhật timeline khi currentVaccineIndex thay đổi
+  useEffect(() => {
+    const timelineEl = document.querySelector('.vaccine-timeline-line-v4');
+    if (timelineEl && vaccines.length > 0) {
+      const percentage = (currentVaccineIndex / (vaccines.length - 1)) * 100;
+      timelineEl.style.width = `${percentage}%`;
+    }
+  }, [currentVaccineIndex, vaccines.length]);
+
   return (
     <div className="homepage">
       <nav>
@@ -356,44 +375,55 @@ const HomePage = () => {
         </div>
       </div>
 
-      {/* Vaccine Carousel Section */}
-      <div className="vaccine-carousel-section">
+      {/* Vaccine Carousel Section - Phiên bản 1: Carousel dạng thẻ với hiệu ứng 3D (3 thẻ) */}
+      <div className="vaccine-carousel-section-v1">
         <h2>VACCINE NỔI BẬT</h2>
-        <div className="vaccine-carousel-container">
-          <button className="vaccine-nav prev" onClick={prevVaccine}>
+        <div className="vaccine-carousel-container-v1">
+          <button className="vaccine-nav-v1 prev" onClick={prevVaccine}>
             <FaChevronLeft />
           </button>
           
-          <div className="vaccine-carousel">
-            {getVisibleVaccines().map((item, index) => (
-              <div 
-                key={item.vaccine._id} 
-                className={`vaccine-card-item ${item.position === 0 ? 'center' : ''}`}
-                style={{
-                  transform: `translateX(${item.position * 100}%) scale(${item.position === 0 ? 1 : 0.85})`,
-                  zIndex: item.position === 0 ? 2 : 1,
-                  opacity: item.opacity
-                }}
-              >
-                <img 
-                  src={item.vaccine.imageUrl || "/images/vaccine-default.jpg"} 
-                  alt={item.vaccine.vaccineName} 
-                />
-                <h3>{item.vaccine.vaccineName}</h3>
-                <p>Nhà sản xuất: {item.vaccine.manufacturer}</p>
-                <div className="vaccine-price">
-                  {item.vaccine.vaccineImports && item.vaccine.vaccineImports.length > 0 
-                    ? `${item.vaccine.vaccineImports[0].price.toLocaleString()} VNĐ` 
-                    : "Liên hệ"}
+          <div className="vaccine-carousel-v1">
+            {vaccines.map((vaccine, index) => {
+              // Tính toán vị trí tương đối so với thẻ hiện tại
+              const position = ((index - currentVaccineIndex) + vaccines.length) % vaccines.length;
+              // Chỉ hiển thị 3 thẻ: thẻ hiện tại (0), thẻ trước (-1) và thẻ sau (1)
+              const isVisible = position === 0 || position === 1 || position === vaccines.length - 1;
+              // Chuyển đổi position để có giá trị -1, 0, 1
+              const displayPosition = position === 0 ? 0 : position === 1 ? 1 : -1;
+              
+              return isVisible ? (
+                <div 
+                  key={`v1-${vaccine._id}`} 
+                  className={`vaccine-card-item-v1 ${displayPosition === 0 ? 'center' : ''}`}
+                  style={{
+                    transform: `translateX(${displayPosition * 150}px) translateZ(${displayPosition === 0 ? 0 : -100}px) rotateY(${displayPosition * 15}deg)`,
+                    zIndex: 3 - Math.abs(displayPosition),
+                    opacity: displayPosition === 0 ? 1 : 0.7
+                  }}
+                >
+                  <div className="vaccine-card-inner-v1">
+                    <img 
+                      src={vaccine.imageUrl || "/images/vaccine-default.jpg"} 
+                      alt={vaccine.vaccineName} 
+                    />
+                    <h3>{vaccine.vaccineName}</h3>
+                    <p>Nhà sản xuất: {vaccine.manufacturer}</p>
+                    <div className="vaccine-price-v1">
+                      {vaccine.vaccineImports && vaccine.vaccineImports.length > 0 
+                        ? `${vaccine.vaccineImports[0].price.toLocaleString()} VNĐ` 
+                        : "Liên hệ"}
+                    </div>
+                    <Link to="/pricelist" className="vaccine-view-more-v1">
+                      XEM THÊM
+                    </Link>
+                  </div>
                 </div>
-                <Link to="/pricelist" className="vaccine-view-more">
-                  XEM THÊM
-                </Link>
-              </div>
-            ))}
+              ) : null;
+            })}
           </div>
           
-          <button className="vaccine-nav next" onClick={nextVaccine}>
+          <button className="vaccine-nav-v1 next" onClick={nextVaccine}>
             <FaChevronRight />
           </button>
         </div>
