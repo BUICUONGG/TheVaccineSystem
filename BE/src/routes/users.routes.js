@@ -9,6 +9,7 @@ import {
   refreshTokenController,
   // checkUsernameController,
   forgotPasswordController,
+  getMeController,
 } from "../controllers/users.controllers.js";
 import {
   registerValidate,
@@ -47,6 +48,8 @@ usersRoutes.post(
   validateRefreshToken,
   refreshTokenController
 );
+
+usersRoutes.post("/getme/:id", getMeController);
 
 // usersRoutes.post("/check-username", checkUsernameController);
 

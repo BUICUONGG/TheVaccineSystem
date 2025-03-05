@@ -199,6 +199,19 @@ class UserService {
       throw new Error("Error finding user");
     }
   }
+
+  async getme(id) {
+    try {
+      const result = await connectToDatabase.users.findOne({
+        _id: new ObjectId(id),
+      });
+      if (!result) throw new Error("Thong tin nguoi dun khong co");
+      return result;
+    } catch (error) {
+      console.log(error.message);
+      throw new Error(error.message);
+    }
+  }
 }
 const userService = new UserService();
 export default userService;

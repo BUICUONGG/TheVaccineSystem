@@ -39,7 +39,7 @@ export const loginController = async (req, res) => {
     const { username, password } = req.body;
     if (!username || !password)
       throw new Error("Vui lòng nhập email và mật khẩu");
-    const { userId, cusId, role, accesstoken, refreshtoken } =
+    const { userId, email, cusId, role, accesstoken, refreshtoken } =
       await userService.login(username, password);
     res.cookie("refreshToken", refreshtoken, {
       httpOnly: true, // Chặn truy cập từ JavaScript (Bảo mật XSS)
@@ -47,7 +47,14 @@ export const loginController = async (req, res) => {
       sameSite: "None", // Chống CSRF
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 ngày
     });
-    res.status(200).json({ userId, cusId, role, accesstoken, refreshtoken });
+    res.status(200).json({
+      userId,
+      username,
+      cusId,
+      role,
+      accesstoken,
+      refreshtoken,
+    });
   } catch (error) {
     res.status(500).json(error.message);
   }
@@ -119,5 +126,15 @@ export const forgotPasswordController = async (req, res) => {
     res.status(200).json(result);
   } catch (error) {
     res.status(200).json(error.message);
+  }
+};
+
+export const getMeController = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const result = await userService.getme(id);
+    res.status(200).json(result);
+  } catch (error) {
+    res.status(500).json(error.message);
   }
 };
