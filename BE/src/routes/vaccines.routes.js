@@ -6,6 +6,7 @@ import {
   deleteVaccineController,
   showVaccineAndImportController,
 } from "../controllers/vaccines.controllers.js";
+import { validateAccessToken } from "../middlewares/user.middleware.js";
 
 const vaccinesRoutes = Router();
 

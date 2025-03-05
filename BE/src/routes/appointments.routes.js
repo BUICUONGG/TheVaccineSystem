@@ -9,6 +9,7 @@ import {
   listAllAptGoiController,
   listAllAptLeController,
   searchAppointmentsController,
+  searchAptGoiByIdController,
   showDetailAptGoiController,
   updateAptGoiController,
   updateAptLeController,
@@ -60,5 +61,8 @@ aptGoiRoutes.post("/delete/:id", deleteAptGoiController);
 
 // New route for updating individual doses
 aptGoiRoutes.post("/updateDose/:id", updateDoseController);
+
+//lấy thông tin chi tiết của 1 apt Gói theo id
+aptGoiRoutes.post("/searchAptGoiById/:id", searchAptGoiByIdController);
 
 export { aptGoiRoutes, aptLeRoutes };

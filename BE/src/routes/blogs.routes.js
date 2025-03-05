@@ -7,6 +7,7 @@ import {
   updateBlogController,
   deleteBlogController,
 } from "../controllers/blog.controllers.js";
+import { validateAccessToken } from "../middlewares/user.middleware.js";
 
 const blogRoutes = Router();
 
