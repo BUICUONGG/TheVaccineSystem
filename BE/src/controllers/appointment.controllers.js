@@ -150,3 +150,13 @@ export const updateDoseController = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+export const searchAptGoiByIdController = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const result = await appointmentService.searchAptGoiById(id);
+    res.status(200).json(result);
+  } catch (error) {
+    res.status(500).json(error.message);
+  }
+};

@@ -1,18 +1,23 @@
-.container {
+/*admin-... for admin layout */
+
+.admin-layout {
   display: flex;
   min-height: 100vh;
+  background: #f5f6fa;
 }
 
-.sidebar {
+.admin-sidebar {
   width: 250px;
-  background-color: #2c3e50;
+  background: #2c3e50;
+  min-height: 100vh;
+  position: fixed;
+  left: 0;
+  top: 0;
   color: white;
   padding: 20px 0;
-  position: relative;
-  min-height: 100vh;
 }
 
-.admin-info {
+.admin-sidebar-info {
   padding: 20px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   margin-bottom: 20px;
@@ -21,131 +26,86 @@
   gap: 10px;
 }
 
-.admin-icon {
+.admin-sidebar-icon {
   font-size: 24px;
 }
 
-.admin-name {
+.admin-sidebar-name {
   font-size: 16px;
+  font-weight: 500;
 }
 
-.menu-items {
+.admin-menu {
   list-style: none;
   padding: 0;
   margin: 0;
 }
 
-.menu-item a {
+.admin-menu-item a {
   display: block;
   padding: 15px 25px;
   color: white;
   text-decoration: none;
-  transition: background-color 0.3s;
+  transition: all 0.3s ease;
 }
 
-.menu-item a:hover {
-  background-color: rgba(255, 255, 255, 0.1);
+.admin-menu-item a:hover {
+  background: rgba(255, 255, 255, 0.1);
 }
 
-.main-contentt {
+.admin-menu-item a.active {
+  background: rgba(255, 255, 255, 0.2);
+  border-left: 4px solid #4A90E2;
+}
+
+.admin-main {
   flex: 1;
-  background-color: #f5f6fa;
+  margin-left: 250px;
+  min-height: 100vh;
+  background: #f5f6fa;
 }
 
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+.admin-header {
+  background: white;
   padding: 15px 30px;
-  background-color: white;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  position: sticky;
+  top: 0;
+  z-index: 999;
 }
 
-.navigation {
+.admin-nav {
   display: flex;
   gap: 20px;
+  align-items: center;
 }
 
-.nav-item {
-  cursor: pointer;
-}
-
-.nav-item:hover {
+.admin-nav-link {
   color: #2c3e50;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.3s ease;
 }
 
-.search-bar {
-  padding: 8px 15px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  width: 200px;
+.admin-nav-link:hover {
+  color: #4A90E2;
 }
 
-.search-bar:focus {
-  outline: none;
-  border-color: #2c3e50;
-}
-
-.content {
+.admin-content {
   padding: 30px;
+  min-height: calc(100vh - 64px);
 }
 
-/* Thêm một số styles hữu ích khác */
-
-/* Active menu item */
-.menu-item a.active {
-  background-color: rgba(255, 255, 255, 0.2);
-}
-
-/* Responsive styles */
-@media (max-width: 768px) {
-  .container {
-    flex-direction: column;
-  }
-
-  .sidebar {
-    width: 100%;
-  }
-
-  .header {
-    flex-direction: column;
-    gap: 15px;
-  }
-
-  .search-bar {
-    width: 100%;
-  }
-}
-
-/* Optional: Add some animations */
-.menu-item a {
-  position: relative;
-}
-
-.menu-item a::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  bottom: 0;
-  width: 0;
-  height: 2px;
-  background-color: white;
-  transition: width 0.3s;
-}
-
-.menu-item a:hover::after {
-  width: 100%;
-}
-
-.logout-section {
+.admin-logout {
   position: absolute;
   bottom: 20px;
   left: 20px;
   width: calc(100% - 40px);
 }
 
-.logout-button {
+.admin-logout-btn {
   width: 100%;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;

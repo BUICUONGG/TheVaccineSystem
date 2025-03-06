@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation, Outlet } from "react-router-dom";
 import { Button } from "antd";
-import { LogoutOutlined, DashboardOutlined } from "@ant-design/icons";
+import { LogoutOutlined } from "@ant-design/icons";
 import "./adminLayout.css";
 
 const AdminLayout = () => {
@@ -55,45 +55,39 @@ const AdminLayout = () => {
   };
 
   return (
-    <div className="container">
-      <div className="sidebar">
-        <div className="admin-info">
-          <div className="admin-icon">👤</div>
-          <span className="admin-name">{adminName}</span>
+    <div className="admin-layout">
+      <div className="admin-sidebar">
+        <div className="admin-sidebar-info">
+          <div className="admin-sidebar-icon">👤</div>
+          <span className="admin-sidebar-name">{adminName}</span>
         </div>
 
-        <ul className="menu-items">
-          <li className="menu-item">
+        <ul className="admin-menu">
+          <li className="admin-menu-item">
             <Link
               to="/admin"
-              className={
-                location.pathname === "/admin" && !location.pathname.includes("/admin/") ? "active" : ""
-              }
+              className={location.pathname === "/admin" && !location.pathname.includes("/admin/") ? "active" : ""}
             >
               Dashboard
             </Link>
           </li>
-          <li className="menu-item">
+          <li className="admin-menu-item">
             <Link
               to="/admin/accounts"
-              className={
-                location.pathname === "/admin/accounts" ? "active" : ""
-              }
+              className={location.pathname === "/admin/accounts" ? "active" : ""}
             >
               Accounts
             </Link>
           </li>
-          <li className="menu-item">
+          <li className="admin-menu-item">
             <Link
               to="/admin/customers"
-              className={
-                location.pathname === "/admin/customers" ? "active" : ""
-              }
+              className={location.pathname === "/admin/customers" ? "active" : ""}
             >
               Customers
             </Link>
           </li>
-          <li className="menu-item">
+          <li className="admin-menu-item">
             <Link
               to="/admin/blog"
               className={location.pathname === "/admin/blog" ? "active" : ""}
@@ -101,81 +95,63 @@ const AdminLayout = () => {
               Blog
             </Link>
           </li>
-          <li className="menu-item">
+          <li className="admin-menu-item">
             <Link
               to="/admin/vaccines"
-              className={
-                location.pathname === "/admin/vaccines" ? "active" : ""
-              }
+              className={location.pathname === "/admin/vaccines" ? "active" : ""}
             >
               Vaccines
             </Link>
           </li>
-          <li className="menu-item">
+          <li className="admin-menu-item">
             <Link
               to="/admin/feedback"
-              className={
-                location.pathname === "/admin/feedback" ? "active" : ""
-              }
+              className={location.pathname === "/admin/feedback" ? "active" : ""}
             >
               Feedback
             </Link>
           </li>
-          <li className="menu-item">
+          <li className="admin-menu-item">
             <Link
               to="/admin/appointments"
-              className={
-                location.pathname === "/admin/appointments" ? "active" : ""
-              }
+              className={location.pathname === "/admin/appointments" ? "active" : ""}
             >
               Appointments
             </Link>
           </li>
-          <li className="menu-item">
+          <li className="admin-menu-item">
             <Link
               to="/admin/consultations"
-              className={
-                location.pathname === "/admin/consultations" ? "active" : ""
-              }
+              className={location.pathname === "/admin/consultations" ? "active" : ""}
             >
               Consultations
             </Link>
           </li>
         </ul>
 
-        <div className="logout-section">
-          {/* <Button
-            type="primary"
-            icon={<DashboardOutlined />}
-            onClick={handleDashboard}
-            className="dashboard-button"
-            style={{ marginBottom: "10px" }}
-          >
-            Dashboard
-          </Button> */}
+        <div className="admin-logout">
           <Button
             type="primary"
             danger
             icon={<LogoutOutlined />}
             onClick={handleLogout}
-            className="logout-button"
+            className="admin-logout-btn"
           >
-            Đăng xuất 
+            Đăng xuất
           </Button>
         </div>
       </div>
 
-      <div className="main-contentt">
-        <header className="header">
-          <div className="navigation">
-            <Link to="/homepage">
-              <span className="nav-item">Home</span>
+      <div className="admin-main">
+        <header className="admin-header">
+          <div className="admin-nav">
+            <Link to="/homepage" className="admin-nav-link">
+              Home
             </Link>
-            <span className="nav-item">Contact</span>
-            
+            <span className="admin-nav-link">Contact</span>
           </div>
         </header>
-        <main className="content">
+        <main className="admin-content">
           <Outlet />
         </main>
       </div>

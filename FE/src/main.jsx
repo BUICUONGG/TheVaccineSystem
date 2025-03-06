@@ -1,6 +1,6 @@
 import { createRoot } from "react-dom/client";
 import "./index.css";
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { createBrowserRouter, RouterProvider, Outlet } from "react-router-dom";
 import LoginPage from "./pages/login/loginPage";
 import RegisterPage from "./pages/register/registerPage";
 import HomePage from "./pages/homepage/homePage";
@@ -13,7 +13,6 @@ import News from "./pages/homepage/news/news";
 import Handbook from "./pages/homepage/handbook/handbook";
 import Advise from "./pages/homepage/Advise/advise";
 import VaccinePriceList from "./pages/homepage/vaccineShop/vaccineShopPage";
-import Profile from "./pages/homepage/profile/profile";
 import BlogList from "./pages/blog/BlogList";
 import BlogManagement from "./pages/usersRole/admin/BlogManagement";
 import OverviewPage from "./pages/usersRole/admin/overviewPage";
@@ -24,6 +23,10 @@ import Thank from "./pages/thanks/Thank";
 import StaffLayout from "./pages/usersRole/staff/staffLayout";
 import AppointmentManagement from "./pages/usersRole/staff/appointmentManagement";
 import AdminAppointmentManagement from "./pages/usersRole/admin/adminAppointmentManagement";
+import ProfileInfo from "./pages/homepage/profile/components/ProfileInfo";
+import ProfileHistory from "./pages/homepage/profile/components/ProfileHistory";
+import Profile from "./pages/homepage/profile/Profile";
+import ProfileAccount from "./pages/homepage/profile/components/ProfileAccount";
 
 const router = createBrowserRouter([
   {
@@ -138,6 +141,20 @@ const router = createBrowserRouter([
   {
     path: "/profile",
     element: <Profile />,
+    children: [
+      {
+        path: "", // Default route
+        element: <ProfileInfo />
+      },
+      {
+        path: "account",
+        element: <ProfileAccount />
+      },
+      {
+        path: "history",
+        element: <ProfileHistory />
+      },
+    ]
   },
   {
     path: "/forgot-password",

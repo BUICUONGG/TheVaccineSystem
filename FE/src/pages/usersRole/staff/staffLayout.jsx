@@ -51,69 +51,63 @@ const StaffLayout = () => {
   };
 
   return (
-    <div className="container">
-      <div className="sidebar">
-        <div className="staff-info">
-          <div className="staff-icon">👤</div>
-          <span className="staff-name">{staffName}</span>
+    <div className="staff-layout">
+      <div className="staff-sidebar">
+        <div className="staff-sidebar-info">
+          <div className="staff-sidebar-icon">👤</div>
+          <span className="staff-sidebar-name">{staffName}</span>
         </div>
 
-        <ul className="menu-items">
-          <li className="menu-item">
+        <ul className="staff-menu">
+          <li className="staff-menu-item">
             <Link
               to="/staffLayout/overview"
-              className={
-                location.pathname === "/staffLayout/overview" ? "active" : ""
-              }
+              className={location.pathname === "/staffLayout/overview" ? "active" : ""}
             >
               Tổng quan
             </Link>
           </li>
-          <li className="menu-item">
+          <li className="staff-menu-item">
             <Link
               to="/staffLayout/appointments"
-              className={
-                location.pathname === "/staffLayout/appointments" ? "active" : ""
-              }
+              className={location.pathname === "/staffLayout/appointments" ? "active" : ""}
             >
               Quản lý lịch hẹn
             </Link>
           </li>
-          <li className="menu-item">
+          <li className="staff-menu-item">
             <Link
               to="/staffLayout/customers"
-              className={
-                location.pathname === "/staffLayout/customers" ? "active" : ""
-              }
+              className={location.pathname === "/staffLayout/customers" ? "active" : ""}
             >
               Khách hàng
             </Link>
           </li>
         </ul>
 
-        <div className="logout-section">
+        <div className="staff-logout">
           <Button
             type="primary"
             danger
             icon={<LogoutOutlined />}
             onClick={handleLogout}
-            className="logout-button"
+            className="staff-logout-btn"
           >
             Đăng xuất
           </Button>
         </div>
       </div>
 
-      <div className="main-content">
-        <header className="header">
-          <div className="navigation">
-            <Link to="/homepage">
-              <span className="nav-item">Trang chủ</span>
+      <div className="staff-main">
+        <header className="staff-header">
+          <div className="staff-nav">
+            <Link to="/homepage" className="staff-nav-link">
+              Trang chủ
             </Link>
-            <span className="nav-item">Liên hệ</span>
+            <span className="staff-nav-link">Liên hệ</span>
           </div>
         </header>
-        <main className="content">
+        <main className="staff-content">
           <Outlet />
         </main>
       </div>

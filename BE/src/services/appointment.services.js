@@ -243,6 +243,8 @@ class AppointmentService {
         _id: new ObjectId(vaccinePakageId),
       });
 
+      console.log("Vaccine Package Schedule:", vaccinePackage?.schedule);
+
       const doseSchedule = await this.calculateVaccinationSchedule(
         date,
         vaccinePackage.schedule
@@ -289,53 +291,88 @@ class AppointmentService {
     }
   }
 
+  async updateDose(appointmentId, doseNumber, status) {
+    try {
+      // Tìm appointment gói theo ID
+      const appointment = await connectToDatabase.appointmentGois.findOne({
+        _id: new ObjectId(appointmentId),
+      });
 
+      if (!appointment) {
+        throw new Error(`Không tìm thấy lịch hẹn với ID: ${appointmentId}`);
+      }
 
-async updateDose(appointmentId, doseNumber, status) {
-  try {
-    // Tìm appointment gói theo ID
-    const appointment = await connectToDatabase.appointmentGois.findOne({
-      _id: new ObjectId(appointmentId)
-    });
+      // Kiểm tra xem doseSchedule có tồn tại không
+      if (
+        !appointment.doseSchedule ||
+        !Array.isArray(appointment.doseSchedule)
+      ) {
+        throw new Error("Lịch hẹn không có thông tin lịch tiêm");
+      }
 
-    if (!appointment) {
-      throw new Error(`Không tìm thấy lịch hẹn với ID: ${appointmentId}`);
+      // Tìm vị trí của dose cần cập nhật
+      const doseIndex = appointment.doseSchedule.findIndex(
+        (dose) => dose.doseNumber === parseInt(doseNumber)
+      );
+
+      if (doseIndex === -1) {
+        throw new Error(`Không tìm thấy mũi tiêm số ${doseNumber}`);
+      }
+
+      // Cập nhật trạng thái của dose
+      const updatedDoseSchedule = [...appointment.doseSchedule];
+      updatedDoseSchedule[doseIndex] = {
+        ...updatedDoseSchedule[doseIndex],
+        status,
+      };
+
+      // Cập nhật lịch hẹn với doseSchedule mới
+      const result = await connectToDatabase.appointmentGois.findOneAndUpdate(
+        { _id: new ObjectId(appointmentId) },
+        { $set: { doseSchedule: updatedDoseSchedule } },
+        { returnDocument: "after" }
+      );
+
+      return result;
+    } catch (error) {
+      console.error("Error updating dose:", error);
+      throw new Error(error.message);
     }
-
-    // Kiểm tra xem doseSchedule có tồn tại không
-    if (!appointment.doseSchedule || !Array.isArray(appointment.doseSchedule)) {
-      throw new Error("Lịch hẹn không có thông tin lịch tiêm");
-    }
-
-    // Tìm vị trí của dose cần cập nhật
-    const doseIndex = appointment.doseSchedule.findIndex(
-      dose => dose.doseNumber === parseInt(doseNumber)
-    );
-
-    if (doseIndex === -1) {
-      throw new Error(`Không tìm thấy mũi tiêm số ${doseNumber}`);
-    }
-
-    // Cập nhật trạng thái của dose
-    const updatedDoseSchedule = [...appointment.doseSchedule];
-    updatedDoseSchedule[doseIndex] = {
-      ...updatedDoseSchedule[doseIndex],
-      status
-    };
-
-    // Cập nhật lịch hẹn với doseSchedule mới
-    const result = await connectToDatabase.appointmentGois.findOneAndUpdate(
-      { _id: new ObjectId(appointmentId) },
-      { $set: { doseSchedule: updatedDoseSchedule } },
-      { returnDocument: "after" }
-    );
-
-    return result;
-  } catch (error) {
-    console.error("Error updating dose:", error);
-    throw new Error(error.message);
   }
-}
+
+  async searchAptGoiById(id) {
+    try {
+      const appointmentGois = await connectToDatabase.appointmentGois.findOne({
+        _id: new ObjectId(id),
+      });
+
+      const customer = await connectToDatabase.customers.findOne({
+        _id: appointmentGois.cusId,
+      });
+
+      const vaccinePakage = await connectToDatabase.vaccinepackages.findOne({
+        _id: appointmentGois.vaccinePakageId,
+      });
+
+      const child = await connectToDatabase.childs.findOne({
+        _id: appointmentGois.childId,
+      });
+
+      delete appointmentGois.cusId;
+      delete appointmentGois.vaccinePakageId;
+      delete appointmentGois.childId;
+
+      appointmentGois.customer = customer;
+      appointmentGois.vaccinePackage = vaccinePakage;
+      appointmentGois.child = child;
+
+      if (!appointmentGois) throw new Error("Khong tìm thấy thông tin apt này");
+      return appointmentGois;
+    } catch (error) {
+      console.log(error.message);
+      throw new Error(error.message);
+    }
+  }
 }
 const appointmentService = new AppointmentService();
 export default appointmentService;
