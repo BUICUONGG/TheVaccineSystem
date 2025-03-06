@@ -1,6 +1,7 @@
 import { Router } from "express";
 import {
   getAllCusController,
+  getAptleAndAptGoiByCusIdController,
   getOneCusController,
   updatemeController,
 } from "../controllers/customer.controllers.js";
@@ -28,5 +29,10 @@ customerRoutes.post(
   "/refresh-token",
   validateRefreshToken,
   refreshTokenController
+);
+
+customerRoutes.post(
+  "/getAptleAndAptGoiByCusId/:id",
+  getAptleAndAptGoiByCusIdController
 );
 export default customerRoutes;

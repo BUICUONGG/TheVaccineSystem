@@ -59,6 +59,58 @@ class CustomerService {
       throw new Error(error.message);
     }
   }
+
+  async getAptleAndAptGoiByCusId(cusId) {
+    try {
+      ///Lấy thông tin lẻ
+      const aptLes = await connectToDatabase.appointmentLes.findOne({
+        cusId: new ObjectId(cusId),
+      });
+
+      const cus = await connectToDatabase.customers.findOne({
+        _id: aptLes.cudId,
+      });
+      const vaccine = await connectToDatabase.vaccinceInventorys.findOne({
+        _id: aptLes.vaccineId,
+      });
+      const child = await connectToDatabase.childs.findOne({
+        _id: aptLes.childId,
+      });
+      aptLes.customer = cus;
+      aptLes.vaccine = vaccine;
+      aptLes.child = child;
+      delete aptLes.cusId;
+      delete aptLes.childId;
+      delete aptLes.vaccineId;
+
+      // //lấy thông tin Gói
+      const aptGois = await connectToDatabase.appointmentGois.findOne({
+        cusId: new ObjectId(cusId),
+      });
+      const customer = await connectToDatabase.customers.findOne({
+        _id: aptGois.cudId,
+      });
+
+      const childd = await connectToDatabase.childs.findOne({
+        _id: aptGois.childId,
+      });
+
+      const vaccinee = await connectToDatabase.vaccinepackages.findOne({
+        _id: aptGois.vaccinePakageId,
+      });
+      aptGois.customer = customer;
+      aptGois.vaccine = vaccinee;
+      aptGois.child = childd;
+      delete aptGois.cusId;
+      delete aptGois.childId;
+      delete aptGois.vaccinePakageId;
+
+      return { aptGois, aptLes };
+    } catch (error) {
+      console.log(error.message);
+      throw new Error(error.message);
+    }
+  }
 }
 
 const customerService = new CustomerService();
