@@ -5,7 +5,7 @@ import { SearchOutlined, CheckCircleFilled, MenuOutlined } from "@ant-design/ico
 import moment from 'moment';
 import "./appointmentManagement.css";
 
-const { Option } = Select;
+// const { Option } = Select;
 const { TabPane } = Tabs;
 const { Title, Text } = Typography;
 
@@ -73,7 +73,7 @@ const AppointmentManagement = () => {
   const getStatusText = (status) => {
     switch (status) {
       case "completed":
-        return "Đã duyệt";
+        return "Hoàn thành";
       case "incomplete":
         return "Đã hủy";
       case "pending":
@@ -156,6 +156,20 @@ const AppointmentManagement = () => {
             ...selectedAppointment,
             doseSchedule: updatedDoseSchedule
           });
+          
+          // Kiểm tra xem tất cả các mũi tiêm đã hoàn thành chưa
+          const allDosesCompleted = updatedDoseSchedule.every(dose => dose.status === "completed");
+          
+          // Nếu tất cả các mũi tiêm đã hoàn thành và trạng thái hiện tại không phải là "completed"
+          if (allDosesCompleted && selectedAppointment.status !== "completed") {
+            console.log("All doses completed, updating appointment status to completed");
+            
+            // Cập nhật trạng thái lịch hẹn thành "completed"
+            await handleStatusChange(appointmentId, "completed", true);
+            
+            // Hiển thị thông báo
+            message.success("Tất cả các mũi tiêm đã hoàn thành, lịch hẹn đã được cập nhật thành Hoàn thành");
+          }
         }
         
         // Refresh the appointments list to ensure consistency
@@ -233,9 +247,25 @@ const AppointmentManagement = () => {
       dataIndex: "date",
       key: "date",
       sorter: (a, b) => {
-        // Parse dates using moment for reliable sorting
-        const dateA = moment(a.date, 'DD/MM/YYYY');
-        const dateB = moment(b.date, 'DD/MM/YYYY');
+        // Hàm chuyển đổi chuỗi ngày thành đối tượng Date
+        const parseDate = (dateStr) => {
+          // Thử các định dạng khác nhau
+          const formats = ['DD/MM/YYYY', 'YYYY-MM-DD', 'MM/DD/YYYY', 'DD-MM-YYYY'];
+          
+          for (const format of formats) {
+            const date = moment(dateStr, format, true);
+            if (date.isValid()) {
+              return date;
+            }
+          }
+          
+          // Nếu không khớp với bất kỳ định dạng nào, thử chuyển đổi trực tiếp
+          return moment(new Date(dateStr));
+        };
+        
+        const dateA = parseDate(a.date);
+        const dateB = parseDate(b.date);
+        
         return dateA - dateB;
       },
       sortDirections: ['ascend', 'descend'],
@@ -245,6 +275,13 @@ const AppointmentManagement = () => {
       title: "Trạng thái",
       dataIndex: "status",
       key: "status",
+      filters: [
+        { text: "Hoàn thành", value: "completed" },
+        { text: "Đã duyệt", value: "approve" },
+        { text: "Đang chờ", value: "pending" },
+        { text: "Đã hủy", value: "incomplete" },
+      ],
+      onFilter: (value, record) => record.status === value,
       render: (status) => (
         <Tag color={getStatusColor(status)}>
           {getStatusText(status)}
@@ -338,9 +375,25 @@ const AppointmentManagement = () => {
       dataIndex: "date",
       key: "date",
       sorter: (a, b) => {
-        // Parse dates using moment for reliable sorting
-        const dateA = moment(a.date, 'DD/MM/YYYY');
-        const dateB = moment(b.date, 'DD/MM/YYYY');
+        // Hàm chuyển đổi chuỗi ngày thành đối tượng Date
+        const parseDate = (dateStr) => {
+          // Thử các định dạng khác nhau
+          const formats = ['DD/MM/YYYY', 'YYYY-MM-DD', 'MM/DD/YYYY', 'DD-MM-YYYY'];
+          
+          for (const format of formats) {
+            const date = moment(dateStr, format, true);
+            if (date.isValid()) {
+              return date;
+            }
+          }
+          
+          // Nếu không khớp với bất kỳ định dạng nào, thử chuyển đổi trực tiếp
+          return moment(new Date(dateStr));
+        };
+        
+        const dateA = parseDate(a.date);
+        const dateB = parseDate(b.date);
+        
         return dateA - dateB;
       },
       sortDirections: ['ascend', 'descend'],
@@ -350,6 +403,13 @@ const AppointmentManagement = () => {
       title: "Trạng thái",
       dataIndex: "status",
       key: "status",
+      filters: [
+        { text: "Hoàn thành", value: "completed" },
+        { text: "Đã duyệt", value: "approve" },
+        { text: "Đang chờ", value: "pending" },
+        { text: "Đã hủy", value: "incomplete" },
+      ],
+      onFilter: (value, record) => record.status === value,
       render: (status) => (
         <Tag color={getStatusColor(status)}>
           {getStatusText(status)}
