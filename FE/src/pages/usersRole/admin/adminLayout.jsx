@@ -41,17 +41,13 @@ const AdminLayout = () => {
 
   const handleLogout = () => {
     // Xóa tất cả thông tin người dùng khỏi localStorage
-    localStorage.removeItem('accesstoken');
-    localStorage.removeItem('role');
-    localStorage.removeItem('userId');
-    localStorage.removeItem('username');
-    
-    // Điều hướng đến trang Thank
-    navigate('/thank-you');
-  };
+    localStorage.removeItem("accesstoken");
+    localStorage.removeItem("role");
+    localStorage.removeItem("userId");
+    localStorage.removeItem("username");
 
-  const handleDashboard = () => {
-    navigate('/admin');
+    // Điều hướng đến trang Thank
+    navigate("/thank-you");
   };
 
   return (
@@ -66,7 +62,12 @@ const AdminLayout = () => {
           <li className="admin-menu-item">
             <Link
               to="/admin"
-              className={location.pathname === "/admin" && !location.pathname.includes("/admin/") ? "active" : ""}
+              className={
+                location.pathname === "/admin" &&
+                !location.pathname.includes("/admin/")
+                  ? "active"
+                  : ""
+              }
             >
               Dashboard
             </Link>
@@ -74,7 +75,9 @@ const AdminLayout = () => {
           <li className="admin-menu-item">
             <Link
               to="/admin/accounts"
-              className={location.pathname === "/admin/accounts" ? "active" : ""}
+              className={
+                location.pathname === "/admin/accounts" ? "active" : ""
+              }
             >
               Accounts
             </Link>
@@ -82,7 +85,9 @@ const AdminLayout = () => {
           <li className="admin-menu-item">
             <Link
               to="/admin/customers"
-              className={location.pathname === "/admin/customers" ? "active" : ""}
+              className={
+                location.pathname === "/admin/customers" ? "active" : ""
+              }
             >
               Customers
             </Link>
@@ -98,7 +103,9 @@ const AdminLayout = () => {
           <li className="admin-menu-item">
             <Link
               to="/admin/vaccines"
-              className={location.pathname === "/admin/vaccines" ? "active" : ""}
+              className={
+                location.pathname === "/admin/vaccines" ? "active" : ""
+              }
             >
               Vaccines
             </Link>
@@ -106,7 +113,9 @@ const AdminLayout = () => {
           <li className="admin-menu-item">
             <Link
               to="/admin/feedback"
-              className={location.pathname === "/admin/feedback" ? "active" : ""}
+              className={
+                location.pathname === "/admin/feedback" ? "active" : ""
+              }
             >
               Feedback
             </Link>
@@ -114,7 +123,9 @@ const AdminLayout = () => {
           <li className="admin-menu-item">
             <Link
               to="/admin/appointments"
-              className={location.pathname === "/admin/appointments" ? "active" : ""}
+              className={
+                location.pathname === "/admin/appointments" ? "active" : ""
+              }
             >
               Appointments
             </Link>
@@ -122,7 +133,9 @@ const AdminLayout = () => {
           <li className="admin-menu-item">
             <Link
               to="/admin/consultations"
-              className={location.pathname === "/admin/consultations" ? "active" : ""}
+              className={
+                location.pathname === "/admin/consultations" ? "active" : ""
+              }
             >
               Consultations
             </Link>

@@ -35,9 +35,15 @@ const VaccinesPage = () => {
   };
 
   const fetchVaccines = async () => {
+    const accesstoken = localStorage.getItem("accessToken");
     try {
       setLoading(true);
-      const response = await axiosInstance.get("/vaccine/showInfo");
+      const response = await axiosInstance.get("/vaccine/showInfo", {
+        headers: {
+          // "Content-Type": "application/json",
+          Authorization: `Bearer ${accesstoken}`,
+        },
+      });
       setVaccineList(response.data);
       setFilteredVaccines(response.data);
     } catch (error) {

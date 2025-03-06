@@ -16,6 +16,10 @@ vaccinesRoutes.get("/listVaccine", getVaccinesController);
 vaccinesRoutes.post("/addVaccine", addVaccineController);
 vaccinesRoutes.post("/updateVaccine/:id", updateVaccineController);
 vaccinesRoutes.post("/delete/:id", deleteVaccineController);
-vaccinesRoutes.get("/showInfo", showVaccineAndImportController);
+vaccinesRoutes.get(
+  "/showInfo",
+  validateAccessToken,
+  showVaccineAndImportController
+);
 
 export default vaccinesRoutes;

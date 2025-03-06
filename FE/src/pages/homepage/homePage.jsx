@@ -2,7 +2,16 @@ import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 //import { Modal } from "antd";
 // import { FaRegCalendarAlt, FaRegListAlt, FaRegThumbsUp, FaRegSmileBeam } from "react-icons/fa";
-import { FaSyringe, FaBook, FaUserCheck, FaMoneyBillWave, FaBaby, FaChild, FaChevronLeft, FaChevronRight } from "react-icons/fa";
+import {
+  FaSyringe,
+  FaBook,
+  FaUserCheck,
+  FaMoneyBillWave,
+  FaBaby,
+  FaChild,
+  FaChevronLeft,
+  FaChevronRight,
+} from "react-icons/fa";
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import "./homePage.css";
 import { useNavigate } from "react-router-dom";
@@ -17,7 +26,7 @@ const HomePage = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [fadeIn, setFadeIn] = useState(true);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userRole, setUserRole] = useState('');
+  const [userRole, setUserRole] = useState("");
   const [showBackToTop, setShowBackToTop] = useState(false);
   const [vaccines, setVaccines] = useState([]);
   const [currentVaccineIndex, setCurrentVaccineIndex] = useState(0);
@@ -29,33 +38,33 @@ const HomePage = () => {
       title: "Đăng Ký Tiêm Chủng",
       description: "Bảo vệ sức khỏe cho bạn và gia đình",
       link: "/registerinjection",
-      buttonText: "Đăng Ký Tiêm"
+      buttonText: "Đăng Ký Tiêm",
     },
     {
       image: "/images/banner2.jpg",
       title: "Blog Sức Khỏe",
       description: "Cập nhật thông tin y tế mới nhất",
       link: "/blogs",
-      buttonText: "Xem Blog"
+      buttonText: "Xem Blog",
     },
     {
       image: "/images/banner3.png",
       title: "Tư Vấn Y Tế",
       description: "Đội ngũ bác sĩ chuyên nghiệp",
       link: "/advise",
-      buttonText: "Tư Vấn Ngay"
-    }
+      buttonText: "Tư Vấn Ngay",
+    },
   ];
 
   useEffect(() => {
-    const token = localStorage.getItem('accesstoken');
+    const token = localStorage.getItem("accesstoken");
     if (token) {
       setIsLoggedIn(true);
-      const tokenParts = token.split('.');
+      const tokenParts = token.split(".");
       const payload = JSON.parse(atob(tokenParts[1]));
       const role = payload.role;
       setUserRole(role);
-      localStorage.setItem('role', role);
+      // localStorage.setItem('role', role);
     }
     document.title = "Trang chủ";
 
@@ -75,7 +84,9 @@ const HomePage = () => {
   const nextSlide = () => {
     setFadeIn(false);
     setTimeout(() => {
-      setCurrentSlide(currentSlide === banners.length - 1 ? 0 : currentSlide + 1);
+      setCurrentSlide(
+        currentSlide === banners.length - 1 ? 0 : currentSlide + 1
+      );
       setFadeIn(true);
     }, 200);
   };
@@ -83,18 +94,20 @@ const HomePage = () => {
   const prevSlide = () => {
     setFadeIn(false);
     setTimeout(() => {
-      setCurrentSlide(currentSlide === 0 ? banners.length - 1 : currentSlide - 1);
+      setCurrentSlide(
+        currentSlide === 0 ? banners.length - 1 : currentSlide - 1
+      );
       setFadeIn(true);
     }, 200);
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('accesstoken');
-    localStorage.removeItem('role');
-    localStorage.removeItem('userId');
+    localStorage.removeItem("accesstoken");
+    localStorage.removeItem("role");
+    localStorage.removeItem("userId");
     setIsLoggedIn(false);
-    setUserRole('');
-    navigate('/thank-you');
+    setUserRole("");
+    navigate("/thank-you");
   };
 
   const handleLogin = () => {
@@ -153,7 +166,7 @@ const HomePage = () => {
 
   // Thêm function scroll
   const scrollToFooter = () => {
-    footerRef.current?.scrollIntoView({ behavior: 'smooth' });
+    footerRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
   useEffect(() => {
@@ -165,32 +178,34 @@ const HomePage = () => {
       }
     };
 
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   // Fetch vaccines for the carousel
   useEffect(() => {
     const fetchVaccines = async () => {
       try {
-        const response = await axios.get("http://localhost:8080/vaccine/showInfo");
+        const response = await axios.get(
+          "http://localhost:8080/vaccine/showInfo"
+        );
         setVaccines(response.data);
       } catch (error) {
         console.error("Error fetching vaccines:", error);
       }
     };
-    
+
     fetchVaccines();
   }, []);
 
   // Handle vaccine carousel navigation
   const nextVaccine = () => {
     if (vaccines.length > 0) {
-      setCurrentVaccineIndex((prevIndex) => 
+      setCurrentVaccineIndex((prevIndex) =>
         prevIndex === vaccines.length - 1 ? 0 : prevIndex + 1
       );
     }
@@ -198,7 +213,7 @@ const HomePage = () => {
 
   const prevVaccine = () => {
     if (vaccines.length > 0) {
-      setCurrentVaccineIndex((prevIndex) => 
+      setCurrentVaccineIndex((prevIndex) =>
         prevIndex === 0 ? vaccines.length - 1 : prevIndex - 1
       );
     }
@@ -207,33 +222,38 @@ const HomePage = () => {
   // Calculate visible vaccines in the carousel
   const getVisibleVaccines = () => {
     if (vaccines.length === 0) return [];
-    
+
     // Luôn hiển thị 5 card (hoặc tất cả nếu ít hơn 5)
     const totalVisible = Math.min(5, vaccines.length);
-    
+
     // Đảm bảo luôn có card ở cả hai bên của card chính
     let indices = [];
     const offset = Math.floor(totalVisible / 2);
-    
+
     for (let i = -offset; i <= offset; i++) {
       // Sử dụng phép toán modulo để tạo hiệu ứng vòng lặp
       let index = (currentVaccineIndex + i + vaccines.length) % vaccines.length;
       indices.push(index);
     }
-    
+
     // Tính toán vị trí hiển thị cho mỗi card
     return indices.map((index, arrayIndex) => {
       // Tính position dựa trên vị trí trong mảng indices thay vì dựa vào index - currentVaccineIndex
       // Điều này đảm bảo luôn có card ở vị trí -2, -1, 0, 1, 2 bất kể currentVaccineIndex là gì
       const position = arrayIndex - offset;
-      
+
       return {
         vaccine: vaccines[index],
         position: position, // Vị trí tương đối: -2, -1, 0, 1, 2
         // Nếu vị trí là card chính (0) thì opacity = 1, còn lại giảm dần theo khoảng cách
-        opacity: Math.abs(position) === 0 ? 1 : 
-                 Math.abs(position) === 1 ? 0.7 : 
-                 Math.abs(position) === 2 ? 0.4 : 0.2
+        opacity:
+          Math.abs(position) === 0
+            ? 1
+            : Math.abs(position) === 1
+            ? 0.7
+            : Math.abs(position) === 2
+            ? 0.4
+            : 0.2,
       };
     });
   };
@@ -249,7 +269,7 @@ const HomePage = () => {
 
   // Cập nhật timeline khi currentVaccineIndex thay đổi
   useEffect(() => {
-    const timelineEl = document.querySelector('.vaccine-timeline-line-v4');
+    const timelineEl = document.querySelector(".vaccine-timeline-line-v4");
     if (timelineEl && vaccines.length > 0) {
       const percentage = (currentVaccineIndex / (vaccines.length - 1)) * 100;
       timelineEl.style.width = `${percentage}%`;
@@ -263,39 +283,74 @@ const HomePage = () => {
           <Link to="/homepage">Diary Vaccine</Link>
         </div>
         <ul>
-          <li><Link to="/homepage">Trang chủ</Link></li>
-          <li><Link to="/blogs">Blog</Link></li>
-          <li><Link to="/news">Tin tức</Link></li>
-          <li><Link to="#" onClick={scrollToFooter}>Liên hệ</Link></li>
+          <li>
+            <Link to="/homepage">Trang chủ</Link>
+          </li>
+          <li>
+            <Link to="/blogs">Blog</Link>
+          </li>
+          <li>
+            <Link to="/news">Tin tức</Link>
+          </li>
+          <li>
+            <Link to="#" onClick={scrollToFooter}>
+              Liên hệ
+            </Link>
+          </li>
           {!isLoggedIn ? (
             <>
-              <li><Link to="/login">Đăng Nhập</Link></li>
-              <li><Link to="/register">Đăng Ký</Link></li>
+              <li>
+                <Link to="/login">Đăng Nhập</Link>
+              </li>
+              <li>
+                <Link to="/register">Đăng Ký</Link>
+              </li>
             </>
           ) : (
             <>
-              {userRole === 'admin' ? (
-                <li><Link to="/admin">Admin</Link></li>
-              ) : userRole === 'staff' ? (
-                <li><Link to="/staffLayout">Quản lý KH</Link></li>
+              {userRole === "admin" ? (
+                <li>
+                  <Link to="/admin">Admin</Link>
+                </li>
+              ) : userRole === "staff" ? (
+                <li>
+                  <Link to="/staffLayout">Quản lý KH</Link>
+                </li>
               ) : (
-                <li><Link to="/profile">Profile</Link></li>
+                <li>
+                  <Link to="/profile">Profile</Link>
+                </li>
               )}
-              <li><button onClick={handleLogout}>Logout</button></li>
+              <li>
+                <button onClick={handleLogout}>Logout</button>
+              </li>
             </>
           )}
         </ul>
       </nav>
 
       <div className="banner-container">
-        <div className="banner-slider" style={{ transform: `translateX(-${currentSlide * 100}%)` }}>
+        <div
+          className="banner-slider"
+          style={{ transform: `translateX(-${currentSlide * 100}%)` }}
+        >
           {banners.map((banner, index) => (
             <div key={index} className="swiper-slide">
               <div className="banner-overlay"></div>
-              <img src={banner.image} alt={banner.title} className="banner-image" />
-              <div className={`slide-content ${currentSlide === index ? 'active' : ''} ${fadeIn && currentSlide === index ? 'fade-in' : ''}`}>
+              <img
+                src={banner.image}
+                alt={banner.title}
+                className="banner-image"
+              />
+              <div
+                className={`slide-content ${
+                  currentSlide === index ? "active" : ""
+                } ${fadeIn && currentSlide === index ? "fade-in" : ""}`}
+              >
                 <div className="elementor-slide-heading">{banner.title}</div>
-                <div className="elementor-slide-description">{banner.description}</div>
+                <div className="elementor-slide-description">
+                  {banner.description}
+                </div>
                 <Link to={banner.link} className="slide-button">
                   {banner.buttonText}
                 </Link>
@@ -315,7 +370,9 @@ const HomePage = () => {
           {banners.map((_, index) => (
             <span
               key={index}
-              className={`swiper-pagination-bullet ${currentSlide === index ? 'active' : ''}`}
+              className={`swiper-pagination-bullet ${
+                currentSlide === index ? "active" : ""
+              }`}
               onClick={() => setCurrentSlide(index)}
             ></span>
           ))}
@@ -351,7 +408,6 @@ const HomePage = () => {
         </div>
       </div>
 
-
       <div className="vaccine-info">
         <h2>THÔNG TIN VACCINE</h2>
         <div className="vaccine-types">
@@ -382,36 +438,49 @@ const HomePage = () => {
           <button className="vaccine-nav-v1 prev" onClick={prevVaccine}>
             <FaChevronLeft />
           </button>
-          
+
           <div className="vaccine-carousel-v1">
             {vaccines.map((vaccine, index) => {
               // Tính toán vị trí tương đối so với thẻ hiện tại
-              const position = ((index - currentVaccineIndex) + vaccines.length) % vaccines.length;
+              const position =
+                (index - currentVaccineIndex + vaccines.length) %
+                vaccines.length;
               // Chỉ hiển thị 3 thẻ: thẻ hiện tại (0), thẻ trước (-1) và thẻ sau (1)
-              const isVisible = position === 0 || position === 1 || position === vaccines.length - 1;
+              const isVisible =
+                position === 0 ||
+                position === 1 ||
+                position === vaccines.length - 1;
               // Chuyển đổi position để có giá trị -1, 0, 1
-              const displayPosition = position === 0 ? 0 : position === 1 ? 1 : -1;
-              
+              const displayPosition =
+                position === 0 ? 0 : position === 1 ? 1 : -1;
+
               return isVisible ? (
-                <div 
-                  key={`v1-${vaccine._id}`} 
-                  className={`vaccine-card-item-v1 ${displayPosition === 0 ? 'center' : ''}`}
+                <div
+                  key={`v1-${vaccine._id}`}
+                  className={`vaccine-card-item-v1 ${
+                    displayPosition === 0 ? "center" : ""
+                  }`}
                   style={{
-                    transform: `translateX(${displayPosition * 150}px) translateZ(${displayPosition === 0 ? 0 : -100}px) rotateY(${displayPosition * 15}deg)`,
+                    transform: `translateX(${
+                      displayPosition * 150
+                    }px) translateZ(${
+                      displayPosition === 0 ? 0 : -100
+                    }px) rotateY(${displayPosition * 15}deg)`,
                     zIndex: 3 - Math.abs(displayPosition),
-                    opacity: displayPosition === 0 ? 1 : 0.7
+                    opacity: displayPosition === 0 ? 1 : 0.7,
                   }}
                 >
                   <div className="vaccine-card-inner-v1">
-                    <img 
-                      src={vaccine.imageUrl || "/images/vaccine-default.jpg"} 
-                      alt={vaccine.vaccineName} 
+                    <img
+                      src={vaccine.imageUrl || "/images/vaccine-default.jpg"}
+                      alt={vaccine.vaccineName}
                     />
                     <h3>{vaccine.vaccineName}</h3>
                     <p>Nhà sản xuất: {vaccine.manufacturer}</p>
                     <div className="vaccine-price-v1">
-                      {vaccine.vaccineImports && vaccine.vaccineImports.length > 0 
-                        ? `${vaccine.vaccineImports[0].price.toLocaleString()} VNĐ` 
+                      {vaccine.vaccineImports &&
+                      vaccine.vaccineImports.length > 0
+                        ? `${vaccine.vaccineImports[0].price.toLocaleString()} VNĐ`
                         : "Liên hệ"}
                     </div>
                     <Link to="/pricelist" className="vaccine-view-more-v1">
@@ -422,7 +491,7 @@ const HomePage = () => {
               ) : null;
             })}
           </div>
-          
+
           <button className="vaccine-nav-v1 next" onClick={nextVaccine}>
             <FaChevronRight />
           </button>
@@ -532,7 +601,6 @@ const HomePage = () => {
               <a href="#">
                 <i className="fab fa-linkedin"></i>
               </a>
-
             </div>
           </div>
         </div>

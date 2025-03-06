@@ -50,12 +50,14 @@ const LoginPage = () => {
         const tokenParts = response.data.accesstoken.split(".");
         const payload = JSON.parse(atob(tokenParts[1]));
         const userRole = payload.role;
+        console.log(userRole);
+        localStorage.setItem("role", userRole);
 
         setIsLoading(false);
         toast.success("Đăng nhập thành công!");
 
         // Kiểm tra role và điều hướng
-        // 
+        //
         navigate("/welcome");
       } catch (error) {
         setIsLoading(false);
@@ -145,10 +147,7 @@ const LoginPage = () => {
               <span>hoặc đăng nhập bằng</span>
             </div>
             <div className="login-button-group">
-              <button
-                type="button"
-                className="login-btn login-btn-secondary"
-              >
+              <button type="button" className="login-btn login-btn-secondary">
                 <FcGoogle className="h-5 w-5 mr-2" /> Google
               </button>
             </div>

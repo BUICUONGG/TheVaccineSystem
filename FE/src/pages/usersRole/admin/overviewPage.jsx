@@ -1,9 +1,14 @@
-import { useState, useEffect } from 'react';
-import { Card, Row, Col, Modal } from 'antd';
-import { UserOutlined, ExperimentOutlined, FileTextOutlined } from '@ant-design/icons';
-import axios from 'axios';
-import { Pie } from '@ant-design/plots';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from "react";
+import { Card, Row, Col, Modal } from "antd";
+import {
+  UserOutlined,
+  ExperimentOutlined,
+  FileTextOutlined,
+} from "@ant-design/icons";
+// import axios from "axios";
+import { Pie } from "@ant-design/plots";
+import { useNavigate } from "react-router-dom";
+import axiosInstance from "../../../service/api";
 
 const OverviewPage = () => {
   const navigate = useNavigate();
@@ -12,7 +17,7 @@ const OverviewPage = () => {
     userList: [],
     totalVaccines: 0,
     totalBlogs: 0,
-    totalCustomers: 0
+    totalCustomers: 0,
   });
 
   useEffect(() => {
@@ -24,28 +29,34 @@ const OverviewPage = () => {
       setLoading(true);
       const accesstoken = localStorage.getItem("accesstoken");
 
-      const [usersResponse, vaccinesResponse, blogsResponse] = await Promise.all([
-        axios.get("http://localhost:8080/user/showInfo", {
-          headers: { Authorization: `Bearer ${accesstoken}` },
-        }),
-        axios.get("http://localhost:8080/vaccine/showInfo"),
-        axios.get("http://localhost:8080/blogs/showBlog")
-      ]);
+      const [usersResponse, vaccinesResponse, blogsResponse] =
+        await Promise.all([
+          axiosInstance.get("http://localhost:8080/user/showInfo", {
+            headers: { Authorization: `Bearer ${accesstoken}` },
+          }),
+          axiosInstance.get("http://localhost:8080/vaccine/showInfo", {
+            headers: { Authorization: `Bearer ${accesstoken}` },
+          }),
+          axiosInstance.get("http://localhost:8080/blogs/showBlog", {
+            headers: { Authorization: `Bearer ${accesstoken}` },
+          }),
+        ]);
 
       const sortedUsers = (usersResponse.data.result || []).sort((a, b) => {
         const roleOrder = { admin: 1, staff: 2, customer: 3 };
         return roleOrder[a.role] - roleOrder[b.role];
       });
 
-      const totalCustomers = sortedUsers.filter(user => user.role === 'customer').length;
+      const totalCustomers = sortedUsers.filter(
+        (user) => user.role === "customer"
+      ).length;
 
       setStats({
         userList: sortedUsers,
         totalVaccines: vaccinesResponse.data.length,
         totalBlogs: blogsResponse.data.length,
-        totalCustomers
+        totalCustomers,
       });
-
     } catch (error) {
       console.error("Error fetching data:", error);
       if (error.response?.status === 401) {
@@ -67,21 +78,21 @@ const OverviewPage = () => {
 
   const pieData = Object.entries(roleCount).map(([type, value]) => ({
     type: type.charAt(0).toUpperCase() + type.slice(1),
-    value
+    value,
   }));
 
   const pieConfig = {
     data: pieData,
-    angleField: 'value',
-    colorField: 'type',
+    angleField: "value",
+    colorField: "type",
     radius: 0.8,
     label: {
-      type: 'outer',
-      content: '{name}: {percentage}',
+      type: "outer",
+      content: "{name}: {percentage}",
     },
     interactions: [
       {
-        type: 'element-active',
+        type: "element-active",
       },
     ],
   };
@@ -108,27 +119,27 @@ const OverviewPage = () => {
         date: "2024-03-15",
         quantity: 300,
         cost: 450000000,
-      }
-    }
+      },
+    },
   };
 
   // Format số tiền thành VND
   const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('vi-VN', {
-      style: 'currency',
-      currency: 'VND'
+    return new Intl.NumberFormat("vi-VN", {
+      style: "currency",
+      currency: "VND",
     }).format(amount);
   };
 
   return (
-    <div style={{ padding: '24px' }}>
+    <div style={{ padding: "24px" }}>
       <h2>Dashboard Overview</h2>
-      
+
       <Row gutter={[16, 16]}>
         <Col xs={24} sm={6}>
           <Card>
-            <div style={{ textAlign: 'center' }}>
-              <UserOutlined style={{ fontSize: '24px', color: '#1890ff' }} />
+            <div style={{ textAlign: "center" }}>
+              <UserOutlined style={{ fontSize: "24px", color: "#1890ff" }} />
               <h3>Total Users</h3>
               <h2>{stats.userList.length}</h2>
             </div>
@@ -137,8 +148,8 @@ const OverviewPage = () => {
 
         <Col xs={24} sm={6}>
           <Card>
-            <div style={{ textAlign: 'center' }}>
-              <UserOutlined style={{ fontSize: '24px', color: '#52c41a' }} />
+            <div style={{ textAlign: "center" }}>
+              <UserOutlined style={{ fontSize: "24px", color: "#52c41a" }} />
               <h3>Total Customers</h3>
               <h2>{stats.totalCustomers}</h2>
             </div>
@@ -147,8 +158,10 @@ const OverviewPage = () => {
 
         <Col xs={24} sm={6}>
           <Card>
-            <div style={{ textAlign: 'center' }}>
-              <ExperimentOutlined style={{ fontSize: '24px', color: '#722ed1' }} />
+            <div style={{ textAlign: "center" }}>
+              <ExperimentOutlined
+                style={{ fontSize: "24px", color: "#722ed1" }}
+              />
               <h3>Total Vaccines</h3>
               <h2>{stats.totalVaccines}</h2>
             </div>
@@ -157,8 +170,10 @@ const OverviewPage = () => {
 
         <Col xs={24} sm={6}>
           <Card>
-            <div style={{ textAlign: 'center' }}>
-              <FileTextOutlined style={{ fontSize: '24px', color: '#faad14' }} />
+            <div style={{ textAlign: "center" }}>
+              <FileTextOutlined
+                style={{ fontSize: "24px", color: "#faad14" }}
+              />
               <h3>Total Blogs</h3>
               <h2>{stats.totalBlogs}</h2>
             </div>
@@ -184,45 +199,47 @@ const OverviewPage = () => {
             <h3>Revenue Overview</h3>
             <div style={{ padding: "20px" }}>
               <div style={{ marginBottom: "24px" }}>
-                <h4 style={{ color: '#1890ff' }}>Sales Revenue</h4>
+                <h4 style={{ color: "#1890ff" }}>Sales Revenue</h4>
                 <Row justify="space-between" style={{ marginBottom: "8px" }}>
-                  <Col>Vaccines Sold ({revenueStats.vaccinesSold.quantity} units)</Col>
-                  <Col style={{ color: '#52c41a', fontWeight: 'bold' }}>
+                  <Col>
+                    Vaccines Sold ({revenueStats.vaccinesSold.quantity} units)
+                  </Col>
+                  <Col style={{ color: "#52c41a", fontWeight: "bold" }}>
                     {formatCurrency(revenueStats.vaccinesSold.revenue)}
                   </Col>
                 </Row>
                 <Row justify="space-between">
                   <Col>Appointments ({revenueStats.appointments.quantity})</Col>
-                  <Col style={{ color: '#52c41a', fontWeight: 'bold' }}>
+                  <Col style={{ color: "#52c41a", fontWeight: "bold" }}>
                     {formatCurrency(revenueStats.appointments.revenue)}
                   </Col>
                 </Row>
               </div>
 
               <div style={{ marginBottom: "24px" }}>
-                <h4 style={{ color: '#ff4d4f' }}>Expenses</h4>
+                <h4 style={{ color: "#ff4d4f" }}>Expenses</h4>
                 <Row justify="space-between" style={{ marginBottom: "8px" }}>
                   <Col>Vaccine Stock</Col>
-                  <Col style={{ color: '#ff4d4f' }}>
+                  <Col style={{ color: "#ff4d4f" }}>
                     {formatCurrency(revenueStats.expenses.vaccineStock)}
                   </Col>
                 </Row>
                 <Row justify="space-between" style={{ marginBottom: "8px" }}>
                   <Col>Operational Costs</Col>
-                  <Col style={{ color: '#ff4d4f' }}>
+                  <Col style={{ color: "#ff4d4f" }}>
                     {formatCurrency(revenueStats.expenses.operational)}
                   </Col>
                 </Row>
                 <Row justify="space-between">
                   <Col>Marketing</Col>
-                  <Col style={{ color: '#ff4d4f' }}>
+                  <Col style={{ color: "#ff4d4f" }}>
                     {formatCurrency(revenueStats.expenses.marketing)}
                   </Col>
                 </Row>
               </div>
 
               <div style={{ marginBottom: "24px" }}>
-                <h4 style={{ color: '#722ed1' }}>Vaccine Inventory</h4>
+                <h4 style={{ color: "#722ed1" }}>Vaccine Inventory</h4>
                 <Row justify="space-between" style={{ marginBottom: "8px" }}>
                   <Col>Current Stock</Col>
                   <Col>{revenueStats.vaccineStock.inStock} units</Col>
@@ -234,34 +251,44 @@ const OverviewPage = () => {
               </div>
 
               <div>
-                <h4 style={{ color: '#faad14' }}>Last Import</h4>
+                <h4 style={{ color: "#faad14" }}>Last Import</h4>
                 <Row justify="space-between" style={{ marginBottom: "8px" }}>
                   <Col>Date</Col>
                   <Col>{revenueStats.vaccineStock.lastImport.date}</Col>
                 </Row>
                 <Row justify="space-between" style={{ marginBottom: "8px" }}>
                   <Col>Quantity</Col>
-                  <Col>{revenueStats.vaccineStock.lastImport.quantity} units</Col>
+                  <Col>
+                    {revenueStats.vaccineStock.lastImport.quantity} units
+                  </Col>
                 </Row>
                 <Row justify="space-between">
                   <Col>Cost</Col>
-                  <Col style={{ color: '#ff4d4f' }}>
+                  <Col style={{ color: "#ff4d4f" }}>
                     {formatCurrency(revenueStats.vaccineStock.lastImport.cost)}
                   </Col>
                 </Row>
               </div>
 
-              <div style={{ marginTop: "24px", borderTop: "1px solid #f0f0f0", paddingTop: "24px" }}>
+              <div
+                style={{
+                  marginTop: "24px",
+                  borderTop: "1px solid #f0f0f0",
+                  paddingTop: "24px",
+                }}
+              >
                 <Row justify="space-between">
-                  <Col><h3>Total Revenue</h3></Col>
                   <Col>
-                    <h3 style={{ color: '#52c41a' }}>
+                    <h3>Total Revenue</h3>
+                  </Col>
+                  <Col>
+                    <h3 style={{ color: "#52c41a" }}>
                       {formatCurrency(
                         revenueStats.vaccinesSold.revenue +
-                        revenueStats.appointments.revenue -
-                        (revenueStats.expenses.vaccineStock +
-                        revenueStats.expenses.operational +
-                        revenueStats.expenses.marketing)
+                          revenueStats.appointments.revenue -
+                          (revenueStats.expenses.vaccineStock +
+                            revenueStats.expenses.operational +
+                            revenueStats.expenses.marketing)
                       )}
                     </h3>
                   </Col>
@@ -275,4 +302,4 @@ const OverviewPage = () => {
   );
 };
 
-export default OverviewPage; 
+export default OverviewPage;

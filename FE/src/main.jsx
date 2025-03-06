@@ -144,17 +144,17 @@ const router = createBrowserRouter([
     children: [
       {
         path: "", // Default route
-        element: <ProfileInfo />
+        element: <ProfileInfo />,
       },
       {
         path: "account",
-        element: <ProfileAccount />
+        element: <ProfileAccount />,
       },
       {
         path: "history",
-        element: <ProfileHistory />
+        element: <ProfileHistory />,
       },
-    ]
+    ],
   },
   {
     path: "/forgot-password",

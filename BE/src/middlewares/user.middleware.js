@@ -51,7 +51,7 @@ export const validateRefreshToken = async (req, res, next) => {
     }
     let decoded;
     try {
-      // 🟢 Giải mã token để kiểm tra hạn sử dụng
+      // Giải mã token để kiểm tra hạn sử dụng
       decoded = await verifyToken({
         token: refreshToken,
         secredOrPublickey: process.env.JWT_REFRESH_TOKEN,
