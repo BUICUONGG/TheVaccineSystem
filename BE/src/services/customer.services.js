@@ -68,7 +68,7 @@ class CustomerService {
       });
 
       const cus = await connectToDatabase.customers.findOne({
-        _id: aptLes.cudId,
+        _id: aptLes.cusId,
       });
       const vaccine = await connectToDatabase.vaccinceInventorys.findOne({
         _id: aptLes.vaccineId,
@@ -88,7 +88,7 @@ class CustomerService {
         cusId: new ObjectId(cusId),
       });
       const customer = await connectToDatabase.customers.findOne({
-        _id: aptGois.cudId,
+        _id: aptGois.cusId,
       });
 
       const childd = await connectToDatabase.childs.findOne({
