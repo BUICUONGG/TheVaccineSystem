@@ -17,6 +17,7 @@ const vaccinePackageSchema = new mongoose.Schema({
   schedule: { type: [Number], required: true },
   price: { type: Number, required: true }, // Giá gói vaccine
   createdAt: { type: String }, // Ngày tạo gói vaccine
+  category: { type: String },
 });
 const VaccinePackage = mongoose.model("VaccinePackage", vaccinePackageSchema);
 
