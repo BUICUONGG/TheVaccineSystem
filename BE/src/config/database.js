@@ -34,6 +34,10 @@ class ConnectDatabaseService {
     return this.db.collection(String("appointmentsLes"));
   }
 
+  get notifications() {
+    return this.db.collection(String("notifications"));
+  }
+
   get appointmentGois() {
     return this.db.collection(String("appointmentsGois"));
   }
