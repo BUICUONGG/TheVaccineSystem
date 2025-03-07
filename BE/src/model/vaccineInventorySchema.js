@@ -7,6 +7,7 @@ const vaccineInventorySchema = new mongoose.Schema({
   createdAt: { type: String }, // Ngày tạo
   imageUrl: { type: String }, // url hinh anh
   information: { type: String },
+  category: { type: String },
 });
 
 const VaccineInventory = mongoose.model(
