@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
-import { Table, Input, Button, Modal, Form, Select, Popconfirm } from "antd";
-import { EditOutlined, DeleteOutlined } from "@ant-design/icons";
-import axios from "axios";
+import { Table, Input, Button, Modal, Form, Select } from "antd";
+import { EditOutlined } from "@ant-design/icons";
+// import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import axiosInstance from "../../../service/api";
 
 const { Option } = Select;
 
@@ -21,9 +22,12 @@ const AllCustomerPage = () => {
   }, []);
 
   useEffect(() => {
-    const filtered = customerList.filter((customer) =>
-      customer.customerName?.toLowerCase().includes(searchText.toLowerCase()) ||
-      customer.username?.toLowerCase().includes(searchText.toLowerCase())
+    const filtered = customerList.filter(
+      (customer) =>
+        customer.customerName
+          ?.toLowerCase()
+          .includes(searchText.toLowerCase()) ||
+        customer.username?.toLowerCase().includes(searchText.toLowerCase())
     );
     setFilteredCustomers(filtered);
   }, [customerList, searchText]);
@@ -36,14 +40,11 @@ const AllCustomerPage = () => {
     try {
       setLoading(true);
       const accesstoken = localStorage.getItem("accesstoken");
-      const response = await axios.get(
-        "http://localhost:8080/customer/getAllCustomer",
-        {
-          headers: {
-            Authorization: `Bearer ${accesstoken}`,
-          },
-        }
-      );
+      const response = await axiosInstance.get("/customer/getAllCustomer", {
+        headers: {
+          Authorization: `Bearer ${accesstoken}`,
+        },
+      });
 
       if (response.data.result) {
         setCustomerList(response.data.result);
@@ -65,18 +66,18 @@ const AllCustomerPage = () => {
   const handleUpdate = async (values) => {
     try {
       const accesstoken = localStorage.getItem("accesstoken");
-      
+
       // Validate data before sending
       const updatedData = {
         customerName: values.customerName?.trim() || null,
         phone: values.phone?.trim() || null,
         address: values.address?.trim() || null,
         gender: values.gender || null,
-        birthday: values.birthday?.trim() || null
+        birthday: values.birthday?.trim() || null,
       };
 
-      await axios.post(
-        `http://localhost:8080/customer/update/${editingCustomer.userId}`,
+      await axiosInstance.post(
+        `/customer/update/${editingCustomer.userId}`,
         updatedData,
         {
           headers: {
@@ -93,7 +94,8 @@ const AllCustomerPage = () => {
     } catch (error) {
       console.error("Error updating customer:", error);
       Modal.error({
-        content: error.response?.data?.message || "Không thể cập nhật thông tin",
+        content:
+          error.response?.data?.message || "Không thể cập nhật thông tin",
       });
     }
   };
@@ -109,8 +111,8 @@ const AllCustomerPage = () => {
         return;
       }
 
-      await axios.post(
-        `http://localhost:8080/customer/delete/${userId}`,
+      await axiosInstance.post(
+        `/customer/delete/${userId}`,
         {},
         {
           headers: {
@@ -122,7 +124,7 @@ const AllCustomerPage = () => {
       Modal.success({
         content: "Xóa khách hàng thành công!",
       });
-      
+
       await fetchCustomers(); // Refresh danh sách
     } catch (error) {
       console.error("Error deleting customer:", error);
@@ -150,31 +152,31 @@ const AllCustomerPage = () => {
       title: "Username",
       dataIndex: "username",
       key: "username",
-      render: (text) => text || "Chưa cập nhật"
+      render: (text) => text || "Chưa cập nhật",
     },
     {
       title: "Họ và tên",
       dataIndex: "customerName",
       key: "customerName",
-      render: (text) => text || "Chưa cập nhật"
+      render: (text) => text || "Chưa cập nhật",
     },
     {
       title: "Số điện thoại",
       dataIndex: "phone",
       key: "phone",
-      render: (text) => text || "Chưa cập nhật"
+      render: (text) => text || "Chưa cập nhật",
     },
     {
       title: "Ngày sinh",
       dataIndex: "birthday",
       key: "birthday",
-      render: (text) => text || "Chưa cập nhật"
+      render: (text) => text || "Chưa cập nhật",
     },
     {
       title: "Địa chỉ",
       dataIndex: "address",
       key: "address",
-      render: (text) => text || "Chưa cập nhật"
+      render: (text) => text || "Chưa cập nhật",
     },
     {
       title: "Giới tính",
@@ -184,12 +186,12 @@ const AllCustomerPage = () => {
         const genderMap = {
           Male: "Nam",
           Female: "Nữ",
-          Other: "Khác"
+          Other: "Khác",
         };
         return genderMap[gender] || "Chưa cập nhật";
-      }
+      },
     },
-    
+
     {
       title: "Thao tác",
       key: "actions",
@@ -254,7 +256,10 @@ const AllCustomerPage = () => {
             label="Họ và tên"
             rules={[
               { required: true, message: "Vui lòng nhập họ tên!" },
-              { whitespace: true, message: "Không được chỉ nhập khoảng trắng!" }
+              {
+                whitespace: true,
+                message: "Không được chỉ nhập khoảng trắng!",
+              },
             ]}
           >
             <Input maxLength={100} />
@@ -265,16 +270,16 @@ const AllCustomerPage = () => {
             label="Số điện thoại"
             rules={[
               { required: true, message: "Vui lòng nhập số điện thoại!" },
-              { pattern: /^[0-9]{10}$/, message: "Số điện thoại phải có 10 chữ số!" }
+              {
+                pattern: /^[0-9]{10}$/,
+                message: "Số điện thoại phải có 10 chữ số!",
+              },
             ]}
           >
             <Input maxLength={10} />
           </Form.Item>
-          
-          <Form.Item 
-            name="address" 
-            label="Địa chỉ"
-          >
+
+          <Form.Item name="address" label="Địa chỉ">
             <Input.TextArea maxLength={200} />
           </Form.Item>
 
@@ -290,13 +295,14 @@ const AllCustomerPage = () => {
             </Select>
           </Form.Item>
 
-          <Form.Item 
-            name="birthday" 
+          <Form.Item
+            name="birthday"
             label="Ngày sinh"
             rules={[
-              { pattern: /^(0[1-9]|[12][0-9]|3[01])\/(0[1-9]|1[0-2])\/\d{4}$/, 
-                message: "Định dạng ngày sinh không hợp lệ (DD/MM/YYYY)!" 
-              }
+              {
+                pattern: /^(0[1-9]|[12][0-9]|3[01])\/(0[1-9]|1[0-2])\/\d{4}$/,
+                message: "Định dạng ngày sinh không hợp lệ (DD/MM/YYYY)!",
+              },
             ]}
           >
             <Input placeholder="DD/MM/YYYY" />

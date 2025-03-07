@@ -5,9 +5,10 @@ import { UserOutlined, UserAddOutlined } from "@ant-design/icons";
 import dayjs from "dayjs"; // Thay moment bằng dayjs
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import axios from "axios";
+// import axios from "axios";
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import "./registerInjection.css";
+import axiosInstance from "../../../service/api";
 
 const RegisterInjection = () => {
   const navigate = useNavigate();
@@ -31,9 +32,7 @@ const RegisterInjection = () => {
   useEffect(() => {
     const fetchVaccines = async () => {
       try {
-        const response = await axios.get(
-          "http://localhost:8080/vaccine/showInfo"
-        );
+        const response = await axiosInstance.get("/vaccine/showInfo");
         setVaccineList(response.data);
       } catch (error) {
         console.error("Error fetching vaccines:", error);
@@ -50,8 +49,8 @@ const RegisterInjection = () => {
   useEffect(() => {
     const fetchVaccinePackages = async () => {
       try {
-        const response = await axios.get(
-          "http://localhost:8080/vaccinepakage/showVaccinePakage"
+        const response = await axiosInstance.get(
+          "/vaccinepakage/showVaccinePakage"
         );
         setVaccinePackages(response.data);
       } catch (error) {
@@ -78,8 +77,8 @@ const RegisterInjection = () => {
       }
 
       try {
-        const response = await axios.get(
-          `http://localhost:8080/customer/getOneCustomer/${userId}`,
+        const response = await axiosInstance.get(
+          `/customer/getOneCustomer/${userId}`,
           {
             headers: {
               Authorization: `Bearer ${accesstoken}`,
@@ -109,39 +108,40 @@ const RegisterInjection = () => {
     }
   }, [isLoggedIn, form]);
 
-  const handleLogin = () => navigate("/login");
-  const handleRegister = () => navigate("/register");
+  // const handleLogin = () => navigate("/login");
+  // const handleRegister = () => navigate("/register");
 
-  const handleLogout = async () => {
-    try {
-      const userId = localStorage.getItem("userId");
-      const accesstoken = localStorage.getItem("accesstoken");
+  // const handleLogout = async () => {
+  //   try {
+  //     const userId = localStorage.getItem("userId");
+  //     const accesstoken = localStorage.getItem("accesstoken");
 
-      if (userId && accesstoken) {
-        await axios.post(
-          `http://localhost:8080/user/logout/${userId}`,
-          {},
-          {
-            headers: {
-              Authorization: `Bearer ${accesstoken}`,
-            },
-          }
-        );
-      }
+  //     if (userId && accesstoken) {
+  //       await axiosInstance.post(
+  //         `/user/logout/${userId}`,
+  //         {},
+  //         {
+  //           headers: {
+  //             Authorization: `Bearer ${accesstoken}`,
+  //           },
+  //         }
+  //       );
+  //     }
 
-      localStorage.removeItem("accesstoken");
-      localStorage.removeItem("username");
-      localStorage.removeItem("userId");
-      setIsLoggedIn(false);
-      navigate("/login");
-    } catch (error) {
-      console.error("Logout error:", error);
-      toast.error("Logout failed. Please try again.", {
-        position: "top-right",
-        autoClose: 3000,
-      });
-    }
-  };
+  //     localStorage.removeItem("accesstoken");
+  //     localStorage.removeItem("username");
+  //     localStorage.removeItem("userId");
+  //     isCookie.removeItem("refreshToken");
+  //     setIsLoggedIn(false);
+  //     navigate("/login");
+  //   } catch (error) {
+  //     console.error("Logout error:", error);
+  //     toast.error("Logout failed. Please try again.", {
+  //       position: "top-right",
+  //       autoClose: 3000,
+  //     });
+  //   }
+  // };
 
   const onFinish = async (values) => {
     try {
@@ -171,23 +171,15 @@ const RegisterInjection = () => {
       // Kiểm tra loại vaccine để gửi đúng API
       if (selectedVaccineType === "single") {
         requestData.vaccineId = values.vaccineId; // Nếu chọn vaccine lẻ, thêm vaccineId
-        await axios.post(
-          "http://localhost:8080/appointmentLe/create",
-          requestData,
-          {
-            headers: { Authorization: `Bearer ${accesstoken}` },
-          }
-        );
+        await axiosInstance.post("/appointmentLe/create", requestData, {
+          headers: { Authorization: `Bearer ${accesstoken}` },
+        });
       }
       if (selectedVaccineType === "package") {
         requestData.vaccinePakageId = values.vaccinePakageId; // Nếu chọn gói, thêm vaccinePakageId
-        await axios.post(
-          "http://localhost:8080/appointmentGoi/create",
-          requestData,
-          {
-            headers: { Authorization: `Bearer ${accesstoken}` },
-          }
-        );
+        await axiosInstance.post("/appointmentGoi/create", requestData, {
+          headers: { Authorization: `Bearer ${accesstoken}` },
+        });
       }
       console.log("Dữ liệu gửi đi:", requestData);
 

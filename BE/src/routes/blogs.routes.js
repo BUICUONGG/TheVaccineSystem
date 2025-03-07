@@ -13,10 +13,14 @@ const blogRoutes = Router();
 
 //PATH:          http://localhost:8080/blog/......
 
-blogRoutes.get("/showBlog", showBlogsController);
-blogRoutes.post("/createBlog", createBlogController);
-blogRoutes.put("/incrementViews/:blogId", incrementViewsController);
-blogRoutes.put("/like/:blogId", toggleLikeController);
-blogRoutes.post("/update/:id", updateBlogController);
-blogRoutes.post("/delete/:id", deleteBlogController);
+blogRoutes.get("/showBlog", validateAccessToken, showBlogsController);
+blogRoutes.post("/createBlog", validateAccessToken, createBlogController);
+blogRoutes.put(
+  "/incrementViews/:blogId",
+  validateAccessToken,
+  incrementViewsController
+);
+blogRoutes.put("/like/:blogId", validateAccessToken, toggleLikeController);
+blogRoutes.post("/update/:id", validateAccessToken, updateBlogController);
+blogRoutes.post("/delete/:id", validateAccessToken, deleteBlogController);
 export default blogRoutes;

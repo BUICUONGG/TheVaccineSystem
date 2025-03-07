@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
 import { Table, Input, Button, Modal, Form, Popconfirm } from "antd";
 import { EditOutlined, DeleteOutlined, PlusOutlined } from "@ant-design/icons";
-import axios from "axios";
+// import axios from "axios";
 // import { useNavigate } from "react-router-dom";
 
-import axiosInstance from "../../../service/api.js";
+import axiosInstance from "../../../service/api";
 
 const { Search } = Input;
 
@@ -41,7 +41,11 @@ const BlogManagement = () => {
   const fetchBlogs = async () => {
     try {
       setLoading(true);
-      const response = await axiosInstance.get("/blogs/showBlog");
+      const response = await axiosInstance.get("/blogs/showBlog", {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accesstoken")}`,
+        },
+      });
       setBlogs(response.data);
       setFilteredBlogs(response.data);
     } catch (error) {
@@ -56,11 +60,19 @@ const BlogManagement = () => {
 
   const handleCreate = async (values) => {
     try {
-      await axios.post("http://localhost:8080/blogs/createBlog", {
-        ...values,
-        userId: "67b53056af240f16ecf58a5c", // Thay thế bằng userId thực tế
-        status: "active",
-      });
+      await axiosInstance.post(
+        "/blogs/createBlog",
+        {
+          ...values,
+          userId: "67b53056af240f16ecf58a5c", // Thay thế bằng userId thực tế
+          status: "active",
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("accesstoken")}`,
+          },
+        }
+      );
 
       Modal.success({
         content: "Blog created successfully",
@@ -87,9 +99,14 @@ const BlogManagement = () => {
         status: editingBlog.status,
       };
 
-      await axios.post(
-        `http://localhost:8080/blogs/update/${editingBlog._id}`,
-        updatedData
+      await axiosInstance.post(
+        `/blogs/update/${editingBlog._id}`,
+        updatedData,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("accesstoken")}`,
+          },
+        }
       );
 
       Modal.success({
@@ -107,7 +124,15 @@ const BlogManagement = () => {
 
   const handleDelete = async (blogId) => {
     try {
-      await axios.post(`http://localhost:8080/blogs/delete/${blogId}`);
+      await axiosInstance.post(
+        `/blogs/delete/${blogId}`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("accesstoken")}`,
+          },
+        }
+      );
 
       Modal.success({
         content: "Xóa blog thành công!",

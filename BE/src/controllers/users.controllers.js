@@ -73,19 +73,19 @@ export const deleteController = async (req, res) => {
   }
 };
 
-// export const checkUsernameController = async (req, res) => {
-//   try {
-//     const { username } = req.body;
-//     const user = await userService.findByUsername(username);
-//     if (user) {
-//       res.json({ exists: true, userId: user._id });
-//     } else {
-//       res.status(404).json({ exists: false, message: "Username not found" });
-//     }
-//   } catch (error) {
-//     res.status(500).json({ message: error.message });
-//   }
-// };
+export const checkUsernameController = async (req, res) => {
+  try {
+    const { username } = req.body;
+    const user = await userService.findByUsername(username);
+    if (user) {
+      res.json({ exists: true, userId: user._id });
+    } else {
+      res.status(404).json({ exists: false, message: "Username not found" });
+    }
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
 
 export const updateController = async (req, res) => {
   try {

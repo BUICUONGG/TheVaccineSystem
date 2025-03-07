@@ -7,9 +7,9 @@ import {
   updateController,
   logoutController,
   refreshTokenController,
-  // checkUsernameController,
   forgotPasswordController,
   getMeController,
+  checkUsernameController,
 } from "../controllers/users.controllers.js";
 import {
   registerValidate,
@@ -37,9 +37,9 @@ usersRoutes.post(
   deleteController
 );
 
-usersRoutes.post("/update/:id", updateController);
+usersRoutes.post("/update/:id", validateAccessToken, updateController);
 
-usersRoutes.post("/logout/:id", validateAccessToken, logoutController);
+usersRoutes.post("/logout/:id", logoutController);
 
 usersRoutes.post("/forgot-password", forgotPasswordController);
 
@@ -51,6 +51,6 @@ usersRoutes.post(
 
 usersRoutes.post("/getme/:id", getMeController);
 
-// usersRoutes.post("/check-username", checkUsernameController);
+usersRoutes.post("/check-username", checkUsernameController);
 
 export default usersRoutes;

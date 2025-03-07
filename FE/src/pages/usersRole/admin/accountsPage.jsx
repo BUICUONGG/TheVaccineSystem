@@ -10,8 +10,9 @@ import {
   message,
 } from "antd";
 import { DeleteOutlined, UserAddOutlined } from "@ant-design/icons";
-import axios from "axios";
+// import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import axiosInstance from "../../../service/api";
 
 const { Search } = Input;
 const { Option } = Select;
@@ -49,17 +50,14 @@ const AccountsPage = () => {
     try {
       setLoading(true);
       const accesstoken = localStorage.getItem("accesstoken");
-      console.log("acc", accesstoken);
+      // console.log("acc", accesstoken);
 
-      const response = await axios.get("http://localhost:8080/user/showInfo", {
+      const response = await axiosInstance.get("/user/showInfo", {
         headers: {
           // "Content-Type": "application/json",
           Authorization: `Bearer ${accesstoken}`,
         },
       });
-
-      // Kiểm tra cấu trúc dữ liệu trả về
-      console.log("API Response:", response.data);
 
       // Lấy dữ liệu người dùng từ response
       // Backend có thể trả về trực tiếp mảng users hoặc object có thuộc tính result
@@ -85,7 +83,7 @@ const AccountsPage = () => {
         Modal.error({
           content: "Unauthorized. Please login again.",
         });
-        navigate("/login");
+        // navigate("/login");
       } else {
         // Hiển thị thông báo lỗi cụ thể
         Modal.error({
@@ -126,8 +124,8 @@ const AccountsPage = () => {
         return;
       }
 
-      await axios.post(
-        `http://localhost:8080/user/delete/${userId}`,
+      await axiosInstance.post(
+        `/user/delete/${userId}`,
         {},
         {
           headers: {
@@ -190,7 +188,7 @@ const AccountsPage = () => {
       };
 
       // Gọi API register giống như trong registerPage.jsx
-      await axios.post("http://localhost:8080/user/register", registerData, {
+      await axiosInstance.post("/user/register", registerData, {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${accesstoken}`, // Vẫn giữ token để xác thực admin

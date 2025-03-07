@@ -1,13 +1,14 @@
 import { Table } from "antd";
-import axios from "axios";
+// import axios from "axios";
 import { useEffect, useState } from "react";
+import axiosInstance from "../../../service/api";
 
 const TestUsers = () => {
   const [userList, setUserList] = useState([]);
 
   const fetchUsers = async () => {
     try {
-      const response = await axios.get("http://localhost:8080/user/showInfo");
+      const response = await axiosInstance.get("/user/showInfo");
       console.log(response.data);
 
       // Lấy danh sách users từ API

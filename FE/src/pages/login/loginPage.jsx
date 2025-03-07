@@ -2,15 +2,16 @@ import { useState } from "react";
 import { FiUser, FiLock, FiEye, FiEyeOff } from "react-icons/fi";
 import { FcGoogle } from "react-icons/fc";
 import { useNavigate, Link } from "react-router-dom";
-import axios from "axios";
+// import axios from "axios";
 import "./loginPage.css"; // Import file css mới
 import { toast } from "react-toastify";
+import axiosInstance from "../../service/api";
 
 const LoginPage = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [errors, setErrors] = useState({});
+  const [, setErrors] = useState({});
   const [rememberMe, setRememberMe] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
@@ -36,8 +37,8 @@ const LoginPage = () => {
     if (validateForm()) {
       setIsLoading(true);
       try {
-        const response = await axios.post(
-          "http://localhost:8080/user/login",
+        const response = await axiosInstance.post(
+          "/user/login",
           { username, password },
           { withCredentials: true }
         );
@@ -50,12 +51,14 @@ const LoginPage = () => {
         const tokenParts = response.data.accesstoken.split(".");
         const payload = JSON.parse(atob(tokenParts[1]));
         const userRole = payload.role;
+        console.log(userRole);
+        localStorage.setItem("role", userRole);
 
         setIsLoading(false);
         toast.success("Đăng nhập thành công!");
 
         // Kiểm tra role và điều hướng
-        // 
+        //
         navigate("/welcome");
       } catch (error) {
         setIsLoading(false);
@@ -145,10 +148,7 @@ const LoginPage = () => {
               <span>hoặc đăng nhập bằng</span>
             </div>
             <div className="login-button-group">
-              <button
-                type="button"
-                className="login-btn login-btn-secondary"
-              >
+              <button type="button" className="login-btn login-btn-secondary">
                 <FcGoogle className="h-5 w-5 mr-2" /> Google
               </button>
             </div>

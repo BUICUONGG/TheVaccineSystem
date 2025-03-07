@@ -7,7 +7,7 @@ import "./handbook.css";
 
 const Handbook = () => {
   const navigate = useNavigate();
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [, setIsLoggedIn] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedCategory, setSelectedCategory] = useState("all");
   const guidesPerPage = 6;
@@ -18,7 +18,7 @@ const Handbook = () => {
     { id: "schedule", name: "Lịch tiêm" },
     { id: "preparation", name: "Chuẩn bị" },
     { id: "aftercare", name: "Chăm sóc sau tiêm" },
-    { id: "faq", name: "Câu hỏi thường gặp" }
+    { id: "faq", name: "Câu hỏi thường gặp" },
   ];
 
   const handlePageChange = (page) => {
@@ -35,7 +35,7 @@ const Handbook = () => {
         "Thông tin chi tiết về các mũi tiêm cần thiết và thời điểm tiêm phù hợp cho trẻ từ 0-24 tháng tuổi.",
       icon: <FaBookOpen size={50} style={{ color: "#4A90E2" }} />,
       category: "schedule",
-      featured: true
+      featured: true,
     },
     {
       id: 2,
@@ -43,7 +43,7 @@ const Handbook = () => {
       description:
         "Tổng quan về các loại vắc xin phổ biến, tác dụng và đối tượng tiêm chủng phù hợp.",
       icon: <FaBookOpen size={50} style={{ color: "#4A90E2" }} />,
-      category: "vaccines"
+      category: "vaccines",
     },
     {
       id: 3,
@@ -51,7 +51,7 @@ const Handbook = () => {
       description:
         "Những việc cần làm và lưu ý quan trọng trước khi đưa trẻ đi tiêm chủng.",
       icon: <FaBookOpen size={50} style={{ color: "#4A90E2" }} />,
-      category: "preparation"
+      category: "preparation",
     },
     {
       id: 4,
@@ -59,7 +59,7 @@ const Handbook = () => {
       description:
         "Hướng dẫn chi tiết cách chăm sóc trẻ và xử lý các phản ứng phụ sau tiêm.",
       icon: <FaBookOpen size={50} style={{ color: "#4A90E2" }} />,
-      category: "aftercare"
+      category: "aftercare",
     },
     {
       id: 5,
@@ -67,7 +67,7 @@ const Handbook = () => {
       description:
         "Giải đáp các thắc mắc phổ biến của phụ huynh về tiêm chủng cho trẻ.",
       icon: <FaBookOpen size={50} style={{ color: "#4A90E2" }} />,
-      category: "faq"
+      category: "faq",
     },
     {
       id: 6,
@@ -75,8 +75,8 @@ const Handbook = () => {
       description:
         "Các bước trong quy trình tiêm chủng và biện pháp đảm bảo an toàn.",
       icon: <FaBookOpen size={50} style={{ color: "#4A90E2" }} />,
-      category: "preparation"
-    }
+      category: "preparation",
+    },
   ];
 
   useEffect(() => {
@@ -121,7 +121,10 @@ const Handbook = () => {
   // Phân trang
   const indexOfLastGuide = currentPage * guidesPerPage;
   const indexOfFirstGuide = indexOfLastGuide - guidesPerPage;
-  const currentGuides = filteredGuides.slice(indexOfFirstGuide, indexOfLastGuide);
+  const currentGuides = filteredGuides.slice(
+    indexOfFirstGuide,
+    indexOfLastGuide
+  );
 
   // Nếu đang ở trang đầu và danh mục "all", loại bỏ mục nổi bật khỏi lưới
   const guidesToShow =
@@ -162,25 +165,29 @@ const Handbook = () => {
         </div>
 
         {/* Phần featured: hiển thị nếu đang ở trang đầu, danh mục "all" */}
-        {selectedCategory === "all" && currentPage === 1 && filteredGuides.length > 0 && (
-          <div className="featured-guide">
-            <div className="featured-card">
-              <div className="featured-content">
-                <h2>{filteredGuides[0].title}</h2>
-                <p>{filteredGuides[0].description}</p>
-                <button
-                  className="featured-btn"
-                  onClick={() => navigate(`/handbook/${filteredGuides[0].id}`)}
-                >
-                  Đọc thêm <i className="fas fa-arrow-right"></i>
-                </button>
-              </div>
-              <div className="guide-icon featured-icon">
-                {filteredGuides[0].icon}
+        {selectedCategory === "all" &&
+          currentPage === 1 &&
+          filteredGuides.length > 0 && (
+            <div className="featured-guide">
+              <div className="featured-card">
+                <div className="featured-content">
+                  <h2>{filteredGuides[0].title}</h2>
+                  <p>{filteredGuides[0].description}</p>
+                  <button
+                    className="featured-btn"
+                    onClick={() =>
+                      navigate(`/handbook/${filteredGuides[0].id}`)
+                    }
+                  >
+                    Đọc thêm <i className="fas fa-arrow-right"></i>
+                  </button>
+                </div>
+                <div className="guide-icon featured-icon">
+                  {filteredGuides[0].icon}
+                </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
 
         <div className="guide-grid">
           {guidesToShow.map((guide) => (

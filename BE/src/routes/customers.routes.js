@@ -21,7 +21,7 @@ customerRoutes.get(
   getOneCusController
 );
 
-customerRoutes.get("/getAllCustomer", getAllCusController);
+customerRoutes.get("/getAllCustomer", validateAccessToken, getAllCusController);
 
 customerRoutes.post("/update/:id", validateAccessToken, updatemeController);
 
@@ -33,6 +33,7 @@ customerRoutes.post(
 
 customerRoutes.post(
   "/getAptleAndAptGoiByCusId/:id",
+  validateAccessToken,
   getAptleAndAptGoiByCusIdController
 );
 export default customerRoutes;

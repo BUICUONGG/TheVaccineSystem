@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { FiUser, FiLock, FiEye, FiEyeOff } from "react-icons/fi";
-import { useNavigate, Link } from "react-router-dom";
-import axios from "axios";
+import { useNavigate } from "react-router-dom";
+// import axios from "axios";
 import "./forgotPassword.css";
 import { toast } from "react-toastify";
+import axiosInstance from "../../service/api";
 
 const ForgotPassword = () => {
   const navigate = useNavigate();
@@ -63,10 +64,9 @@ const ForgotPassword = () => {
     if (validateUsername()) {
       setIsLoading(true);
       try {
-        const response = await axios.post(
-          "http://localhost:8080/user/check-username",
-          { username }
-        );
+        const response = await axiosInstance.post("/user/check-username", {
+          username,
+        });
         if (response.data.exists) {
           setUserId(response.data.userId);
           setStep(2);
@@ -95,13 +95,15 @@ const ForgotPassword = () => {
     if (!passwordError && !confirmError) {
       setIsLoading(true);
       try {
-        await axios.post(`http://localhost:8080/user/update/${userId}`, {
+        await axiosInstance.post(`/user/update/${userId}`, {
           password: newPassword,
         });
         toast.success("Password updated successfully!");
         navigate("/login");
       } catch (error) {
-        toast.error(error.response?.data?.message || "Failed to update password");
+        toast.error(
+          error.response?.data?.message || "Failed to update password"
+        );
       } finally {
         setIsLoading(false);
       }
@@ -164,9 +166,9 @@ const ForgotPassword = () => {
                   onChange={(e) => {
                     setNewPassword(e.target.value);
                     const passwordError = validatePassword(e.target.value);
-                    setErrors(prev => ({
+                    setErrors((prev) => ({
                       ...prev,
-                      newPassword: passwordError
+                      newPassword: passwordError,
                     }));
                   }}
                 />
@@ -195,9 +197,9 @@ const ForgotPassword = () => {
                       e.target.value,
                       newPassword
                     );
-                    setErrors(prev => ({
+                    setErrors((prev) => ({
                       ...prev,
-                      confirmPassword: confirmError
+                      confirmPassword: confirmError,
                     }));
                   }}
                 />
@@ -216,7 +218,10 @@ const ForgotPassword = () => {
               <div className="forgot-button-group">
                 <button
                   type="submit"
-                  disabled={isLoading || Object.values(errors).some(error => error !== "")}
+                  disabled={
+                    isLoading ||
+                    Object.values(errors).some((error) => error !== "")
+                  }
                   className="forgot-btn forgot-btn-primary"
                 >
                   {isLoading ? "Updating..." : "Reset Password"}

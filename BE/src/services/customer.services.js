@@ -62,50 +62,53 @@ class CustomerService {
 
   async getAptleAndAptGoiByCusId(cusId) {
     try {
-      ///Lấy thông tin lẻ
-      const aptLes = await connectToDatabase.appointmentLes.findOne({
-        cusId: new ObjectId(cusId),
-      });
+      const objectId = new ObjectId(cusId);
 
-      const cus = await connectToDatabase.customers.findOne({
-        _id: aptLes.cudId,
-      });
-      const vaccine = await connectToDatabase.vaccinceInventorys.findOne({
-        _id: aptLes.vaccineId,
-      });
-      const child = await connectToDatabase.childs.findOne({
-        _id: aptLes.childId,
-      });
-      aptLes.customer = cus;
-      aptLes.vaccine = vaccine;
-      aptLes.child = child;
-      delete aptLes.cusId;
-      delete aptLes.childId;
-      delete aptLes.vaccineId;
+      // Lấy tất cả thông tin lẻ
+      const aptLes = await connectToDatabase.appointmentLes
+        .find({ cusId: objectId })
+        .toArray();
 
-      // //lấy thông tin Gói
-      const aptGois = await connectToDatabase.appointmentGois.findOne({
-        cusId: new ObjectId(cusId),
-      });
-      const customer = await connectToDatabase.customers.findOne({
-        _id: aptGois.cudId,
-      });
+      // Lấy tất cả thông tin gói
+      const aptGois = await connectToDatabase.appointmentGois
+        .find({ cusId: objectId })
+        .toArray();
 
-      const childd = await connectToDatabase.childs.findOne({
-        _id: aptGois.childId,
-      });
+      // Lấy thông tin chi tiết cho từng đơn lẻ
+      for (const aptLe of aptLes) {
+        aptLe.customer = await connectToDatabase.customers.findOne({
+          _id: aptLe.cusId,
+        });
+        aptLe.vaccine = await connectToDatabase.vaccinceInventorys.findOne({
+          _id: aptLe.vaccineId,
+        });
+        aptLe.child = await connectToDatabase.childs.findOne({
+          _id: aptLe.childId,
+        });
 
-      const vaccinee = await connectToDatabase.vaccinepackages.findOne({
-        _id: aptGois.vaccinePakageId,
-      });
-      aptGois.customer = customer;
-      aptGois.vaccine = vaccinee;
-      aptGois.child = childd;
-      delete aptGois.cusId;
-      delete aptGois.childId;
-      delete aptGois.vaccinePakageId;
+        delete aptLe.cusId;
+        delete aptLe.childId;
+        delete aptLe.vaccineId;
+      }
 
-      return { aptGois, aptLes };
+      // Lấy thông tin chi tiết cho từng đơn gói
+      for (const aptGoi of aptGois) {
+        aptGoi.customer = await connectToDatabase.customers.findOne({
+          _id: aptGoi.cusId,
+        });
+        aptGoi.vaccine = await connectToDatabase.vaccinepackages.findOne({
+          _id: aptGoi.vaccinePakageId,
+        });
+        aptGoi.child = await connectToDatabase.childs.findOne({
+          _id: aptGoi.childId,
+        });
+
+        delete aptGoi.cusId;
+        delete aptGoi.childId;
+        delete aptGoi.vaccinePakageId;
+      }
+
+      return { aptLes, aptGois };
     } catch (error) {
       console.log(error.message);
       throw new Error(error.message);
