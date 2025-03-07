@@ -15,6 +15,7 @@ import {
   updateAptLeController,
   updateDoseController,
 } from "../controllers/appointment.controllers.js";
+import { validateAccessToken } from "../middlewares/user.middleware.js";
 // import { validateAccessToken } from "../middlewares/user.middleware.js";
 
 const aptLeRoutes = Router();
@@ -25,44 +26,61 @@ const aptGoiRoutes = Router();
 
 //------------------Apt Lẻ -------------------------------------------
 // show ra list cac hoa don
-aptLeRoutes.get("/showInfo", listAllAptLeController);
+aptLeRoutes.get("/showInfo", validateAccessToken, listAllAptLeController);
 
 // tao 1 hoa don dua theo id cus va id vaccine
-aptLeRoutes.post("/create", createAptLeController);
+aptLeRoutes.post("/create", validateAccessToken, createAptLeController);
 
 // lay full thong tin chi tiet cac hoá đơn
-aptLeRoutes.get("/getdetailallaptle", getAppointmentsController);
+aptLeRoutes.get(
+  "/getdetailallaptle",
+  validateAccessToken,
+  getAppointmentsController
+);
 
 // lấy chi tiết 1 hoá đơn dựa theo id
 aptLeRoutes.get(
   "/getdetailaptlee/:id",
+  validateAccessToken,
   getAppointmentsWithDetailsByIdController
 );
 
 // cập nhật thông tin hoá đơn dựa trên id
-aptLeRoutes.post("/update/:id", updateAptLeController);
+aptLeRoutes.post("/update/:id", validateAccessToken, updateAptLeController);
 
 // xoá 1 hoá đơn theo id
-aptLeRoutes.post("/delete/:id", deleteAptLeController);
+aptLeRoutes.post("/delete/:id", validateAccessToken, deleteAptLeController);
 
 // tìm kiếm 1 hoá đơn chi tiết theo id
-aptLeRoutes.post("/searchDetail/:id", searchAppointmentsController);
+aptLeRoutes.post(
+  "/searchDetail/:id",
+  validateAccessToken,
+  searchAppointmentsController
+);
 //-----------------Apt Gois ------------------------------------------
-aptGoiRoutes.get("/showInfo", listAllAptGoiController);
+aptGoiRoutes.get("/showInfo", validateAccessToken, listAllAptGoiController);
 
-aptGoiRoutes.post("/create", createAptGoiController);
+aptGoiRoutes.post("/create", validateAccessToken, createAptGoiController);
 
 //show chi tiet hoa ddon cua goi
-aptGoiRoutes.get("/showDetailAptGoi", showDetailAptGoiController);
+aptGoiRoutes.get(
+  "/showDetailAptGoi",
+  validateAccessToken,
+  showDetailAptGoiController
+);
 
-aptGoiRoutes.post("/update/:id", updateAptGoiController);
+aptGoiRoutes.post("/update/:id", validateAccessToken, updateAptGoiController);
 
-aptGoiRoutes.post("/delete/:id", deleteAptGoiController);
+aptGoiRoutes.post("/delete/:id", validateAccessToken, deleteAptGoiController);
 
 // New route for updating individual doses
-aptGoiRoutes.post("/updateDose/:id", updateDoseController);
+aptGoiRoutes.post("/updateDose/:id", validateAccessToken, updateDoseController);
 
 //lấy thông tin chi tiết của 1 apt Gói theo id
-aptGoiRoutes.post("/searchAptGoiById/:id", searchAptGoiByIdController);
+aptGoiRoutes.post(
+  "/searchAptGoiById/:id",
+  validateAccessToken,
+  searchAptGoiByIdController
+);
 
 export { aptGoiRoutes, aptLeRoutes };

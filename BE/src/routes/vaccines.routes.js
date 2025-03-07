@@ -12,10 +12,18 @@ const vaccinesRoutes = Router();
 
 //PATH:       http://localhost:8080/vaccine
 
-vaccinesRoutes.get("/listVaccine", getVaccinesController);
-vaccinesRoutes.post("/addVaccine", addVaccineController);
-vaccinesRoutes.post("/updateVaccine/:id", updateVaccineController);
-vaccinesRoutes.post("/delete/:id", deleteVaccineController);
+vaccinesRoutes.get("/listVaccine", validateAccessToken, getVaccinesController);
+vaccinesRoutes.post("/addVaccine", validateAccessToken, addVaccineController);
+vaccinesRoutes.post(
+  "/updateVaccine/:id",
+  validateAccessToken,
+  updateVaccineController
+);
+vaccinesRoutes.post(
+  "/delete/:id",
+  validateAccessToken,
+  deleteVaccineController
+);
 vaccinesRoutes.get(
   "/showInfo",
   validateAccessToken,

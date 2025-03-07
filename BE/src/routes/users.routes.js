@@ -32,12 +32,12 @@ usersRoutes.post("/register", registerValidate, registerController);
 
 usersRoutes.post(
   "/delete/:id",
-
+  validateAccessToken,
   // verifyAdmin,
   deleteController
 );
 
-usersRoutes.post("/update/:id", updateController);
+usersRoutes.post("/update/:id", validateAccessToken, updateController);
 
 usersRoutes.post("/logout/:id", logoutController);
 
