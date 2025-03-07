@@ -1,12 +1,9 @@
 import { useState, useEffect, useRef } from "react";
-import axios from "axios";
-//import { Modal } from "antd";
-// import { FaRegCalendarAlt, FaRegListAlt, FaRegThumbsUp, FaRegSmileBeam } from "react-icons/fa";
 import { FaSyringe, FaBook, FaUserCheck, FaMoneyBillWave, FaBaby, FaChild, FaChevronLeft, FaChevronRight } from "react-icons/fa";
+import { EyeOutlined, HeartOutlined, HeartFilled, CommentOutlined, ShareAltOutlined } from "@ant-design/icons";
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import "./homePage.css";
-import { isCookie, useNavigate } from "react-router-dom";
-// import { UserOutlined } from '@ant-design/icons';
+import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import axiosInstance from "../../service/api";
 
@@ -102,7 +99,7 @@ const HomePage = () => {
     localStorage.removeItem("accesstoken");
     localStorage.removeItem("role");
     localStorage.removeItem("userId");
-    isCookie.removeItem("refreshToken");
+    // isCookie.removeItem("refreshToken");
     setIsLoggedIn(false);
     setUserRole("");
     navigate("/thank-you");
@@ -280,7 +277,7 @@ const HomePage = () => {
   const fetchBlogs = async () => {
     try {
       setLoadingBlogs(true);
-      const response = await axios.get("http://localhost:8080/blogs/showBlog");
+      const response = await axiosInstance.get("/blogs/showBlog");
       // Lấy 3 bài blog mới nhất
       const latestBlogs = response.data.slice(0, 3).map(blog => ({
         ...blog,
@@ -305,7 +302,10 @@ const HomePage = () => {
     <div className="homepage">
       <nav>
         <div className="logo">
-          <Link to="/homepage">Diary Vaccine</Link>
+          <Link to="/homepage">
+            <img src="/images/LogoHeader.png" alt="Logo" className="logo-image" />
+            Diary Vaccine
+          </Link>
         </div>
         <ul>
           <li>
