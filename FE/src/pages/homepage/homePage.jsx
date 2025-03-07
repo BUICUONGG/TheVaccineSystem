@@ -2,12 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 //import { Modal } from "antd";
 // import { FaRegCalendarAlt, FaRegListAlt, FaRegThumbsUp, FaRegSmileBeam } from "react-icons/fa";
-import {
-  FaMoneyBillWave,
-  FaChild,
-  FaChevronLeft,
-  FaChevronRight,
-} from "react-icons/fa";
+import { FaSyringe, FaBook, FaUserCheck, FaMoneyBillWave, FaBaby, FaChild, FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import "./homePage.css";
 import { isCookie, useNavigate } from "react-router-dom";
@@ -28,6 +23,11 @@ const HomePage = () => {
   const [vaccines, setVaccines] = useState([]);
   const [currentVaccineIndex, setCurrentVaccineIndex] = useState(0);
   const [flippedCardIndex, setFlippedCardIndex] = useState(null);
+  
+  // Thêm state cho blog
+  const [blogs, setBlogs] = useState([]);
+  const [loadingBlogs, setLoadingBlogs] = useState(false);
+  const [likedBlogStates, setLikedBlogStates] = useState({});
 
   const banners = [
     {
@@ -271,6 +271,35 @@ const HomePage = () => {
       timelineEl.style.width = `${percentage}%`;
     }
   }, [currentVaccineIndex, vaccines.length]);
+
+  // Thêm hàm fetch blogs
+  useEffect(() => {
+    fetchBlogs();
+  }, []);
+
+  const fetchBlogs = async () => {
+    try {
+      setLoadingBlogs(true);
+      const response = await axios.get("http://localhost:8080/blogs/showBlog");
+      // Lấy 3 bài blog mới nhất
+      const latestBlogs = response.data.slice(0, 3).map(blog => ({
+        ...blog,
+        views: 1000
+      }));
+      setBlogs(latestBlogs);
+    } catch (error) {
+      console.error("Failed to fetch blogs:", error);
+    } finally {
+      setLoadingBlogs(false);
+    }
+  };
+
+  const toggleLike = (blogId) => {
+    setLikedBlogStates(prev => ({
+      ...prev,
+      [blogId]: !prev[blogId]
+    }));
+  };
 
   return (
     <div className="homepage">
@@ -554,6 +583,57 @@ const HomePage = () => {
           </div>
         </div>
       </div>
+
+      {/* Thêm phần hiển thị blog trước footer */}
+      <section className="blog-section">
+        <div className="container">
+          <h2 className="section-title">Bài Viết Mới Nhất</h2>
+          <div className="blog-container">
+            <div className="blog-grid">
+              {blogs.map((blog, index) => (
+                <div className="blog-card" key={blog._id}>
+                  <div className="blog-image">
+                    <img 
+                      src={blog.imageUrl || "/images/blog1.png"} 
+                      alt={blog.blogTitle} 
+                    />
+                  </div>
+                  <div className="blog-content">
+                    <h3>{blog.blogTitle}</h3>
+                    <p className="blog-excerpt">
+                      {blog.blogContent.length > 150 
+                        ? `${blog.blogContent.substring(0, 150)}...` 
+                        : blog.blogContent}
+                    </p>
+                    <div className="blog-meta">
+                      <span className="blog-author">Tác giả: {blog.author}</span>
+                      <span className="blog-date">Ngày: {new Date(blog.createDate).toLocaleDateString()}</span>
+                    </div>
+                    <div className="blog-actions">
+                      <span 
+                        className={`like-button ${likedBlogStates[blog._id] ? 'liked' : ''}`} 
+                        onClick={() => toggleLike(blog._id)}
+                      >
+                        {likedBlogStates[blog._id] ? <HeartFilled /> : <HeartOutlined />}
+                      </span>
+                      <span className="comment-icon"><CommentOutlined /></span>
+                      <span className="share-icon"><ShareAltOutlined /></span>
+                      <span className="views-count">
+                        <EyeOutlined /> 1000
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="view-all-blogs">
+              <Link to="/blogs" className="view-all-button">
+                Xem tất cả bài viết
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
 
       <footer className="footer" ref={footerRef}>
         <div className="footer-content">
