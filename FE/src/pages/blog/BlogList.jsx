@@ -1,9 +1,16 @@
 import { useState, useEffect } from "react";
 import { Card, Row, Col, Typography } from "antd";
-import { EyeOutlined, HeartOutlined, HeartFilled, CommentOutlined, ShareAltOutlined } from "@ant-design/icons";
+import {
+  EyeOutlined,
+  HeartOutlined,
+  HeartFilled,
+  CommentOutlined,
+  ShareAltOutlined,
+} from "@ant-design/icons";
 import { Link } from "react-router-dom";
-import axios from "axios";
+// import axios from "axios";
 import "./BlogList.css";
+import axiosInstance from "../../service/api";
 
 const { Title, Paragraph } = Typography;
 
@@ -21,23 +28,26 @@ const BlogList = () => {
   const fetchBlogs = async () => {
     try {
       setLoading(true);
-      const response = await axios.get("http://localhost:8080/blogs/showBlog");
-      const blogsWithViews = response.data.map(blog => ({
+      const response = await axiosInstance.get("/blogs/showBlog", {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accesstoken")}`,
+        },
+      });
+      const blogsWithViews = response.data.map((blog) => ({
         ...blog,
-        views: 1000
+        views: 1000,
       }));
       setBlogs(blogsWithViews);
+      setLoading(false);
     } catch (error) {
       console.error("Failed to fetch blogs:", error);
-    } finally {
-      setLoading(false);
     }
   };
 
   const toggleLike = (blogId) => {
-    setLikedStates(prev => ({
+    setLikedStates((prev) => ({
       ...prev,
-      [blogId]: !prev[blogId]
+      [blogId]: !prev[blogId],
     }));
   };
 
@@ -49,22 +59,22 @@ const BlogList = () => {
         </Link>
       </div>
 
-      <Title level={1} className={`main-title ${visible ? 'fade-in' : ''}`}>
+      <Title level={1} className={`main-title ${visible ? "fade-in" : ""}`}>
         Câu Chuyện Vaccine
       </Title>
-      
+
       <Row gutter={[16, 16]}>
         {blogs.map((blog, index) => (
           <Col span={8} key={blog._id}>
-            <Card 
+            <Card
               loading={loading}
               className={`fade-in-blog`}
               style={{ animationDelay: `${index * 0.2}s` }}
             >
-              <img 
-                src={blog.imageUrl || "./images/blog1.png"} 
-                alt="blog" 
-                style={{ width: '100%', height: '200px', objectFit: 'cover' }}
+              <img
+                src={blog.imageUrl || "./images/blog1.png"}
+                alt="blog"
+                style={{ width: "100%", height: "200px", objectFit: "cover" }}
               />
               <Title level={4}>{blog.blogTitle}</Title>
               <Paragraph>{blog.blogContent}</Paragraph>
@@ -72,12 +82,16 @@ const BlogList = () => {
                 <div className="author-content">
                   <span>Tác giả: {blog.author}</span>
                   <br />
-                  <span>Ngày: {new Date(blog.createDate).toLocaleDateString()}</span>
+                  <span>
+                    Ngày: {new Date(blog.createDate).toLocaleDateString()}
+                  </span>
                 </div>
               </div>
               <div className="blog-actions">
-                <span 
-                  className={`like-button ${likedStates[blog._id] ? 'liked' : ''}`} 
+                <span
+                  className={`like-button ${
+                    likedStates[blog._id] ? "liked" : ""
+                  }`}
                   onClick={() => toggleLike(blog._id)}
                 >
                   {likedStates[blog._id] ? <HeartFilled /> : <HeartOutlined />}
@@ -96,4 +110,4 @@ const BlogList = () => {
   );
 };
 
-export default BlogList; 
+export default BlogList;

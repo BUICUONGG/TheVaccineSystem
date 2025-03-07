@@ -1,14 +1,15 @@
 import { useState, useEffect } from "react";
 import { Form, Input, Button, message, Spin } from "antd";
 import { useOutletContext } from "react-router-dom";
-import axios from "axios";
-import './ProfileInfo.css';
+// import axios from "axios";
+import "./ProfileInfo.css";
+import axiosInstance from "../../../../service/api";
 
 const ProfileAccount = () => {
   const { userData, refreshUserData } = useOutletContext();
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
-  const [userAccount, setUserAccount] = useState(null);
+  const [, setUserAccount] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
 
   // Fetch thông tin user account
@@ -16,24 +17,21 @@ const ProfileAccount = () => {
     const fetchUserAccount = async () => {
       try {
         const accesstoken = localStorage.getItem("accesstoken");
-        const tokenParts = accesstoken.split('.');
+        const tokenParts = accesstoken.split(".");
         const payload = JSON.parse(atob(tokenParts[1]));
         const userId = payload.id;
 
-        const response = await axios.get(
-          `http://localhost:8080/user/getOne/${userId}`,
-          {
-            headers: { Authorization: `Bearer ${accesstoken}` }
-          }
-        );
+        const response = await axiosInstance.get(`/user/getOne/${userId}`, {
+          headers: { Authorization: `Bearer ${accesstoken}` },
+        });
 
         setUserAccount(response.data);
         form.setFieldsValue({
           username: response.data.username,
-          email: response.data.email
+          email: response.data.email,
         });
       } catch (error) {
-        message.error('Không thể tải thông tin tài khoản');
+        message.error("Không thể tải thông tin tài khoản", error);
       }
     };
 
@@ -44,27 +42,26 @@ const ProfileAccount = () => {
     try {
       setLoading(true);
       const accesstoken = localStorage.getItem("accesstoken");
-      const tokenParts = accesstoken.split('.');
+      const tokenParts = accesstoken.split(".");
       const payload = JSON.parse(atob(tokenParts[1]));
       const userId = payload.id;
 
-      await axios.post(
-        `http://localhost:8080/user/update/${userId}`,
+      await axiosInstance.post(
+        `/user/update/${userId}`,
         {
           username: values.username,
-          email: values.email
+          email: values.email,
         },
         {
-          headers: { Authorization: `Bearer ${accesstoken}` }
+          headers: { Authorization: `Bearer ${accesstoken}` },
         }
       );
 
-      message.success('Cập nhật thông tin thành công');
+      message.success("Cập nhật thông tin thành công");
       setIsEditing(false);
       await refreshUserData();
-      
     } catch (error) {
-      message.error('Cập nhật thông tin thất bại');
+      message.error("Cập nhật thông tin thất bại", error);
     } finally {
       setLoading(false);
     }
@@ -74,26 +71,25 @@ const ProfileAccount = () => {
     try {
       setLoading(true);
       const accesstoken = localStorage.getItem("accesstoken");
-      const tokenParts = accesstoken.split('.');
+      const tokenParts = accesstoken.split(".");
       const payload = JSON.parse(atob(tokenParts[1]));
       const userId = payload.id;
 
-      await axios.post(
-        `http://localhost:8080/user/changePassword/${userId}`,
+      await axiosInstance.post(
+        `/user/changePassword/${userId}`,
         {
           oldPassword: values.oldPassword,
-          newPassword: values.newPassword
+          newPassword: values.newPassword,
         },
         {
-          headers: { Authorization: `Bearer ${accesstoken}` }
+          headers: { Authorization: `Bearer ${accesstoken}` },
         }
       );
 
-      message.success('Đổi mật khẩu thành công');
-      form.resetFields(['oldPassword', 'newPassword', 'confirmPassword']);
-
+      message.success("Đổi mật khẩu thành công");
+      form.resetFields(["oldPassword", "newPassword", "confirmPassword"]);
     } catch (error) {
-      message.error('Đổi mật khẩu thất bại');
+      message.error("Đổi mật khẩu thất bại", error);
     } finally {
       setLoading(false);
     }
@@ -116,12 +112,12 @@ const ProfileAccount = () => {
             {/* User Info Section */}
             <div className="user-info-section">
               <h3>Thông tin đăng nhập</h3>
-              
+
               <Form.Item
                 name="username"
                 label="Tên đăng nhập"
                 rules={[
-                  { required: true, message: 'Vui lòng nhập tên đăng nhập!' }
+                  { required: true, message: "Vui lòng nhập tên đăng nhập!" },
                 ]}
               >
                 <Input disabled={!isEditing} />
@@ -131,8 +127,8 @@ const ProfileAccount = () => {
                 name="email"
                 label="Email"
                 rules={[
-                  { required: true, message: 'Vui lòng nhập email!' },
-                  { type: 'email', message: 'Email không hợp lệ!' }
+                  { required: true, message: "Vui lòng nhập email!" },
+                  { type: "email", message: "Email không hợp lệ!" },
                 ]}
               >
                 <Input disabled={!isEditing} />
@@ -149,7 +145,7 @@ const ProfileAccount = () => {
                 }}
                 className="edit-button"
               >
-                {isEditing ? 'Lưu thông tin' : 'Chỉnh sửa'}
+                {isEditing ? "Lưu thông tin" : "Chỉnh sửa"}
               </Button>
             </div>
 
@@ -157,12 +153,15 @@ const ProfileAccount = () => {
             {!isEditing && (
               <div className="password-section">
                 <h3>Đổi mật khẩu</h3>
-                
+
                 <Form.Item
                   name="oldPassword"
                   label="Mật khẩu hiện tại"
                   rules={[
-                    { required: true, message: 'Vui lòng nhập mật khẩu hiện tại!' }
+                    {
+                      required: true,
+                      message: "Vui lòng nhập mật khẩu hiện tại!",
+                    },
                   ]}
                 >
                   <Input.Password />
@@ -172,8 +171,8 @@ const ProfileAccount = () => {
                   name="newPassword"
                   label="Mật khẩu mới"
                   rules={[
-                    { required: true, message: 'Vui lòng nhập mật khẩu mới!' },
-                    { min: 6, message: 'Mật khẩu phải có ít nhất 6 ký tự!' }
+                    { required: true, message: "Vui lòng nhập mật khẩu mới!" },
+                    { min: 6, message: "Mật khẩu phải có ít nhất 6 ký tự!" },
                   ]}
                 >
                   <Input.Password />
@@ -182,15 +181,15 @@ const ProfileAccount = () => {
                 <Form.Item
                   name="confirmPassword"
                   label="Xác nhận mật khẩu mới"
-                  dependencies={['newPassword']}
+                  dependencies={["newPassword"]}
                   rules={[
-                    { required: true, message: 'Vui lòng xác nhận mật khẩu!' },
+                    { required: true, message: "Vui lòng xác nhận mật khẩu!" },
                     ({ getFieldValue }) => ({
                       validator(_, value) {
-                        if (!value || getFieldValue('newPassword') === value) {
+                        if (!value || getFieldValue("newPassword") === value) {
                           return Promise.resolve();
                         }
-                        return Promise.reject('Mật khẩu xác nhận không khớp!');
+                        return Promise.reject("Mật khẩu xác nhận không khớp!");
                       },
                     }),
                   ]}
@@ -198,8 +197,8 @@ const ProfileAccount = () => {
                   <Input.Password />
                 </Form.Item>
 
-                <Button 
-                  type="primary" 
+                <Button
+                  type="primary"
                   htmlType="submit"
                   className="update-all-btn"
                 >

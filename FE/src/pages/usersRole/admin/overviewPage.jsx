@@ -7,12 +7,12 @@ import {
 } from "@ant-design/icons";
 // import axios from "axios";
 import { Pie } from "@ant-design/plots";
-import { useNavigate } from "react-router-dom";
+// import { useNavigate } from "react-router-dom";
 import axiosInstance from "../../../service/api";
 
 const OverviewPage = () => {
-  const navigate = useNavigate();
-  const [loading, setLoading] = useState(true);
+  // const navigate = useNavigate();
+  const [, setLoading] = useState(true);
   const [stats, setStats] = useState({
     userList: [],
     totalVaccines: 0,
@@ -31,13 +31,13 @@ const OverviewPage = () => {
 
       const [usersResponse, vaccinesResponse, blogsResponse] =
         await Promise.all([
-          axiosInstance.get("http://localhost:8080/user/showInfo", {
+          axiosInstance.get("/user/showInfo", {
             headers: { Authorization: `Bearer ${accesstoken}` },
           }),
-          axiosInstance.get("http://localhost:8080/vaccine/showInfo", {
+          axiosInstance.get("/vaccine/showInfo", {
             headers: { Authorization: `Bearer ${accesstoken}` },
           }),
-          axiosInstance.get("http://localhost:8080/blogs/showBlog", {
+          axiosInstance.get("/blogs/showBlog", {
             headers: { Authorization: `Bearer ${accesstoken}` },
           }),
         ]);
@@ -57,16 +57,15 @@ const OverviewPage = () => {
         totalBlogs: blogsResponse.data.length,
         totalCustomers,
       });
+      setLoading(false);
     } catch (error) {
       console.error("Error fetching data:", error);
       if (error.response?.status === 401) {
         Modal.error({
           content: "Unauthorized. Please login again.",
         });
-        navigate("/login");
+        // navigate("/login");
       }
-    } finally {
-      setLoading(false);
     }
   };
 

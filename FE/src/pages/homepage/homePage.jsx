@@ -3,20 +3,17 @@ import axios from "axios";
 //import { Modal } from "antd";
 // import { FaRegCalendarAlt, FaRegListAlt, FaRegThumbsUp, FaRegSmileBeam } from "react-icons/fa";
 import {
-  FaSyringe,
-  FaBook,
-  FaUserCheck,
   FaMoneyBillWave,
-  FaBaby,
   FaChild,
   FaChevronLeft,
   FaChevronRight,
 } from "react-icons/fa";
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import "./homePage.css";
-import { useNavigate } from "react-router-dom";
+import { isCookie, useNavigate } from "react-router-dom";
 // import { UserOutlined } from '@ant-design/icons';
 import { Link } from "react-router-dom";
+import axiosInstance from "../../service/api";
 
 // eslint-disable-next-line no-unused-vars
 // import { FaSearch, FaShoppingCart } from "react-icons/fa";
@@ -105,22 +102,23 @@ const HomePage = () => {
     localStorage.removeItem("accesstoken");
     localStorage.removeItem("role");
     localStorage.removeItem("userId");
+    isCookie.removeItem("refreshToken");
     setIsLoggedIn(false);
     setUserRole("");
     navigate("/thank-you");
   };
 
-  const handleLogin = () => {
-    navigate("/login");
-  };
+  // const handleLogin = () => {
+  //   navigate("/login");
+  // };
 
-  const handleRegister = () => {
-    navigate("/register");
-  };
+  // const handleRegister = () => {
+  //   navigate("/register");
+  // };
 
-  const handleProfile = () => {
-    navigate("/profile");
-  };
+  // const handleProfile = () => {
+  //   navigate("/profile");
+  // };
 
   useEffect(() => {
     // Thêm script cho Chatbase
@@ -190,9 +188,7 @@ const HomePage = () => {
   useEffect(() => {
     const fetchVaccines = async () => {
       try {
-        const response = await axios.get(
-          "http://localhost:8080/vaccine/showInfo"
-        );
+        const response = await axiosInstance.get("/vaccine/showInfo");
         setVaccines(response.data);
       } catch (error) {
         console.error("Error fetching vaccines:", error);

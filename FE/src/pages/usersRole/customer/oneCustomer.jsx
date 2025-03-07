@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { Form, Input, Select, Button, message } from "antd";
-import axios from "axios";
+// import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import axiosInstance from "../../../service/api";
 
 const CustomerProfile = () => {
   const [form] = Form.useForm();
@@ -13,8 +14,8 @@ const CustomerProfile = () => {
     const fetchCustomerProfile = async () => {
       try {
         const accessToken = localStorage.getItem("accesstoken");
-        const response = await axios.get(
-          `http://localhost:8080/customer/getOneCustomer/${userId}`,
+        const response = await axiosInstance.get(
+          `/customer/getOneCustomer/${userId}`,
           {
             headers: { Authorization: `Bearer ${accessToken}` },
           }
@@ -33,13 +34,9 @@ const CustomerProfile = () => {
     setLoading(true);
     try {
       const accessToken = localStorage.getItem("accesstoken");
-      await axios.post(
-        `http://localhost:8080/customer/update/${userId}`,
-        values,
-        {
-          headers: { Authorization: `Bearer ${accessToken}` },
-        }
-      );
+      await axiosInstance.post(`/customer/update/${userId}`, values, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
       message.success("Profile updated successfully");
       navigate("/homepage");
     } catch (error) {
@@ -52,11 +49,7 @@ const CustomerProfile = () => {
   return (
     <div className="max-w-2xl mx-auto p-8">
       <h2 className="text-2xl font-bold mb-6">My Profile</h2>
-      <Form
-        form={form}
-        layout="vertical"
-        onFinish={onFinish}
-      >
+      <Form form={form} layout="vertical" onFinish={onFinish}>
         <Form.Item
           name="customerName"
           label="Full Name"
@@ -68,7 +61,9 @@ const CustomerProfile = () => {
         <Form.Item
           name="phone"
           label="Phone Number"
-          rules={[{ required: true, message: "Please input your phone number!" }]}
+          rules={[
+            { required: true, message: "Please input your phone number!" },
+          ]}
         >
           <Input />
         </Form.Item>

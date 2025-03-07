@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import { Form, Input, Radio, message, Spin } from "antd";
-import { useNavigate, useOutletContext } from "react-router-dom";
-import { UserOutlined } from '@ant-design/icons';
-import axios from "axios";
-import './ProfileInfo.css';
+import { useOutletContext } from "react-router-dom";
+import { UserOutlined } from "@ant-design/icons";
+// import axios from "axios";
+import "./ProfileInfo.css";
+import axiosInstance from "../../../../service/api";
 
 const ProfileInfo = () => {
   const { userData, refreshUserData } = useOutletContext();
@@ -18,7 +19,7 @@ const ProfileInfo = () => {
         phone: userData.phone,
         birthday: userData.birthday,
         address: userData.address,
-        gender: userData.gender
+        gender: userData.gender,
       });
     }
   }, [userData, form]);
@@ -30,25 +31,20 @@ const ProfileInfo = () => {
       setLoading(true);
 
       const accesstoken = localStorage.getItem("accesstoken");
-      const tokenParts = accesstoken.split('.');
+      const tokenParts = accesstoken.split(".");
       const payload = JSON.parse(atob(tokenParts[1]));
       const userId = payload.id;
 
       // Gọi API cập nhật
-      await axios.post(
-        `http://localhost:8080/customer/update/${userId}`,
-        values,
-        {
-          headers: { Authorization: `Bearer ${accesstoken}` }
-        }
-      );
+      await axiosInstance.post(`/customer/update/${userId}`, values, {
+        headers: { Authorization: `Bearer ${accesstoken}` },
+      });
 
       // Refresh data và hiển thị thông báo thành công
       await refreshUserData();
-      message.success('Cập nhật thông tin thành công');
-
+      message.success("Cập nhật thông tin thành công");
     } catch (error) {
-      message.error('Cập nhật thất bại: ' + error.message);
+      message.error("Cập nhật thất bại: " + error.message);
     } finally {
       setLoading(false);
     }
@@ -60,7 +56,7 @@ const ProfileInfo = () => {
         <h2>Thông Tin Cá Nhân</h2>
         <p>Cập nhật thông tin cá nhân của bạn</p>
       </div>
-      
+
       <div className="profile-info-container">
         <div className="avatar-section">
           <div className="avatar-container">
@@ -74,7 +70,7 @@ const ProfileInfo = () => {
             <Form.Item
               name="customerName"
               label="Họ và tên"
-              rules={[{ required: true, message: 'Vui lòng nhập họ tên!' }]}
+              rules={[{ required: true, message: "Vui lòng nhập họ tên!" }]}
             >
               <Input />
             </Form.Item>
@@ -83,8 +79,11 @@ const ProfileInfo = () => {
               name="phone"
               label="Số điện thoại"
               rules={[
-                { required: true, message: 'Vui lòng nhập số điện thoại!' },
-                { pattern: /^[0-9]{10}$/, message: 'Số điện thoại phải có 10 chữ số!' }
+                { required: true, message: "Vui lòng nhập số điện thoại!" },
+                {
+                  pattern: /^[0-9]{10}$/,
+                  message: "Số điện thoại phải có 10 chữ số!",
+                },
               ]}
             >
               <Input />
@@ -93,7 +92,7 @@ const ProfileInfo = () => {
             <Form.Item
               name="address"
               label="Địa chỉ"
-              rules={[{ required: true, message: 'Vui lòng nhập địa chỉ!' }]}
+              rules={[{ required: true, message: "Vui lòng nhập địa chỉ!" }]}
             >
               <Input.TextArea rows={4} />
             </Form.Item>
@@ -109,16 +108,20 @@ const ProfileInfo = () => {
               name="birthday"
               label="Ngày sinh"
               rules={[
-                { 
+                {
                   pattern: /^(0[1-9]|[12][0-9]|3[01])\/(0[1-9]|1[0-2])\/\d{4}$/,
-                  message: 'Định dạng ngày sinh không hợp lệ (DD/MM/YYYY)!'
-                }
+                  message: "Định dạng ngày sinh không hợp lệ (DD/MM/YYYY)!",
+                },
               ]}
             >
               <Input placeholder="DD/MM/YYYY" />
             </Form.Item>
 
-            <button type="button" className="update-all-btn" onClick={handleUpdate}>
+            <button
+              type="button"
+              className="update-all-btn"
+              onClick={handleUpdate}
+            >
               Cập nhật thông tin
             </button>
           </Form>

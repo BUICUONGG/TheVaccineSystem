@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
+// import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { Form, Input, Select, message, Spin } from "antd";
 import "./ProfilePage.css";
+import axiosInstance from "../../../service/api";
 
 const { Option } = Select;
 
@@ -24,22 +25,22 @@ const Profile = () => {
       }
 
       // Decode token để lấy userId
-      const tokenParts = accesstoken.split('.');
+      const tokenParts = accesstoken.split(".");
       const payload = JSON.parse(atob(tokenParts[1]));
       const userId = payload.id; // "67b53056af240f16ecf58a5c"
 
       try {
         // Fetch user data
         const [userResponse, customerResponse] = await Promise.all([
-          axios.get("http://localhost:8080/users/showInfo", {
+          axiosInstance.get("/users/showInfo", {
             headers: { Authorization: `Bearer ${accesstoken}` },
           }),
-          axios.get(`http://localhost:8080/customer/getOneCustomer/${userId}`, {
+          axiosInstance.get(`/customer/getOneCustomer/${userId}`, {
             headers: { Authorization: `Bearer ${accesstoken}` },
-          })
+          }),
         ]);
 
-        console.log('Customer Response:', customerResponse.data); // Để debug
+        console.log("Customer Response:", customerResponse.data); // Để debug
 
         const customerData = customerResponse.data;
         const userData = userResponse.data;
@@ -52,19 +53,17 @@ const Profile = () => {
           phone: customerData.phone,
           birthday: customerData.birthday,
           address: customerData.address,
-          gender: customerData.gender
+          gender: customerData.gender,
         });
 
         setUserData({
           ...userData,
-          ...customerData
+          ...customerData,
         });
-
       } catch (error) {
         console.error("Error in data fetching:", error);
         message.error("Không thể tải thông tin người dùng");
       }
-
     } catch (error) {
       console.error("Error in token processing:", error);
       if (error.response?.status === 401) {
@@ -86,9 +85,9 @@ const Profile = () => {
     try {
       setLoading(true);
       const accesstoken = localStorage.getItem("accesstoken");
-      
+
       // Decode token để lấy userId
-      const tokenParts = accesstoken.split('.');
+      const tokenParts = accesstoken.split(".");
       const payload = JSON.parse(atob(tokenParts[1]));
       const userId = payload.id;
 
@@ -103,16 +102,12 @@ const Profile = () => {
         phone: values.phone?.trim() || null,
         address: values.address?.trim() || null,
         gender: values.gender || null,
-        birthday: values.birthday?.trim() || null
+        birthday: values.birthday?.trim() || null,
       };
 
-      await axios.post(
-        `http://localhost:8080/customer/update/${userId}`,
-        updatedData,
-        {
-          headers: { Authorization: `Bearer ${accesstoken}` }
-        }
-      );
+      await axiosInstance.post(`/customer/update/${userId}`, updatedData, {
+        headers: { Authorization: `Bearer ${accesstoken}` },
+      });
 
       message.success("Cập nhật thông tin thành công");
       fetchUserData(); // Refresh data after update
@@ -161,7 +156,10 @@ const Profile = () => {
               className="form-item"
               rules={[
                 { required: true, message: "Vui lòng nhập họ tên!" },
-                { whitespace: true, message: "Không được chỉ nhập khoảng trắng!" }
+                {
+                  whitespace: true,
+                  message: "Không được chỉ nhập khoảng trắng!",
+                },
               ]}
             >
               <Input maxLength={100} />
@@ -173,7 +171,10 @@ const Profile = () => {
               className="form-item"
               rules={[
                 { required: true, message: "Vui lòng nhập số điện thoại!" },
-                { pattern: /^[0-9]{10}$/, message: "Số điện thoại phải có 10 chữ số!" }
+                {
+                  pattern: /^[0-9]{10}$/,
+                  message: "Số điện thoại phải có 10 chữ số!",
+                },
               ]}
             >
               <Input maxLength={10} />
@@ -183,9 +184,7 @@ const Profile = () => {
           <Form.Item
             name="address"
             label="Địa chỉ"
-            rules={[
-              { required: true, message: "Vui lòng nhập địa chỉ!" }
-            ]}
+            rules={[{ required: true, message: "Vui lòng nhập địa chỉ!" }]}
           >
             <Input.TextArea maxLength={200} rows={4} />
           </Form.Item>
@@ -211,8 +210,8 @@ const Profile = () => {
               rules={[
                 {
                   pattern: /^(0[1-9]|[12][0-9]|3[01])\/(0[1-9]|1[0-2])\/\d{4}$/,
-                  message: "Định dạng ngày sinh không hợp lệ (DD/MM/YYYY)!"
-                }
+                  message: "Định dạng ngày sinh không hợp lệ (DD/MM/YYYY)!",
+                },
               ]}
             >
               <Input placeholder="DD/MM/YYYY" />

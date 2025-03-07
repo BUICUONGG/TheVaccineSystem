@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
+// import axios from "axios";
 import {
   Table,
   Tag,
@@ -19,6 +19,7 @@ import {
 } from "@ant-design/icons";
 import moment from "moment";
 import "./appointmentManagement.css";
+import axiosInstance from "../../../service/api";
 
 // const { Option } = Select;
 const { TabPane } = Tabs;
@@ -40,16 +41,16 @@ const AppointmentManagement = () => {
       const token = localStorage.getItem("accesstoken");
 
       // Fetch appointments lẻ
-      const responseLe = await axios.get(
-        "http://localhost:8080/appointmentLe/getdetailallaptle",
+      const responseLe = await axiosInstance.get(
+        "/appointmentLe/getdetailallaptle",
         {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
 
       // Fetch appointments gói - sử dụng API chi tiết
-      const responseGoi = await axios.get(
-        "http://localhost:8080/appointmentGoi/showDetailAptGoi",
+      const responseGoi = await axiosInstance.get(
+        "/appointmentGoi/showDetailAptGoi",
         {
           headers: { Authorization: `Bearer ${token}` },
         }
@@ -104,10 +105,10 @@ const AppointmentManagement = () => {
     try {
       const token = localStorage.getItem("accesstoken");
       const endpoint = isPackage
-        ? `http://localhost:8080/appointmentGoi/update/${id}`
-        : `http://localhost:8080/appointmentLe/update/${id}`;
+        ? `/appointmentGoi/update/${id}`
+        : `/appointmentLe/update/${id}`;
 
-      await axios.post(
+      await axiosInstance.post(
         endpoint,
         { status },
         { headers: { Authorization: `Bearer ${token}` } }
@@ -155,8 +156,8 @@ const AppointmentManagement = () => {
       });
 
       // Make API call to update dose status
-      const response = await axios.post(
-        `http://localhost:8080/appointmentGoi/updateDose/${appointmentId}`,
+      const response = await axiosInstance.post(
+        `/appointmentGoi/updateDose/${appointmentId}`,
         {
           doseNumber: parseInt(doseNumber),
           status,

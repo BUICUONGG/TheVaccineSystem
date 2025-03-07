@@ -46,22 +46,29 @@ const VaccinesPage = () => {
       });
       setVaccineList(response.data);
       setFilteredVaccines(response.data);
+      setLoading(false);
     } catch (error) {
       console.error("Error fetching vaccines:", error);
       Modal.error({
         content: "Không thể tải danh sách vaccine",
       });
-    } finally {
-      setLoading(false);
     }
   };
 
   const handleCreate = async (values) => {
     try {
-      await axiosInstance.post("/vaccine/addVaccine", {
-        ...values,
-        createdAt: new Date().toLocaleDateString("en-GB"),
-      });
+      await axiosInstance.post(
+        "/vaccine/addVaccine",
+        {
+          ...values,
+          createdAt: new Date().toLocaleDateString("en-GB"),
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("accesstoken")}`,
+          },
+        }
+      );
 
       Modal.success({
         content: "Thêm vaccine thành công!",
@@ -94,7 +101,12 @@ const VaccinesPage = () => {
 
       await axiosInstance.post(
         `/vaccine/updateVaccine/${editingVaccine._id}`,
-        updatedData
+        updatedData,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("accesstoken")}`,
+          },
+        }
       );
 
       Modal.success({
@@ -113,7 +125,15 @@ const VaccinesPage = () => {
 
   const handleDelete = async (vaccineId) => {
     try {
-      await axiosInstance.post(`/vaccine/delete/${vaccineId}`);
+      await axiosInstance.post(
+        `/vaccine/delete/${vaccineId}`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("accesstoken")}`,
+          },
+        }
+      );
 
       Modal.success({
         content: "Xóa vaccine thành công!",
