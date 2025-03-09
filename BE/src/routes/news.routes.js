@@ -4,9 +4,10 @@ import {
     deleteNewsController,
     showNewsController,
     updateNewsController,
-} from "../controllers/news.controller";
+} from "../controllers/news.controllers.js";
 
-import { validateAccessToken } from "../middlewares/user.middleware";
+import { validateAccessToken } from "../middlewares/user.middleware.js";
+
 const newsRoutes = Router();
 // PATH: http://localhost:8080/news/......
 
