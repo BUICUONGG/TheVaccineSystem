@@ -3,6 +3,7 @@ import { ObjectId } from "mongodb";
 import AppointmentLe from "../model/appointmentSchemaLe.js";
 import Child from "../model/childSchema.js";
 import AppointmentGoi from "../model/appointmentSchemaGoi.js";
+import notiService from "./noti.services.js";
 
 class AppointmentService {
   async listAptLe() {
@@ -67,14 +68,16 @@ class AppointmentService {
       }
 
       // Xóa thông báo cũ cho appointment này
-      await Notification.deleteMany({ cusId: result.cusId });
+      await notiService.deleteNotiById(result._id);
 
       // Tạo thông báo mới
-      const notification = new Notification({
+      await notiService.createNoti({
         cusId: result.cusId,
-        message: `Lịch hẹn của bạn đã chuyển sang trạng thái: ${updateAptLe.status}`,
+        apt: result._id,
+        aptModel: "AppointmentLe",
+        message: `Lịch hẹn gói của bạn đã cập nhật trạng thái: ${updateAptLe.status}`,
+        createdAt: new Date().toLocaleDateString("vi-VN"),
       });
-      await notification.save();
 
       return result;
     } catch (error) {
@@ -286,6 +289,22 @@ class AppointmentService {
         { $set: updateGoi },
         { returnDocument: "after" }
       );
+
+      if (!result) {
+        throw new Error("Không thể update");
+      }
+
+      // Xóa thông báo cũ
+      await notiService.deleteNotiById(result._id);
+
+      await notiService.createNoti({
+        cusId: result.cusId,
+        apt: result._id,
+        aptModel: "AppointmentGoi",
+        message: `Lịch hẹn gói của bạn đã cập nhật trạng thái: ${updateGoi.status}`,
+        createdAt: new Date().toLocaleDateString("vi-VN"),
+      });
+
       return result;
     } catch (error) {
       throw new Error(error.message);
@@ -314,7 +333,7 @@ class AppointmentService {
         throw new Error(`Không tìm thấy lịch hẹn với ID: ${appointmentId}`);
       }
 
-      // Kiểm tra xem doseSchedule có tồn tại không
+      // Kiểm tra doseSchedule
       if (
         !appointment.doseSchedule ||
         !Array.isArray(appointment.doseSchedule)
@@ -322,7 +341,7 @@ class AppointmentService {
         throw new Error("Lịch hẹn không có thông tin lịch tiêm");
       }
 
-      // Tìm vị trí của dose cần cập nhật
+      // Tìm dose cần cập nhật
       const doseIndex = appointment.doseSchedule.findIndex(
         (dose) => dose.doseNumber === parseInt(doseNumber)
       );
@@ -343,6 +362,17 @@ class AppointmentService {
         { _id: new ObjectId(appointmentId) },
         { $set: { doseSchedule: updatedDoseSchedule } },
         { returnDocument: "after" }
+      );
+
+      // Xóa thông báo cũ
+      await notiService.deleteNotiById(appointmentId);
+
+      // Tạo thông báo mới
+      await notiService.createNoti(
+        appointment.cusId,
+        appointmentId,
+        "AppointmentGoi",
+        `Mũi tiêm số ${doseNumber} đã được cập nhật trạng thái: ${status}`
       );
 
       return result;

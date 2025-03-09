@@ -13,8 +13,8 @@ export const createNotiController = async (req, res) => {
 
 export const getNotiByCusIdController = async (req, res) => {
   try {
-    const data = req.body;
-    const notis = await notiService.getNoti(cusId);
+    const id = req.params.id;
+    const notis = await notiService.getNoti(id);
     res.status(200).json(notis);
   } catch (error) {
     res.status(500).json(error.message);

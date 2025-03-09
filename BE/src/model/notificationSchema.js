@@ -8,8 +8,11 @@ const notificationSchema = new mongoose.Schema({
   },
   apt: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: ["AppointmentLe", "AppointmentGoi"],
-    required: true,
+    refPath: "aptModel", // Tham chiếu động
+  },
+  aptModel: {
+    type: String,
+    enum: ["AppointmentLe", "AppointmentGoi"], // Các model hợp lệ
   },
   message: { type: String, required: true },
   createdAt: { type: String },
