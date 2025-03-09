@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
 import { Form, Input, Button, message, Spin } from "antd";
 import { useOutletContext } from "react-router-dom";
-// import axios from "axios";
-import "./ProfileInfo.css";
+import './ProfileInfo.css';
 import axiosInstance from "../../../../service/api";
 
 const ProfileAccount = () => {
@@ -11,8 +10,9 @@ const ProfileAccount = () => {
   const [loading, setLoading] = useState(false);
   const [, setUserAccount] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [showPasswordChange, setShowPasswordChange] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
 
-  // Fetch thông tin user account
   useEffect(() => {
     const fetchUserAccount = async () => {
       try {
@@ -21,9 +21,12 @@ const ProfileAccount = () => {
         const payload = JSON.parse(atob(tokenParts[1]));
         const userId = payload.id;
 
-        const response = await axiosInstance.get(`/user/getOne/${userId}`, {
-          headers: { Authorization: `Bearer ${accesstoken}` },
-        });
+        const response = await axiosInstance.post(
+          `/user/getme/${userId}`,
+          {
+            headers: { Authorization: `Bearer ${accesstoken}` }
+          }
+        );
 
         setUserAccount(response.data);
         form.setFieldsValue({
@@ -38,7 +41,13 @@ const ProfileAccount = () => {
     fetchUserAccount();
   }, [form]);
 
-  const handleUpdateUserInfo = async (values) => {
+  const handleEdit = () => {
+    setIsEditMode(true);
+  };
+
+  
+
+  const handleUpdateInfo = async (values) => {
     try {
       setLoading(true);
       const accesstoken = localStorage.getItem("accesstoken");
@@ -57,8 +66,8 @@ const ProfileAccount = () => {
         }
       );
 
-      message.success("Cập nhật thông tin thành công");
-      setIsEditing(false);
+      message.success('Cập nhật thông tin thành công');
+      setIsEditMode(false);
       await refreshUserData();
     } catch (error) {
       message.error("Cập nhật thông tin thất bại", error);
@@ -86,8 +95,9 @@ const ProfileAccount = () => {
         }
       );
 
-      message.success("Đổi mật khẩu thành công");
-      form.resetFields(["oldPassword", "newPassword", "confirmPassword"]);
+      message.success('Đổi mật khẩu thành công');
+      form.resetFields(['oldPassword', 'newPassword', 'confirmPassword']);
+      setShowPasswordChange(false);
     } catch (error) {
       message.error("Đổi mật khẩu thất bại", error);
     } finally {
@@ -107,12 +117,10 @@ const ProfileAccount = () => {
           <Form
             form={form}
             layout="vertical"
-            onFinish={isEditing ? handleUpdateUserInfo : handleChangePassword}
+            onFinish={showPasswordChange ? handleChangePassword : handleUpdateInfo}
           >
-            {/* User Info Section */}
-            <div className="user-info-section">
-              <h3>Thông tin đăng nhập</h3>
-
+            {/* Main Account Info */}
+            <div className="account-info-section">
               <Form.Item
                 name="username"
                 label="Tên đăng nhập"
@@ -120,7 +128,7 @@ const ProfileAccount = () => {
                   { required: true, message: "Vui lòng nhập tên đăng nhập!" },
                 ]}
               >
-                <Input disabled={!isEditing} />
+                <Input  />
               </Form.Item>
 
               <Form.Item
@@ -131,27 +139,57 @@ const ProfileAccount = () => {
                   { type: "email", message: "Email không hợp lệ!" },
                 ]}
               >
-                <Input disabled={!isEditing} />
+                <Input  />
               </Form.Item>
 
-              <Button
-                type="primary"
-                onClick={() => {
-                  if (isEditing) {
-                    form.submit();
-                  } else {
-                    setIsEditing(true);
-                  }
-                }}
-                className="edit-button"
+              <Form.Item
+                label="Mật khẩu"
               >
-                {isEditing ? "Lưu thông tin" : "Chỉnh sửa"}
-              </Button>
+                <div className="password-field">
+                  <Input.Password 
+                    disabled 
+                    value="********" 
+                    style={{ width: 'calc(100% - 120px)' }}
+                  />
+                  <Button 
+                    type="link" 
+                    onClick={() => setShowPasswordChange(!showPasswordChange)}
+                    className="change-password-link"
+                  >
+                    Đổi mật khẩu
+                  </Button>
+                </div>
+              </Form.Item>
+
+              {!showPasswordChange && (
+                <div className="button-group" style={{ marginTop: '20px' }}>
+                  {!isEditMode ? (
+                    <Button
+                      type="primary"
+                      onClick={handleEdit}
+                      className="update-all-btn"
+                    >
+                      Cập nhật thông tin
+                    </Button>
+                  ) : (
+                    <>
+                      <Button
+                        type="primary"
+                        htmlType="submit"
+                        className="update-all-btn"
+                        style={{ marginBottom: '10px' }}
+                      >
+                        Lưu thay đổi
+                      </Button>   
+                    </>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Password Change Section */}
-            {!isEditing && (
-              <div className="password-section">
+            {showPasswordChange && (
+              <div className="password-change-section">
                 <h3>Đổi mật khẩu</h3>
 
                 <Form.Item
@@ -202,7 +240,7 @@ const ProfileAccount = () => {
                   htmlType="submit"
                   className="update-all-btn"
                 >
-                  Đổi mật khẩu
+                  Xác nhận đổi mật khẩu
                 </Button>
               </div>
             )}

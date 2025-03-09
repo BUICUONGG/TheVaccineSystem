@@ -1,8 +1,10 @@
 .history-container {
-  padding: 15px;
+  padding: 24px;
   background: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  border-radius: 12px;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+  max-width: 1200px;
+  margin: 0 auto;
 }
 
 .table-container {
@@ -13,28 +15,37 @@
   border-radius: 8px;
   overflow: hidden;
   box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  margin-top: 16px;
 }
 
 .history-table .ant-table-thead > tr > th {
   background: #fafafa;
   font-weight: 600;
-  padding: 16px;
+  padding: 16px 24px;
   border-bottom: 2px solid #f0f0f0;
+  color: #262626;
+  font-size: 14px;
 }
 
 .history-table .ant-table-tbody > tr > td {
-  padding: 16px;
+  padding: 16px 24px;
   border-bottom: 1px solid #f0f0f0;
+  font-size: 14px;
+  color: #595959;
+  transition: all 0.3s ease;
 }
 
 .status-tag {
-  padding: 6px 12px;
-  border-radius: 15px;
+  padding: 4px 12px;
+  border-radius: 4px;
   font-weight: 500;
   text-align: center;
   min-width: 100px;
   display: inline-block;
   border: none;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 /* Animation khi loading */
@@ -48,7 +59,7 @@
 
 /* Hover effect cho rows */
 .history-table .ant-table-tbody > tr:hover > td {
-  background: #f8f8f8 !important;
+  background: #fafafa !important;
 }
 
 /* Responsive adjustments */
@@ -147,7 +158,7 @@
 }
 
 .search-section {
-  margin: 20px 0;
+  margin: 24px 0;
   padding: 0 15px;
 }
 
@@ -172,4 +183,321 @@
 .search-input .ant-input:focus {
   border-color: #1890ff;
   box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.1);
+}
+
+/* Styles cho modal */
+.ant-modal-content {
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  padding: 0;
+}
+
+.ant-modal-header {
+  border-radius: 12px 12px 0 0;
+  background: #f8f9fa;
+  padding: 24px 32px;
+  border-bottom: 1px solid #f0f0f0;
+  margin-bottom: 0;
+}
+
+.ant-modal-body {
+  padding: 32px;
+  max-height: 80vh;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #d9d9d9 #fff;
+}
+
+.ant-modal-body::-webkit-scrollbar {
+  width: 6px;
+}
+
+.ant-modal-body::-webkit-scrollbar-thumb {
+  background-color: #d9d9d9;
+  border-radius: 3px;
+}
+
+.ant-modal-body::-webkit-scrollbar-track {
+  background-color: #fff;
+}
+
+.ant-modal-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1f1f1f;
+  margin: 0;
+}
+
+/* Cải thiện Descriptions trong modal */
+.ant-descriptions {
+  margin-top: 0;
+}
+
+.ant-descriptions-bordered .ant-descriptions-item-label {
+  width: 180px;
+  background: #fafafa;
+  font-weight: 500;
+  color: #262626;
+  padding: 16px 24px;
+  font-size: 14px;
+}
+
+.ant-descriptions-bordered .ant-descriptions-item-content {
+  padding: 16px 24px;
+  color: #262626;
+  line-height: 1.5;
+  font-size: 14px;
+}
+
+.ant-descriptions-bordered {
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  border: 1px solid #f0f0f0;
+}
+
+.ant-descriptions-bordered .ant-descriptions-view {
+  border: none;
+}
+
+/* Style cho tags trong modal */
+.ant-descriptions-item-content .ant-tag {
+  margin: 4px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-weight: 500;
+  border: none;
+}
+
+/* Style cho thông tin người tiêm trong modal */
+.ant-descriptions-item-content div {
+  margin-bottom: 8px;
+  line-height: 1.6;
+}
+
+.ant-descriptions-item-content div:last-child {
+  margin-bottom: 0;
+}
+
+/* Style cho lịch tiêm trong modal */
+.ant-descriptions-item-content p {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  padding: 8px;
+  background: #fafafa;
+  border-radius: 6px;
+}
+
+/* Footer modal */
+.ant-modal-footer {
+  padding: 16px 24px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.ant-modal-footer .ant-btn {
+  padding: 6px 20px;
+  height: 36px;
+  border-radius: 6px;
+  font-weight: 500;
+}
+
+/* Responsive cho modal */
+@media (max-width: 768px) {
+  .ant-modal {
+    max-width: 95% !important;
+  }
+
+  .ant-descriptions-bordered .ant-descriptions-item-label,
+  .ant-descriptions-bordered .ant-descriptions-item-content {
+    padding: 12px;
+  }
+
+  .ant-modal-header {
+    padding: 16px 20px;
+  }
+
+  .ant-modal-body {
+    padding: 20px;
+  }
+
+  .ant-modal-title {
+    font-size: 18px;
+  }
+}
+
+/* Hiệu ứng hover cho các elements trong modal */
+.ant-descriptions-item-content p:hover {
+  background: #f5f5f5;
+  transition: background 0.3s ease;
+}
+
+/* Style cho health note */
+.ant-descriptions-item-content div[style*="health-note"] {
+  background: #fffbe6;
+  padding: 8px 12px;
+  border-radius: 6px;
+  border-left: 4px solid #faad14;
+}
+
+/* Cập nhật style cho nút xem thêm */
+.ant-btn-primary.details-button {
+  border-radius: 6px;
+  height: 32px;
+  padding: 4px 15px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ant-btn-primary.details-button:hover {
+  background: #40a9ff;
+  border-color: #40a9ff;
+}
+
+/* Style cho thông tin người tiêm */
+.person-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Responsive styles cho modal */
+@media (max-width: 768px) {
+  .ant-modal {
+    max-width: 95% !important;
+    margin: 10px;
+  }
+
+  .ant-descriptions-item-label,
+  .ant-descriptions-item-content {
+    padding: 12px 8px;
+  }
+}
+
+/* Hiệu ứng hover cho row trong bảng */
+.history-table .ant-table-tbody > tr:hover {
+  cursor: pointer;
+}
+
+/* Style cho các trạng thái khác nhau */
+.ant-tag.status-tag {
+  text-transform: uppercase;
+  font-size: 12px;
+  line-height: 20px;
+  height: 22px;
+  font-weight: 500;
+}
+
+/* Styles cho thông tin mũi tiêm trong modal */
+.dose-schedule-item {
+  background: white;
+  border: 1px solid #f0f0f0;
+  border-radius: 8px;
+  padding: 16px 20px;
+  margin-bottom: 16px;
+}
+
+.dose-schedule-item:last-child {
+  margin-bottom: 0;
+}
+
+.dose-schedule-item h4 {
+  margin: 0 0 12px 0;
+  color: #262626;
+  font-weight: 600;
+  font-size: 15px;
+  border-bottom: 1px dashed #f0f0f0;
+  padding-bottom: 8px;
+}
+
+.dose-info {
+  padding: 0 12px;
+}
+
+.dose-info > div {
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+  color: #595959;
+}
+
+.vaccine-list {
+  margin-top: 8px;
+}
+
+.vaccine-item {
+  padding: 4px 0 4px 16px;
+  color: #666;
+}
+
+/* Highlight cho trạng thái mũi tiêm */
+.dose-info .ant-tag {
+  margin-left: 8px;
+}
+
+.vaccine-package-item {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 12px;
+  border: 1px solid #f0f0f0;
+}
+
+.vaccine-detail {
+  padding-left: 12px;
+  margin-top: 8px;
+  color: #666;
+  background: white;
+  border-radius: 6px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+  padding: 12px 16px;
+}
+
+.vaccine-detail > div {
+  margin-bottom: 8px;
+  color: #595959;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.vaccine-name {
+  margin-top: 4px;
+  color: #1890ff;
+  font-weight: 500;
+}
+
+/* Header section */
+.content-header {
+  margin-bottom: 32px;
+  border-bottom: 2px solid #f0f0f0;
+  padding-bottom: 16px;
+}
+
+.content-header h2 {
+  font-size: 24px;
+  font-weight: 600;
+  color: #262626;
+  margin-bottom: 8px;
+}
+
+.content-header p {
+  color: #8c8c8c;
+  font-size: 15px;
+}
+
+/* Button styling */
+.ant-btn {
+  border-radius: 6px;
+  font-size: 14px;
+  height: 34px;
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }

@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
-// import axios from "axios";
+import axios from "axios";
 import {
   Table,
   Tag,
   Button,
-  // Select,
+  Select,
   message,
   Modal,
   Tabs,
@@ -12,7 +12,7 @@ import {
   List,
   Card,
   Typography,
-  // Checkbox,
+  Checkbox,
 } from "antd";
 import {
   SearchOutlined,

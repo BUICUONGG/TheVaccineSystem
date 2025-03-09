@@ -13,7 +13,7 @@ const axiosInstance = axios.create({
 // Hàm lấy accessToken từ localStorage
 const getAccessToken = () => {
   const token = localStorage.getItem("accesstoken");
-  console.log("Current AccessToken:", token);
+  // console.log("Current AccessToken:", token);
   return token;
 };
 

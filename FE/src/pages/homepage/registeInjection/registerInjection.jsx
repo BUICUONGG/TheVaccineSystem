@@ -86,7 +86,7 @@ const RegisterInjection = () => {
           }
         );
 
-        console.log("User Info:", response.data);
+        // console.log("User Info:", response.data);
 
         // Cập nhật form nếu có dữ liệu trả về
         if (response.data) {
@@ -147,7 +147,7 @@ const RegisterInjection = () => {
     try {
       const accesstoken = localStorage.getItem("accesstoken");
       // const userId = localStorage.getItem("userId");
-      const cusId = localStorage.getItem("userId");
+      const cusId = localStorage.getItem("cusId");
       const today = new Date();
       const createAt = `${String(today.getDate()).padStart(2, "0")}/${String(
         today.getMonth() + 1
@@ -181,7 +181,7 @@ const RegisterInjection = () => {
           headers: { Authorization: `Bearer ${accesstoken}` },
         });
       }
-      console.log("Dữ liệu gửi đi:", requestData);
+
 
       // Thông báo thành công
       toast.success(
@@ -194,6 +194,7 @@ const RegisterInjection = () => {
           onClose: () => navigate("/homepage"),
         }
       );
+      console.log("Dữ liệu gửi đi:", requestData);
     } catch (error) {
       console.error("Registration error:", error);
       toast.error(
@@ -218,7 +219,7 @@ const RegisterInjection = () => {
       <div className="main-content">
         <div className="back-home-wrapper">
           <Link to="/homepage" className="back-home">
-            Back home
+            Về trang chủ
           </Link>
         </div>
         <div className="form-container">
@@ -366,7 +367,7 @@ const RegisterInjection = () => {
                 name={
                   selectedVaccineType === "single"
                     ? "vaccineId"
-                    : "vaccinePackageId"
+                    : "vaccinePakageId"
                 }
                 label="Chọn Vaccine"
                 rules={[{ required: true, message: "Vui lòng chọn vaccine!" }]}
