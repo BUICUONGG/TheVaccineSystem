@@ -11,6 +11,7 @@ import {
   List,
   Card,
   Typography,
+  Checkbox,
 } from "antd";
 import {
   SearchOutlined,
@@ -18,45 +19,12 @@ import {
   MenuOutlined,
 } from "@ant-design/icons";
 import moment from "moment";
-import "./appointmentManagement.css";
 import axiosInstance from "../../../service/api";
+import "./appointmentManagement.css";
 
 // const { Option } = Select;
 const { TabPane } = Tabs;
 const { Title, Text } = Typography;
-
-// Các hàm tiện ích
-const STATUS_COLORS = {
-  completed: "green",
-  incomplete: "red",
-  pending: "orange",
-  approve: "blue",
-  default: "default",
-};
-
-const STATUS_TEXTS = {
-  completed: "Hoàn thành",
-  incomplete: "Đã hủy",
-  pending: "Đang chờ",
-  approve: "Đã duyệt",
-  default: "Không xác định",
-};
-
-const getStatusColor = (status) =>
-  STATUS_COLORS[status] || STATUS_COLORS.default;
-const getStatusText = (status) => STATUS_TEXTS[status] || STATUS_TEXTS.default;
-
-// Hàm chuyển đổi chuỗi ngày thành đối tượng Date
-const parseDate = (dateStr) => {
-  const formats = ["DD/MM/YYYY", "YYYY-MM-DD", "MM/DD/YYYY", "DD-MM-YYYY"];
-
-  for (const format of formats) {
-    const date = moment(dateStr, format, true);
-    if (date.isValid()) return date;
-  }
-
-  return moment(new Date(dateStr));
-};
 
 const AppointmentManagement = () => {
   const [loading, setLoading] = useState(false);
