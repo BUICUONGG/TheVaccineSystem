@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const NotificationSchema = new mongoose.Schema({
+const notificationSchema = new mongoose.Schema({
   cusId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Customer",
@@ -15,5 +15,5 @@ const NotificationSchema = new mongoose.Schema({
   createdAt: { type: String },
 });
 
-const Notification = mongoose.model("Notification", NotificationSchema);
+const Notification = mongoose.model("Notification", notificationSchema);
 export default Notification;

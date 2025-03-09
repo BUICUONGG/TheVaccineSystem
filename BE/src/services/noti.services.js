@@ -5,6 +5,7 @@ class NotiService {
     try {
       const noti = new Notification();
       const result = await connectToDatabase.notifications.insertOne();
+      return result;
     } catch (error) {
       console.log(error.message);
       throw new Error(error.message);

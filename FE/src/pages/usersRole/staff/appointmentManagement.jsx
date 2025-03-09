@@ -31,7 +31,7 @@ const STATUS_COLORS = {
   incomplete: "red",
   pending: "orange",
   approve: "blue",
-  default: "default"
+  default: "default",
 };
 
 const STATUS_TEXTS = {
@@ -39,21 +39,22 @@ const STATUS_TEXTS = {
   incomplete: "Đã hủy",
   pending: "Đang chờ",
   approve: "Đã duyệt",
-  default: "Không xác định"
+  default: "Không xác định",
 };
 
-const getStatusColor = (status) => STATUS_COLORS[status] || STATUS_COLORS.default;
+const getStatusColor = (status) =>
+  STATUS_COLORS[status] || STATUS_COLORS.default;
 const getStatusText = (status) => STATUS_TEXTS[status] || STATUS_TEXTS.default;
 
 // Hàm chuyển đổi chuỗi ngày thành đối tượng Date
 const parseDate = (dateStr) => {
-  const formats = ['DD/MM/YYYY', 'YYYY-MM-DD', 'MM/DD/YYYY', 'DD-MM-YYYY'];
-  
+  const formats = ["DD/MM/YYYY", "YYYY-MM-DD", "MM/DD/YYYY", "DD-MM-YYYY"];
+
   for (const format of formats) {
     const date = moment(dateStr, format, true);
     if (date.isValid()) return date;
   }
-  
+
   return moment(new Date(dateStr));
 };
 
@@ -115,8 +116,10 @@ const AppointmentManagement = () => {
         { status },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      
-      message.success(`Đã ${status === "completed" ? "duyệt" : "hủy"} đơn thành công`);
+
+      message.success(
+        `Đã ${status === "completed" ? "duyệt" : "hủy"} đơn thành công`
+      );
       fetchAppointments();
 
       // Cập nhật trạng thái trong modal nếu đang mở
@@ -132,7 +135,9 @@ const AppointmentManagement = () => {
       }
     } catch (error) {
       console.error("Error updating status:", error);
-      message.error(`Không thể ${status === "completed" ? "duyệt" : "hủy"} đơn`);
+      message.error(
+        `Không thể ${status === "completed" ? "duyệt" : "hủy"} đơn`
+      );
     }
   };
 
@@ -190,19 +195,25 @@ const AppointmentManagement = () => {
             ...selectedAppointment,
             doseSchedule: updatedDoseSchedule,
           });
-          
+
           // Kiểm tra xem tất cả các mũi tiêm đã hoàn thành chưa
-          const allDosesCompleted = updatedDoseSchedule.every(dose => dose.status === "completed");
-          
+          const allDosesCompleted = updatedDoseSchedule.every(
+            (dose) => dose.status === "completed"
+          );
+
           // Nếu tất cả các mũi tiêm đã hoàn thành và trạng thái hiện tại không phải là "completed"
           if (allDosesCompleted && selectedAppointment.status !== "completed") {
-            console.log("All doses completed, updating appointment status to completed");
-            
+            console.log(
+              "All doses completed, updating appointment status to completed"
+            );
+
             // Cập nhật trạng thái lịch hẹn thành "completed"
             await handleStatusChange(appointmentId, "completed", true);
-            
+
             // Hiển thị thông báo
-            message.success("Tất cả các mũi tiêm đã hoàn thành, lịch hẹn đã được cập nhật thành Hoàn thành");
+            message.success(
+              "Tất cả các mũi tiêm đã hoàn thành, lịch hẹn đã được cập nhật thành Hoàn thành"
+            );
           }
         }
 
@@ -238,13 +249,13 @@ const AppointmentManagement = () => {
         message.info("Không thể xem chi tiết đơn đã bị hủy");
         return;
       }
-      
+
       // Kiểm tra nếu đơn đã hoàn thành thì không hiển thị chi tiết
       if (record.status === "completed") {
         message.info("Không thể xem chi tiết đơn đã hoàn thành");
         return;
       }
-      
+
       setDetailLoading(true);
       setIsModalVisible(true);
 
@@ -275,12 +286,12 @@ const AppointmentManagement = () => {
       key: "cusId",
       render: (cusId, record) => {
         // Try to get customer name from all possible sources
-        const customerName = 
-          record.customer?.customerName || 
-          cusId?.customerName || 
-          cusId?.name || 
+        const customerName =
+          record.customer?.customerName ||
+          cusId?.customerName ||
+          cusId?.name ||
           "N/A";
-        
+
         return customerName;
       },
     },
@@ -290,12 +301,14 @@ const AppointmentManagement = () => {
       key: isPackage ? "vaccinePakageId" : "vaccineId",
       render: (value, record) => {
         if (isPackage) {
-          return record.package?.packageName ||
+          return (
+            record.package?.packageName ||
             record.vaccinePakage?.packageName ||
-            record.packageDetails?.packageName || 
-            value?.packageName || 
-            value?.name || 
-            (typeof value === 'string' ? value : "N/A");
+            record.packageDetails?.packageName ||
+            value?.packageName ||
+            value?.name ||
+            (typeof value === "string" ? value : "N/A")
+          );
         } else {
           if (record.vaccine?.vaccineName) return record.vaccine.vaccineName;
           if (value?.vaccineName) return value.vaccineName;
@@ -310,8 +323,8 @@ const AppointmentManagement = () => {
       key: "date",
       sorter: (a, b) => {
         // Parse dates using moment for reliable sorting
-        const dateA = moment(a.date, 'DD/MM/YYYY');
-        const dateB = moment(b.date, 'DD/MM/YYYY');
+        const dateA = moment(a.date, "DD/MM/YYYY");
+        const dateB = moment(b.date, "DD/MM/YYYY");
         return dateA - dateB;
       },
       sortDirections: ["ascend", "descend"],
@@ -337,17 +350,25 @@ const AppointmentManagement = () => {
       key: "action",
       render: (_, record) => (
         <div className="action-buttons">
-          <Button 
-            type="primary" 
-            style={{ backgroundColor: '#52c41a', borderColor: '#52c41a', marginRight: 8 }}
+          <Button
+            type="primary"
+            style={{
+              backgroundColor: "#52c41a",
+              borderColor: "#52c41a",
+              marginRight: 8,
+            }}
             onClick={() => handleStatusChange(record._id, "completed", false)}
           >
             Duyệt
           </Button>
           <Button
             danger
-            onClick={() => handleStatusChange(record._id, "incomplete", isPackage)}
-            disabled={record.status === "incomplete" || record.status === "completed"}
+            onClick={() =>
+              handleStatusChange(record._id, "incomplete", isPackage)
+            }
+            disabled={
+              record.status === "incomplete" || record.status === "completed"
+            }
           >
             Hủy Đơn
           </Button>
@@ -363,7 +384,9 @@ const AppointmentManagement = () => {
           type="primary"
           icon={<MenuOutlined />}
           onClick={() => showAppointmentDetails(record, isPackage)}
-          disabled={record.status === "incomplete" || record.status === "completed"}
+          disabled={
+            record.status === "incomplete" || record.status === "completed"
+          }
         />
       ),
     },
@@ -382,13 +405,13 @@ const AppointmentManagement = () => {
       key: "cusId",
       render: (cusId, record) => {
         // Try to get customer name from all possible sources
-        const customerName = 
-          record.customer?.customerName || 
-          record.customerDetails?.customerName || 
-          cusId?.customerName || 
-          cusId?.name || 
-          (typeof cusId === 'string' ? cusId : "N/A");
-        
+        const customerName =
+          record.customer?.customerName ||
+          record.customerDetails?.customerName ||
+          cusId?.customerName ||
+          cusId?.name ||
+          (typeof cusId === "string" ? cusId : "N/A");
+
         return customerName;
       },
     },
@@ -398,21 +421,21 @@ const AppointmentManagement = () => {
       key: "vaccinePakageId",
       render: (pkg, record) => {
         // Try to get package name from all possible sources
-        const packageName = 
+        const packageName =
           record.package?.packageName ||
           record.vaccinePakage?.packageName ||
-          record.packageDetails?.packageName || 
-          pkg?.packageName || 
-          pkg?.name || 
-          (typeof pkg === 'string' ? pkg : "N/A");
-        
+          record.packageDetails?.packageName ||
+          pkg?.packageName ||
+          pkg?.name ||
+          (typeof pkg === "string" ? pkg : "N/A");
+
         console.log("Vaccine Package Data:", {
           package: record.package,
           vaccinePakage: record.vaccinePakage,
           packageDetails: record.packageDetails,
-          pkg: pkg
+          pkg: pkg,
         });
-        
+
         return packageName;
       },
     },
@@ -422,21 +445,19 @@ const AppointmentManagement = () => {
       key: "date",
       sorter: (a, b) => {
         // Parse dates using moment for reliable sorting
-        const dateA = moment(a.date, 'DD/MM/YYYY');
-        const dateB = moment(b.date, 'DD/MM/YYYY');
+        const dateA = moment(a.date, "DD/MM/YYYY");
+        const dateB = moment(b.date, "DD/MM/YYYY");
         return dateA - dateB;
       },
-      sortDirections: ['ascend', 'descend'],
-      defaultSortOrder: 'descend',
+      sortDirections: ["ascend", "descend"],
+      defaultSortOrder: "descend",
     },
     {
       title: "Trạng thái",
       dataIndex: "status",
       key: "status",
       render: (status) => (
-        <Tag color={getStatusColor(status)}>
-          {getStatusText(status)}
-        </Tag>
+        <Tag color={getStatusColor(status)}>{getStatusText(status)}</Tag>
       ),
     },
     {
@@ -444,14 +465,18 @@ const AppointmentManagement = () => {
       key: "action",
       render: (_, record) => (
         <div className="action-buttons">
-          <Button 
-            type="primary" 
-            style={{ backgroundColor: '#52c41a', borderColor: '#52c41a', marginRight: 8 }}
+          <Button
+            type="primary"
+            style={{
+              backgroundColor: "#52c41a",
+              borderColor: "#52c41a",
+              marginRight: 8,
+            }}
             onClick={() => handleStatusChange(record._id, "completed", true)}
           >
             Duyệt
           </Button>
-          <Button 
+          <Button
             danger
             onClick={() => handleStatusChange(record._id, "incomplete", true)}
           >
@@ -465,8 +490,8 @@ const AppointmentManagement = () => {
       key: "details",
       width: 80,
       render: (_, record) => (
-        <Button 
-          type="primary" 
+        <Button
+          type="primary"
           icon={<MenuOutlined />}
           onClick={() => showAppointmentDetails(record, true)}
         />
@@ -474,20 +499,53 @@ const AppointmentManagement = () => {
     },
   ];
 
-  const filteredAppointmentsLe = appointmentsLe.filter(apt => 
-    apt._id?.toLowerCase().includes(searchText.toLowerCase()) ||
-    (apt.customer?.customerName || apt.cusId?.customerName || apt.cusId?.name || "")?.toLowerCase().includes(searchText.toLowerCase()) ||
-    (apt.vaccine?.vaccineName || apt.vaccineId?.vaccineName || apt.vaccineId?.name || "")?.toLowerCase().includes(searchText.toLowerCase()) ||
-    apt.date?.toLowerCase().includes(searchText.toLowerCase()) ||
-    apt.status?.toLowerCase().includes(searchText.toLowerCase())
+  const filteredAppointmentsLe = appointmentsLe.filter(
+    (apt) =>
+      apt._id?.toLowerCase().includes(searchText.toLowerCase()) ||
+      (
+        apt.customer?.customerName ||
+        apt.cusId?.customerName ||
+        apt.cusId?.name ||
+        ""
+      )
+        ?.toLowerCase()
+        .includes(searchText.toLowerCase()) ||
+      (
+        apt.vaccine?.vaccineName ||
+        apt.vaccineId?.vaccineName ||
+        apt.vaccineId?.name ||
+        ""
+      )
+        ?.toLowerCase()
+        .includes(searchText.toLowerCase()) ||
+      apt.date?.toLowerCase().includes(searchText.toLowerCase()) ||
+      apt.status?.toLowerCase().includes(searchText.toLowerCase())
   );
 
-  const filteredAppointmentsGoi = appointmentsGoi.filter(apt => 
-    apt._id?.toLowerCase().includes(searchText.toLowerCase()) ||
-    (apt.customer?.customerName || apt.customerDetails?.customerName || apt.cusId?.customerName || apt.cusId?.name || "")?.toLowerCase().includes(searchText.toLowerCase()) ||
-    (apt.package?.packageName || apt.vaccinePakage?.packageName || apt.packageDetails?.packageName || apt.vaccinePakageId?.packageName || apt.vaccinePakageId?.name || "")?.toLowerCase().includes(searchText.toLowerCase()) ||
-    apt.date?.toLowerCase().includes(searchText.toLowerCase()) ||
-    apt.status?.toLowerCase().includes(searchText.toLowerCase())
+  const filteredAppointmentsGoi = appointmentsGoi.filter(
+    (apt) =>
+      apt._id?.toLowerCase().includes(searchText.toLowerCase()) ||
+      (
+        apt.customer?.customerName ||
+        apt.customerDetails?.customerName ||
+        apt.cusId?.customerName ||
+        apt.cusId?.name ||
+        ""
+      )
+        ?.toLowerCase()
+        .includes(searchText.toLowerCase()) ||
+      (
+        apt.package?.packageName ||
+        apt.vaccinePakage?.packageName ||
+        apt.packageDetails?.packageName ||
+        apt.vaccinePakageId?.packageName ||
+        apt.vaccinePakageId?.name ||
+        ""
+      )
+        ?.toLowerCase()
+        .includes(searchText.toLowerCase()) ||
+      apt.date?.toLowerCase().includes(searchText.toLowerCase()) ||
+      apt.status?.toLowerCase().includes(searchText.toLowerCase())
   );
 
   return (
@@ -532,14 +590,16 @@ const AppointmentManagement = () => {
         footer={[
           <Button key="back" onClick={() => setIsModalVisible(false)}>
             Đóng
-          </Button>
+          </Button>,
         ]}
         width={700}
         confirmLoading={detailLoading}
       >
         {detailLoading ? (
           <div className="loading-details">Đang tải thông tin chi tiết...</div>
-        ) : renderAppointmentDetails()}
+        ) : (
+          renderAppointmentDetails()
+        )}
       </Modal>
     </div>
   );
