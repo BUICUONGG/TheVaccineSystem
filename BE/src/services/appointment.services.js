@@ -61,12 +61,24 @@ class AppointmentService {
         { $set: updateAptLe },
         { returnDocument: "after" }
       );
+
       if (!result) {
         throw new Error("Không thể update");
       }
+
+      // Xóa thông báo cũ cho appointment này
+      await Notification.deleteMany({ cusId: result.cusId });
+
+      // Tạo thông báo mới
+      const notification = new Notification({
+        cusId: result.cusId,
+        message: `Lịch hẹn của bạn đã chuyển sang trạng thái: ${updateAptLe.status}`,
+      });
+      await notification.save();
+
       return result;
     } catch (error) {
-      throw new Error(error.message); // Ném lỗi chỉ khi có lỗi xảy ra
+      throw new Error(error.message);
     }
   }
 
