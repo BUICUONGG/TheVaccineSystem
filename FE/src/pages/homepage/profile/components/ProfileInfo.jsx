@@ -22,6 +22,7 @@ const ProfileInfo = () => {
         gender: userData.gender,
       });
     }
+    document.title ="Thông tin cá nhân";
   }, [userData, form]);
 
   const handleUpdate = async () => {
@@ -29,12 +30,10 @@ const ProfileInfo = () => {
       // Validate form trước khi gửi
       const values = await form.validateFields();
       setLoading(true);
-
       const accesstoken = localStorage.getItem("accesstoken");
       const tokenParts = accesstoken.split(".");
       const payload = JSON.parse(atob(tokenParts[1]));
       const userId = payload.id;
-
       // Gọi API cập nhật
       await axiosInstance.post(`/customer/update/${userId}`, values, {
         headers: { Authorization: `Bearer ${accesstoken}` },

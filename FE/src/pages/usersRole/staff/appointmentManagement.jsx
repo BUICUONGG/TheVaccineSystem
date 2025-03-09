@@ -693,4 +693,4 @@ const AppointmentManagement = () => {
   );
 };
 
-export default AppointmentManagement; 
+export default AppointmentManagement;

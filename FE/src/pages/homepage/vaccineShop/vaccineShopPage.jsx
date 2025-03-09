@@ -192,7 +192,7 @@ const VaccinePriceList = () => {
                         <div className="package-price">
                           {product.price.toLocaleString()}
                         </div>
-                        <button className="view-more-btn">XEM THÊM</button>
+                        <button onClick={() => navigate("/vaccineDetail")} className="view-more-btn">XEM THÊM</button>
                       </>
                     )}
                   </div>
