@@ -1,9 +1,11 @@
 import connectToDatabase from "../config/database.js";
+import Notification from "../model/notificationSchema.js";
 
 class NotiService {
   async createNoti(data) {
     try {
-      const noti = new Notification();
+      const noti = new Notification(data);
+
       const result = await connectToDatabase.notifications.insertOne();
       return result;
     } catch (error) {

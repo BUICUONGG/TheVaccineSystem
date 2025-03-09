@@ -4,6 +4,7 @@ import {
   Table,
   Tag,
   Button,
+  // Select,
   message,
   Modal,
   Tabs,
@@ -11,7 +12,7 @@ import {
   List,
   Card,
   Typography,
-  Checkbox,
+  // Checkbox,
 } from "antd";
 import {
   SearchOutlined,
@@ -72,6 +73,36 @@ const AppointmentManagement = () => {
     fetchAppointments();
   }, []);
 
+  const getStatusColor = (status) => {
+    switch (status) {
+      case "completed":
+        return "green";
+      case "incomplete":
+        return "red";
+      case "pending":
+        return "orange";
+      case "approve":
+        return "blue";
+      default:
+        return "default";
+    }
+  };
+
+  const getStatusText = (status) => {
+    switch (status) {
+      case "completed":
+        return "Hoàn thành";
+      case "incomplete":
+        return "Đã hủy";
+      case "pending":
+        return "Đang chờ";
+      case "approve":
+        return "Đã duyệt";
+      default:
+        return "Không xác định";
+    }
+  };
+
   const handleStatusChange = async (id, status, isPackage) => {
     try {
       const token = localStorage.getItem("accesstoken");
@@ -85,9 +116,18 @@ const AppointmentManagement = () => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
-      message.success(
-        `Đã ${status === "completed" ? "duyệt" : "hủy"} đơn thành công`
-      );
+      let successMessage = "";
+      if (status === "completed") {
+        successMessage = "Đã hoàn thành đơn thành công";
+      } else if (status === "approve") {
+        successMessage = "Đã duyệt đơn thành công";
+      } else if (status === "incomplete") {
+        successMessage = "Đã hủy đơn thành công";
+      } else {
+        successMessage = "Đã cập nhật trạng thái đơn thành công";
+      }
+
+      message.success(successMessage);
       fetchAppointments();
 
       // Cập nhật trạng thái trong modal nếu đang mở
@@ -103,9 +143,19 @@ const AppointmentManagement = () => {
       }
     } catch (error) {
       console.error("Error updating status:", error);
-      message.error(
-        `Không thể ${status === "completed" ? "duyệt" : "hủy"} đơn`
-      );
+
+      let errorMessage = "";
+      if (status === "completed") {
+        errorMessage = "Không thể hoàn thành đơn";
+      } else if (status === "approve") {
+        errorMessage = "Không thể duyệt đơn";
+      } else if (status === "incomplete") {
+        errorMessage = "Không thể hủy đơn";
+      } else {
+        errorMessage = "Không thể cập nhật trạng thái đơn";
+      }
+
+      message.error(errorMessage);
     }
   };
 
@@ -218,12 +268,6 @@ const AppointmentManagement = () => {
         return;
       }
 
-      // Kiểm tra nếu đơn đã hoàn thành thì không hiển thị chi tiết
-      if (record.status === "completed") {
-        message.info("Không thể xem chi tiết đơn đã hoàn thành");
-        return;
-      }
-
       setDetailLoading(true);
       setIsModalVisible(true);
 
@@ -240,8 +284,7 @@ const AppointmentManagement = () => {
     }
   };
 
-  // Định nghĩa cột chung
-  const getBaseColumns = (isPackage) => [
+  const columnsLe = [
     {
       title: "STT",
       key: "stt",
@@ -264,25 +307,14 @@ const AppointmentManagement = () => {
       },
     },
     {
-      title: isPackage ? "Gói vaccine" : "Vaccine",
-      dataIndex: isPackage ? "vaccinePakageId" : "vaccineId",
-      key: isPackage ? "vaccinePakageId" : "vaccineId",
-      render: (value, record) => {
-        if (isPackage) {
-          return (
-            record.package?.packageName ||
-            record.vaccinePakage?.packageName ||
-            record.packageDetails?.packageName ||
-            value?.packageName ||
-            value?.name ||
-            (typeof value === "string" ? value : "N/A")
-          );
-        } else {
-          if (record.vaccine?.vaccineName) return record.vaccine.vaccineName;
-          if (value?.vaccineName) return value.vaccineName;
-          if (value?.name) return value.name;
-          return value ? value.toString().substring(0, 8) + "..." : "N/A";
-        }
+      title: "Vaccine",
+      dataIndex: "vaccineId",
+      key: "vaccineId",
+      render: (vaccineId, record) => {
+        if (record.vaccine?.vaccineName) return record.vaccine.vaccineName;
+        if (vaccineId?.vaccineName) return vaccineId.vaccineName;
+        if (vaccineId?.name) return vaccineId.name;
+        return vaccineId ? vaccineId.toString().substring(0, 8) + "..." : "N/A";
       },
     },
     {
@@ -290,9 +322,30 @@ const AppointmentManagement = () => {
       dataIndex: "date",
       key: "date",
       sorter: (a, b) => {
-        // Parse dates using moment for reliable sorting
-        const dateA = moment(a.date, "DD/MM/YYYY");
-        const dateB = moment(b.date, "DD/MM/YYYY");
+        // Hàm chuyển đổi chuỗi ngày thành đối tượng Date
+        const parseDate = (dateStr) => {
+          // Thử các định dạng khác nhau
+          const formats = [
+            "DD/MM/YYYY",
+            "YYYY-MM-DD",
+            "MM/DD/YYYY",
+            "DD-MM-YYYY",
+          ];
+
+          for (const format of formats) {
+            const date = moment(dateStr, format, true);
+            if (date.isValid()) {
+              return date;
+            }
+          }
+
+          // Nếu không khớp với bất kỳ định dạng nào, thử chuyển đổi trực tiếp
+          return moment(new Date(dateStr));
+        };
+
+        const dateA = parseDate(a.date);
+        const dateB = parseDate(b.date);
+
         return dateA - dateB;
       },
       sortDirections: ["ascend", "descend"],
@@ -326,14 +379,15 @@ const AppointmentManagement = () => {
               marginRight: 8,
             }}
             onClick={() => handleStatusChange(record._id, "completed", false)}
+            disabled={
+              record.status === "incomplete" || record.status === "completed"
+            }
           >
             Duyệt
           </Button>
           <Button
             danger
-            onClick={() =>
-              handleStatusChange(record._id, "incomplete", isPackage)
-            }
+            onClick={() => handleStatusChange(record._id, "incomplete", false)}
             disabled={
               record.status === "incomplete" || record.status === "completed"
             }
@@ -351,10 +405,8 @@ const AppointmentManagement = () => {
         <Button
           type="primary"
           icon={<MenuOutlined />}
-          onClick={() => showAppointmentDetails(record, isPackage)}
-          disabled={
-            record.status === "incomplete" || record.status === "completed"
-          }
+          onClick={() => showAppointmentDetails(record, false)}
+          disabled={record.status === "incomplete"}
         />
       ),
     },
@@ -412,9 +464,30 @@ const AppointmentManagement = () => {
       dataIndex: "date",
       key: "date",
       sorter: (a, b) => {
-        // Parse dates using moment for reliable sorting
-        const dateA = moment(a.date, "DD/MM/YYYY");
-        const dateB = moment(b.date, "DD/MM/YYYY");
+        // Hàm chuyển đổi chuỗi ngày thành đối tượng Date
+        const parseDate = (dateStr) => {
+          // Thử các định dạng khác nhau
+          const formats = [
+            "DD/MM/YYYY",
+            "YYYY-MM-DD",
+            "MM/DD/YYYY",
+            "DD-MM-YYYY",
+          ];
+
+          for (const format of formats) {
+            const date = moment(dateStr, format, true);
+            if (date.isValid()) {
+              return date;
+            }
+          }
+
+          // Nếu không khớp với bất kỳ định dạng nào, thử chuyển đổi trực tiếp
+          return moment(new Date(dateStr));
+        };
+
+        const dateA = parseDate(a.date);
+        const dateB = parseDate(b.date);
+
         return dateA - dateB;
       },
       sortDirections: ["ascend", "descend"],
@@ -424,6 +497,13 @@ const AppointmentManagement = () => {
       title: "Trạng thái",
       dataIndex: "status",
       key: "status",
+      filters: [
+        { text: "Hoàn thành", value: "completed" },
+        { text: "Đã duyệt", value: "approve" },
+        { text: "Đang chờ", value: "pending" },
+        { text: "Đã hủy", value: "incomplete" },
+      ],
+      onFilter: (value, record) => record.status === value,
       render: (status) => (
         <Tag color={getStatusColor(status)}>{getStatusText(status)}</Tag>
       ),
@@ -440,13 +520,19 @@ const AppointmentManagement = () => {
               borderColor: "#52c41a",
               marginRight: 8,
             }}
-            onClick={() => handleStatusChange(record._id, "completed", true)}
+            onClick={() => handleStatusChange(record._id, "approve", true)}
+            disabled={
+              record.status === "incomplete" || record.status === "completed"
+            }
           >
             Duyệt
           </Button>
           <Button
             danger
             onClick={() => handleStatusChange(record._id, "incomplete", true)}
+            disabled={
+              record.status === "incomplete" || record.status === "completed"
+            }
           >
             Hủy Đơn
           </Button>
@@ -462,6 +548,7 @@ const AppointmentManagement = () => {
           type="primary"
           icon={<MenuOutlined />}
           onClick={() => showAppointmentDetails(record, true)}
+          disabled={record.status === "incomplete"}
         />
       ),
     },
@@ -563,10 +650,189 @@ const AppointmentManagement = () => {
         width={700}
         confirmLoading={detailLoading}
       >
-        {detailLoading ? (
-          <div className="loading-details">Đang tải thông tin chi tiết...</div>
+        {selectedAppointment && !detailLoading ? (
+          <div className="appointment-details">
+            <div className="detail-row">
+              <span className="detail-label">Mã lịch hẹn:</span>
+              <span className="detail-value">{selectedAppointment._id}</span>
+            </div>
+            <div className="detail-row">
+              <span className="detail-label">Khách hàng:</span>
+              <span className="detail-value">
+                {selectedAppointment.isPackage
+                  ? selectedAppointment.customer?.customerName ||
+                    selectedAppointment.customerDetails?.customerName ||
+                    selectedAppointment.cusId?.customerName ||
+                    selectedAppointment.cusId?.name ||
+                    (typeof selectedAppointment.cusId === "string"
+                      ? selectedAppointment.cusId
+                      : "N/A")
+                  : selectedAppointment.customer?.customerName ||
+                    selectedAppointment.cusId?.customerName ||
+                    selectedAppointment.cusId?.name ||
+                    (selectedAppointment.cusId
+                      ? selectedAppointment.cusId.toString()
+                      : "N/A")}
+              </span>
+            </div>
+            <div className="detail-row">
+              <span className="detail-label">Số điện thoại:</span>
+              <span className="detail-value">
+                {selectedAppointment.isPackage
+                  ? selectedAppointment.customer?.phone ||
+                    selectedAppointment.customerDetails?.phone ||
+                    selectedAppointment.cusId?.phone ||
+                    "N/A"
+                  : selectedAppointment.customer?.phone ||
+                    selectedAppointment.cusId?.phone ||
+                    "N/A"}
+              </span>
+            </div>
+            <div className="detail-row">
+              <span className="detail-label">Địa chỉ:</span>
+              <span className="detail-value">
+                {selectedAppointment.isPackage
+                  ? selectedAppointment.customer?.address ||
+                    selectedAppointment.customerDetails?.address ||
+                    selectedAppointment.cusId?.address ||
+                    "N/A"
+                  : selectedAppointment.customer?.address ||
+                    selectedAppointment.cusId?.address ||
+                    "N/A"}
+              </span>
+            </div>
+            {selectedAppointment.childId && (
+              <div className="detail-row">
+                <span className="detail-label">Trẻ em:</span>
+                <span className="detail-value">
+                  {selectedAppointment.childId.childName ||
+                    selectedAppointment.childId.toString()}
+                </span>
+              </div>
+            )}
+            <div className="detail-row">
+              <span className="detail-label">
+                {selectedAppointment.isPackage ? "Gói vaccine:" : "Vaccine:"}
+              </span>
+              <span className="detail-value">
+                {selectedAppointment.isPackage
+                  ? selectedAppointment.package?.packageName ||
+                    selectedAppointment.vaccinePakage?.packageName ||
+                    selectedAppointment.packageDetails?.packageName ||
+                    selectedAppointment.vaccinePakageId?.packageName ||
+                    selectedAppointment.vaccinePakageId?.name ||
+                    (selectedAppointment.vaccinePakageId
+                      ? selectedAppointment.vaccinePakageId.toString()
+                      : "N/A")
+                  : selectedAppointment.vaccine?.vaccineName ||
+                    selectedAppointment.vaccineId?.vaccineName ||
+                    selectedAppointment.vaccineId?.name ||
+                    "N/A"}
+              </span>
+            </div>
+            <div className="detail-row">
+              <span className="detail-label">Ngày hẹn:</span>
+              <span className="detail-value">{selectedAppointment.date}</span>
+            </div>
+            <div className="detail-row">
+              <span className="detail-label">Ngày tạo:</span>
+              <span className="detail-value">
+                {selectedAppointment.createAt}
+              </span>
+            </div>
+            <div className="detail-row">
+              <span className="detail-label">Trạng thái:</span>
+              <span className="detail-value">
+                <Tag color={getStatusColor(selectedAppointment.status)}>
+                  {getStatusText(selectedAppointment.status)}
+                </Tag>
+              </span>
+            </div>
+
+            {/* Hiển thị lịch tiêm cho từng mũi (chỉ với lịch hẹn gói) */}
+            {selectedAppointment.isPackage &&
+              selectedAppointment.doseSchedule &&
+              selectedAppointment.doseSchedule.length > 0 && (
+                <div className="dose-schedule-section">
+                  <Title level={5} style={{ marginTop: 20, marginBottom: 10 }}>
+                    Lịch tiêm các mũi
+                  </Title>
+                  <List
+                    grid={{ gutter: 16, column: 1 }}
+                    dataSource={selectedAppointment.doseSchedule}
+                    renderItem={(item) => (
+                      <List.Item>
+                        <Card
+                          title={`Mũi ${item.doseNumber}`}
+                          size="small"
+                          style={{ marginBottom: 8 }}
+                          extra={
+                            <Tag color={getStatusColor(item.status)}>
+                              {getStatusText(item.status)}
+                            </Tag>
+                          }
+                        >
+                          <div className="dose-detail-row">
+                            <Text strong>Ngày tiêm:</Text> {item.date}
+                          </div>
+                          <div
+                            className="dose-detail-row"
+                            style={{
+                              marginTop: 8,
+                              display: "flex",
+                              alignItems: "center",
+                            }}
+                          >
+                            <Button
+                              type={
+                                item.status === "completed"
+                                  ? "primary"
+                                  : "default"
+                              }
+                              icon={
+                                item.status === "completed" ? (
+                                  <CheckCircleFilled />
+                                ) : null
+                              }
+                              onClick={() => {
+                                const newStatus =
+                                  item.status === "completed"
+                                    ? "pending"
+                                    : "completed";
+                                console.log(
+                                  `Toggling status for dose ${item.doseNumber} from ${item.status} to ${newStatus}`
+                                );
+                                handleDoseStatusChange(
+                                  selectedAppointment._id,
+                                  item.doseNumber,
+                                  newStatus === "completed"
+                                );
+                              }}
+                              style={{
+                                backgroundColor:
+                                  item.status === "completed"
+                                    ? "#52c41a"
+                                    : undefined,
+                                borderColor:
+                                  item.status === "completed"
+                                    ? "#52c41a"
+                                    : undefined,
+                              }}
+                            >
+                              {item.status === "completed"
+                                ? "Đã hoàn thành"
+                                : "Đánh dấu hoàn thành"}
+                            </Button>
+                          </div>
+                        </Card>
+                      </List.Item>
+                    )}
+                  />
+                </div>
+              )}
+          </div>
         ) : (
-          renderAppointmentDetails()
+          <div className="loading-details">Đang tải thông tin chi tiết...</div>
         )}
       </Modal>
     </div>
