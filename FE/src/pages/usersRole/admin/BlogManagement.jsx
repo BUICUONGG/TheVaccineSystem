@@ -75,7 +75,7 @@ const BlogManagement = () => {
       );
 
       Modal.success({
-        content: "Blog created successfully",
+        content: "Tạo bài viết thành công",
       });
 
       setIsModalVisible(false);

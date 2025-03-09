@@ -32,8 +32,7 @@ class NewsService {
         try {
             const result = await connectToDatabase.news.findOneAndUpdate(
                 { _id: new ObjectId(id) },
-
-
+                { $set: dataUpdate },
                 { returnDocument: "after" }
             );
             return result;
@@ -44,9 +43,11 @@ class NewsService {
 
     async deleteNews(id) {
         try {
-            const result = await connectToDatabase.news.findOneAndDelete({
-                _id: new ObjectId(id)
-            });
+            const result = await connectToDatabase.news.findOneAndUpdate(
+                { _id: new ObjectId(id) },
+                { $set: { status: "none" } },
+                { returnDocument: "after" }
+            );
             return result;
         } catch (error) {
             throw new Error(error.message);

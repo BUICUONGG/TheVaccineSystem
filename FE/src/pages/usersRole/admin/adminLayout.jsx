@@ -102,6 +102,14 @@ const AdminLayout = () => {
           </li>
           <li className="admin-menu-item">
             <Link
+              to="/admin/newsManagement"
+              className={location.pathname === "/admin/newsManagement" ? "active" : ""}
+            >
+              News
+            </Link>
+          </li>
+          <li className="admin-menu-item">
+            <Link
               to="/admin/vaccines"
               className={
                 location.pathname === "/admin/vaccines" ? "active" : ""
@@ -122,7 +130,7 @@ const AdminLayout = () => {
           </li>
           <li className="admin-menu-item">
             <Link
-              to="/admin/appointments"
+              to="/staffLayout/appointments"
               className={
                 location.pathname === "/admin/appointments" ? "active" : ""
               }

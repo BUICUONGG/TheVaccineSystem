@@ -23,7 +23,7 @@ const StaffLayout = () => {
       const tokenParts = accessToken.split(".");
       const payload = JSON.parse(atob(tokenParts[1]));
 
-      if (payload.role !== "staff") {
+      if (payload.role !== "staff" && payload.role !== "admin") {
         navigate("/homepage");
         return;
       }
