@@ -82,7 +82,7 @@ class AppointmentService {
         cusId: result.cusId,
         apt: result._id,
         aptModel: "AppointmentLe",
-        message: `Lịch hẹn gói của bạn đã cập nhật trạng thái: ${updateAptLe.status}`,
+        message: `Lịch hẹn le của bạn đã cập nhật trạng thái: ${updateAptLe.status}`,
         createdAt: new Date().toLocaleDateString("vi-VN"),
       });
 
@@ -264,7 +264,7 @@ class AppointmentService {
       await notiService.createNoti({
         cusId: data.cusId,
         apt: data.vaccinePakageId,
-        aptModel: "AppointmentLe",
+        aptModel: "AppointmentGoi",
         message: `Lịch hẹn gói của bạn đã cập nhật trạng thái chờ duyệt`,
         createdAt: new Date().toLocaleDateString("vi-VN"),
       });
