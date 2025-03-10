@@ -182,7 +182,6 @@ const RegisterInjection = () => {
         });
       }
 
-
       // Thông báo thành công
       toast.success(
         `Đăng ký tiêm chủng ${
@@ -417,7 +416,7 @@ const RegisterInjection = () => {
                 />
               </Form.Item>
 
-              <Button 
+              <Button
                 className="form-submit-btn"
                 size="large"
                 onClick={() => form.submit()}
