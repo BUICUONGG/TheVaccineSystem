@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Form, Input, Button, message, Spin } from "antd";
 import { useOutletContext } from "react-router-dom";
-import './ProfileInfo.css';
+import './ProfileAccount.css'; // Thay đổi import CSS
 import axiosInstance from "../../../../service/api";
 
 const ProfileAccount = () => {
@@ -112,14 +112,13 @@ const ProfileAccount = () => {
         <p>Xem và cập nhật thông tin đăng nhập của bạn</p>
       </div>
 
-      <div className="profile-info-container">
-        <div className="form-section">
+      <div className="account-container">
+        <div className="account-form-section">
           <Form
             form={form}
             layout="vertical"
             onFinish={showPasswordChange ? handleChangePassword : handleUpdateInfo}
           >
-            {/* Main Account Info */}
             <div className="account-info-section">
               <Form.Item
                 name="username"
@@ -145,7 +144,7 @@ const ProfileAccount = () => {
               <Form.Item
                 label="Mật khẩu"
               >
-                <div className="password-field">
+                <div className="account-password-field">
                   <Input.Password 
                     disabled 
                     value="********" 
@@ -154,43 +153,27 @@ const ProfileAccount = () => {
                   <Button 
                     type="link" 
                     onClick={() => setShowPasswordChange(!showPasswordChange)}
-                    className="change-password-link"
+                    className="account-change-password-link"
                   >
                     Đổi mật khẩu
                   </Button>
                 </div>
               </Form.Item>
 
-              {!showPasswordChange && (
-                <div className="button-group" style={{ marginTop: '20px' }}>
-                  {!isEditMode ? (
-                    <Button
-                      type="primary"
-                      onClick={handleEdit}
-                      className="update-all-btn"
-                    >
-                      Cập nhật thông tin
-                    </Button>
-                  ) : (
-                    <>
-                      <Button
-                        type="primary"
-                        htmlType="submit"
-                        className="update-all-btn"
-                        style={{ marginBottom: '10px' }}
-                      >
-                        Lưu thay đổi
-                      </Button>   
-                    </>
-                  )}
-                </div>
-              )}
+              <button
+                type="button"
+                className="account-update-all-btn"
+                onClick={handleUpdateInfo}
+              >
+                Cập nhật thông tin
+              </button>
             </div>
 
-            {/* Password Change Section */}
             {showPasswordChange && (
-              <div className="password-change-section">
-                <h3>Đổi mật khẩu</h3>
+              <div className="account-password-section">
+                <div className="account-section-title">
+                  <h2>Đổi mật khẩu</h2>
+                </div>
 
                 <Form.Item
                   name="oldPassword"
@@ -235,13 +218,13 @@ const ProfileAccount = () => {
                   <Input.Password />
                 </Form.Item>
 
-                <Button
-                  type="primary"
-                  htmlType="submit"
-                  className="update-all-btn"
+                <button
+                  type="button"
+                  className="account-update-all-btn"
+                  onClick={handleChangePassword}
                 >
                   Xác nhận đổi mật khẩu
-                </Button>
+                </button>
               </div>
             )}
           </Form>

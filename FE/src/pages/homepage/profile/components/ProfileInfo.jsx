@@ -56,15 +56,15 @@ const ProfileInfo = () => {
         <p>Cập nhật thông tin cá nhân của bạn</p>
       </div>
 
-      <div className="profile-info-container">
-        <div className="avatar-section">
-          <div className="avatar-container">
+      <div className="info-profile-info-container">
+        <div className="info-avatar-section">
+          <div className="info-avatar-container">
             <UserOutlined />
           </div>
-          <div className="user-name">{userData?.customerName}</div>
+          <div className="info-user-name">{userData?.customerName}</div>
         </div>
 
-        <div className="form-section">
+        <div className="info-form-section">
           <Form form={form} layout="vertical">
             <Form.Item
               name="customerName"
@@ -118,7 +118,7 @@ const ProfileInfo = () => {
 
             <button
               type="button"
-              className="update-all-btn"
+              className="info-update-all-btn"
               onClick={handleUpdate}
             >
               Cập nhật thông tin

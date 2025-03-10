@@ -215,17 +215,17 @@ const RegisterInjection = () => {
   };
 
   return (
-    <div className="register-injection-page">
-      <div className="main-content">
-        <div className="back-home-wrapper">
-          <Link to="/homepage" className="back-home">
+    <div className="form-register-page">
+      <div className="form-main-content">
+        <div className="form-back-home-wrapper">
+          <Link to="/homepage" className="form-back-home">
             Về trang chủ
           </Link>
         </div>
         <div className="form-container">
-          <h2 className="form-title">Đăng Ký Tiêm Chủng</h2>
+          <h2 className="form-header">Đăng Ký Tiêm Chủng</h2>
 
-          <div className="registration-type-switch">
+          <div className="form-type-switch">
             <span className={!isChildRegistration ? "active-type" : ""}>
               <UserOutlined /> Đăng ký cho bản thân
             </span>
@@ -245,11 +245,11 @@ const RegisterInjection = () => {
             form={form}
             layout="vertical"
             onFinish={onFinish}
-            className="registration-form"
+            className="form-registration"
           >
             {/* Phần thông tin cá nhân đơn giản hóa */}
             {isChildRegistration ? (
-              <div className="form-section child-info-section">
+              <div className="form-section form-child-info">
                 <h3>Thông Tin Trẻ Em</h3>
                 <div className="child-info-container">
                   <Form.Item
@@ -317,7 +317,7 @@ const RegisterInjection = () => {
                 </div>
               </div>
             ) : (
-              <div className="form-section personal-info-section">
+              <div className="form-section form-personal-info">
                 <h3>Thông Tin Cá Nhân</h3>
                 <div className="personal-info-container">
                   <Form.Item label="Họ và tên">
@@ -349,7 +349,7 @@ const RegisterInjection = () => {
             )}
 
             {/* Phần đăng ký tiêm chủng */}
-            <div className="form-section vaccine-registration-section">
+            <div className="form-section form-vaccine-info">
               <h3>Thông Tin Đăng Ký Tiêm</h3>
 
               {/* Thêm Radio để chọn loại vaccine */}
@@ -416,18 +416,15 @@ const RegisterInjection = () => {
                   placeholder="Chọn ngày tiêm"
                 />
               </Form.Item>
-            </div>
 
-            <Form.Item>
-              <Button
-                type="primary"
-                htmlType="submit"
-                className="submit-btn"
+              <Button 
+                className="form-submit-btn"
                 size="large"
+                onClick={() => form.submit()}
               >
-                Xác Nhận Đăng Ký
+                Xác nhận đăng ký
               </Button>
-            </Form.Item>
+            </div>
           </Form>
         </div>
       </div>
