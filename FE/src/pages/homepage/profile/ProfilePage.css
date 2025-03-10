@@ -34,23 +34,23 @@
 .ant-input,
 .ant-select-selector,
 .ant-input-textarea {
-  border-radius: 8px !important;
-  border: 1px solid #d9d9d9 !important;
-  padding: 8px 12px !important;
-  transition: all 0.3s ease !important;
+  border-radius: 8px ;
+  border: 1px solid #d9d9d9 ;
+  padding: 8px 12px ;
+  transition: all 0.3s ease ;
 }
 
 .ant-input:hover,
 .ant-select-selector:hover,
 .ant-input-textarea:hover {
-  border-color: #40a9ff !important;
+  border-color: #40a9ff ;
 }
 
 .ant-input:focus,
 .ant-select-selector:focus,
 .ant-input-textarea:focus {
-  border-color: #1890ff !important;
-  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2) !important;
+  border-color: #1890ff ;
+  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2) ;
 }
 
 /* Label styles */

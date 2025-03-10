@@ -54,21 +54,20 @@
 }
 
 .login-btn {
-  background: #87CEEB !important;
-  color: white !important;
+  background: #87CEEB ;
+  color: white ;
 }
-
 .register-btn {
-  background: #ff4d4d !important;
-  color: white !important;
+  background: #ff4d4d;
+  color: white;
 }
 
 .login-btn:hover {
-  background: #5f9ea0 !important;
+  background: #5f9ea0 
 }
 
 .register-btn:hover {
-  background: #ff3333 !important;
+  background: #ff3333 
 }
 
 .avatar-icon {

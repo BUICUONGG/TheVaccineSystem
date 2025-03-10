@@ -80,11 +80,11 @@
     padding: 8px 16px;
   }
 
-  .search-section {
+  .history-container .search-section {
     padding: 0 10px;
   }
 
-  .search-input {
+  .history-container .search-input {
     max-width: 100%;
   }
 }
@@ -157,12 +157,14 @@
   background-color: #fff1b8 !important;
 }
 
-.search-section {
+/* Thêm phạm vi cụ thể cho search section */
+.history-container .search-section {
   margin: 24px 0;
   padding: 0 15px;
 }
 
-.search-input {
+/* Thêm phạm vi cụ thể cho search input */
+.history-container .search-input {
   width: 100%;
   max-width: 400px;
   height: 40px;
@@ -170,17 +172,17 @@
   font-size: 14px;
 }
 
-.search-input .ant-input-prefix {
+.history-container .search-input .ant-input-prefix {
   color: #1890ff;
   margin-right: 8px;
 }
 
-.search-input .ant-input {
+.history-container .search-input .ant-input {
   padding-left: 12px;
 }
 
-.search-input .ant-input:hover,
-.search-input .ant-input:focus {
+.history-container .search-input .ant-input:hover,
+.history-container .search-input .ant-input:focus {
   border-color: #1890ff;
   box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.1);
 }
@@ -494,10 +496,11 @@
 /* Button styling */
 .ant-btn {
   border-radius: 6px;
-  font-size: 14px;
-  height: 34px;
+  font-weight: 500;
+  height: 36px;
   padding: 0 16px;
   display: flex;
   align-items: center;
-  gap: 6px;
+  justify-content: center;
+  gap: 8px;
 }

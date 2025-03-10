@@ -120,16 +120,6 @@ const AdminLayout = () => {
           </li>
           <li className="admin-menu-item">
             <Link
-              to="/admin/feedback"
-              className={
-                location.pathname === "/admin/feedback" ? "active" : ""
-              }
-            >
-              Feedback
-            </Link>
-          </li>
-          <li className="admin-menu-item">
-            <Link
               to="/staffLayout/appointments"
               className={
                 location.pathname === "/admin/appointments" ? "active" : ""
@@ -138,6 +128,17 @@ const AdminLayout = () => {
               Appointments
             </Link>
           </li>
+          <li className="admin-menu-item">
+            <Link
+              to="/admin/feedback"
+              className={
+                location.pathname === "/admin/feedback" ? "active" : ""
+              }
+            >
+              Feedback
+            </Link>
+          </li>
+          
           <li className="admin-menu-item">
             <Link
               to="/admin/consultations"

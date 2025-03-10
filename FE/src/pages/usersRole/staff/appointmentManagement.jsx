@@ -1,10 +1,9 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
+
 import {
   Table,
   Tag,
   Button,
-  Select,
   message,
   Modal,
   Tabs,
@@ -12,7 +11,6 @@ import {
   List,
   Card,
   Typography,
-  Checkbox,
 } from "antd";
 import {
   SearchOutlined,
@@ -22,8 +20,6 @@ import {
 import moment from "moment";
 import axiosInstance from "../../../service/api";
 import "./appointmentManagement.css";
-
-// const { Option } = Select;
 const { TabPane } = Tabs;
 const { Title, Text } = Typography;
 
@@ -130,7 +126,6 @@ const AppointmentManagement = () => {
       message.success(successMessage);
       fetchAppointments();
 
-      // Cập nhật trạng thái trong modal nếu đang mở
       if (
         isModalVisible &&
         selectedAppointment &&
@@ -516,7 +511,7 @@ const AppointmentManagement = () => {
           <Button
             type="primary"
             style={{
-              backgroundColor: "#52c41a",
+              backgroundColor: "blue",
               borderColor: "#52c41a",
               marginRight: 8,
             }}

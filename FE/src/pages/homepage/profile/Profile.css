@@ -82,40 +82,40 @@
 .ant-input,
 .ant-select-selector,
 .ant-input-textarea {
-  height: 42px !important;
-  border-radius: 8px !important;
-  border: 1px solid #e2e8f0 !important;
-  background: #ffffff !important;
-  padding: 8px 16px !important;
-  font-size: 15px !important;
-  transition: all 0.3s ease !important;
+  height: 42px ;
+  border-radius: 8px ;
+  border: 1px solid #e2e8f0 ;
+  background: #ffffff ;
+  padding: 8px 16px ;
+  font-size: 15px ;
+  transition: all 0.3s ease ;
 }
 
 .ant-input:hover,
 .ant-select-selector:hover {
-  border-color: #4A90E2 !important;
+  border-color: #4A90E2 ;
 }
 
 .ant-input:focus,
 .ant-select-selector:focus {
-  border-color: #4A90E2 !important;
-  box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2) !important;
+  border-color: #4A90E2 ;
+  box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2) ;
 }
 
 /* Textarea specific styling */
 .ant-input-textarea .ant-input {
-  min-height: 120px !important;
+  min-height: 120px ;
   resize: vertical;
 }
 
 /* Select styling */
 .ant-select-single:not(.ant-select-customize-input) .ant-select-selector {
-  height: 42px !important;
-  padding: 5px 16px !important;
+  height: 42px ;
+  padding: 5px 16px ;
 }
 
 .ant-select-single .ant-select-selector .ant-select-selection-item {
-  line-height: 32px !important;
+  line-height: 32px ;
 }
 
 /* Submit button styling */
@@ -205,7 +205,7 @@
 }
 
 .profile-sider {
-  background: white !important;
+  background: white ;
   box-shadow: 2px 0 8px rgba(0,0,0,0.05);
   position: fixed;
   height: 100vh;
@@ -255,37 +255,37 @@
 }
 
 .profile-menu {
-  width: 100% !important;
-  border: none !important;
-  padding: 0 !important;
+  width: 100% ;
+  border: none ;
+  padding: 0 ;
 }
 
 .profile-menu .ant-menu-item {
-  margin: 8px 0 !important;
-  padding: 0 24px !important;
-  border-radius: 0 !important;
-  height: 50px !important;
-  line-height: 50px !important;
-  width: 100% !important;
+  margin: 8px 0 ;
+  padding: 0 24px ;
+  border-radius: 0 ;
+  height: 50px ;
+  line-height: 50px ;
+  width: 100% ;
 }
 
 .profile-menu .ant-menu-item:hover {
-  background: #f6f9fe !important;
-  color: #4A90E2 !important;
+  background: #f6f9fe ;
+  color: #4A90E2 ;
 }
 
 .profile-menu .ant-menu-item-selected {
-  background: #4A90E2 !important;
-  color: white !important;
+  background: #4A90E2 ;
+  color: white ;
 }
 
 .profile-menu .ant-menu-item-selected:hover {
-  background: #357abd !important;
-  color: white !important;
+  background: #357abd ;
+  color: white ;
 }
 
 .ant-menu-item-icon {
-  margin-right: 12px !important;
+  margin-right: 12px ;
 }
 
 .ant-menu-title-content {
@@ -344,16 +344,16 @@
 
 /* Style cho menu item home */
 .profile-menu .ant-menu-item[data-menu-id='home'] {
-  margin-bottom: 20px !important;
+  margin-bottom: 20px ;
   border-bottom: 1px solid #f0f2f5;
 }
 
 .profile-menu .ant-menu-item[data-menu-id='home']:hover {
-  background: #e6f7ff !important;
-  color: #1890ff !important;
+  background: #e6f7ff ;
+  color: #1890ff ;
 }
 
 .profile-menu .ant-menu-item[data-menu-id='home'].ant-menu-item-selected {
-  background: #e6f7ff !important;
-  color: #1890ff !important;
+  background: #e6f7ff ;
+  color: #1890ff ;
 }

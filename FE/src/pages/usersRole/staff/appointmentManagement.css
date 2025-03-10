@@ -7,11 +7,11 @@
   color: #1890ff;
 }
 
-.search-container {
+.appointment-management .search-container {
   margin-bottom: 20px;
 }
 
-.search-input {
+.appointment-management .search-input {
   width: 300px;
 }
 

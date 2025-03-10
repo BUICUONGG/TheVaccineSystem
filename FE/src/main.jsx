@@ -9,7 +9,6 @@ import AccountsPage from "./pages/usersRole/admin/accountsPage";
 import VaccinesPage from "./pages/usersRole/admin/vaccinesPage";
 import { ToastContainer } from "react-toastify";
 import AllCustomerPage from "./pages/usersRole/customer/allCustomerPage";
-import Advise from "./pages/homepage/Advise/advise";
 import VaccinePriceList from "./pages/homepage/vaccineShop/vaccineShopPage";
 import BlogList from "./pages/blog/BlogList";
 import BlogManagement from "./pages/usersRole/admin/BlogManagement";
@@ -22,7 +21,6 @@ import Welcome from "./pages/welcome/Welcome";
 import Thank from "./pages/thanks/Thank";
 import StaffLayout from "./pages/usersRole/staff/staffLayout";
 import AppointmentManagement from "./pages/usersRole/staff/appointmentManagement";
-import AdminAppointmentManagement from "./pages/usersRole/admin/adminAppointmentManagement";
 import ProfileInfo from "./pages/homepage/profile/components/ProfileInfo";
 import ProfileHistory from "./pages/homepage/profile/components/ProfileHistory";
 import Profile from "./pages/homepage/profile/Profile";
@@ -65,10 +63,6 @@ const router = createBrowserRouter([
   //   path: "/news",
   //   element: <NewsList />,
   // },
-  {
-    path: "/advise",
-    element: <Advise />,
-  },
   {
     path: "/blogs",
     element: <BlogList />,
@@ -116,10 +110,7 @@ const router = createBrowserRouter([
         path: "feedback",
         element: <div>Feedback Management</div>,
       },
-      {
-        path: "appointments",
-        element: <AdminAppointmentManagement />,
-      },
+      
       {
         path: "consultations",
         element: <div>Consultations Management</div>,

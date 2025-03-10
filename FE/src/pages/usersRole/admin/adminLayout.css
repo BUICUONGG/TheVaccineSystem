@@ -111,3 +111,16 @@
   justify-content: center;
   gap: 8px;
 }
+
+/* Đảm bảo nút primary hiển thị đúng màu */
+.admin-logout .ant-btn-primary {
+  background-color: #1890ff !important;
+  border-color: #1890ff !important;
+  color: white !important;
+}
+
+.admin-logout .ant-btn-primary.ant-btn-dangerous {
+  background-color: #ff4d4f !important;
+  border-color: #ff4d4f !important;
+  color: white !important;
+}
