@@ -48,6 +48,13 @@ class AppointmentService {
       });
       await aptLe.validate();
       // await aptLevalidate();
+      await notiService.createNoti({
+        cusId: result.cusId,
+        apt: result._id,
+        aptModel: "AppointmentLe",
+        message: `Lịch hẹn Le của bạn đã cập nhật trạng thái chờ duyệt`,
+        createdAt: new Date().toLocaleDateString("vi-VN"),
+      });
       const result = await connectToDatabase.appointmentLes.insertOne(aptLe);
       return { _id: result.insertedId, ...data };
     } catch (error) {
@@ -254,6 +261,14 @@ class AppointmentService {
         finalChildId = saveChild.insertedId;
       }
 
+      await notiService.createNoti({
+        cusId: result.cusId,
+        apt: result._id,
+        aptModel: "AppointmentGoi",
+        message: `Lịch hẹn gói của bạn đã cập nhật trạng thái chờ duyệt`,
+        createdAt: new Date().toLocaleDateString("vi-VN"),
+      });
+
       const vaccinePackage = await connectToDatabase.vaccinepackages.findOne({
         _id: new ObjectId(vaccinePakageId),
       });
@@ -368,12 +383,13 @@ class AppointmentService {
       await notiService.deleteNotiById(appointmentId);
 
       // Tạo thông báo mới
-      await notiService.createNoti(
-        appointment.cusId,
-        appointmentId,
-        "AppointmentGoi",
-        `Mũi tiêm số ${doseNumber} đã được cập nhật trạng thái: ${status}`
-      );
+      await notiService.createNoti({
+        cusId: appointment.cusId,
+        apt: appointmentId,
+        aptModel: "AppointmentGoi",
+        message: `Mũi tiêm số ${doseNumber} đã được cập nhật trạng thái: ${status}`,
+        createdAt: new Date().toLocaleDateString("vi-VN"),
+      });
 
       return result;
     } catch (error) {

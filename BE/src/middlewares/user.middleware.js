@@ -72,7 +72,6 @@ export const validateRefreshToken = async (req, res, next) => {
         .status(403)
         .json({ message: "Refresh Token không hợp lệ hoặc đã bị thu hồi" });
     }
-    console.log(decoded);
     req.user = {
       _id: decoded.id,
       role: decoded.role,
