@@ -22,9 +22,7 @@ export const registerController = async (req, res) => {
 export const refreshTokenController = async (req, res) => {
   try {
     const user = req.user; // Lấy thông tin user từ middleware
-    console.log(user);
     const newAccessToken = await userService.signAccessToken(user);
-
     return res.json({
       accessToken: newAccessToken,
       // refreshToken: newRefreshToken,
@@ -100,7 +98,7 @@ export const updateController = async (req, res) => {
 
 export const logoutController = async (req, res) => {
   try {
-    const { id } = req.params;
+    const id = req.params.id;
     const result = await userService.logout(id);
     if (!result) {
       throw new Error("Can not logout");

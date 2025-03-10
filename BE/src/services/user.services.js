@@ -66,7 +66,7 @@ class UserService {
     return await signToken({
       payload: { id: user._id.toString(), role: user.role },
       privateKey: process.env.JWT_ACCESS_TOKEN,
-      options: { expiresIn:"1h"|| process.env.EXPIRESIN_ACCESS_TOKEN },
+      options: { expiresIn: "1h" || process.env.EXPIRESIN_ACCESS_TOKEN },
     });
   }
 
@@ -74,7 +74,7 @@ class UserService {
     return await signToken({
       payload: { id: user._id.toString(), role: user.role },
       privateKey: process.env.JWT_REFRESH_TOKEN,
-      options: { expiresIn:"5h" || process.env.EXPIRESIN_REFRESH_TOKEN },
+      options: { expiresIn: "5h" || process.env.EXPIRESIN_REFRESH_TOKEN },
     });
   }
 
@@ -179,7 +179,7 @@ class UserService {
       const passwordHashed = await hashPassword(newPassword);
       const result = await connectToDatabase.users.findOneAndUpdate(
         { username },
-        { $set: passwordHashed },
+        { $set: { password: passwordHashed } },
         { returnDocument: "after" }
       );
       if (!result) {
@@ -200,15 +200,34 @@ class UserService {
     }
   }
 
+  // async getme(id) {
+  //   try {
+  //     const result = await connectToDatabase.users.findOne({
+  //       _id: new ObjectId(id),
+  //     });
+  //     if (!result) {
+  //       console.error("Không tìm thấy người dùng với ID:", id);
+  //       return null;
+  //     }
+  //     return result;
+  //   } catch (error) {
+  //     console.error(error.message);
+  //     throw new Error(error.message);
+  //   }
+  // }
+
   async getme(id) {
     try {
       const result = await connectToDatabase.users.findOne({
         _id: new ObjectId(id),
       });
-      if (!result) throw new Error("Thong tin nguoi dung khong co");
+      if (!result) {
+        console.error("Không tìm thấy người dùng với ID:", id);
+        return null;
+      }
       return result;
     } catch (error) {
-      console.log(error.message);
+      console.error(error.message);
       throw new Error(error.message);
     }
   }
