@@ -49,8 +49,8 @@ class AppointmentService {
       await aptLe.validate();
       // await aptLevalidate();
       await notiService.createNoti({
-        cusId: result.cusId,
-        apt: result._id,
+        cusId: data.cusId,
+        apt: data._id,
         aptModel: "AppointmentLe",
         message: `Lịch hẹn Le của bạn đã cập nhật trạng thái chờ duyệt`,
         createdAt: new Date().toLocaleDateString("vi-VN"),
@@ -262,9 +262,9 @@ class AppointmentService {
       }
 
       await notiService.createNoti({
-        cusId: result.cusId,
-        apt: result._id,
-        aptModel: "AppointmentGoi",
+        cusId: data.cusId,
+        apt: data.vaccinePakageId,
+        aptModel: "AppointmentLe",
         message: `Lịch hẹn gói của bạn đã cập nhật trạng thái chờ duyệt`,
         createdAt: new Date().toLocaleDateString("vi-VN"),
       });
@@ -273,7 +273,7 @@ class AppointmentService {
         _id: new ObjectId(vaccinePakageId),
       });
 
-      console.log("Vaccine Package Schedule:", vaccinePackage?.schedule);
+      // console.log("Vaccine Package Schedule:", vaccinePackage?.schedule);
 
       const doseSchedule = await this.calculateVaccinationSchedule(
         date,
