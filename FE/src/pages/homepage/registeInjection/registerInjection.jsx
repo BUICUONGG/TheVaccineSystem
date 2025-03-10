@@ -189,7 +189,7 @@ const RegisterInjection = () => {
           selectedVaccineType === "single" ? "vaccine lẻ" : "gói vaccine"
         } thành công!`,
         {
-          position: "top-center",
+          position: "top-right",
           autoClose: 2000,
           onClose: () => navigate("/homepage"),
         }

@@ -4,6 +4,8 @@ import {
   getNotiByCusIdController,
 } from "../controllers/noti.controllers.js";
 
+
+
 const notiRoutes = Router();
 
 notiRoutes.get("/getNotiByCusId/:id", getNotiByCusIdController);
