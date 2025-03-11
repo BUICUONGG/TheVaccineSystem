@@ -25,6 +25,7 @@ import ProfileInfo from "./pages/homepage/profile/components/ProfileInfo";
 import ProfileHistory from "./pages/homepage/profile/components/ProfileHistory";
 import Profile from "./pages/homepage/profile/Profile";
 import ProfileAccount from "./pages/homepage/profile/components/ProfileAccount";
+import FeedbackManagement from "./pages/usersRole/admin/FeedbackManagement";
 
 const router = createBrowserRouter([
   {
@@ -105,7 +106,7 @@ const router = createBrowserRouter([
       },
       {
         path: "feedback",
-        element: <div>Feedback Management</div>,
+        element: <FeedbackManagement />,
       },
       {
         path: "customers",

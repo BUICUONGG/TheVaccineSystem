@@ -91,12 +91,21 @@ const VaccinesPage = () => {
         throw new Error("Không tìm thấy ID vaccine");
       }
 
+      // Chuyển đổi price thành số
+      const price = Number(values.price);
+      
+      // Kiểm tra giá trị price
+      if (isNaN(price) || price < 0) {
+        throw new Error("Giá không hợp lệ hoặc âm");
+      }
+
       // Validate data before sending
       const updatedData = {
         vaccineName: values.vaccineName?.trim(),
         description: values.description?.trim(),
         manufacturer: values.manufacturer?.trim(),
         imageUrl: values.imageUrl?.trim(),
+        price: price, // Đảm bảo là số
       };
 
       await axiosInstance.post(
@@ -171,11 +180,21 @@ const VaccinesPage = () => {
       dataIndex: "manufacturer",
       key: "manufacturer",
     },
-    // {
-    //   title: "Ngày tạo",
-    //   dataIndex: "createdAt",
-    //   key: "createdAt",
-    // },
+    {
+      title: "Giá",
+      key: "price",
+      render: (_, record) => {
+        if (record.vaccineImports && record.vaccineImports.length > 0) {
+          return `${record.vaccineImports[0].price.toLocaleString()} VNĐ`;
+        }
+        return "Chưa có giá";
+      },
+      sorter: (a, b) => {
+        const priceA = a.vaccineImports && a.vaccineImports.length > 0 ? a.vaccineImports[0].price : 0;
+        const priceB = b.vaccineImports && b.vaccineImports.length > 0 ? b.vaccineImports[0].price : 0;
+        return priceA - priceB;
+      },
+    },
     {
       title: "Hình ảnh",
       dataIndex: "imageUrl",
@@ -225,12 +244,19 @@ const VaccinesPage = () => {
       return;
     }
 
+    // Lấy giá từ vaccineImports và đảm bảo là số
+    let price = 0;
+    if (vaccine.vaccineImports && vaccine.vaccineImports.length > 0) {
+      price = Number(vaccine.vaccineImports[0].price);
+    }
+
     setEditingVaccine(vaccine);
     editForm.setFieldsValue({
       vaccineName: vaccine.vaccineName,
       description: vaccine.description,
       manufacturer: vaccine.manufacturer,
       imageUrl: vaccine.imageUrl,
+      price: price, // Đảm bảo là số
     });
     setIsEditModalVisible(true);
   };
@@ -323,6 +349,27 @@ const VaccinesPage = () => {
             <Input />
           </Form.Item>
 
+          <Form.Item
+            name="price"
+            label="Giá (VNĐ)"
+            rules={[
+              { required: true, message: "Vui lòng nhập giá!" },
+            ]}
+          >
+            <Input 
+              type="number" 
+              min={0} 
+              step={1000}
+              onChange={(e) => {
+                // Đảm bảo giá trị là số dương
+                const value = e.target.value;
+                if (value < 0) {
+                  editForm.setFieldsValue({ price: 0 });
+                }
+              }}
+            />
+          </Form.Item>
+
           <Form.Item>
             <Button type="primary" htmlType="submit" style={{ marginRight: 8 }}>
               Cập nhật
@@ -363,6 +410,17 @@ const VaccinesPage = () => {
 
           <Form.Item name="imageUrl" label="URL hình ảnh">
             <Input />
+          </Form.Item>
+
+          <Form.Item
+            name="price"
+            label="Giá (VNĐ)"
+            rules={[
+              { required: true, message: "Vui lòng nhập giá!" },
+              { type: 'number', min: 0, message: "Giá không được âm!" }
+            ]}
+          >
+            <Input type="number" min={0} />
           </Form.Item>
 
           <Form.Item className="text-right">

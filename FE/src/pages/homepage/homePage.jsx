@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useRef } from "react";
-import { FaSyringe, FaBook, FaUserCheck, FaMoneyBillWave, FaBaby, FaChild, FaChevronLeft, FaChevronRight } from "react-icons/fa";
-import { EyeOutlined, HeartOutlined, HeartFilled, CommentOutlined, ShareAltOutlined } from "@ant-design/icons";
+import { FaSyringe, FaBook, FaUserCheck, FaMoneyBillWave, FaBaby, FaChild, FaChevronLeft, FaChevronRight, FaCommentAlt } from "react-icons/fa";
+import { EyeOutlined, HeartOutlined, HeartFilled, CommentOutlined, ShareAltOutlined, UserOutlined, LogoutOutlined, DownOutlined } from "@ant-design/icons";
+import { Dropdown, Space, Avatar, Menu } from "antd";
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import "./homePage.css";
 import { useNavigate, Link } from "react-router-dom";
 import axiosInstance from "../../service/api";
 import NotificationIcon from "./notification/Notification";
+import FeedbackForm from "../../components/Feedback/FeedbackForm";
 
 // eslint-disable-next-line no-unused-vars
 // import { FaSearch, FaShoppingCart } from "react-icons/fa";
@@ -21,6 +23,8 @@ const HomePage = () => {
   const [currentVaccineIndex, setCurrentVaccineIndex] = useState(0);
   const [flippedCardIndex, setFlippedCardIndex] = useState(null);
   const [cusId, setCusId] = useState(null);
+  const [showFeedbackForm, setShowFeedbackForm] = useState(false);
+  const [username, setUsername] = useState("");
   
   // Thêm state cho blog
   const [blogs, setBlogs] = useState([]);
@@ -35,7 +39,8 @@ const HomePage = () => {
   const newsImages = [
     "/images/news/news1.jpeg",
     "/images/news/news2.jpg",
-    "/images/news/news3.jpg"
+    "/images/news/news3.jpg",
+    "/images/news/news4.webp",
   ];
 
   const banners = [
@@ -71,6 +76,12 @@ const HomePage = () => {
         const payload = JSON.parse(atob(tokenParts[1]));
         const role = payload.role;
         setUserRole(role);
+        
+        // Get username from localStorage
+        const storedUsername = localStorage.getItem("username");
+        if (storedUsername) {
+          setUsername(storedUsername);
+        }
         
         // Lấy cusId từ localStorage nếu là customer
         if (role === "customer") {
@@ -348,6 +359,60 @@ const HomePage = () => {
     }
   };
 
+  // Add a new function to handle opening the feedback form
+  const openFeedbackForm = () => {
+    if (isLoggedIn && userRole === "customer") {
+      setShowFeedbackForm(true);
+    } else {
+      navigate("/login");
+    }
+  };
+
+  // Create dropdown menu items based on user role
+  const getUserMenuItems = () => {
+    if (userRole === "admin") {
+      return (
+        <Menu>
+          <Menu.Item key="admin" icon={<UserOutlined />}>
+            <Link to="/admin">Admin</Link>
+          </Menu.Item>
+          <Menu.Divider />
+          <Menu.Item key="logout" icon={<LogoutOutlined />} onClick={handleLogout}>
+            Đăng xuất
+          </Menu.Item>
+        </Menu>
+      );
+    } else if (userRole === "staff") {
+      return (
+        <Menu>
+          <Menu.Item key="staff" icon={<UserOutlined />}>
+            <Link to="/staffLayout">Quản lý KH</Link>
+          </Menu.Item>
+          <Menu.Divider />
+          <Menu.Item key="logout" icon={<LogoutOutlined />} onClick={handleLogout}>
+            Đăng xuất
+          </Menu.Item>
+        </Menu>
+      );
+    } else {
+      // Customer menu
+      return (
+        <Menu>
+          <Menu.Item key="profile" icon={<UserOutlined />}>
+            <Link to="/profile">Hồ sơ cá nhân</Link>
+          </Menu.Item>
+          <Menu.Item key="feedback" icon={<CommentOutlined />} onClick={openFeedbackForm}>
+            Đánh giá
+          </Menu.Item>
+          <Menu.Divider />
+          <Menu.Item key="logout" icon={<LogoutOutlined />} onClick={handleLogout}>
+            Đăng xuất
+          </Menu.Item>
+        </Menu>
+      );
+    }
+  };
+
   return (
     <div className="homepage">
       <nav>
@@ -383,27 +448,24 @@ const HomePage = () => {
             </>
           ) : (
             <>
-              {userRole === "admin" ? (
-                <li>
-                  <Link to="/admin">Admin</Link>
-                </li>
-              ) : userRole === "staff" ? (
-                <li>
-                  <Link to="/staffLayout">Quản lý KH</Link>
-                </li>
-              ) : (
-                <li>
-                  <Link to="/profile">Profile</Link>
-                </li>
-              )}
               {userRole === "customer" && cusId && (
                 <li className="notification-container">
-                  {console.log("Truyền cusId cho NotificationIcon:", cusId)}
                   <NotificationIcon cusId={cusId} />
                 </li>
               )}
-              <li>
-                <button onClick={handleLogout}>Logout</button>
+              <li className="user-dropdown">
+                <Dropdown overlay={getUserMenuItems()} trigger={['click']}>
+                  <a onClick={(e) => e.preventDefault()}>
+                    <Space>
+                      <Avatar 
+                        icon={<UserOutlined />} 
+                        style={{ backgroundColor: userRole === 'admin' ? '#ff4d4f' : userRole === 'staff' ? '#1890ff' : '#52c41a' }} 
+                      />
+                      <span className="username">{username}</span>
+                      <DownOutlined />
+                    </Space>
+                  </a>
+                </Dropdown>
               </li>
             </>
           )}
@@ -673,6 +735,9 @@ const HomePage = () => {
               <Link to="/about">Giới thiệu</Link>
               <Link to="/privacy-policy">Chính sách bảo mật</Link>
               <Link to="/terms">Điều khoản dịch vụ</Link>
+              {isLoggedIn && userRole === "customer" && (
+                <Link to="#" onClick={openFeedbackForm}>Đánh giá dịch vụ</Link>
+              )}
             </div>
           </div>
           <div className="footer-section">
@@ -719,6 +784,24 @@ const HomePage = () => {
           <i className="fas fa-arrow-up"></i>
         </button>
       )}
+
+      {/* Floating feedback button for customers */}
+      {isLoggedIn && userRole === "customer" && (
+        <button
+          className="feedback-floating-button"
+          onClick={openFeedbackForm}
+          aria-label="Đánh giá dịch vụ"
+        >
+          <FaCommentAlt />
+          <span>Đánh giá</span>
+        </button>
+      )}
+
+      {/* Feedback Form Modal */}
+      <FeedbackForm 
+        isOpen={showFeedbackForm} 
+        onClose={() => setShowFeedbackForm(false)} 
+      />
     </div>
   );
 };

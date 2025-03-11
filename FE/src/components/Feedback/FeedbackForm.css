@@ -1,0 +1,37 @@
+.feedback-form {
+  padding: 10px;
+}
+
+.feedback-rating {
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.rating-stars {
+  font-size: 32px;
+}
+
+.feedback-comment {
+  margin-bottom: 20px;
+}
+
+.feedback-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.ant-modal-content {
+  border-radius: 8px;
+}
+
+.ant-modal-header {
+  border-radius: 8px 8px 0 0;
+}
+
+.ant-modal-title {
+  font-size: 20px;
+  font-weight: 600;
+  text-align: center;
+} 

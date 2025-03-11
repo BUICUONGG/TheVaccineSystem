@@ -114,13 +114,13 @@
 
 /* Đảm bảo nút primary hiển thị đúng màu */
 .admin-logout .ant-btn-primary {
-  background-color: #1890ff !important;
-  border-color: #1890ff !important;
-  color: white !important;
+  background-color: #1890ff ;
+  border-color: #1890ff ;
+  color: white ;
 }
 
 .admin-logout .ant-btn-primary.ant-btn-dangerous {
-  background-color: #ff4d4f !important;
-  border-color: #ff4d4f !important;
-  color: white !important;
+  background-color: #ff4d4f ;
+  border-color: #ff4d4f ;
+  color: white ;
 }
