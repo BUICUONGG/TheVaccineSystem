@@ -14,9 +14,24 @@
     color: #4A90E2;
 }
 
+/* Thêm style cho header-container */
+.header-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.welcome-logo {
+    width: 60px;
+    height: auto;
+    margin-right: 15px;
+}
+
 .thanks-content h1 {
     font-size: 2.5rem;
     margin-bottom: 1rem;
+    display: inline-block; /* Để h1 nằm cùng hàng với logo */
 }
 
 .thanks-content p {
@@ -33,7 +48,7 @@
 .loading-dots span {
     width: 10px;
     height: 10px;
-    background-color:  #4A90E2;
+    background-color: #4A90E2;
     border-radius: 50%;
     animation: bounce 1s infinite ease-in-out;
 }
@@ -55,12 +70,9 @@
 }
 
 @keyframes bounce {
-
-    0%,
-    100% {
+    0%, 100% {
         transform: translateY(0);
     }
-
     50% {
         transform: translateY(-10px);
     }
@@ -71,7 +83,6 @@
         opacity: 0;
         transform: translateY(20px);
     }
-
     to {
         opacity: 1;
         transform: translateY(0);
@@ -83,9 +94,43 @@
         opacity: 1;
         transform: translateY(0);
     }
-
     to {
         opacity: 0;
         transform: translateY(-20px);
+    }
+}
+
+/* Media Queries cho responsive */
+@media (max-width: 768px) {
+    .thanks-content h1 {
+        font-size: 1.8rem;
+    }
+
+    .thanks-content p {
+        font-size: 1rem;
+    }
+    
+    .welcome-logo {
+        width: 40px;
+    }
+    
+    .header-container {
+        flex-direction: row;
+        align-items: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .thanks-content h1 {
+        font-size: 1.5rem;
+    }
+    
+    .header-container {
+        flex-direction: column;
+    }
+    
+    .welcome-logo {
+        margin-right: 0;
+        margin-bottom: 10px;
     }
 }

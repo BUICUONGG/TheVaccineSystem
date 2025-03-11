@@ -26,8 +26,11 @@ const Thank = () => {
   return (
     <div className={`thanks-container ${fadeOut ? 'fade-out' : 'fade-in'}`}>
       <div className="thanks-content">
-        <h1>Thank You!</h1>
-        <p>Have a great day!</p>
+        <div className="header-container">
+          <img src="/images/LogoHeader.png" alt="Logo" className="welcome-logo" />
+          <h1>Cảm ơn đã sử dụng dịch vụ!</h1>
+        </div>
+        <p>Một ngày tốt lành!</p>
         <div className="loading-dots">
           <span></span>
           <span></span>

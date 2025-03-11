@@ -3,39 +3,52 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  background: url('/images/vd2.jpg') center center;
-  background-size: cover;
+  background-color: whitesmoke;
   position: relative;
   opacity: 0;
 }
 
 .welcome-container::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5); /* Overlay tối để text dễ đọc hơn */
+  content: none;
 }
 
 .welcome-content {
   text-align: center;
-  color: whitesmoke; /* Màu vàng */
+  color: #4A90E2; /* Màu xanh dương */
   position: relative;
-  z-index: 1; /* Đảm bảo nội dung hiển thị trên overlay */
+  z-index: 1;
+}
+
+.logo-container {
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: center;
+}
+
+.header-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.welcome-logo {
+  width: 60px;
+  height: auto;
+  margin-right: 15px;
 }
 
 .welcome-content h1 {
   font-size: 2.5rem;
   margin-bottom: 1rem;
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); /* Thêm bóng cho text */
+  text-shadow: none; /* Bỏ bóng cho text */
+  display: inline-block; /* Để h1 nằm cùng hàng với logo */
 }
 
 .welcome-content p {
   font-size: 1.2rem;
   margin-bottom: 2rem;
-  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+  text-shadow: none;
 }
 
 .loading-dots {
@@ -47,7 +60,7 @@
 .loading-dots span {
   width: 10px;
   height: 10px;
-  background-color: #FFD700; /* Màu vàng cho dots */
+  background-color: #4A90E2; 
   border-radius: 50%;
   animation: bounce 1s infinite ease-in-out;
 }
@@ -102,10 +115,34 @@
 /* Media Queries cho responsive */
 @media (max-width: 768px) {
   .welcome-content h1 {
-    font-size: 2rem;
+    font-size: 1.8rem;
   }
 
   .welcome-content p {
     font-size: 1rem;
+  }
+  
+  .welcome-logo {
+    width: 40px;
+  }
+  
+  .header-container {
+    flex-direction: row;
+    align-items: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .welcome-content h1 {
+    font-size: 1.5rem;
+  }
+  
+  .header-container {
+    flex-direction: column;
+  }
+  
+  .welcome-logo {
+    margin-right: 0;
+    margin-bottom: 10px;
   }
 }

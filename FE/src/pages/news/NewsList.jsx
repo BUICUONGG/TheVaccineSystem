@@ -16,6 +16,13 @@ const NewsList = () => {
   const [loading, setLoading] = useState(false);
   const [visible, setVisible] = useState(false);
 
+
+  const newsImages = [
+    "/images/news/news1.jpeg",
+    "/images/news/news2.jpg",
+    "/images/news/news3.jpg"
+  ];
+
   useEffect(() => {
     fetchNews();
     setVisible(true);
@@ -31,9 +38,11 @@ const NewsList = () => {
       });
       // Lọc chỉ hiển thị các news có trạng thái "active"
       const activeNews = response.data.filter(news => news.status === "active");
-      const newsWithViews = activeNews.map((news) => ({
+      const newsWithViews = activeNews.map((news, index) => ({
         ...news,
         views: 500,
+        // Gán hình ảnh theo thứ tự, nếu vượt quá số lượng hình ảnh thì lặp lại
+        imageUrl: newsImages[index % newsImages.length]
       }));
       setNews(newsWithViews);
       setLoading(false);
@@ -63,8 +72,8 @@ const NewsList = () => {
               style={{ animationDelay: `${index * 0.2}s` }}
             >
               <img
-                src={newsItem.imageUrl || "./images/news1.png"}
-                alt="news"
+                src={newsItem.imageUrl}
+                alt={`Tin tức ${index + 1}`}
                 style={{ width: "100%", height: "200px", objectFit: "cover" }}
               />
               <Title level={4}>{newsItem.newsTitle}</Title>

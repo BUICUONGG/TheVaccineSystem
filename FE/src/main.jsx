@@ -12,7 +12,7 @@ import AllCustomerPage from "./pages/usersRole/customer/allCustomerPage";
 import VaccinePriceList from "./pages/homepage/vaccineShop/vaccineShopPage";
 import BlogList from "./pages/blog/BlogList";
 import BlogManagement from "./pages/usersRole/admin/BlogManagement";
-// import NewsList from "./pages/news/NewsList";
+import NewsList from "./pages/news/NewsList";
 import NewsManagement from "./pages/usersRole/admin/NewsManagement";
 import OverviewPage from "./pages/usersRole/admin/overviewPage";
 import RegisterInjection from "./pages/homepage/registeInjection/registerInjection";
@@ -59,10 +59,10 @@ const router = createBrowserRouter([
     path: "/register",
     element: <RegisterPage />,
   },
-  // {
-  //   path: "/news",
-  //   element: <NewsList />,
-  // },
+  {
+    path: "/news",
+    element: <NewsList />,
+  },
   {
     path: "/blogs",
     element: <BlogList />,
