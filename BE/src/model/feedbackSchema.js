@@ -1,14 +1,14 @@
 import mongoose from "mongoose";
 
 const feedbackSchema = new mongoose.Schema({
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-  rating: { type: Number, min: 1, max: 5 },
-  comment: { type: String },
-  appointmentId: {
+  cusId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Appointment",
+    ref: "Customer",
     required: true,
   },
+  rating: { type: Number, min: 1, max: 5 },
+  comment: { type: String },
+  createAt: { type: String },
 });
 const Feedback = mongoose.model("Feedback", feedbackSchema);
 

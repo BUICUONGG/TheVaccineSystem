@@ -18,6 +18,7 @@ import vaccinesRoutes from "./src/routes/vaccines.routes.js";
 import staffRoutes from "./src/routes/staffs.routes.js";
 import vaccinePakageRoutes from "./src/routes/vaccinePakages.routes.js";
 import notiRoutes from "./src/routes/noti.routes.js";
+import feedbackRoutes from "./src/routes/feedback.routes.js";
 const app = express();
 app.use(express.json());
 const PORT = 8080 || process.env.PORT;
@@ -59,6 +60,7 @@ app.use("/appointmentGoi", aptGoiRoutes);
 app.use("/staff", staffRoutes);
 app.use("/vaccinepakage", vaccinePakageRoutes);
 app.use("/noti", notiRoutes);
+app.use("/feedback", feedbackRoutes);
 // Lắng nghe cổng
 app.listen(PORT, () => {
   console.log(`Server đang chạy tại http://localhost:${PORT}`);
