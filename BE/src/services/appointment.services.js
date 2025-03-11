@@ -378,19 +378,6 @@ class AppointmentService {
         { $set: { doseSchedule: updatedDoseSchedule } },
         { returnDocument: "after" }
       );
-
-      // Xóa thông báo cũ
-      await notiService.deleteNotiById(appointmentId);
-
-      // Tạo thông báo mới
-      await notiService.createNoti({
-        cusId: appointment.cusId,
-        apt: appointmentId,
-        aptModel: "AppointmentGoi",
-        message: `Mũi tiêm số ${doseNumber} đã được cập nhật trạng thái: ${status}`,
-        createdAt: new Date().toLocaleDateString("vi-VN"),
-      });
-
       return result;
     } catch (error) {
       console.error("Error updating dose:", error);
