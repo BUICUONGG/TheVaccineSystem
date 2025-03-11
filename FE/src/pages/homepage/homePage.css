@@ -91,17 +91,44 @@ nav ul li a:hover {
   color: black;
 }
 nav ul li button:hover {
-  background-color: #e6f2ff;
-  transform: scale(1.1);
-  color: black;
+  background-color: #e6f7ff;
+  color: #1890ff;
 }
 
+/* Notification styles for homepage */
+.notification-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 
+.notification-container .notification-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+.notification-container .notification-bell {
+  font-size: 20px;
+  color: #4A90E2;
+  transition: color 0.3s;
+}
+
+.notification-container .notification-bell:hover {
+  color: #1890ff;
+}
+
+/* Ensure the dropdown appears properly in the navbar */
+.notification-container .ant-dropdown {
+  top: 60px !important;
+}
 
 .homepage {
   width: 100%;
   overflow-x: hidden;
   background-color: #e6f2ff;
+  padding-top: 80px;
 }
 
 /* Banner and Navigation */

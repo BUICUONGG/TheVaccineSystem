@@ -6,6 +6,7 @@ import "./homePage.css";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import axiosInstance from "../../service/api";
+import NotificationIcon from "./notification/Notification";
 
 // eslint-disable-next-line no-unused-vars
 // import { FaSearch, FaShoppingCart } from "react-icons/fa";
@@ -20,6 +21,7 @@ const HomePage = () => {
   const [vaccines, setVaccines] = useState([]);
   const [currentVaccineIndex, setCurrentVaccineIndex] = useState(0);
   const [flippedCardIndex, setFlippedCardIndex] = useState(null);
+  const [cusId, setCusId] = useState(null);
   
   // Thêm state cho blog
   const [blogs, setBlogs] = useState([]);
@@ -58,6 +60,11 @@ const HomePage = () => {
       const payload = JSON.parse(atob(tokenParts[1]));
       const role = payload.role;
       setUserRole(role);
+      
+      // Get cusId from token payload
+      if (payload.id && role === "customer") {
+        setCusId(payload.id);
+      }
       // localStorage.setItem('role', role);
     }
     document.title = "Trang chủ";
@@ -344,6 +351,11 @@ const HomePage = () => {
               ) : (
                 <li>
                   <Link to="/profile">Profile</Link>
+                </li>
+              )}
+              {cusId && userRole === "customer" && (
+                <li className="notification-container">
+                  <NotificationIcon cusId={cusId} />
                 </li>
               )}
               <li>
