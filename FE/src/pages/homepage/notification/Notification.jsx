@@ -9,6 +9,7 @@ const NotificationIcon = ({ cusId: propsCusId }) => {
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(false);
   const [cusId, setCusId] = useState(propsCusId);
+  const [isDropdownVisible, setIsDropdownVisible] = useState(false);
 
   // Lấy cusId từ localStorage nếu không có từ props
   useEffect(() => {
@@ -53,41 +54,26 @@ const NotificationIcon = ({ cusId: propsCusId }) => {
         console.log("Dữ liệu thông báo:", JSON.stringify(response.data));
         
         if (response.data.length > 0) {
-          // Chỉ lấy message và createdAt từ mỗi thông báo
+          // Chỉ lấy message và id từ mỗi thông báo, thêm trạng thái đã đọc
           const simplifiedNotifications = response.data.map(noti => ({
             id: noti._id || 'unknown',
             message: noti.message || 'Không có nội dung',
-            createdAt: noti.createdAt || new Date().toLocaleDateString('vi-VN')
+            read: false // Mặc định là chưa đọc
           }));
           
           console.log("Thông báo đã xử lý:", simplifiedNotifications);
           
           // Sắp xếp thông báo theo thời gian tạo (mới nhất lên đầu)
-          const sortedNotifications = [...simplifiedNotifications].sort((a, b) => {
-            // Nếu là định dạng "11/3/2025"
-            if (a.createdAt && a.createdAt.includes('/') && b.createdAt && b.createdAt.includes('/')) {
-              const partsA = a.createdAt.split('/');
-              const partsB = b.createdAt.split('/');
-              if (partsA.length === 3 && partsB.length === 3) {
-                const dateA = new Date(partsA[2], partsA[1] - 1, partsA[0]);
-                const dateB = new Date(partsB[2], partsB[1] - 1, partsB[0]);
-                return dateB - dateA;
-              }
-            }
-            // Mặc định sử dụng Date constructor
-            return new Date(b.createdAt) - new Date(a.createdAt);
-          });
-          
-          setNotifications(sortedNotifications);
-          setUnreadCount(sortedNotifications.length);
-          console.log("Đã cập nhật thông báo:", sortedNotifications.length);
+          setNotifications(simplifiedNotifications);
+          setUnreadCount(simplifiedNotifications.length);
+          console.log("Đã cập nhật thông báo:", simplifiedNotifications.length);
         } else {
           console.log("Mảng thông báo rỗng");
           // Tạo một thông báo mặc định khi không có thông báo nào
           const defaultNotification = {
             id: 'default',
             message: "Chào mừng bạn đến với hệ thống thông báo Diary Vaccine",
-            createdAt: new Date().toLocaleDateString('vi-VN')
+            read: true
           };
           setNotifications([defaultNotification]);
           setUnreadCount(0); // Không hiển thị badge khi chỉ có thông báo mặc định
@@ -99,7 +85,7 @@ const NotificationIcon = ({ cusId: propsCusId }) => {
         const defaultNotification = {
           id: 'default',
           message: "Chào mừng bạn đến với hệ thống thông báo Diary Vaccine",
-          createdAt: new Date().toLocaleDateString('vi-VN')
+          read: true
         };
         setNotifications([defaultNotification]);
         setUnreadCount(0); // Không hiển thị badge khi chỉ có thông báo mặc định
@@ -116,7 +102,7 @@ const NotificationIcon = ({ cusId: propsCusId }) => {
       const errorNotification = {
         id: 'error',
         message: "Không thể kết nối đến hệ thống thông báo. Vui lòng thử lại sau.",
-        createdAt: new Date().toLocaleDateString('vi-VN')
+        read: true
       };
       setNotifications([errorNotification]);
       setUnreadCount(0);
@@ -141,47 +127,41 @@ const NotificationIcon = ({ cusId: propsCusId }) => {
       const defaultNotification = {
         id: 'default',
         message: "Vui lòng đăng nhập để xem thông báo",
-        createdAt: new Date().toLocaleDateString('vi-VN')
+        read: true
       };
       setNotifications([defaultNotification]);
       setUnreadCount(0); // Không hiển thị badge
     }
   }, [cusId, fetchNotifications]);
 
-  const formatDate = (dateString) => {
-    if (!dateString) return '';
-    
-    // Xử lý định dạng ngày tháng từ API (có thể là "11/3/2025" hoặc ISO date)
-    let date;
-    if (dateString.includes('/')) {
-      // Nếu là định dạng "11/3/2025"
-      const parts = dateString.split('/');
-      if (parts.length === 3) {
-        date = new Date(parts[2], parts[1] - 1, parts[0]);
-      } else {
-        date = new Date(dateString);
-      }
-    } else {
-      date = new Date(dateString);
-    }
-    
-    // Kiểm tra nếu date không hợp lệ
-    if (isNaN(date.getTime())) {
-      return dateString; // Trả về chuỗi gốc nếu không thể parse
-    }
-    
-    return date.toLocaleString('vi-VN', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
-
   const handleRefresh = () => {
     console.log("Đang làm mới thông báo...");
     fetchNotifications();
+  };
+
+  // Xử lý khi click vào thông báo
+  const handleNotificationClick = (id) => {
+    // Đánh dấu thông báo đã đọc
+    const updatedNotifications = notifications.map(noti => 
+      noti.id === id ? { ...noti, read: true } : noti
+    );
+    setNotifications(updatedNotifications);
+    
+    // Cập nhật số lượng thông báo chưa đọc
+    const unreadNotifications = updatedNotifications.filter(noti => !noti.read);
+    setUnreadCount(unreadNotifications.length);
+  };
+
+  // Xử lý khi mở/đóng dropdown
+  const handleDropdownVisibleChange = (visible) => {
+    setIsDropdownVisible(visible);
+    
+    // Nếu đóng dropdown, đánh dấu tất cả thông báo đã đọc
+    if (!visible && notifications.some(noti => !noti.read)) {
+      const allReadNotifications = notifications.map(noti => ({ ...noti, read: true }));
+      setNotifications(allReadNotifications);
+      setUnreadCount(0);
+    }
   };
 
   const dropdownContent = (
@@ -202,12 +182,12 @@ const NotificationIcon = ({ cusId: propsCusId }) => {
         dataSource={notifications}
         locale={{ emptyText: <Empty description="Không có thông báo nào" /> }}
         renderItem={(item) => (
-          <List.Item className="notification-item">
-            <div>
+          <List.Item 
+            className={`notification-item ${item.read ? 'read' : 'unread'}`}
+            onClick={() => handleNotificationClick(item.id)}
+          >
+            <div className="notification-content">
               <Typography.Text strong>{item.message}</Typography.Text>
-              <div className="notification-time">
-                {formatDate(item.createdAt)}
-              </div>
             </div>
           </List.Item>
         )}
@@ -221,6 +201,8 @@ const NotificationIcon = ({ cusId: propsCusId }) => {
       trigger={['click']}
       placement="bottomRight"
       overlayClassName="notification-dropdown-overlay"
+      onVisibleChange={handleDropdownVisibleChange}
+      visible={isDropdownVisible}
     >
       <Space className="notification-trigger">
         <Badge count={unreadCount} overflowCount={99}>

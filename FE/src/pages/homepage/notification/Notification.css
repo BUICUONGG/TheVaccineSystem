@@ -59,12 +59,34 @@
   border-bottom: none;
 }
 
+/* Style cho thông báo chưa đọc */
 .notification-item.unread {
   background-color: #e6f7ff;
+  font-weight: bold;
 }
 
 .notification-item.unread:hover {
   background-color: #bae7ff;
+}
+
+/* Style cho thông báo đã đọc */
+.notification-item.read {
+  background-color: white;
+  font-weight: normal;
+}
+
+/* Style cho nội dung thông báo */
+.notification-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.notification-content .ant-typography {
+  display: block;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #333;
 }
 
 .notification-time {
@@ -88,13 +110,4 @@
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-/* Message styling */
-.notification-item .ant-typography {
-  display: block;
-  font-size: 14px;
-  line-height: 1.5;
-  color: #333;
-  margin-bottom: 4px;
 }
