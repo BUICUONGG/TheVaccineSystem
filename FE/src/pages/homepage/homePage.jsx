@@ -56,16 +56,25 @@ const HomePage = () => {
     const token = localStorage.getItem("accesstoken");
     if (token) {
       setIsLoggedIn(true);
-      const tokenParts = token.split(".");
-      const payload = JSON.parse(atob(tokenParts[1]));
-      const role = payload.role;
-      setUserRole(role);
-      
-      // Get cusId from token payload
-      if (payload.id && role === "customer") {
-        setCusId(payload.id);
+      try {
+        const tokenParts = token.split(".");
+        const payload = JSON.parse(atob(tokenParts[1]));
+        const role = payload.role;
+        setUserRole(role);
+        
+        // Lấy cusId từ localStorage nếu là customer
+        if (role === "customer") {
+          const storedCusId = localStorage.getItem("cusId");
+          if (storedCusId) {
+            console.log("Đã lấy cusId từ localStorage:", storedCusId);
+            setCusId(storedCusId);
+          } else {
+            console.log("Không tìm thấy cusId trong localStorage");
+          }
+        }
+      } catch (error) {
+        console.error("Error parsing token:", error);
       }
-      // localStorage.setItem('role', role);
     }
     document.title = "Trang chủ";
 
@@ -106,6 +115,8 @@ const HomePage = () => {
     localStorage.removeItem("accesstoken");
     localStorage.removeItem("role");
     localStorage.removeItem("userId");
+    localStorage.removeItem("cusId");
+    // localStorage.removeItem("currentCusId");
     // isCookie.removeItem("refreshToken");
     setIsLoggedIn(false);
     setUserRole("");
@@ -353,8 +364,9 @@ const HomePage = () => {
                   <Link to="/profile">Profile</Link>
                 </li>
               )}
-              {cusId && userRole === "customer" && (
+              {userRole === "customer" && cusId && (
                 <li className="notification-container">
+                  {console.log("Truyền cusId cho NotificationIcon:", cusId)}
                   <NotificationIcon cusId={cusId} />
                 </li>
               )}

@@ -22,6 +22,20 @@
   font-weight: 600;
   border-bottom: 1px solid #f0f0f0;
   background-color: #f9f9f9;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.refresh-button {
+  padding: 4px;
+  border: none;
+  background: transparent;
+}
+
+.refresh-button:hover {
+  color: #1890ff;
+  background-color: rgba(24, 144, 255, 0.1);
 }
 
 .notification-list {
@@ -39,6 +53,10 @@
 
 .notification-item:hover {
   background-color: #f5f5f5;
+}
+
+.notification-item:last-child {
+  border-bottom: none;
 }
 
 .notification-item.unread {
@@ -70,4 +88,13 @@
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+/* Message styling */
+.notification-item .ant-typography {
+  display: block;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #333;
+  margin-bottom: 4px;
 }
