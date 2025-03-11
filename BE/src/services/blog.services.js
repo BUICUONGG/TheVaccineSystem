@@ -77,9 +77,24 @@ class BlogService {
 
   async deleteBlog(id) {
     try {
-      const result = await connectToDatabase.blogs.findOneAndDelete({
-        _id: new ObjectId(id),
-      });
+      const result = await connectToDatabase.blogs.findOneAndUpdate(
+        { _id: new ObjectId(id) },
+        { $set: { status: "none" } },
+        { returnDocument: "after" }
+      );
+      return result;
+    } catch (error) {
+      throw new Error(error.message);
+    }
+  }
+
+  async restoreBlog(id) {
+    try {
+      const result = await connectToDatabase.blogs.findOneAndUpdate(
+        { _id: new ObjectId(id) },
+        { $set: { status: "active" } },
+        { returnDocument: "after" }
+      );
       return result;
     } catch (error) {
       throw new Error(error.message);

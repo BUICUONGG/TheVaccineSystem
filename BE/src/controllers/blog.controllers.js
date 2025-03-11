@@ -66,3 +66,14 @@ export const deleteBlogController = async (req, res) => {
     res.status(500).json(error.message);
   }
 };
+
+export const restoreBlogController = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const result = await blogService.restoreBlog(id);
+    res.status(200).json(result);
+  } catch (error) {
+    console.warn("Không thể khôi phục blog");
+    res.status(500).json(error.message);
+  }
+};
