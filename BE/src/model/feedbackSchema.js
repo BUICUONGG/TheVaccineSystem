@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 
+//feedback về sử dụng dịch vụ thôi không có sản phẩm
 const feedbackSchema = new mongoose.Schema({
   cusId: {
     type: mongoose.Schema.Types.ObjectId,
