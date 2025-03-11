@@ -162,27 +162,7 @@
 }
 
 .regis-btn-secondary:hover {
-    background: #3182ce;
-}
-
-/* Divider */
-.regis-divider {
-    display: flex;
-    align-items: center;
-    margin: 20px 0;
-}
-
-.regis-divider::before,
-.regis-divider::after {
-    content: '';
-    flex: 1;
-    border-bottom: 1px solid #e2e8f0;
-}
-
-.regis-divider span {
-    padding: 0 10px;
-    color: #718096;
-    font-size: 14px;
+    background-color: #e6e6e6;
 }
 
 /* Back home button */

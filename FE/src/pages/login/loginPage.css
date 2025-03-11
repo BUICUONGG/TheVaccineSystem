@@ -147,47 +147,7 @@
 }
 
 .login-btn-secondary:hover {
-    background: #e53e3e;
-}
-
-/* Google sign in button */
-.login-google-btn {
-    width: 100%;
-    padding: 12px;
-    border: 1px solid #e2e8f0;
-    border-radius: 8px;
-    background: white;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    color: #4a5568;
-}
-
-.login-google-btn:hover {
-    background: #f7fafc;
-}
-
-/* Divider */
-.login-divider {
-    display: flex;
-    align-items: center;
-    margin: 20px 0;
-}
-
-.login-divider::before,
-.login-divider::after {
-    content: '';
-    flex: 1;
-    border-bottom: 1px solid #e2e8f0;
-}
-
-.login-divider span {
-    padding: 0 10px;
-    color: #718096;
-    font-size: 14px;
+    background-color: #e6e6e6;
 }
 
 /* Back home button */

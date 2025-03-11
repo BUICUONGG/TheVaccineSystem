@@ -46,15 +46,15 @@ const BlogManagement = () => {
           Authorization: `Bearer ${localStorage.getItem("accesstoken")}`,
         },
       });
+      // Hiển thị tất cả các blog, bao gồm cả những blog có trạng thái "none" và "active"
       setBlogs(response.data);
       setFilteredBlogs(response.data);
-    } catch (error) {
-      console.error("Error fetching blogs:", error);
-      Modal.error({
-        content: "Failed to fetch blogs",
-      });
-    } finally {
       setLoading(false);
+    } catch (error) {
+      console.error("Failed to fetch blogs:", error);
+      Modal.error({
+        content: "Không thể tải danh sách blog",
+      });
     }
   };
 
@@ -135,14 +135,39 @@ const BlogManagement = () => {
       );
 
       Modal.success({
-        content: "Xóa blog thành công!",
+        content: "Tạm xóa blog thành công!",
       });
 
       fetchBlogs();
     } catch (error) {
-      console.error("Error deleting blog:", error);
+      console.error("Error updating blog status:", error);
       Modal.error({
-        content: "Không thể xóa blog",
+        content: "Không thể cập nhật trạng thái blog",
+      });
+    }
+  };
+
+  const handleRestore = async (blogId) => {
+    try {
+      await axiosInstance.post(
+        `/blogs/restore/${blogId}`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("accesstoken")}`,
+          },
+        }
+      );
+
+      Modal.success({
+        content: "Khôi phục blog thành công!",
+      });
+
+      fetchBlogs();
+    } catch (error) {
+      console.error("Error restoring blog:", error);
+      Modal.error({
+        content: "Không thể khôi phục blog",
       });
     }
   };
@@ -186,18 +211,12 @@ const BlogManagement = () => {
       width: 100,
     },
     {
-      title: "Status",
+      title: "Trạng thái",
       dataIndex: "status",
       key: "status",
-      width: 100,
       render: (status) => (
-        <span
-          style={{
-            color: status === "active" ? "#52c41a" : "#ff4d4f",
-            textTransform: "capitalize",
-          }}
-        >
-          {status}
+        <span style={{ color: status === "active" ? "green" : "red" }}>
+          {status === "active" ? "Hoạt động" : "Tạm ẩn"}
         </span>
       ),
     },
@@ -208,27 +227,34 @@ const BlogManagement = () => {
       render: (text) => new Date(text).toLocaleDateString(),
     },
     {
-      title: "Actions",
-      key: "actions",
-      width: 150,
+      title: "Hành động",
+      key: "action",
       render: (_, record) => (
-        <span>
+        <div style={{ display: "flex", gap: "8px" }}>
           <Button
-            type="link"
             icon={<EditOutlined />}
             onClick={() => showEditModal(record)}
           />
-          <Popconfirm
-            title="Xóa blog"
-            description="Bạn có chắc chắn muốn xóa blog này?"
-            onConfirm={() => handleDelete(record._id)}
-            okText="Có"
-            cancelText="Không"
-            okType="danger"
-          >
-            <Button type="link" danger icon={<DeleteOutlined />} />
-          </Popconfirm>
-        </span>
+          {record.status === "active" ? (
+            <Popconfirm
+              title="Bạn có chắc chắn muốn tạm ẩn blog này?"
+              onConfirm={() => handleDelete(record._id)}
+              okText="Có"
+              cancelText="Không"
+            >
+              <Button danger icon={<DeleteOutlined />} />
+            </Popconfirm>
+          ) : (
+            <Popconfirm
+              title="Bạn có chắc chắn muốn khôi phục blog này?"
+              onConfirm={() => handleRestore(record._id)}
+              okText="Có"
+              cancelText="Không"
+            >
+              <Button type="primary" icon={<PlusOutlined />} />
+            </Popconfirm>
+          )}
+        </div>
       ),
     },
   ];

@@ -61,14 +61,6 @@ const StaffLayout = () => {
         <ul className="staff-menu">
           <li className="staff-menu-item">
             <Link
-              to="/staffLayout/overview"
-              className={location.pathname === "/staffLayout/overview" ? "active" : ""}
-            >
-              Tổng quan
-            </Link>
-          </li>
-          <li className="staff-menu-item">
-            <Link
               to="/staffLayout/appointments"
               className={location.pathname === "/staffLayout/appointments" ? "active" : ""}
             >

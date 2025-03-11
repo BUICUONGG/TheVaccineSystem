@@ -144,14 +144,7 @@ const LoginPage = () => {
                 {isLoading ? "Signing in..." : "Đăng Nhập"}
               </button>
             </div>
-            <div className="login-divider">
-              <span>hoặc đăng nhập bằng</span>
-            </div>
-            <div className="login-button-group">
-              <button type="button" className="login-btn login-btn-secondary">
-                <FcGoogle className="h-5 w-5 mr-2" /> Google
-              </button>
-            </div>
+            
           </form>
         </div>
       </div>

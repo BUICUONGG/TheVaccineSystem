@@ -138,17 +138,6 @@ const AdminLayout = () => {
               Feedback
             </Link>
           </li>
-          
-          <li className="admin-menu-item">
-            <Link
-              to="/admin/consultations"
-              className={
-                location.pathname === "/admin/consultations" ? "active" : ""
-              }
-            >
-              Consultations
-            </Link>
-          </li>
         </ul>
 
         <div className="admin-logout">

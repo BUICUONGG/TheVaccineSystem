@@ -75,10 +75,7 @@ const router = createBrowserRouter([
         path: "",
         element: <div>Chào mừng đến trang quản lý của Staff</div>,
       },
-      {
-        path: "overview",
-        element: <div>Tổng quan</div>,
-      },
+
       {
         path: "appointments",
         element: <AppointmentManagement />,
@@ -109,11 +106,6 @@ const router = createBrowserRouter([
       {
         path: "feedback",
         element: <div>Feedback Management</div>,
-      },
-      
-      {
-        path: "consultations",
-        element: <div>Consultations Management</div>,
       },
       {
         path: "customers",

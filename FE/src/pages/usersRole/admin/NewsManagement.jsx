@@ -130,14 +130,39 @@ const NewsManagement = () => {
             );
 
             Modal.success({
-                content: "Tạm xóa",
+                content: "Tạm xóa news thành công!",
             });
 
             fetchNews();
         } catch (error) {
             console.error("Error updating news status:", error);
             Modal.error({
-                content: "Failed to update news status",
+                content: "Không thể cập nhật trạng thái news",
+            });
+        }
+    };
+
+    const handleRestore = async (newsId) => {
+        try {
+            await axiosInstance.post(
+                `/news/restore/${newsId}`,
+                {},
+                {
+                    headers: {
+                        Authorization: `Bearer ${localStorage.getItem("accesstoken")}`,
+                    },
+                }
+            );
+
+            Modal.success({
+                content: "Khôi phục news thành công!",
+            });
+
+            fetchNews();
+        } catch (error) {
+            console.error("Error restoring news:", error);
+            Modal.error({
+                content: "Không thể khôi phục news",
             });
         }
     };
@@ -188,32 +213,41 @@ const NewsManagement = () => {
             key: "status",
             width: 100,
             render: (status) => (
-                <span style={{ color: status === "active" ? "#52c41a" : "#ff4d4f", textTransform: "capitalize" }}>{status}</span>
+                <span style={{ color: status === "active" ? "green" : "red" }}>
+                    {status === "active" ? "Hoạt động" : "Tạm ẩn"}
+                </span>
             ),
         },
         {
-            title: "Actions",
-            key: "actions",
-            width: 150,
+            title: "Hành động",
+            key: "action",
             render: (_, record) => (
-                <span>
+                <div style={{ display: "flex", gap: "8px" }}>
                     <Button
-                        type="link"
                         icon={<EditOutlined />}
                         onClick={() => showEditModal(record)}
                     />
-                    <Popconfirm
-                        title="Ẩn News"
-                        description="Bạn có chắc chắn muốn ẩn News này? (Trạng thái sẽ chuyển thành 'none')"
-                        onConfirm={() => handleDelete(record._id)}
-                        okText="Có"
-                        cancelText="Không"
-                        okType="danger"
-                    >
-                        <Button type="link" danger icon={<DeleteOutlined />} />
-                    </Popconfirm>
-                </span>
-            )
+                    {record.status === "active" ? (
+                        <Popconfirm
+                            title="Bạn có chắc chắn muốn tạm ẩn news này?"
+                            onConfirm={() => handleDelete(record._id)}
+                            okText="Có"
+                            cancelText="Không"
+                        >
+                            <Button danger icon={<DeleteOutlined />} />
+                        </Popconfirm>
+                    ) : (
+                        <Popconfirm
+                            title="Bạn có chắc chắn muốn khôi phục news này?"
+                            onConfirm={() => handleRestore(record._id)}
+                            okText="Có"
+                            cancelText="Không"
+                        >
+                            <Button type="primary" icon={<PlusOutlined />} />
+                        </Popconfirm>
+                    )}
+                </div>
+            ),
         }
     ];
 

@@ -33,7 +33,8 @@ const BlogList = () => {
           Authorization: `Bearer ${localStorage.getItem("accesstoken")}`,
         },
       });
-      const blogsWithViews = response.data.map((blog) => ({
+      const activeBlogs = response.data.filter(blog => blog.status === "active");
+      const blogsWithViews = activeBlogs.map((blog) => ({
         ...blog,
         views: 1000,
       }));
