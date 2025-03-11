@@ -296,8 +296,10 @@ const HomePage = () => {
     try {
       setLoadingBlogs(true);
       const response = await axiosInstance.get("/blogs/showBlog");
+      // Lọc chỉ hiển thị các blog có trạng thái "active"
+      const activeBlogs = response.data.filter(blog => blog.status === "active");
       // Lấy 3 bài blog mới nhất
-      const latestBlogs = response.data.slice(0, 3).map(blog => ({
+      const latestBlogs = activeBlogs.slice(0, 3).map(blog => ({
         ...blog,
         views: 1000
       }));

@@ -53,6 +53,19 @@ class NewsService {
             throw new Error(error.message);
         }
     }
+
+    async restoreNews(id) {
+        try {
+            const result = await connectToDatabase.news.findOneAndUpdate(
+                { _id: new ObjectId(id) },
+                { $set: { status: "active" } },
+                { returnDocument: "after" }
+            );
+            return result;
+        } catch (error) {
+            throw new Error(error.message);
+        }
+    }
 }
 
 const newsService = new NewsService();

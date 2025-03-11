@@ -41,6 +41,17 @@ export const deleteNewsController = async (req, res) => {
     }
 };
 
+export const restoreNewsController = async (req, res) => {
+    try {
+        const id = req.params.id;
+        const result = await newsService.restoreNews(id);
+        res.status(200).json(result);
+    } catch (error) {
+        console.warn("Không thể khôi phục news");
+        res.status(500).json(error.message);
+    }
+};
+
 
 
 

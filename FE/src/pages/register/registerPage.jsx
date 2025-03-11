@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { FiUser, FiMail, FiLock, FiEye, FiEyeOff } from "react-icons/fi";
-import { FcGoogle } from "react-icons/fc";
 import { useNavigate, Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import "./registerPage.css";
@@ -221,19 +220,6 @@ const RegistrationForm = () => {
                 className="regis-btn regis-btn-primary"
               >
                 {loading ? "Đang xử lý..." : "Đăng Ký"}
-              </button>
-            </div>
-            
-            <div className="regis-divider">
-              <span>hoặc đăng ký bằng</span>
-            </div>
-            
-            <div className="regis-button-group">
-              <button
-                type="button"
-                className="regis-btn regis-btn-secondary"
-              >
-                <FcGoogle className="h-5 w-5 mr-2" /> Google
               </button>
             </div>
           </form>

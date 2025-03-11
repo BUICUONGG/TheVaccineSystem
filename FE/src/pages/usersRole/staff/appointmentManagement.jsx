@@ -23,6 +23,53 @@ import "./appointmentManagement.css";
 const { TabPane } = Tabs;
 const { Title, Text } = Typography;
 
+// Thêm style cho nút duyệt và hủy đơn
+const buttonStyles = `
+  .approve-button {
+    background-color: #1976d2 !important;
+    border-color: #1976d2 !important;
+    margin-right: 8px;
+    transition: all 0.3s ease;
+    box-shadow: 0 3px 1px -2px rgba(0,0,0,0.2), 0 2px 2px 0 rgba(0,0,0,0.14), 0 1px 5px 0 rgba(0,0,0,0.12);
+  }
+  
+  .approve-button:hover:not(:disabled) {
+    background-color: #1565c0 !important;
+    border-color: #1565c0 !important;
+    box-shadow: 0 2px 4px -1px rgba(0,0,0,0.2), 0 4px 5px 0 rgba(0,0,0,0.14), 0 1px 10px 0 rgba(0,0,0,0.12);
+  }
+  
+  .approve-button:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+
+  .cancel-button {
+    background-color: #f44336 !important;
+    border-color: #f44336 !important;
+    color: white !important;
+    transition: all 0.3s ease;
+    box-shadow: 0 3px 1px -2px rgba(0,0,0,0.2), 0 2px 2px 0 rgba(0,0,0,0.14), 0 1px 5px 0 rgba(0,0,0,0.12);
+  }
+  
+  .cancel-button:hover:not(:disabled) {
+    background-color: #d32f2f !important;
+    border-color: #d32f2f !important;
+    box-shadow: 0 2px 4px -1px rgba(0,0,0,0.2), 0 4px 5px 0 rgba(0,0,0,0.14), 0 1px 10px 0 rgba(0,0,0,0.12);
+  }
+  
+  .cancel-button:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+
+  .action-buttons {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+  }
+`;
+
 const AppointmentManagement = () => {
   const [loading, setLoading] = useState(false);
   const [appointmentsLe, setAppointmentsLe] = useState([]);
@@ -32,6 +79,20 @@ const AppointmentManagement = () => {
   const [searchText, setSearchText] = useState("");
   const [activeTab, setActiveTab] = useState("1");
   const [detailLoading, setDetailLoading] = useState(false);
+
+  // Thêm style vào component
+  useEffect(() => {
+    // Tạo style element
+    const styleElement = document.createElement('style');
+    styleElement.type = 'text/css';
+    styleElement.innerHTML = buttonStyles;
+    document.head.appendChild(styleElement);
+
+    // Cleanup khi component unmount
+    return () => {
+      document.head.removeChild(styleElement);
+    };
+  }, []);
 
   const fetchAppointments = async () => {
     try {
@@ -368,11 +429,7 @@ const AppointmentManagement = () => {
         <div className="action-buttons">
           <Button
             type="primary"
-            style={{
-              backgroundColor: "#52c41a",
-              borderColor: "#52c41a",
-              marginRight: 8,
-            }}
+            className="approve-button"
             onClick={() => handleStatusChange(record._id, "completed", false)}
             disabled={
               record.status === "incomplete" || record.status === "completed"
@@ -382,6 +439,7 @@ const AppointmentManagement = () => {
           </Button>
           <Button
             danger
+            className="cancel-button"
             onClick={() => handleStatusChange(record._id, "incomplete", false)}
             disabled={
               record.status === "incomplete" || record.status === "completed"
@@ -510,11 +568,7 @@ const AppointmentManagement = () => {
         <div className="action-buttons">
           <Button
             type="primary"
-            style={{
-              backgroundColor: "blue",
-              borderColor: "#52c41a",
-              marginRight: 8,
-            }}
+            className="approve-button"
             onClick={() => handleStatusChange(record._id, "approve", true)}
             disabled={
               record.status === "incomplete" || record.status === "completed"
@@ -524,6 +578,7 @@ const AppointmentManagement = () => {
           </Button>
           <Button
             danger
+            className="cancel-button"
             onClick={() => handleStatusChange(record._id, "incomplete", true)}
             disabled={
               record.status === "incomplete" || record.status === "completed"

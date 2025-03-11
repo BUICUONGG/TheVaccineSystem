@@ -6,6 +6,7 @@ import {
   toggleLikeController,
   updateBlogController,
   deleteBlogController,
+  restoreBlogController,
 } from "../controllers/blog.controllers.js";
 import { validateAccessToken } from "../middlewares/user.middleware.js";
 
@@ -23,4 +24,5 @@ blogRoutes.put(
 blogRoutes.put("/like/:blogId", validateAccessToken, toggleLikeController);
 blogRoutes.post("/update/:id", validateAccessToken, updateBlogController);
 blogRoutes.post("/delete/:id", validateAccessToken, deleteBlogController);
+blogRoutes.post("/restore/:id", validateAccessToken, restoreBlogController);
 export default blogRoutes;
