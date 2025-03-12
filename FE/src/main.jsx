@@ -12,7 +12,7 @@ import AllCustomerPage from "./pages/usersRole/customer/allCustomerPage";
 import VaccinePriceList from "./pages/homepage/vaccineShop/vaccineShopPage";
 import BlogList from "./pages/blog/BlogList";
 import BlogManagement from "./pages/usersRole/admin/BlogManagement";
-// import NewsList from "./pages/news/NewsList";
+import NewsList from "./pages/news/NewsList";
 import NewsManagement from "./pages/usersRole/admin/NewsManagement";
 import OverviewPage from "./pages/usersRole/admin/overviewPage";
 import RegisterInjection from "./pages/homepage/registeInjection/registerInjection";
@@ -25,6 +25,7 @@ import ProfileInfo from "./pages/homepage/profile/components/ProfileInfo";
 import ProfileHistory from "./pages/homepage/profile/components/ProfileHistory";
 import Profile from "./pages/homepage/profile/Profile";
 import ProfileAccount from "./pages/homepage/profile/components/ProfileAccount";
+import FeedbackManagement from "./pages/usersRole/admin/FeedbackManagement";
 
 const router = createBrowserRouter([
   {
@@ -59,10 +60,10 @@ const router = createBrowserRouter([
     path: "/register",
     element: <RegisterPage />,
   },
-  // {
-  //   path: "/news",
-  //   element: <NewsList />,
-  // },
+  {
+    path: "/news",
+    element: <NewsList />,
+  },
   {
     path: "/blogs",
     element: <BlogList />,
@@ -105,7 +106,7 @@ const router = createBrowserRouter([
       },
       {
         path: "feedback",
-        element: <div>Feedback Management</div>,
+        element: <FeedbackManagement />,
       },
       {
         path: "customers",

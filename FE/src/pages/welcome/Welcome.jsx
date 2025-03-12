@@ -5,14 +5,13 @@ import "./Welcome.css";
 const Welcome = () => {
   const navigate = useNavigate();
   const [fadeOut, setFadeOut] = useState(false);
-  const username = localStorage.getItem("username");
   const userRole = localStorage.getItem("role");
 
   useEffect(() => {
     // Start fade out after 2.5 seconds
     const fadeTimer = setTimeout(() => {
       setFadeOut(true);
-    }, 1500);
+    }, 1000);
 
     // Navigate after fade out (3 seconds total)
     const navigationTimer = setTimeout(() => {
@@ -21,7 +20,7 @@ const Welcome = () => {
       } else {
         navigate("/homepage");
       }
-    }, 2000);
+    }, 1500);
 
     return () => {
       clearTimeout(fadeTimer);
@@ -32,7 +31,10 @@ const Welcome = () => {
   return (
     <div className={`welcome-container ${fadeOut ? "fade-out" : "fade-in"}`}>
       <div className="welcome-content">
-        <h1>Chào mừng đến Diary Vaccine{username ? `, ${username}` : ""}!</h1>
+        <div className="header-container">
+          <img src="/images/LogoHeader.png" alt="Logo" className="welcome-logo" />
+          <h1>Chào mừng đến Diary Vaccine!</h1>
+        </div>
         <p>Xin đợi một chút...</p>
         <div className="loading-dots">
           <span></span>

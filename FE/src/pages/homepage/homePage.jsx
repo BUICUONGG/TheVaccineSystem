@@ -1,12 +1,13 @@
-import { useState, useEffect, useRef } from "react";
-import { FaSyringe, FaBook, FaUserCheck, FaMoneyBillWave, FaBaby, FaChild, FaChevronLeft, FaChevronRight } from "react-icons/fa";
-import { EyeOutlined, HeartOutlined, HeartFilled, CommentOutlined, ShareAltOutlined } from "@ant-design/icons";
+import React, { useState, useEffect, useRef } from "react";
+import { FaSyringe, FaBook, FaUserCheck, FaMoneyBillWave, FaBaby, FaChild, FaChevronLeft, FaChevronRight, FaCommentAlt } from "react-icons/fa";
+import { EyeOutlined, HeartOutlined, HeartFilled, CommentOutlined, ShareAltOutlined, UserOutlined, LogoutOutlined, DownOutlined } from "@ant-design/icons";
+import { Dropdown, Space, Avatar, Menu } from "antd";
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import "./homePage.css";
-import { useNavigate } from "react-router-dom";
-import { Link } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import axiosInstance from "../../service/api";
 import NotificationIcon from "./notification/Notification";
+import FeedbackForm from "../../components/Feedback/FeedbackForm";
 
 // eslint-disable-next-line no-unused-vars
 // import { FaSearch, FaShoppingCart } from "react-icons/fa";
@@ -22,11 +23,25 @@ const HomePage = () => {
   const [currentVaccineIndex, setCurrentVaccineIndex] = useState(0);
   const [flippedCardIndex, setFlippedCardIndex] = useState(null);
   const [cusId, setCusId] = useState(null);
+  const [showFeedbackForm, setShowFeedbackForm] = useState(false);
+  const [username, setUsername] = useState("");
   
   // Thêm state cho blog
   const [blogs, setBlogs] = useState([]);
   const [loadingBlogs, setLoadingBlogs] = useState(false);
   const [likedBlogStates, setLikedBlogStates] = useState({});
+
+  // Thêm state cho news
+  const [news, setNews] = useState([]);
+  const [loadingNews, setLoadingNews] = useState(false);
+  
+  // Mảng đường dẫn hình ảnh news
+  const newsImages = [
+    "/images/news/news1.jpeg",
+    "/images/news/news2.jpg",
+    "/images/news/news3.jpg",
+    "/images/news/news4.webp",
+  ];
 
   const banners = [
     {
@@ -61,6 +76,12 @@ const HomePage = () => {
         const payload = JSON.parse(atob(tokenParts[1]));
         const role = payload.role;
         setUserRole(role);
+        
+        // Get username from localStorage
+        const storedUsername = localStorage.getItem("username");
+        if (storedUsername) {
+          setUsername(storedUsername);
+        }
         
         // Lấy cusId từ localStorage nếu là customer
         if (role === "customer") {
@@ -123,17 +144,6 @@ const HomePage = () => {
     navigate("/thank-you");
   };
 
-  // const handleLogin = () => {
-  //   navigate("/login");
-  // };
-
-  // const handleRegister = () => {
-  //   navigate("/register");
-  // };
-
-  // const handleProfile = () => {
-  //   navigate("/profile");
-  // };
 
   useEffect(() => {
     // Thêm script cho Chatbase
@@ -318,6 +328,91 @@ const HomePage = () => {
     }));
   };
 
+  // Thêm useEffect để fetch news
+  useEffect(() => {
+    fetchNews();
+  }, []);
+
+  // Thêm hàm fetch news
+  const fetchNews = async () => {
+    try {
+      setLoadingNews(true);
+      const response = await axiosInstance.post("/news/showNews", {}, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accesstoken")}`,
+        },
+      });
+      // Lọc chỉ hiển thị các news có trạng thái "active"
+      const activeNews = response.data.filter(news => news.status === "active");
+      // Lấy 3 bài news mới nhất
+      const latestNews = activeNews.slice(0, 3).map((news, index) => ({
+        ...news,
+        views: 500,
+        // Gán hình ảnh theo thứ tự, nếu vượt quá số lượng hình ảnh thì lặp lại
+        imageUrl: newsImages[index % newsImages.length]
+      }));
+      setNews(latestNews);
+    } catch (error) {
+      console.error("Failed to fetch news:", error);
+    } finally {
+      setLoadingNews(false);
+    }
+  };
+
+  // Add a new function to handle opening the feedback form
+  const openFeedbackForm = () => {
+    if (isLoggedIn && userRole === "customer") {
+      setShowFeedbackForm(true);
+    } else {
+      navigate("/login");
+    }
+  };
+
+  // Create dropdown menu items based on user role
+  const getUserMenuItems = () => {
+    if (userRole === "admin") {
+      return (
+        <Menu>
+          <Menu.Item key="admin" icon={<UserOutlined />}>
+            <Link to="/admin">Admin</Link>
+          </Menu.Item>
+          <Menu.Divider />
+          <Menu.Item key="logout" icon={<LogoutOutlined />} onClick={handleLogout}>
+            Đăng xuất
+          </Menu.Item>
+        </Menu>
+      );
+    } else if (userRole === "staff") {
+      return (
+        <Menu>
+          <Menu.Item key="staff" icon={<UserOutlined />}>
+            <Link to="/staffLayout">Quản lý KH</Link>
+          </Menu.Item>
+          <Menu.Divider />
+          <Menu.Item key="logout" icon={<LogoutOutlined />} onClick={handleLogout}>
+            Đăng xuất
+          </Menu.Item>
+        </Menu>
+      );
+    } else {
+      // Customer menu
+      return (
+        <Menu>
+          <Menu.Item key="profile" icon={<UserOutlined />}>
+            <Link to="/profile">Hồ sơ cá nhân</Link>
+          </Menu.Item>
+          <Menu.Item key="feedback" icon={<CommentOutlined />} onClick={openFeedbackForm}>
+            Đánh giá
+          </Menu.Item>
+          <Menu.Divider />
+          <Menu.Item key="logout" icon={<LogoutOutlined />} onClick={handleLogout}>
+            Đăng xuất
+          </Menu.Item>
+        </Menu>
+      );
+    }
+  };
+
   return (
     <div className="homepage">
       <nav>
@@ -353,27 +448,24 @@ const HomePage = () => {
             </>
           ) : (
             <>
-              {userRole === "admin" ? (
-                <li>
-                  <Link to="/admin">Admin</Link>
-                </li>
-              ) : userRole === "staff" ? (
-                <li>
-                  <Link to="/staffLayout">Quản lý KH</Link>
-                </li>
-              ) : (
-                <li>
-                  <Link to="/profile">Profile</Link>
-                </li>
-              )}
               {userRole === "customer" && cusId && (
                 <li className="notification-container">
-                  {console.log("Truyền cusId cho NotificationIcon:", cusId)}
                   <NotificationIcon cusId={cusId} />
                 </li>
               )}
-              <li>
-                <button onClick={handleLogout}>Logout</button>
+              <li className="user-dropdown">
+                <Dropdown overlay={getUserMenuItems()} trigger={['click']}>
+                  <a onClick={(e) => e.preventDefault()}>
+                    <Space>
+                      <Avatar 
+                        icon={<UserOutlined />} 
+                        style={{ backgroundColor: userRole === 'admin' ? '#ff4d4f' : userRole === 'staff' ? '#1890ff' : '#52c41a' }} 
+                      />
+                      <span className="username">{username}</span>
+                      <DownOutlined />
+                    </Space>
+                  </a>
+                </Dropdown>
               </li>
             </>
           )}
@@ -552,61 +644,30 @@ const HomePage = () => {
       <div className="news-section">
         <h2>TIN TỨC SỨC KHỎE</h2>
         <div className="news-grid">
-          <div className="news-item">
-            <div className="news-image">
-              <img src="/images/news1.jpeg" alt="COVID-19 News" />
-            </div>
-            <div className="news-content">
-              <h3>
-                60% mẫu giải trình tự gen ca COVID-19 ở các tỉnh phía Bắc nhiễm
-                biến thể BA.5
-              </h3>
-              <p>
-                Theo báo cáo về tình hình dịch bệnh COVID-19 của 28 tỉnh, thành
-                phố từ Hà Tĩnh trở ra cho thấy từ đầu năm 2022 đến ngày 15/8,
-                các địa phương đã ghi nhận tổng cộng 7.731.853 ca mắc
-                COVID-19...
-              </p>
-              <a href="#" className="read-more">
-                XEM THÊM
-              </a>
-            </div>
-          </div>
-
-          <div className="news-item">
-            <div className="news-image">
-              <img src="/images/news2.jpg" alt="COVID Test" />
-            </div>
-            <div className="news-content">
-              <h3>
-                Sáng 1/8: Có 3 dấu hiệu chính mắc bệnh đậu mùa khỉ; 1 tuần ghi
-                nhận hơn 10 nghìn ca COVID-19 mới
-              </h3>
-              <p>
-                Theo báo cáo về tình hình dịch bệnh COVID-19 của 28 tỉnh, thành
-                phố từ Hà Tĩnh trở ra...
-              </p>
-              <a href="#" className="read-more">
-                XEM THÊM
-              </a>
-            </div>
-          </div>
-
-          <div className="news-item">
-            <div className="news-image">
-              <img src="/images/news3.jpg" alt="Hospital Care" />
-            </div>
-            <div className="news-content">
-              <h3>Nguy hiểm bệnh viêm não vào mùa</h3>
-              <p>
-                Theo báo cáo về tình hình dịch bệnh COVID-19 của 28 tỉnh, thành
-                phố từ Hà Tĩnh trở ra cho thấy từ đầu năm 2022...
-              </p>
-              <a href="#" className="read-more">
-                XEM THÊM
-              </a>
-            </div>
-          </div>
+          {loadingNews ? (
+            <div className="loading-spinner">Đang tải tin tức...</div>
+          ) : news.length > 0 ? (
+            news.map((newsItem, index) => (
+              <div className="news-item" key={newsItem._id}>
+                <div className="news-image">
+                  <img src={newsItem.imageUrl} alt={`Tin tức ${index + 1}`} />
+                </div>
+                <div className="news-content">
+                  <h3>{newsItem.newsTitle}</h3>
+                  <p>
+                    {newsItem.newsContent.length > 150 
+                      ? `${newsItem.newsContent.substring(0, 150)}...` 
+                      : newsItem.newsContent}
+                  </p>
+                  <Link to="/news" className="read-more">
+                    XEM THÊM
+                  </Link>
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className="no-news">Không có tin tức nào.</div>
+          )}
         </div>
       </div>
 
@@ -674,6 +735,9 @@ const HomePage = () => {
               <Link to="/about">Giới thiệu</Link>
               <Link to="/privacy-policy">Chính sách bảo mật</Link>
               <Link to="/terms">Điều khoản dịch vụ</Link>
+              {isLoggedIn && userRole === "customer" && (
+                <Link to="#" onClick={openFeedbackForm}>Đánh giá dịch vụ</Link>
+              )}
             </div>
           </div>
           <div className="footer-section">
@@ -720,6 +784,24 @@ const HomePage = () => {
           <i className="fas fa-arrow-up"></i>
         </button>
       )}
+
+      {/* Floating feedback button for customers */}
+      {isLoggedIn && userRole === "customer" && (
+        <button
+          className="feedback-floating-button"
+          onClick={openFeedbackForm}
+          aria-label="Đánh giá dịch vụ"
+        >
+          <FaCommentAlt />
+          <span>Đánh giá</span>
+        </button>
+      )}
+
+      {/* Feedback Form Modal */}
+      <FeedbackForm 
+        isOpen={showFeedbackForm} 
+        onClose={() => setShowFeedbackForm(false)} 
+      />
     </div>
   );
 };

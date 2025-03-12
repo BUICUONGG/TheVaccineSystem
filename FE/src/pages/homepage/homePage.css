@@ -839,7 +839,7 @@ nav ul li button:hover {
 
 .back-to-top {
   position: fixed;
-  bottom: 20px;
+  bottom: 160px;
   left: 20px;
   background: #4a90e2;
   color: white;
@@ -873,7 +873,7 @@ nav ul li button:hover {
 
 @media (max-width: 768px) {
   .back-to-top {
-    bottom: 90px;
+    bottom: 140px;
     left: 20px;
     width: 45px;
     height: 45px;
@@ -1538,5 +1538,103 @@ nav ul li button:hover {
   
   .blog-section .section-title {
     font-size: 28px;
+  }
+}
+
+/* Feedback Floating Button */
+.feedback-floating-button {
+  position: fixed;
+  bottom: 100px;
+  right: 20px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 50px;
+  padding: 10px 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  z-index: 999;
+  transition: all 0.3s ease;
+}
+
+.feedback-floating-button:hover {
+  background-color: #45a049;
+  transform: translateY(-3px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+}
+
+.feedback-floating-button svg {
+  font-size: 18px;
+}
+
+.feedback-floating-button span {
+  font-weight: 500;
+}
+
+@media (max-width: 768px) {
+  .feedback-floating-button {
+    padding: 8px 16px;
+    bottom: 80px;
+  }
+}
+
+/* User Dropdown Styles */
+.user-dropdown {
+  display: flex;
+  align-items: center;
+}
+
+.user-dropdown a {
+  display: flex;
+  align-items: center;
+  padding: 5px 10px;
+  border-radius: 4px;
+  transition: background-color 0.3s;
+}
+
+.user-dropdown a:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+.username {
+  margin: 0 5px;
+  font-weight: 500;
+}
+
+/* Customize Ant Design dropdown */
+.ant-dropdown-menu {
+  border-radius: 8px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+}
+
+.ant-dropdown-menu-item {
+  padding: 10px 16px;
+  transition: all 0.3s;
+}
+
+.ant-dropdown-menu-item:hover {
+  background-color: #f0f7ff;
+}
+
+.ant-dropdown-menu-item .anticon {
+  margin-right: 8px;
+}
+
+.ant-avatar {
+  background-color: #1890ff;
+  cursor: pointer;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .username {
+    display: none;
+  }
+  
+  .user-dropdown a {
+    padding: 5px;
   }
 }

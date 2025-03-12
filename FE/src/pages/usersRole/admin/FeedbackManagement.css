@@ -1,0 +1,81 @@
+.feedback-management {
+  padding: 20px;
+}
+
+.page-title {
+  font-size: 24px;
+  margin-bottom: 24px;
+  color: #1a3353;
+  border-bottom: 2px solid #f0f0f0;
+  padding-bottom: 12px;
+}
+
+.stats-container {
+  margin-bottom: 24px;
+}
+
+.stat-card {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.09);
+  border-radius: 8px;
+  transition: all 0.3s;
+}
+
+.stat-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.rating-card .ant-statistic-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.average-rate {
+  margin-top: 10px;
+  font-size: 16px;
+}
+
+.star-percentage {
+  margin-top: 8px;
+  text-align: center;
+  font-size: 14px;
+  color: #faad14;
+  font-weight: bold;
+}
+
+.search-container {
+  margin-bottom: 24px;
+}
+
+.search-input {
+  max-width: 600px;
+}
+
+.feedback-table {
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.09);
+}
+
+.feedback-table .ant-table-thead > tr > th {
+  background-color: #f7f7f7;
+  color: #1a3353;
+  font-weight: 600;
+}
+
+.feedback-table .ant-table-tbody > tr:hover > td {
+  background-color: #f0f7ff;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .page-title {
+    font-size: 20px;
+  }
+  
+  .search-input {
+    max-width: 100%;
+  }
+} 

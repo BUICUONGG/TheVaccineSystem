@@ -72,18 +72,18 @@
 }
 
 .login-btn {
-  background: #87ceeb !important;
-  color: white !important;
+  background: #87ceeb ;
+  color: white ;
 }
 
 .register-btn {
-  background: #ff4d4d !important;
-  color: white !important;
+  background: #ff4d4d ;
+  color: white ;
 }
 
 .logout-btn {
-  background: #dc3545 !important;
-  color: white !important;
+  background: #dc3545 ;
+  color: white ;
 }
 
 /* Navigation bar styles */
@@ -428,12 +428,12 @@
 
 /* Thêm styles cho DatePicker */
 .date-picker {
-  width: 100% !important;
+  width: 100% ;
   height: 40px;
   font-size: 16px;
 }
 
-.ant-picker-input > input {
+.ant-picker-input > {
   font-size: 15px;
 }
 

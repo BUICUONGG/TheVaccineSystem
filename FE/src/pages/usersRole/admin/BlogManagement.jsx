@@ -62,11 +62,11 @@ const BlogManagement = () => {
     try {
       await axiosInstance.post(
         "/blogs/createBlog",
-        {
-          ...values,
-          userId: "67b53056af240f16ecf58a5c", // Thay thế bằng userId thực tế
-          status: "active",
-        },
+        // {
+        //   ...values,
+        //   userId: "67b53056af240f16ecf58a5c", // Thay thế bằng userId thực tế
+        //   status: "active",
+        // },
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("accesstoken")}`,
@@ -198,18 +198,18 @@ const BlogManagement = () => {
       key: "author",
       render: (text) => text || "Chưa cập nhật",
     },
-    {
-      title: "Views",
-      dataIndex: "views",
-      key: "views",
-      width: 100,
-    },
-    {
-      title: "Likes",
-      dataIndex: "likes",
-      key: "likes",
-      width: 100,
-    },
+    // {
+    //   title: "Views",
+    //   dataIndex: "views",
+    //   key: "views",
+    //   width: 100,
+    // },
+    // {
+    //   title: "Likes",
+    //   dataIndex: "likes",
+    //   key: "likes",
+    //   width: 100,
+    // },
     {
       title: "Trạng thái",
       dataIndex: "status",
