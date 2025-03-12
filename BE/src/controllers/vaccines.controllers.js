@@ -74,3 +74,13 @@ export const showVaccineAndImportController = async (req, res) => {
     });
   }
 };
+
+export const getOneVaccineByIdController = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const result = await vaccineService.getOneVaccineById(id);
+    res.status(200).json(result);
+  } catch (error) {
+    res.status(500).json(error.message);
+  }
+};
