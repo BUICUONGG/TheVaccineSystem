@@ -136,12 +136,9 @@ const HomePage = () => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("accesstoken");
-    localStorage.removeItem("role");
-    localStorage.removeItem("userId");
-    localStorage.removeItem("cusId");
-    // localStorage.removeItem("currentCusId");
-    // isCookie.removeItem("refreshToken");
+    // Clear all localStorage items
+    localStorage.clear();
+    // Update state
     setIsLoggedIn(false);
     setUserRole("");
     navigate("/thank-you");

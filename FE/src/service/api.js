@@ -38,7 +38,8 @@ axiosInstance.interceptors.response.use(
 
     const originalRequest = error.config;
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    // Only attempt to refresh token if we're not on the login page and there was a previous token
+    if (error.response?.status === 401 && !originalRequest._retry && localStorage.getItem("accesstoken")) {
       originalRequest._retry = true;
       console.log("Token expired, trying to refresh...");
 

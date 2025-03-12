@@ -7,6 +7,9 @@ const Thank = () => {
   const [fadeOut, setFadeOut] = useState(false);
 
   useEffect(() => {
+    // Ensure localStorage is completely cleared
+    localStorage.clear();
+    
     // Start fade out after 2.5 seconds
     const fadeTimer = setTimeout(() => {
       setFadeOut(true);
