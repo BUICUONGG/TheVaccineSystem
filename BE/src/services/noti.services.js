@@ -5,8 +5,9 @@ class NotiService {
   async createNoti(data) {
     try {
       const noti = new Notification(data);
+
       // Tạo document thông báo
-      const result = await connectToDatabase.notifications.insertOne(noti);
+      await connectToDatabase.notifications.insertOne(noti);
       return { ...data };
     } catch (error) {
       console.log("Lỗi khi tạo thông báo:", error.message);

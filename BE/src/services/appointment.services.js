@@ -48,13 +48,14 @@ class AppointmentService {
       });
       await aptLe.validate();
       // await aptLevalidate();
-      await notiService.createNoti({
+      const noti = await notiService.createNoti({
         cusId: data.cusId,
-        apt: data._id,
+        apt: data.vaccineId,
         aptModel: "AppointmentLe",
         message: `Lịch hẹn Le của bạn đã cập nhật trạng thái chờ duyệt`,
         createdAt: new Date().toLocaleDateString("vi-VN"),
       });
+
       const result = await connectToDatabase.appointmentLes.insertOne(aptLe);
       return { _id: result.insertedId, ...data };
     } catch (error) {
@@ -261,7 +262,7 @@ class AppointmentService {
         finalChildId = saveChild.insertedId;
       }
 
-      await notiService.createNoti({
+      const notiGoi = await notiService.createNoti({
         cusId: data.cusId,
         apt: data.vaccinePakageId,
         aptModel: "AppointmentGoi",
