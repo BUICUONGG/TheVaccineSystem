@@ -26,6 +26,7 @@ import ProfileHistory from "./pages/homepage/profile/components/ProfileHistory";
 import Profile from "./pages/homepage/profile/Profile";
 import ProfileAccount from "./pages/homepage/profile/components/ProfileAccount";
 import FeedbackManagement from "./pages/usersRole/admin/FeedbackManagement";
+import StaffsPage from "./pages/usersRole/admin/staffsPage";
 
 const router = createBrowserRouter([
   {
@@ -111,6 +112,10 @@ const router = createBrowserRouter([
       {
         path: "customers",
         element: <AllCustomerPage />,
+      },
+      {
+        path: "staffs",
+        element: <StaffsPage />,
       },
       {
         path: "blog",

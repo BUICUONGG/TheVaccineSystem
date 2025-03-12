@@ -1638,3 +1638,211 @@ nav ul li button:hover {
     padding: 5px;
   }
 }
+
+/* Customer Feedback Section */
+.feedback-section {
+  padding: 60px 0;
+  background-color: #f8f9fa;
+  position: relative;
+  margin-top: 2rem;
+}
+
+.feedback-section:before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #4a90e2, #67b26f);
+}
+
+.feedback-section h2 {
+  text-align: center;
+  color: #4a90e2;
+  font-size: 24px;
+  margin-bottom: 2rem;
+}
+
+.feedback-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.feedback-carousel {
+  margin-top: 40px;
+}
+
+.feedback-carousel .slick-dots li button {
+  background-color: #d9d9d9;
+  border-radius: 50%;
+  width: 10px;
+  height: 10px;
+}
+
+.feedback-carousel .slick-dots li.slick-active button {
+  background-color: #4a90e2;
+  width: 12px;
+  height: 12px;
+}
+
+.feedback-slide {
+  padding: 10px;
+}
+
+.feedback-row {
+  display: flex;
+  gap: 30px;
+  justify-content: center;
+}
+
+.feedback-card {
+  flex: 1;
+  max-width: 500px;
+  min-height: 250px;
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+  padding: 25px;
+  transition: transform 0.3s, box-shadow 0.3s;
+  margin: 10px;
+}
+
+.feedback-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+}
+
+.feedback-card-inner {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.feedback-quote {
+  position: relative;
+  flex: 1;
+  padding: 10px 0;
+  margin-bottom: 20px;
+}
+
+.feedback-quote p {
+  font-size: 16px;
+  line-height: 1.6;
+  color: #555;
+  font-style: italic;
+  text-align: center;
+}
+
+.quote-icon {
+  color: #4a90e2;
+  opacity: 0.3;
+  font-size: 20px;
+}
+
+.quote-icon.left {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.quote-icon.right {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+}
+
+.feedback-rating {
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.feedback-rating .ant-rate {
+  color: #faad14;
+  font-size: 18px;
+}
+
+.feedback-customer {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  border-top: 1px solid #f0f0f0;
+  padding-top: 15px;
+}
+
+.feedback-customer-info {
+  flex: 1;
+}
+
+.feedback-customer-info h4 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+}
+
+.feedback-customer-info p {
+  margin: 0;
+  font-size: 14px;
+  color: #888;
+}
+
+.no-feedback {
+  text-align: center;
+  padding: 40px 0;
+  color: #888;
+}
+
+.feedback-action {
+  text-align: center;
+  margin-top: 30px;
+}
+
+.feedback-button {
+  background-color: #4a90e2;
+  color: white;
+  border: none;
+  border-radius: 50px;
+  padding: 12px 25px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s;
+  box-shadow: 0 4px 6px rgba(74, 144, 226, 0.2);
+}
+
+.feedback-button:hover {
+  background-color: #3a7bc8;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(74, 144, 226, 0.3);
+}
+
+.loading-spinner {
+  text-align: center;
+  padding: 40px 0;
+  color: #888;
+}
+
+/* Responsive adjustments for feedback section */
+@media (max-width: 768px) {
+  .feedback-row {
+    flex-direction: column;
+  }
+  
+  .feedback-card {
+    max-width: 100%;
+  }
+  
+  .feedback-quote p {
+    font-size: 14px;
+  }
+  
+  .feedback-button {
+    padding: 10px 20px;
+    font-size: 14px;
+  }
+}
