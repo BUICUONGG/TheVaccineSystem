@@ -44,17 +44,36 @@ const buttonStyles = `
     cursor: not-allowed;
   }
 
+  .complete-button {
+    background-color: #52c41a ;
+    border-color: #52c41a ;
+    margin-right: 8px;
+    transition: all 0.3s ease;
+    box-shadow: 0 3px 1px -2px rgba(0,0,0,0.2), 0 2px 2px 0 rgba(0,0,0,0.14), 0 1px 5px 0 rgba(0,0,0,0.12);
+  }
+  
+  .complete-button:hover:not(:disabled) {
+    background-color: #389e0d ;
+    border-color: #389e0d ;
+    box-shadow: 0 2px 4px -1px rgba(0,0,0,0.2), 0 4px 5px 0 rgba(0,0,0,0.14), 0 1px 10px 0 rgba(0,0,0,0.12);
+  }
+  
+  .complete-button:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+
   .cancel-button {
-    background-color: #f44336 !important;
-    border-color: #f44336 !important;
-    color: white !important;
+    background-color: #f44336 ;
+    border-color: #f44336 ;
+    color: white ;
     transition: all 0.3s ease;
     box-shadow: 0 3px 1px -2px rgba(0,0,0,0.2), 0 2px 2px 0 rgba(0,0,0,0.14), 0 1px 5px 0 rgba(0,0,0,0.12);
   }
   
   .cancel-button:hover:not(:disabled) {
-    background-color: #d32f2f !important;
-    border-color: #d32f2f !important;
+    background-color: #d32f2f ;
+    border-color: #d32f2f !;
     box-shadow: 0 2px 4px -1px rgba(0,0,0,0.2), 0 4px 5px 0 rgba(0,0,0,0.14), 0 1px 10px 0 rgba(0,0,0,0.12);
   }
   
@@ -427,23 +446,30 @@ const AppointmentManagement = () => {
       key: "action",
       render: (_, record) => (
         <div className="action-buttons">
-          <Button
-            type="primary"
-            className="approve-button"
-            onClick={() => handleStatusChange(record._id, "completed", false)}
-            disabled={
-              record.status === "incomplete" || record.status === "completed"
-            }
-          >
-            Duyệt
-          </Button>
+          {record.status === "pending" ? (
+            <Button
+              type="primary"
+              className="approve-button"
+              onClick={() => handleStatusChange(record._id, "approve", false)}
+              disabled={record.status === "incomplete" || record.status === "completed"}
+            >
+              Duyệt
+            </Button>
+          ) : record.status === "approve" ? (
+            <Button
+              type="primary"
+              className="complete-button"
+              onClick={() => handleStatusChange(record._id, "completed", false)}
+              disabled={record.status === "incomplete" || record.status === "completed"}
+            >
+              Hoàn thành
+            </Button>
+          ) : null}
           <Button
             danger
             className="cancel-button"
             onClick={() => handleStatusChange(record._id, "incomplete", false)}
-            disabled={
-              record.status === "incomplete" || record.status === "completed"
-            }
+            disabled={record.status === "incomplete" || record.status === "completed"}
           >
             Hủy Đơn
           </Button>
@@ -804,7 +830,7 @@ const AppointmentManagement = () => {
               selectedAppointment.doseSchedule &&
               selectedAppointment.doseSchedule.length > 0 && (
                 <div className="dose-schedule-section">
-                  <Title level={5} style={{ marginTop: 20, marginBottom: 10 }}>
+                  <Title level={5}>
                     Lịch tiêm các mũi
                   </Title>
                   <List
@@ -825,14 +851,7 @@ const AppointmentManagement = () => {
                           <div className="dose-detail-row">
                             <Text strong>Ngày tiêm:</Text> {item.date}
                           </div>
-                          <div
-                            className="dose-detail-row"
-                            style={{
-                              marginTop: 8,
-                              display: "flex",
-                              alignItems: "center",
-                            }}
-                          >
+                          <div className="dose-detail-row dose-actions">
                             <Button
                               type={
                                 item.status === "completed"
@@ -858,16 +877,11 @@ const AppointmentManagement = () => {
                                   newStatus === "completed"
                                 );
                               }}
-                              style={{
-                                backgroundColor:
-                                  item.status === "completed"
-                                    ? "#52c41a"
-                                    : undefined,
-                                borderColor:
-                                  item.status === "completed"
-                                    ? "#52c41a"
-                                    : undefined,
-                              }}
+                              className={
+                                item.status === "completed"
+                                  ? "complete-dose-button"
+                                  : "mark-complete-button"
+                              }
                             >
                               {item.status === "completed"
                                 ? "Đã hoàn thành"

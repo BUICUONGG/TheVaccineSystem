@@ -18,6 +18,7 @@
 .action-buttons {
   display: flex;
   align-items: center;
+  justify-content: flex-start;
 }
 
 .id-column {
@@ -47,4 +48,120 @@
 
 .detail-value {
   flex: 1;
+}
+
+/* Styles for buttons */
+.approve-button {
+  background-color: #1976d2 !important;
+  border-color: #1976d2 !important;
+  margin-right: 8px;
+  transition: all 0.3s ease;
+  box-shadow: 0 3px 1px -2px rgba(0,0,0,0.2), 0 2px 2px 0 rgba(0,0,0,0.14), 0 1px 5px 0 rgba(0,0,0,0.12);
+}
+
+.approve-button:hover:not(:disabled) {
+  background-color: #1565c0 !important;
+  border-color: #1565c0 !important;
+  box-shadow: 0 2px 4px -1px rgba(0,0,0,0.2), 0 4px 5px 0 rgba(0,0,0,0.14), 0 1px 10px 0 rgba(0,0,0,0.12);
+}
+
+.approve-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.complete-button {
+  background-color: #52c41a !important;
+  border-color: #52c41a !important;
+  margin-right: 8px;
+  transition: all 0.3s ease;
+  box-shadow: 0 3px 1px -2px rgba(0,0,0,0.2), 0 2px 2px 0 rgba(0,0,0,0.14), 0 1px 5px 0 rgba(0,0,0,0.12);
+}
+
+.complete-button:hover:not(:disabled) {
+  background-color: #389e0d !important;
+  border-color: #389e0d !important;
+  box-shadow: 0 2px 4px -1px rgba(0,0,0,0.2), 0 4px 5px 0 rgba(0,0,0,0.14), 0 1px 10px 0 rgba(0,0,0,0.12);
+}
+
+.complete-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.cancel-button {
+  background-color: #f44336 !important;
+  border-color: #f44336 !important;
+  color: white !important;
+  transition: all 0.3s ease;
+  box-shadow: 0 3px 1px -2px rgba(0,0,0,0.2), 0 2px 2px 0 rgba(0,0,0,0.14), 0 1px 5px 0 rgba(0,0,0,0.12);
+}
+
+.cancel-button:hover:not(:disabled) {
+  background-color: #d32f2f !important;
+  border-color: #d32f2f !important;
+  box-shadow: 0 2px 4px -1px rgba(0,0,0,0.2), 0 4px 5px 0 rgba(0,0,0,0.14), 0 1px 10px 0 rgba(0,0,0,0.12);
+}
+
+.cancel-button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* Dose schedule styles */
+.dose-schedule-section {
+  margin-top: 20px;
+  border-top: 1px solid #f0f0f0;
+  padding-top: 15px;
+}
+
+.dose-detail-row {
+  margin-bottom: 8px;
+}
+
+.dose-detail-row:last-child {
+  margin-bottom: 0;
+}
+
+.dose-actions {
+  display: flex;
+  align-items: center;
+  margin-top: 8px;
+}
+
+.complete-dose-button {
+  background-color: #52c41a !important;
+  border-color: #52c41a !important;
+}
+
+.mark-complete-button {
+  background-color: #ffffff;
+  border-color: #d9d9d9;
+}
+
+.loading-details {
+  text-align: center;
+  padding: 20px;
+  color: #999;
+  font-style: italic;
+}
+
+/* Modal styles */
+.ant-modal-content {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.ant-modal-header {
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #eaeaea;
+}
+
+.ant-modal-title {
+  color: #1890ff;
+  font-weight: 600;
+}
+
+.ant-modal-footer {
+  border-top: 1px solid #eaeaea;
 } 
