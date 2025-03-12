@@ -24,6 +24,26 @@ const NotificationIcon = ({ cusId: propsCusId }) => {
     }
   }, [propsCusId]);
 
+  // Hàm để lấy danh sách thông báo đã đọc từ localStorage
+  const getReadNotifications = useCallback(() => {
+    try {
+      const readNotificationsStr = localStorage.getItem(`readNotifications_${cusId}`);
+      return readNotificationsStr ? JSON.parse(readNotificationsStr) : [];
+    } catch (error) {
+      console.error("Lỗi khi đọc thông báo đã đọc từ localStorage:", error);
+      return [];
+    }
+  }, [cusId]);
+
+  // Hàm để lưu danh sách thông báo đã đọc vào localStorage
+  const saveReadNotifications = useCallback((notificationIds) => {
+    try {
+      localStorage.setItem(`readNotifications_${cusId}`, JSON.stringify(notificationIds));
+    } catch (error) {
+      console.error("Lỗi khi lưu thông báo đã đọc vào localStorage:", error);
+    }
+  }, [cusId]);
+
   // Sử dụng useCallback để tránh tạo lại hàm fetchNotifications mỗi khi component re-render
   const fetchNotifications = useCallback(async () => {
     if (!cusId) {
@@ -48,24 +68,31 @@ const NotificationIcon = ({ cusId: propsCusId }) => {
       
       console.log("Kết quả API thông báo:", response);
       
+      // Lấy danh sách ID thông báo đã đọc từ localStorage
+      const readNotificationIds = getReadNotifications();
+      
       // Xử lý dữ liệu thông báo
       if (response.data && Array.isArray(response.data)) {
         console.log("Đã nhận được thông báo:", response.data.length);
         console.log("Dữ liệu thông báo:", JSON.stringify(response.data));
         
         if (response.data.length > 0) {
-          // Chỉ lấy message và id từ mỗi thông báo, thêm trạng thái đã đọc
+          // Chỉ lấy message và id từ mỗi thông báo, kiểm tra trạng thái đã đọc từ localStorage
           const simplifiedNotifications = response.data.map(noti => ({
             id: noti._id || 'unknown',
             message: noti.message || 'Không có nội dung',
-            read: false // Mặc định là chưa đọc
+            read: readNotificationIds.includes(noti._id) // Kiểm tra xem thông báo đã được đọc chưa
           }));
           
+          // Lọc ra các thông báo chưa đọc
+          const unreadNotifications = simplifiedNotifications.filter(noti => !noti.read);
+          
           console.log("Thông báo đã xử lý:", simplifiedNotifications);
+          console.log("Thông báo chưa đọc:", unreadNotifications.length);
           
           // Sắp xếp thông báo theo thời gian tạo (mới nhất lên đầu)
           setNotifications(simplifiedNotifications);
-          setUnreadCount(simplifiedNotifications.length);
+          setUnreadCount(unreadNotifications.length);
           console.log("Đã cập nhật thông báo:", simplifiedNotifications.length);
         } else {
           console.log("Mảng thông báo rỗng");
@@ -109,7 +136,7 @@ const NotificationIcon = ({ cusId: propsCusId }) => {
     } finally {
       setLoading(false);
     }
-  }, [cusId]);
+  }, [cusId, getReadNotifications]);
 
   // Gọi API khi component mount hoặc cusId thay đổi
   useEffect(() => {
@@ -141,6 +168,8 @@ const NotificationIcon = ({ cusId: propsCusId }) => {
 
   // Xử lý khi click vào thông báo
   const handleNotificationClick = (id) => {
+    if (id === 'default' || id === 'error') return; // Không xử lý cho thông báo mặc định hoặc lỗi
+    
     // Đánh dấu thông báo đã đọc
     const updatedNotifications = notifications.map(noti => 
       noti.id === id ? { ...noti, read: true } : noti
@@ -150,6 +179,13 @@ const NotificationIcon = ({ cusId: propsCusId }) => {
     // Cập nhật số lượng thông báo chưa đọc
     const unreadNotifications = updatedNotifications.filter(noti => !noti.read);
     setUnreadCount(unreadNotifications.length);
+    
+    // Lưu ID thông báo đã đọc vào localStorage
+    const readNotificationIds = getReadNotifications();
+    if (!readNotificationIds.includes(id)) {
+      readNotificationIds.push(id);
+      saveReadNotifications(readNotificationIds);
+    }
   };
 
   // Xử lý khi mở/đóng dropdown
@@ -161,6 +197,38 @@ const NotificationIcon = ({ cusId: propsCusId }) => {
       const allReadNotifications = notifications.map(noti => ({ ...noti, read: true }));
       setNotifications(allReadNotifications);
       setUnreadCount(0);
+      
+      // Lưu tất cả ID thông báo vào localStorage
+      const readNotificationIds = getReadNotifications();
+      const newReadIds = notifications
+        .filter(noti => !noti.read && noti.id !== 'default' && noti.id !== 'error')
+        .map(noti => noti.id);
+      
+      if (newReadIds.length > 0) {
+        const updatedReadIds = [...new Set([...readNotificationIds, ...newReadIds])];
+        saveReadNotifications(updatedReadIds);
+      }
+    }
+  };
+
+  // Xử lý đánh dấu tất cả thông báo đã đọc
+  const handleMarkAllAsRead = () => {
+    if (notifications.length === 0 || notifications.every(noti => noti.read)) return;
+    
+    // Đánh dấu tất cả thông báo đã đọc
+    const allReadNotifications = notifications.map(noti => ({ ...noti, read: true }));
+    setNotifications(allReadNotifications);
+    setUnreadCount(0);
+    
+    // Lưu tất cả ID thông báo vào localStorage
+    const readNotificationIds = getReadNotifications();
+    const newReadIds = notifications
+      .filter(noti => !noti.read && noti.id !== 'default' && noti.id !== 'error')
+      .map(noti => noti.id);
+    
+    if (newReadIds.length > 0) {
+      const updatedReadIds = [...new Set([...readNotificationIds, ...newReadIds])];
+      saveReadNotifications(updatedReadIds);
     }
   };
 
@@ -168,13 +236,23 @@ const NotificationIcon = ({ cusId: propsCusId }) => {
     <div className="notification-dropdown">
       <div className="notification-header">
         <Typography.Title level={5} style={{ margin: 0 }}>Thông báo</Typography.Title>
-        <Button 
-          type="text" 
-          icon={<ReloadOutlined />} 
-          onClick={handleRefresh}
-          loading={loading}
-          className="refresh-button"
-        />
+        <div className="notification-actions">
+          <Button 
+            type="text" 
+            size="small"
+            onClick={handleMarkAllAsRead}
+            disabled={notifications.length === 0 || notifications.every(noti => noti.read)}
+          >
+            Đánh dấu đã đọc tất cả
+          </Button>
+          <Button 
+            type="text" 
+            icon={<ReloadOutlined />} 
+            onClick={handleRefresh}
+            loading={loading}
+            className="refresh-button"
+          />
+        </div>
       </div>
       <List
         className="notification-list"
@@ -187,7 +265,7 @@ const NotificationIcon = ({ cusId: propsCusId }) => {
             onClick={() => handleNotificationClick(item.id)}
           >
             <div className="notification-content">
-              <Typography.Text strong>{item.message}</Typography.Text>
+              <Typography.Text strong={!item.read}>{item.message}</Typography.Text>
             </div>
           </List.Item>
         )}

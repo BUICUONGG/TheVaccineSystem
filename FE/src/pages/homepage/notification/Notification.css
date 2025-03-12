@@ -27,6 +27,18 @@
   align-items: center;
 }
 
+.notification-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.notification-actions button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .refresh-button {
   padding: 4px;
   border: none;
@@ -47,8 +59,9 @@
 .notification-item {
   padding: 12px 16px;
   cursor: pointer;
-  transition: background-color 0.3s;
+  transition: all 0.3s;
   border-bottom: 1px solid #f5f5f5;
+  position: relative;
 }
 
 .notification-item:hover {
@@ -62,7 +75,16 @@
 /* Style cho thông báo chưa đọc */
 .notification-item.unread {
   background-color: #e6f7ff;
-  font-weight: bold;
+}
+
+.notification-item.unread:before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background-color: #1890ff;
 }
 
 .notification-item.unread:hover {
@@ -72,7 +94,11 @@
 /* Style cho thông báo đã đọc */
 .notification-item.read {
   background-color: white;
-  font-weight: normal;
+  opacity: 0.8;
+}
+
+.notification-item.read .notification-content {
+  color: #8c8c8c;
 }
 
 /* Style cho nội dung thông báo */
@@ -110,4 +136,26 @@
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+/* Badge styling */
+.notification-trigger .ant-badge-count {
+  box-shadow: 0 0 0 1px #fff;
+}
+
+/* Animation for new notifications */
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(24, 144, 255, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(24, 144, 255, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(24, 144, 255, 0);
+  }
+}
+
+.notification-item.unread {
+  animation: pulse 2s infinite;
 }

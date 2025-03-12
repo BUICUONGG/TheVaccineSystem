@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
-import { FaSyringe, FaBook, FaUserCheck, FaMoneyBillWave, FaBaby, FaChild, FaChevronLeft, FaChevronRight, FaCommentAlt } from "react-icons/fa";
-import { EyeOutlined, HeartOutlined, HeartFilled, CommentOutlined, ShareAltOutlined, UserOutlined, LogoutOutlined, DownOutlined } from "@ant-design/icons";
-import { Dropdown, Space, Avatar, Menu } from "antd";
+import { FaSyringe, FaBook, FaUserCheck, FaMoneyBillWave, FaBaby, FaChild, FaChevronLeft, FaChevronRight, FaCommentAlt, FaQuoteLeft, FaQuoteRight } from "react-icons/fa";
+import { EyeOutlined, HeartOutlined, HeartFilled, CommentOutlined, ShareAltOutlined, UserOutlined, LogoutOutlined, DownOutlined, StarFilled } from "@ant-design/icons";
+import { Dropdown, Space, Avatar, Menu, Rate, Carousel } from "antd";
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import "./homePage.css";
 import { useNavigate, Link } from "react-router-dom";
@@ -66,6 +66,9 @@ const HomePage = () => {
       buttonText: "Tư Vấn Ngay",
     },
   ];
+
+  const [customerFeedbacks, setCustomerFeedbacks] = useState([]);
+  const [loadingFeedbacks, setLoadingFeedbacks] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem("accesstoken");
@@ -413,6 +416,53 @@ const HomePage = () => {
     }
   };
 
+  // Add a new useEffect to fetch customer feedbacks
+  useEffect(() => {
+    fetchCustomerFeedbacks();
+  }, []);
+
+  // Function to fetch customer feedbacks
+  const fetchCustomerFeedbacks = async () => {
+    try {
+      setLoadingFeedbacks(true);
+      const response = await axiosInstance.get("/feedback/getAllFeedback");
+      
+      if (response.status === 200 && Array.isArray(response.data)) {
+        // Sort by rating (highest first) and then take top 6
+        const sortedFeedbacks = response.data
+          .sort((a, b) => b.rating - a.rating)
+          .slice(0, 6);
+        
+        // Fetch customer details for each feedback
+        const feedbacksWithCustomerDetails = await Promise.all(
+          sortedFeedbacks.map(async (feedback) => {
+            try {
+              const customerResponse = await axiosInstance.get(`/customer/getCustomerById/${feedback.cusId}`);
+              return {
+                ...feedback,
+                customerName: customerResponse.data.customerName || customerResponse.data.username || "Khách hàng",
+                customerAvatar: null // You can add avatar URL if available
+              };
+            } catch (error) {
+              console.error("Error fetching customer details:", error);
+              return {
+                ...feedback,
+                customerName: "Khách hàng",
+                customerAvatar: null
+              };
+            }
+          })
+        );
+        
+        setCustomerFeedbacks(feedbacksWithCustomerDetails);
+      }
+    } catch (error) {
+      console.error("Error fetching customer feedbacks:", error);
+    } finally {
+      setLoadingFeedbacks(false);
+    }
+  };
+
   return (
     <div className="homepage">
       <nav>
@@ -718,6 +768,76 @@ const HomePage = () => {
                 Xem tất cả bài viết
               </Link>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Add Customer Feedback Section */}
+      <section className="feedback-section">
+        <div className="container">
+          <h2>ĐÁNH GIÁ TỪ KHÁCH HÀNG</h2>
+          <div className="feedback-container">
+            {loadingFeedbacks ? (
+              <div className="loading-spinner">Đang tải đánh giá...</div>
+            ) : customerFeedbacks.length > 0 ? (
+              <Carousel 
+                autoplay 
+                dots={true}
+                autoplaySpeed={5000}
+                className="feedback-carousel"
+              >
+                {/* Group feedbacks in pairs for desktop view */}
+                {Array(Math.ceil(customerFeedbacks.length / 2)).fill().map((_, index) => (
+                  <div key={index} className="feedback-slide">
+                    <div className="feedback-row">
+                      {customerFeedbacks.slice(index * 2, index * 2 + 2).map((feedback) => (
+                        <div key={feedback._id} className="feedback-card">
+                          <div className="feedback-card-inner">
+                            <div className="feedback-quote">
+                              <FaQuoteLeft className="quote-icon left" />
+                              <p>{feedback.comment || "Dịch vụ rất tốt!"}</p>
+                              <FaQuoteRight className="quote-icon right" />
+                            </div>
+                            <div className="feedback-rating">
+                              <Rate disabled defaultValue={feedback.rating} />
+                            </div>
+                            <div className="feedback-customer">
+                              <Avatar 
+                                size={50} 
+                                icon={<UserOutlined />} 
+                                src={feedback.customerAvatar}
+                                style={{ backgroundColor: '#1890ff' }}
+                              />
+                              <div className="feedback-customer-info">
+                                <h4>{feedback.customerName}</h4>
+                                <p>Khách hàng</p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </Carousel>
+            ) : (
+              <div className="no-feedback">
+                <p>Chưa có đánh giá nào.</p>
+                {isLoggedIn && userRole === "customer" && (
+                  <button className="feedback-button" onClick={openFeedbackForm}>
+                    Hãy là người đầu tiên đánh giá
+                  </button>
+                )}
+              </div>
+            )}
+            
+            {isLoggedIn && userRole === "customer" && customerFeedbacks.length > 0 && (
+              <div className="feedback-action">
+                <button className="feedback-button" onClick={openFeedbackForm}>
+                  <FaCommentAlt /> Thêm đánh giá của bạn
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </section>
