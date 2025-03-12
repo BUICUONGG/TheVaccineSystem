@@ -68,14 +68,3 @@
 .feedback-table .ant-table-tbody > tr:hover > td {
   background-color: #f0f7ff;
 }
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
-  .page-title {
-    font-size: 20px;
-  }
-  
-  .search-input {
-    max-width: 100%;
-  }
-} 

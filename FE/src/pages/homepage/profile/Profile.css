@@ -170,29 +170,6 @@
   color: white;
 }
 
-/* Responsive design */
-@media (max-width: 768px) {
-  .profile-container {
-    margin: 20px;
-    padding: 25px;
-  }
-
-  .form-row {
-    grid-template-columns: 1fr;
-    gap: 15px;
-  }
-
-  .profile-title {
-    font-size: 24px;
-    margin-bottom: 30px;
-  }
-
-  .update-btn {
-    width: 100%;
-    padding: 12px 20px;
-  }
-}
-
 /* Additional animations */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(20px); }
