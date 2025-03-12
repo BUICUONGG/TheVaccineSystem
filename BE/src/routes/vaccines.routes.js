@@ -5,7 +5,6 @@ import {
   updateVaccineController,
   deleteVaccineController,
   showVaccineAndImportController,
-  getOneVaccineById,
   getOneVaccineByIdController,
 } from "../controllers/vaccines.controllers.js";
 import { validateAccessToken } from "../middlewares/user.middleware.js";
