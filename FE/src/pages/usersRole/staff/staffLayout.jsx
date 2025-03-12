@@ -54,7 +54,7 @@ const StaffLayout = () => {
     <div className="staff-layout">
       <div className="staff-sidebar">
         <div className="staff-sidebar-info">
-          <div className="staff-sidebar-icon">👤</div>
+          <div className="staff-sidebar-icon"></div>
           <span className="staff-sidebar-name">{staffName}</span>
         </div>
 

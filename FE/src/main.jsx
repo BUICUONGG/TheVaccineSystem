@@ -14,7 +14,7 @@ import BlogList from "./pages/blog/BlogList";
 import BlogManagement from "./pages/usersRole/admin/BlogManagement";
 import NewsList from "./pages/news/NewsList";
 import NewsManagement from "./pages/usersRole/admin/NewsManagement";
-import OverviewPage from "./pages/usersRole/admin/overviewPage";
+import DashboardPage from "./pages/usersRole/admin/dashboardPage";
 import RegisterInjection from "./pages/homepage/registeInjection/registerInjection";
 import ForgotPassword from "./pages/login/forgotPassword";
 import Welcome from "./pages/welcome/Welcome";
@@ -95,7 +95,7 @@ const router = createBrowserRouter([
     children: [
       {
         path: "",
-        element: <OverviewPage />,
+        element: <DashboardPage />,
       },
       {
         path: "accounts",

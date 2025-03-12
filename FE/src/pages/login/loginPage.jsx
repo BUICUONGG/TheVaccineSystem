@@ -47,6 +47,9 @@ const LoginPage = () => {
         localStorage.setItem("accesstoken", response.data.accesstoken);
         localStorage.setItem("userId", response.data.userId);
         localStorage.setItem("cusId", response.data.cusId);
+        // Lưu username vào localStorage
+        localStorage.setItem("username", username);
+        
         // Decode token để lấy role
         const tokenParts = response.data.accesstoken.split(".");
         const payload = JSON.parse(atob(tokenParts[1]));

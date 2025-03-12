@@ -28,6 +28,11 @@
 
 .staff-sidebar-icon {
   font-size: 24px;
+  background-image: url("../icons/adminIcon.png");
+  background-size: cover;
+  background-position: center;
+  width: 30px;
+  height: 30px;
 }
 
 .staff-sidebar-name {

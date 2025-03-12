@@ -18,13 +18,11 @@ const BlogManagement = () => {
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
   const [editingBlog, setEditingBlog] = useState(null);
   const [form] = Form.useForm();
-  // const [editForm] = Form.useForm();
 
   useEffect(() => {
     fetchBlogs();
   }, []);
 
-  // Filter blogs when searchText changes
   useEffect(() => {
     const filtered = blogs.filter(
       (blog) =>
@@ -290,14 +288,6 @@ const BlogManagement = () => {
           Create New Blog
         </Button>
       </div>
-
-      <Search
-        placeholder="Search by title or author"
-        allowClear
-        enterButton
-        onSearch={handleSearch}
-        style={{ width: 300, marginBottom: 16 }}
-      />
 
       <Table
         dataSource={filteredBlogs}

@@ -14,7 +14,6 @@ import {
 } from "@ant-design/icons";
 import { Pie, Column } from "@ant-design/plots";
 import axiosInstance from "../../../service/api";
-import moment from "moment";
 
 const OverviewPage = () => {
   const [loading, setLoading] = useState(true);
@@ -377,7 +376,7 @@ const OverviewPage = () => {
     return (
       <div style={{ padding: "24px", textAlign: "center" }}>
         <Spin size="large" />
-        <p>Đang tải dữ liệu dashboard...</p>
+        <p>Đang tải dữ liệu thống kê...</p>
       </div>
     );
   }
@@ -481,7 +480,7 @@ const OverviewPage = () => {
         <Col xs={24} md={6}>
           <Card>
             <Statistic
-              title="Đang chờ duyệt"
+              title="Tổng lịch hẹn chờ duyệt"
               value={stats.appointmentStats.pending}
               valueStyle={{ color: '#faad14' }}
               prefix={<ClockCircleOutlined />}
@@ -498,7 +497,7 @@ const OverviewPage = () => {
         <Col xs={24} md={6}>
           <Card>
             <Statistic
-              title="Đã duyệt"
+              title= "Lịch hẹn đã duyệt"
               value={stats.appointmentStats.approved}
               valueStyle={{ color: '#1890ff' }}
               prefix={<CheckCircleOutlined />}
@@ -514,7 +513,7 @@ const OverviewPage = () => {
         <Col xs={24} md={6}>
           <Card>
             <Statistic
-              title="Hoàn thành"
+              title="Đơn Tiêm thành công"
               value={stats.appointmentStats.completed}
               valueStyle={{ color: '#52c41a' }}
               prefix={<CheckCircleOutlined />}
@@ -530,7 +529,7 @@ const OverviewPage = () => {
         <Col xs={24} md={6}>
           <Card>
             <Statistic
-              title="Đã hủy"
+              title="Đơn bị hủy"
               value={stats.appointmentStats.incomplete}
               valueStyle={{ color: '#f5222d' }}
               prefix={<CloseCircleOutlined />}

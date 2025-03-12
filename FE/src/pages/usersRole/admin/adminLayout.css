@@ -17,6 +17,31 @@
   padding: 20px 0;
 }
 
+/* Logo và tên dự án */
+.admin-logo-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 10px 15px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  margin-bottom: 10px;
+}
+
+.admin-logo {
+  width: 20px;
+  height: 20px;
+  /* object-fit: contain; */
+  margin-right:5px;
+}
+
+.admin-project-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: white;
+  /* margin: 0; */
+}
+
 .admin-sidebar-info {
   padding: 20px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
@@ -28,6 +53,13 @@
 
 .admin-sidebar-icon {
   font-size: 24px;
+  background-image: url("../icons/adminIcon.png");
+  background-size: cover;
+  background-position: center;
+  width: 30px;
+  height: 30px;
+  display: inline-block;
+  border-radius: 50%;
 }
 
 .admin-sidebar-name {

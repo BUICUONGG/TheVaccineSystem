@@ -1,13 +1,13 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation, Outlet } from "react-router-dom";
 import { Button } from "antd";
-import { LogoutOutlined } from "@ant-design/icons";
+import { LogoutOutlined, UserOutlined } from "@ant-design/icons";
 import "./adminLayout.css";
 
 const AdminLayout = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const [adminName, setAdminName] = useState("");
+  const [username, setUsername] = useState("");
 
   useEffect(() => {
     // Kiểm tra authentication và authorization
@@ -28,10 +28,10 @@ const AdminLayout = () => {
         return;
       }
 
-      // Nếu là admin, set tên admin
-      const username = localStorage.getItem("username");
-      if (username) {
-        setAdminName(`Admin: ${username}`);
+      // Lấy username từ localStorage
+      const storedUsername = localStorage.getItem("username");
+      if (storedUsername) {
+        setUsername(storedUsername);
       }
     } catch (error) {
       console.error("Invalid token:", error);
@@ -53,9 +53,14 @@ const AdminLayout = () => {
   return (
     <div className="admin-layout">
       <div className="admin-sidebar">
+        <div className="admin-logo-container">
+          <img src="/images/LogoHeader.png" alt="Diary Vaccine Logo" className="admin-logo" />
+          <h2 className="admin-project-name">Diary Vaccine</h2>
+        </div>
+        
         <div className="admin-sidebar-info">
-          <div className="admin-sidebar-icon">👤</div>
-          <span className="admin-sidebar-name">{adminName}</span>
+          <div className="admin-sidebar-icon"></div>
+          <span className="admin-sidebar-name">{username}</span>
         </div>
 
         <ul className="admin-menu">
@@ -69,53 +74,17 @@ const AdminLayout = () => {
                   : ""
               }
             >
-              Dashboard
+              Thống kê
             </Link>
           </li>
           <li className="admin-menu-item">
             <Link
-              to="/admin/accounts"
+              to="/staffLayout/appointments"
               className={
-                location.pathname === "/admin/accounts" ? "active" : ""
+                location.pathname === "/admin/appointments" ? "active" : ""
               }
             >
-              Accounts
-            </Link>
-          </li>
-          <li className="admin-menu-item">
-            <Link
-              to="/admin/customers"
-              className={
-                location.pathname === "/admin/customers" ? "active" : ""
-              }
-            >
-              Customers
-            </Link>
-          </li>
-          <li className="admin-menu-item">
-            <Link
-              to="/admin/staffs"
-              className={
-                location.pathname === "/admin/staffs" ? "active" : ""
-              }
-            >
-              Staffs
-            </Link>
-          </li>
-          <li className="admin-menu-item">
-            <Link
-              to="/admin/blog"
-              className={location.pathname === "/admin/blog" ? "active" : ""}
-            >
-              Blog
-            </Link>
-          </li>
-          <li className="admin-menu-item">
-            <Link
-              to="/admin/newsManagement"
-              className={location.pathname === "/admin/newsManagement" ? "active" : ""}
-            >
-              News
+              Lịch Hẹn
             </Link>
           </li>
           <li className="admin-menu-item">
@@ -130,14 +99,52 @@ const AdminLayout = () => {
           </li>
           <li className="admin-menu-item">
             <Link
-              to="/staffLayout/appointments"
+              to="/admin/accounts"
               className={
-                location.pathname === "/admin/appointments" ? "active" : ""
+                location.pathname === "/admin/accounts" ? "active" : ""
               }
             >
-              Appointments
+              Tài khoản
             </Link>
           </li>
+          <li className="admin-menu-item">
+            <Link
+              to="/admin/customers"
+              className={
+                location.pathname === "/admin/customers" ? "active" : ""
+              }
+            >
+              Khách Hàng
+            </Link>
+          </li>
+          <li className="admin-menu-item">
+            <Link
+              to="/admin/staffs"
+              className={
+                location.pathname === "/admin/staffs" ? "active" : ""
+              }
+            >
+              Nhân Viên
+            </Link>
+          </li>
+          <li className="admin-menu-item">
+            <Link
+              to="/admin/blog"
+              className={location.pathname === "/admin/blog" ? "active" : ""}
+            >
+              Cẩm nang
+            </Link>
+          </li>
+          <li className="admin-menu-item">
+            <Link
+              to="/admin/newsManagement"
+              className={location.pathname === "/admin/newsManagement" ? "active" : ""}
+            >
+              Tin Tức
+            </Link>
+          </li>
+          
+          
           <li className="admin-menu-item">
             <Link
               to="/admin/feedback"
@@ -145,7 +152,7 @@ const AdminLayout = () => {
                 location.pathname === "/admin/feedback" ? "active" : ""
               }
             >
-              Feedback
+              Đánh giá
             </Link>
           </li>
         </ul>
@@ -167,9 +174,9 @@ const AdminLayout = () => {
         <header className="admin-header">
           <div className="admin-nav">
             <Link to="/homepage" className="admin-nav-link">
-              Home
+              Trang chủ
             </Link>
-            <span className="admin-nav-link">Contact</span>
+            <span className="admin-nav-link">Liên hệ</span>
           </div>
         </header>
         <main className="admin-content">
