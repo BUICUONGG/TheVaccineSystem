@@ -113,6 +113,19 @@ class VaccineService {
       throw new Error(error.message);
     }
   }
+
+  async getOneVaccineById(id) {
+    try {
+      const vaccineInventory =
+        await connectToDatabase.vaccinceInventorys.findOne({
+          _id: new ObjectId(id),
+        });
+      return vaccineInventory;
+    } catch (error) {
+      console.log("Đây là lỗi dòng 121 ở vaccineService", error.message);
+      throw new Error(error.message);
+    }
+  }
 }
 const vaccineService = new VaccineService();
 export default vaccineService;
