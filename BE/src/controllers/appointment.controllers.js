@@ -45,7 +45,7 @@ export const deleteAptLeController = async (req, res) => {
 
 export const getAppointmentsController = async (req, res) => {
   try {
-    const appointments = await appointmentService.getAppointmentsWithDetails();
+    const appointments = await appointmentService.listAptLe();
     res.status(200).json(appointments);
   } catch (error) {
     res.status(500).json(error.message);

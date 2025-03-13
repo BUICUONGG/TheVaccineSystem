@@ -11,17 +11,19 @@ const vaccineImportSchema = new mongoose.Schema({
         required: true,
       },
       quantity: { type: Number, required: true }, // Số lượng mỗi loại vaccine trong lô
+      expiryDate: { type: String, required: true }, // Ngày hết hạn (DD/MM/YYYY)
+      unitPrice: { type: Number, required: true }, // Giá của từng vaccine trong lô
     },
   ],
-  price: { type: Number, required: true }, // Giá nhập của từng loại vaccine
-  importDate: { type: String, required: true }, // Ngày nhập kho
+  totalPrice: { type: Number, required: true }, // Tổng giá trị của cả lô nhập
+  importDate: { type: String, required: true }, // Ngày nhập kho (DD/MM/YYYY)
   importedBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Admin", // Liên kết với bảng Admin
     required: true,
   },
   supplier: { type: String, required: true }, // Nhà cung cấp
-  createdAt: { type: String }, // Ngày tạo
+  createdAt: { type: String, default: new Date().toLocaleDateString("vi-VN") }, // Ngày tạo (mặc định là ngày hiện tại)
 });
 
 const VaccineImport = mongoose.model("VaccineImport", vaccineImportSchema);
