@@ -9,6 +9,7 @@ const vaccineInventorySchema = new mongoose.Schema({
   category: { type: String },
   information: [
     {
+      _id: false,
       preventedDiseases: { type: String },
       eligibleGroups: { type: String },
       administrationRoute: { type: String },

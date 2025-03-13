@@ -12,9 +12,16 @@ const appointmentLeSchema = new mongoose.Schema({
     ref: "VaccineInventory",
     required: true,
   },
-
-  date: { type: String, required: true }, // ngayf cus nđặt lịch hẹn
-  createAt: { type: String, required: true },
+  batchId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "VaccineImport", // Thông tin lô vaccine
+    required: true,
+  },
+  date: { type: String, required: true }, // Ngày khách đặt lịch (Date thay vì String)
+  createdAt: { type: String, default: new Date().toLocaleDateString("vi-VN") }, // Mặc định là ngày hiện tại
+  time: { type: String },
+  price: { type: Number, required: true }, // 🔹 Giá tiêm lẻ
+  note: { type: String, default: "" }, // 🔹 Ghi chú thêm về lịch hẹn
   status: {
     type: String,
     enum: ["completed", "incomplete", "pending", "approve"],
