@@ -80,7 +80,7 @@ const HomePage = () => {
         const role = payload.role;
         setUserRole(role);
         
-        // Get username from localStorage
+        // Get username from localStorage with consistent key
         const storedUsername = localStorage.getItem("username");
         if (storedUsername) {
           setUsername(storedUsername);
@@ -669,7 +669,8 @@ const HomePage = () => {
                     <p>Nhà sản xuất: {vaccine.manufacturer}</p>
                     <div className="vaccine-price-v1">
                       {vaccine.vaccineImports &&
-                      vaccine.vaccineImports.length > 0
+                      vaccine.vaccineImports.length > 0 &&
+                      vaccine.vaccineImports[0].price
                         ? `${vaccine.vaccineImports[0].price.toLocaleString()} VNĐ`
                         : "Liên hệ"}
                     </div>

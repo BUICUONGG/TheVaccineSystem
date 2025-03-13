@@ -5,6 +5,8 @@ import "./Welcome.css";
 const Welcome = () => {
   const navigate = useNavigate();
   const [fadeOut, setFadeOut] = useState(false);
+  
+  // Get user role and access token from localStorage
   const userRole = localStorage.getItem("role");
   const accessToken = localStorage.getItem("accesstoken");
 
@@ -26,6 +28,8 @@ const Welcome = () => {
     const navigationTimer = setTimeout(() => {
       if (userRole === "admin") {
         navigate("/admin");
+      } else if (userRole === "staff") {
+        navigate("/staffLayout");
       } else {
         navigate("/homepage");
       }

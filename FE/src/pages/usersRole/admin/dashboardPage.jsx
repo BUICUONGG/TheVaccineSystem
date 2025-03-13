@@ -335,7 +335,9 @@ const OverviewPage = () => {
       title: 'Giá',
       key: 'price',
       render: (_, record) => {
-        if (record.vaccineImports && record.vaccineImports.length > 0) {
+        if (record.vaccineImports && 
+            record.vaccineImports.length > 0 && 
+            record.vaccineImports[0].price) {
           return `${record.vaccineImports[0].price.toLocaleString()} VNĐ`;
         }
         return "Chưa có giá";

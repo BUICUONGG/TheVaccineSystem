@@ -184,14 +184,16 @@ const VaccinesPage = () => {
       title: "Giá",
       key: "price",
       render: (_, record) => {
-        if (record.vaccineImports && record.vaccineImports.length > 0) {
+        if (record.vaccineImports && 
+            record.vaccineImports.length > 0 && 
+            record.vaccineImports[0].price) {
           return `${record.vaccineImports[0].price.toLocaleString()} VNĐ`;
         }
         return "Chưa có giá";
       },
       sorter: (a, b) => {
-        const priceA = a.vaccineImports && a.vaccineImports.length > 0 ? a.vaccineImports[0].price : 0;
-        const priceB = b.vaccineImports && b.vaccineImports.length > 0 ? b.vaccineImports[0].price : 0;
+        const priceA = a.vaccineImports && a.vaccineImports.length > 0 && a.vaccineImports[0].price ? a.vaccineImports[0].price : 0;
+        const priceB = b.vaccineImports && b.vaccineImports.length > 0 && b.vaccineImports[0].price ? b.vaccineImports[0].price : 0;
         return priceA - priceB;
       },
     },
