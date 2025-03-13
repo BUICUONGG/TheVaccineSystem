@@ -1,317 +1,243 @@
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+/* Reset và style chung */
+* {
+  box-sizing: border-box;
 }
 
-.blog-list-container {
-  padding: 24px;
-  max-width: 1400px;
-  margin: 0 auto;
-}
-
-.blog-header {
-  text-align: center;
-  margin-bottom: 48px;
-  animation: fadeInUp 0.8s ease-out forwards;
-}
-
-.blog-header h1 {
-  font-size: 2.5rem;
-  color: #1a1a1a;
-  margin-bottom: 1rem;
-}
-
-.blog-header p {
-  font-size: 1.1rem;
-  color: #666;
-}
-.blog-author{
-  font-style: italic;
-}
-.blog-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 30px;
-  margin-bottom: 48px;
-}
-
-.blog-card-wrapper {
-  animation: fadeInUp 0.8s ease-out forwards;
-  opacity: 0;
-  margin-bottom: 24px;
-}
-
-.blog-card {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-  transition: all 0.3s ease;
-}
-
-.blog-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 16px rgba(0,0,0,0.1);
-}
-
-.blog-image {
-  height: 300px;
-  width: 100%;
-  object-fit: cover;
-}
-
-.blog-image img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.blog-content {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  padding: 20px;
-}
-
-.blog-title {
-  margin-bottom: 16px ;
-  font-size: 24px ;
-  max-height: 60px;
-  line-height: 1.25;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  position: relative;
-}
-
-.blog-title::after {
-  content: "...";
-  position: absolute;
-  bottom: 0;
-  right: 0;
-  padding-left: 40px;
-  background: linear-gradient(to right, transparent, white 50%);
-}
-
-.blog-excerpt {
-  flex: 1;
-  margin-bottom: 16px;
-  font-size: 16px;
-  max-height: 72px;
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   line-height: 1.5;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  position: relative;
-}
-
-.blog-excerpt::after {
-  content: "...";
-  position: absolute;
-  bottom: 0;
-  right: 0;
-  padding-left: 40px;
-  background: linear-gradient(to right, transparent, white 50%);
-}
-
-.blog-meta {
-  margin-bottom: 16px;
-  color: #8c8c8c;
-}
-
-.blog-interactions {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding-top: 16px;
-  border-top: 1px solid #f0f0f0;
-}
-
-.blog-interactions .ant-btn {
-  padding: 0 8px;
-  height: 32px;
-  color: #8c8c8c;
-}
-
-.blog-interactions .ant-btn:hover {
-  color: #1890ff;
-}
-
-.views {
-  color: #8c8c8c;
-}
-
-.author {
-  font-weight: 500;
-}
-
-.date {
-  color: #8c8c8c;
-}
-
-.status-tag {
-  padding: 0.3rem 0.8rem;
-  border-radius: 1rem;
-  font-size: 0.8rem;
-  text-transform: capitalize;
-}
-
-.status-tag.active {
-  background-color: #e6f7ff;
-  color: #1890ff;
-}
-
-.status-tag.none {
-  background-color: #fff1f0;
-  color: #ff4d4f;
-}
-
-.blog-tags {
-  margin-top: 16px;
-}
-
-.blog-tags .ant-tag {
-  margin: 4px;
-}
-
-.ant-card {
-  height: 100%;
-}
-
-.ant-card-meta-title {
-  font-size: 1.2em;
-  margin-bottom: 8px;
-}
-
-.ant-card-meta-description {
-  color: #666;
-  display: -webkit-box;
-  /* -webkit-line-clamp: 3; */
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-@media (max-width: 768px) {
-  .blog-list-container {
-    padding: 1rem;
-  }
-
-  .blog-header h1 {
-    font-size: 2rem;
-  }
-
-  .blog-card {
-    margin-bottom: 1rem;
-  }
-
-  .blog-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-.blog-container {
-  padding: 20px;
-  min-height: 100vh;
-  background: 
-  linear-gradient(135deg, rgba(245, 247, 250, 0.8) 0%, rgba(195, 207, 226, 0.8) 100%),
-  url('https://www.lindau-nobel.org/wp-content/uploads/2023/12/Header_Vaccines.png') no-repeat center center fixed;
-background-size: cover;
-}
-
-.back-home-wrapper {
-  position: absolute;
-  top: 20px;
-  left: 20px;
-  z-index: 10;
-}
-
-.back-home {
-  text-decoration: none;
-  font-size: 18px;
   color: #333;
-  padding: 8px 12px;
-  border-radius: 4px;
-  transition: background 0.3s ease, color 0.3s ease, font-weight 0.3s ease;
+  background-color: #f4f6f8;
+  margin: 0;
 }
 
-.back-home:hover {
-  background: #333;
-  color: white;
-  font-weight: bold;
-  cursor: pointer;
+/* Container chính */
+.blog-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: transparent;
+}
+
+/* Layout 2 cột giống Viblo */
+.blog-layout {
+  display: flex;
+  gap: 20px;
+}
+
+.blog-main {
+  flex: 1;
+  min-width: 0; /* Để tránh overflow trên flex items */
+}
+
+.blog-sidebar {
+  width: 300px;
+  flex-shrink: 0;
+}
+
+/* Header */
+.blog-header {
+  margin-bottom: 24px;
 }
 
 .main-title {
   text-align: center;
-  margin-bottom: 40px ;
+  margin-bottom: 24px;
+  font-size: 28px;
+  font-weight: 600;
+  color: #0f1419;
   opacity: 0;
-  transform: translateY(-20px);
+  transition: opacity 0.5s ease;
 }
 
-.main-title.fade-in {
-  animation: fadeInDown 1s forwards;
+.fade-in {
+  opacity: 1;
 }
 
-.fade-in-blog {
-  opacity: 0;
-  animation: fadeIn 0.5s forwards;
+/* Bộ lọc */
+.blog-filters {
+  background-color: #fff;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
-.blog-actions {
-  margin-top: 10px;
+/* Tags phổ biến */
+.popular-tags {
+  background-color: #fff;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.popular-tags .ant-tag {
+  margin: 4px;
+  cursor: pointer;
+}
+
+/* Danh sách bài viết */
+.blog-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Card bài viết */
+.blog-card {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  overflow: hidden;
+  border: none !important;
+}
+
+.blog-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Thumbnail */
+.blog-thumbnail {
+  width: 100%;
+  height: 180px;
+  overflow: hidden;
+  border-radius: 4px;
+}
+
+.blog-thumbnail img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.blog-card:hover .blog-thumbnail img {
+  transform: scale(1.05);
+}
+
+/* Nội dung bài viết */
+.blog-content {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+}
+
+.blog-title {
+  font-size: 20px !important;
+  font-weight: 600 !important;
+  margin-bottom: 12px !important;
+  color: #0f1419 !important;
+  line-height: 1.4 !important;
+}
+
+.blog-title:hover {
+  color: #1890ff !important;
+}
+
+.blog-meta {
+  margin-bottom: 12px;
+  color: #6e7781;
+  font-size: 14px;
+}
+
+.blog-excerpt {
+  color: #444;
+  margin-bottom: 16px;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.blog-footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px solid #f0f2f5;
+}
+
+.blog-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.blog-stats {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  color: #6e7781;
+  font-size: 14px;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.stat-item:hover {
+  color: #1890ff;
 }
 
 .like-button {
   cursor: pointer;
-  font-size: 18px;
-  transition: all 0.3s;
-}
-
-.like-button:hover {
-  transform: scale(1.2);
 }
 
 .like-button.liked {
   color: #ff4d4f;
 }
 
-.views-count {
-  color: #8c8c8c;
-  font-size: 14px;
+/* Sidebar components */
+.sidebar-card {
+  background-color: #fff;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
-.views-count .anticon {
-  margin-right: 5px;
+.sidebar-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  color: #0f1419;
+  border-bottom: 1px solid #f0f2f5;
+  padding-bottom: 8px;
 }
 
-.author-spoiler {
-  position: relative;
-  height: 0;
-  overflow: hidden;
-  transition: height 0.3s ease;
+/* Loading và No Content */
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
-.author-content {
-  padding: 10px;
-  background: rgba(0, 0, 0, 0.05);
-  border-radius: 4px;
+.no-blogs {
+  text-align: center;
+  padding: 40px 0;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
-.blog-card:hover .author-spoiler {
-  height: 60px;
+/* Animations */
+.fade-in-blog {
+  animation: fadeIn 0.5s ease forwards;
+  opacity: 0;
 }
 
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(10px);
   }
   to {
     opacity: 1;
@@ -319,13 +245,34 @@ background-size: cover;
   }
 }
 
-@keyframes fadeInDown {
-  from {
-    opacity: 0;
-    transform: translateY(-20px);
+/* Responsive */
+@media (max-width: 992px) {
+  .blog-layout {
+    flex-direction: column;
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+  
+  .blog-sidebar {
+    width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .blog-container {
+    padding: 16px;
+  }
+  
+  .blog-footer {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  
+  .blog-stats {
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  .blog-thumbnail {
+    height: 160px;
   }
 }

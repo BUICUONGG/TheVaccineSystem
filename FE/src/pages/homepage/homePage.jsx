@@ -8,10 +8,6 @@ import { useNavigate, Link } from "react-router-dom";
 import axiosInstance from "../../service/api";
 import NotificationIcon from "./notification/Notification";
 import FeedbackForm from "../../components/Feedback/FeedbackForm";
-
-// eslint-disable-next-line no-unused-vars
-// import { FaSearch, FaShoppingCart } from "react-icons/fa";
-
 const HomePage = () => {
   const navigate = useNavigate();
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -237,54 +233,6 @@ const HomePage = () => {
       setCurrentVaccineIndex((prevIndex) =>
         prevIndex === 0 ? vaccines.length - 1 : prevIndex - 1
       );
-    }
-  };
-
-  // Calculate visible vaccines in the carousel
-  const getVisibleVaccines = () => {
-    if (vaccines.length === 0) return [];
-
-    // Luôn hiển thị 5 card (hoặc tất cả nếu ít hơn 5)
-    const totalVisible = Math.min(5, vaccines.length);
-
-    // Đảm bảo luôn có card ở cả hai bên của card chính
-    let indices = [];
-    const offset = Math.floor(totalVisible / 2);
-
-    for (let i = -offset; i <= offset; i++) {
-      // Sử dụng phép toán modulo để tạo hiệu ứng vòng lặp
-      let index = (currentVaccineIndex + i + vaccines.length) % vaccines.length;
-      indices.push(index);
-    }
-
-    // Tính toán vị trí hiển thị cho mỗi card
-    return indices.map((index, arrayIndex) => {
-      // Tính position dựa trên vị trí trong mảng indices thay vì dựa vào index - currentVaccineIndex
-      // Điều này đảm bảo luôn có card ở vị trí -2, -1, 0, 1, 2 bất kể currentVaccineIndex là gì
-      const position = arrayIndex - offset;
-
-      return {
-        vaccine: vaccines[index],
-        position: position, // Vị trí tương đối: -2, -1, 0, 1, 2
-        // Nếu vị trí là card chính (0) thì opacity = 1, còn lại giảm dần theo khoảng cách
-        opacity:
-          Math.abs(position) === 0
-            ? 1
-            : Math.abs(position) === 1
-            ? 0.7
-            : Math.abs(position) === 2
-            ? 0.4
-            : 0.2,
-      };
-    });
-  };
-
-  // Hàm xử lý khi click vào thẻ
-  const handleCardFlip = (index) => {
-    if (flippedCardIndex === index) {
-      setFlippedCardIndex(null);
-    } else {
-      setFlippedCardIndex(index);
     }
   };
 
