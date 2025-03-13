@@ -129,3 +129,23 @@ export const verifyStaff = (req, res, next) => {
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
+
+// Check if user is an admin
+export const isAdmin = async (req, res, next) => {
+  try {
+    // Assuming the user object is attached to the request by validateAccessToken middleware
+    if (!req.user) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    // Check if user has admin role
+    if (req.user.role !== "admin") {
+      return res.status(403).json({ message: "Forbidden: Admin access required" });
+    }
+
+    next();
+  } catch (error) {
+    console.error("Admin authorization error:", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+};
