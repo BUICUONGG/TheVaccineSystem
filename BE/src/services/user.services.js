@@ -66,7 +66,7 @@ class UserService {
     return await signToken({
       payload: { id: user._id.toString(), role: user.role },
       privateKey: process.env.JWT_ACCESS_TOKEN,
-      options: { expiresIn: process.env.EXPIRESIN_ACCESS_TOKEN || "7d" },
+      options: { expiresIn: "7d" || process.env.EXPIRESIN_ACCESS_TOKEN },
     });
   }
 
@@ -74,7 +74,7 @@ class UserService {
     return await signToken({
       payload: { id: user._id.toString(), role: user.role },
       privateKey: process.env.JWT_REFRESH_TOKEN,
-      options: { expiresIn: process.env.EXPIRESIN_REFRESH_TOKEN || "30d" },
+      options: { expiresIn: "30d" || process.env.EXPIRESIN_REFRESH_TOKEN },
     });
   }
 
