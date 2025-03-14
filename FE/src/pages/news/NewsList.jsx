@@ -165,7 +165,6 @@ const NewsList = () => {
         
         <Search
           placeholder="Tìm kiếm tin tức"
-          allowClear
           enterButton={<SearchOutlined />}
           size="large"
           onSearch={handleSearch}

@@ -322,7 +322,6 @@ const ProfileHistory = () => {
           prefix={<SearchOutlined />}
           onChange={(e) => setSearchText(e.target.value)}
           className="search-input"
-          allowClear
         />
       </div>
 

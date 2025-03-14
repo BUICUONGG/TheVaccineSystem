@@ -474,7 +474,6 @@ const NewsManagement = () => {
             }}>
                 <Search
                     placeholder="Tìm kiếm theo tiêu đề, nội dung hoặc danh mục"
-                    allowClear
                     enterButton
                     onSearch={handleSearch}
                     style={{ width: 300 }}

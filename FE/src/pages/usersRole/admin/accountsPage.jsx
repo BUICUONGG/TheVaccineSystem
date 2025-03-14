@@ -1,40 +1,22 @@
 import { useState, useEffect } from "react";
-import {
-  Table,
-  Input,
-  Button,
-  Modal,
-  Popconfirm,
-  Form,
-  Select,
-  message,
-} from "antd";
-import { DeleteOutlined, UserAddOutlined } from "@ant-design/icons";
-// import axios from "axios";
+import { Table, Input, Button, Modal, Popconfirm, Form, Select, message, } from "antd";
+import { DeleteOutlined, SearchOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../../../service/api";
 
 const { Search } = Input;
-const { Option } = Select;
 
 const AccountsPage = () => {
   const navigate = useNavigate();
   const [userList, setUserList] = useState([]);
   const [loading, setLoading] = useState(false);
   const [searchText, setSearchText] = useState("");
-  // const [deleteLoading, setDeleteLoading] = useState(false);
-  const [isCreateModalVisible, setIsCreateModalVisible] = useState(false);
-  const [createForm] = Form.useForm();
-  const [createLoading, setCreateLoading] = useState(false);
-
-  // Thêm state cho filtered users
   const [filteredUsers, setFilteredUsers] = useState([]);
 
   useEffect(() => {
     fetchUsers();
   }, []);
 
-  // Cập nhật filtered users khi userList hoặc searchText thay đổi
   useEffect(() => {
     const filtered = userList.filter((user) =>
       user.username.toLowerCase().includes(searchText.toLowerCase())
@@ -50,16 +32,11 @@ const AccountsPage = () => {
     try {
       setLoading(true);
       const accesstoken = localStorage.getItem("accesstoken");
-      // console.log("acc", accesstoken);
-
       const response = await axiosInstance.get("/user/showInfo", {
         headers: {
-          // "Content-Type": "application/json",
           Authorization: `Bearer ${accesstoken}`,
         },
       });
-
-      // Lấy dữ liệu người dùng từ response
       // Backend có thể trả về trực tiếp mảng users hoặc object có thuộc tính result
       const users = Array.isArray(response.data)
         ? response.data
@@ -83,9 +60,7 @@ const AccountsPage = () => {
         Modal.error({
           content: "Unauthorized. Please login again.",
         });
-        // navigate("/login");
       } else {
-        // Hiển thị thông báo lỗi cụ thể
         Modal.error({
           content:
             error.response?.data?.message ||
@@ -94,24 +69,6 @@ const AccountsPage = () => {
       }
     }
   };
-
-  // const fetchUsers = async () => {
-  //   const acc = localStorage.getItem("accesstoken");
-  //   console.log(acc);
-  //   const res = await fetch("http://localhost:8080/user/showInfo", {
-  //     method: "GET",
-  //     headers: {
-  //       "Content-Type": "application/json",
-  //       Authorization: `Bearer ${acc}`,
-  //     },
-  //   });
-
-  //   const data = await res.json();
-
-  //   console.log(data);
-  //   setUserList(data);
-  //   setFilteredUsers(data);
-  // };
 
   const handleDelete = async (userId) => {
     try {
@@ -123,7 +80,6 @@ const AccountsPage = () => {
         });
         return;
       }
-
       await axiosInstance.post(
         `/user/delete/${userId}`,
         {},
@@ -154,70 +110,6 @@ const AccountsPage = () => {
     }
   };
 
-  // Handle create staff modal
-  const showCreateModal = () => {
-    createForm.resetFields();
-    setIsCreateModalVisible(true);
-  };
-
-  const handleCreateCancel = () => {
-    setIsCreateModalVisible(false);
-  };
-
-  const handleCreateStaff = async (values) => {
-    try {
-      setCreateLoading(true);
-      const accesstoken = localStorage.getItem("accesstoken");
-
-      if (!accesstoken) {
-        Modal.error({
-          content: "You need to login first",
-        });
-        return;
-      }
-
-      // Chuẩn bị dữ liệu để gửi đến API register
-      const registerData = {
-        username: values.username,
-        password: values.password,
-        email: values.email || `${values.username}@vaccinesystem.com`, // Tạo email mặc định nếu không có
-        role: "staff", // Thêm trường role để xác định đây là tài khoản staff
-        staffName: values.staffname,
-        phone: values.phone,
-        gender: values.gender,
-      };
-
-      // Gọi API register giống như trong registerPage.jsx
-      await axiosInstance.post("/user/register", registerData, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${accesstoken}`, // Vẫn giữ token để xác thực admin
-        },
-      });
-
-      message.success("Tạo tài khoản nhân viên thành công!");
-      setIsCreateModalVisible(false);
-      await fetchUsers(); // Refresh danh sách
-    } catch (error) {
-      console.error("Error creating staff:", error);
-      if (error.response?.status === 401) {
-        Modal.error({
-          content: "Unauthorized. Please login again.",
-        });
-        navigate("/login");
-      } else {
-        // Hiển thị thông báo lỗi cụ thể từ server
-        Modal.error({
-          content:
-            error.response?.data?.message ||
-            "Không thể tạo tài khoản nhân viên",
-        });
-      }
-    } finally {
-      setCreateLoading(false);
-    }
-  };
-
   const columns = [
     {
       title: "STT",
@@ -226,38 +118,23 @@ const AccountsPage = () => {
       width: 70,
     },
     {
-      title: "Username",
+      title: "Tên đăng nhập",
       dataIndex: "username",
       key: "username",
     },
-    // {
-    //   title: "Full Name",
-    //   dataIndex: "fullname",
-    //   key: "fullname",
-    // },
     {
       title: "Email",
       dataIndex: "email",
       key: "email",
     },
     {
-      title: "Password",
+      title: "Mật khẩu",
       dataIndex: "password",
       key: "password",
       render: () => "•••••••",
     },
-    // {
-    //   title: "Email",
-    //   dataIndex: "email",
-    //   key: "email",
-    // },
-    // {
-    //   title: "Phone",
-    //   dataIndex: "phone",
-    //   key: "phone",
-    // },
     {
-      title: "Role",
+      title: "Vai trò",
       dataIndex: "role",
       key: "role",
       filters: [
@@ -274,8 +151,8 @@ const AccountsPage = () => {
               role === "admin"
                 ? "#ff4d4f"
                 : role === "staff"
-                ? "#1890ff"
-                : "#52c41a",
+                  ? "#1890ff"
+                  : "#52c41a",
           }}
         >
           {role}
@@ -301,9 +178,7 @@ const AccountsPage = () => {
             danger
             icon={<DeleteOutlined />}
             disabled={record.role === "admin"}
-          >
-            Delete
-          </Button>
+          ></Button>
         </Popconfirm>
       ),
     },
@@ -311,27 +186,13 @@ const AccountsPage = () => {
 
   return (
     <div style={{ padding: "20px" }}>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          marginBottom: "16px",
-        }}
-      >
-        <h2>User Accounts Management</h2>
-        <Button
-          type="primary"
-          icon={<UserAddOutlined />}
-          onClick={showCreateModal}
-        >
-          Create Staff
-        </Button>
+      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "16px", }}>
+        <h2>Quản lý tài khoản</h2>
       </div>
 
       <Search
-        placeholder="Search by username"
-        allowClear
-        enterButton
+        placeholder="Search by username" 
+        enterButton={<SearchOutlined />}
         onSearch={handleSearch}
         style={{ width: 300, marginBottom: 16 }}
       />
@@ -348,87 +209,7 @@ const AccountsPage = () => {
         }}
       />
 
-      {/* Create Staff Modal */}
-      <Modal
-        title="Create Staff Account"
-        open={isCreateModalVisible}
-        onCancel={handleCreateCancel}
-        footer={null}
-      >
-        <Form form={createForm} layout="vertical" onFinish={handleCreateStaff}>
-          <Form.Item
-            name="username"
-            label="Username"
-            rules={[{ required: true, message: "Please input username!" }]}
-          >
-            <Input placeholder="Enter username" />
-          </Form.Item>
-
-          <Form.Item
-            name="password"
-            label="Password"
-            rules={[{ required: true, message: "Please input password!" }]}
-          >
-            <Input.Password placeholder="Enter password" />
-          </Form.Item>
-
-          <Form.Item
-            name="email"
-            label="Email"
-            rules={[
-              { required: true, message: "Please input email!" },
-              { type: "email", message: "Please enter a valid email!" },
-            ]}
-          >
-            <Input placeholder="Enter email" />
-          </Form.Item>
-
-          <Form.Item
-            name="staffname"
-            label="Staff Name"
-            rules={[{ required: true, message: "Please input staff name!" }]}
-          >
-            <Input placeholder="Enter full name" />
-          </Form.Item>
-
-          <Form.Item
-            name="phone"
-            label="Phone Number"
-            rules={[
-              { required: true, message: "Please input phone number!" },
-              {
-                pattern: /^[0-9]{10}$/,
-                message: "Please enter a valid 10-digit phone number!",
-              },
-            ]}
-          >
-            <Input placeholder="Enter phone number" />
-          </Form.Item>
-
-          <Form.Item
-            name="gender"
-            label="Gender"
-            rules={[{ required: true, message: "Please select gender!" }]}
-          >
-            <Select placeholder="Select gender">
-              <Option value="male">Male</Option>
-              <Option value="female">Female</Option>
-              <Option value="other">Other</Option>
-            </Select>
-          </Form.Item>
-
-          <Form.Item>
-            <div style={{ display: "flex", justifyContent: "flex-end" }}>
-              <Button onClick={handleCreateCancel} style={{ marginRight: 8 }}>
-                Cancel
-              </Button>
-              <Button type="primary" htmlType="submit" loading={createLoading}>
-                Create
-              </Button>
-            </div>
-          </Form.Item>
-        </Form>
-      </Modal>
+      
     </div>
   );
 };

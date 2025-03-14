@@ -287,7 +287,6 @@ const VaccinesPage = () => {
 
       <Search
         placeholder="Tìm kiếm theo tên vaccine"
-        allowClear
         enterButton
         onSearch={handleSearch}
         style={{ width: 300, marginBottom: 16 }}

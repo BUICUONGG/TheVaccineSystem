@@ -260,13 +260,13 @@ const BlogManagement = () => {
           <Paragraph ellipsis={{ rows: 2 }}>
             {text || "Chưa cập nhật"}
           </Paragraph>
-          <Button 
+          {/* <Button 
             type="link" 
             icon={<EyeOutlined />} 
             onClick={() => showDetailModal(record)}
           >
             Xem chi tiết
-          </Button>
+          </Button> */}
         </Space>
       ),
     },
@@ -286,20 +286,7 @@ const BlogManagement = () => {
         <Tag color="blue">{getCategoryLabel(category) || "Chưa phân loại"}</Tag>
       ),
     },
-    {
-      title: "Chi tiết",
-      key: "details",
-      width: 100,
-      render: (_, record) => (
-        <Button 
-          type="primary" 
-          icon={<InfoCircleOutlined />} 
-          onClick={() => showStatsModal(record)}
-        >
-          Chi tiết
-        </Button>
-      ),
-    },
+    
     {
       title: "Trạng thái",
       dataIndex: "status",
@@ -342,6 +329,18 @@ const BlogManagement = () => {
             </Popconfirm>
           )}
         </div>
+      ),
+    },
+    {
+      title: "Chi tiết",
+      key: "details",
+      width: 100,
+      render: (_, record) => (
+        <Button 
+          type="primary" 
+          icon={<InfoCircleOutlined />} 
+          onClick={() => showStatsModal(record)}
+        ></Button>
       ),
     },
   ];

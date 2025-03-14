@@ -298,7 +298,6 @@ const StaffsPage = () => {
 
       <Input
         placeholder="Tìm kiếm theo tên, username hoặc email"
-        allowClear
         onChange={handleSearch}
         style={{ width: 300, marginBottom: 16 }}
       />

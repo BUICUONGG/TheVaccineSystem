@@ -272,7 +272,6 @@ const FeedbackManagement = () => {
       <div className="search-container">
         <Search
           placeholder="Tìm kiếm theo tên khách hàng, email, số điện thoại hoặc nội dung bình luận"
-          allowClear
           enterButton={<SearchOutlined />}
           size="large"
           onSearch={handleSearch}
