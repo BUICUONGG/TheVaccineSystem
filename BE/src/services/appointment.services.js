@@ -6,7 +6,7 @@ import AppointmentGoi from "../model/appointmentSchemaGoi.js";
 import notiService from "./noti.services.js";
 
 class AppointmentService {
-  // 🔹 Kiểm tra tồn kho của vaccine
+  // Kiểm tra tồn kho của vaccine
   async checkVaccineStock(vaccineId) {
     const vaccineImports = await connectToDatabase.vaccineImports
       .find({ "vaccines.vaccineId": new ObjectId(vaccineId) })
@@ -48,7 +48,6 @@ class AppointmentService {
         }
       }
     }
-
     return selectedBatch;
   }
 
@@ -65,7 +64,6 @@ class AppointmentService {
     }
   }
 
-  // 🔹 Tạo mới hồ sơ trẻ nếu chưa có
   async createChildIfNotExists(cusId, childInfo) {
     const newChild = new Child({
       cusId,
@@ -78,15 +76,14 @@ class AppointmentService {
     return saveChild.insertedId; // Trả về ID của trẻ mới tạo
   }
 
-  // 🔹 Tạo lịch hẹn lẻ
-
+  // Tạo lịch hẹn lẻ
   async createAptLe(data) {
     try {
       const { cusId, childId, childInfo, vaccineId, date, time, status, note } =
         data;
       let finalChildId = childId ? new ObjectId(childId) : null;
 
-      // 🔹 Nếu không có childId và có childInfo => Tạo mới hồ sơ trẻ
+      //  Nếu không có childId và có childInfo => Tạo mới hồ sơ trẻ
       if (!finalChildId && childInfo && Object.keys(childInfo).length > 0) {
         finalChildId = await this.createChildIfNotExists(
           new ObjectId(cusId),
@@ -125,13 +122,12 @@ class AppointmentService {
         vaccineId: new ObjectId(vaccineId),
         batchId: nearestBatch._id,
         date,
-        date: time,
+        time: time,
         createdAt: new Date().toLocaleDateString("vi-VN"),
         price,
         note: note || "",
         status: status || "pending",
       };
-
       // Lưu lịch hẹn vào DB
       const result = await connectToDatabase.appointmentLes.insertOne(aptLe);
 
@@ -145,14 +141,13 @@ class AppointmentService {
       );
 
       //  Tạo thông báo với ID lịch hẹn thay vì object
-      await notiService.createNoti({
+      const noti = await notiService.createNoti({
         cusId: new ObjectId(cusId),
         apt: result.insertedId,
         aptModel: "AppointmentLe",
         message: `Lịch hẹn lẻ của bạn vào lúc ${time} đang trạng thái chờ duyệt`,
         createdAt: new Date().toLocaleDateString("vi-VN"),
       });
-
       return {
         _id: result.insertedId,
         ...aptLe,
@@ -162,6 +157,8 @@ class AppointmentService {
       throw new Error(error.message);
     }
   }
+
+  // Hàm tạo URL thanh toán VNPay
 
   async updateAptLe(id, updateAptLe) {
     try {
@@ -433,7 +430,7 @@ class AppointmentService {
         const vaccineBatchInfo = nearestBatches[dose.vaccineId.toString()];
         if (!vaccineBatchInfo) {
           console.warn(
-            `⚠ Không tìm thấy lô vaccine hợp lệ cho vaccine ID: ${dose.vaccineId}`
+            `Không tìm thấy lô vaccine hợp lệ cho vaccine ID: ${dose.vaccineId}`
           );
           continue;
         }
@@ -474,128 +471,6 @@ class AppointmentService {
       };
     } catch (error) {
       console.error("Lỗi trong createAptGoi:", error.message);
-      throw new Error(error.message);
-    }
-  }
-
-  async updateAptGoi(id, updateGoi) {
-    try {
-      const result = await connectToDatabase.appointmentGois.findOneAndUpdate(
-        { _id: new ObjectId(id) },
-        { $set: updateGoi },
-        { returnDocument: "after" }
-      );
-
-      if (!result) {
-        throw new Error("Không thể update");
-      }
-
-      // Xóa thông báo cũ
-      await notiService.deleteNotiById(result._id);
-
-      await notiService.createNoti({
-        cusId: result.cusId,
-        apt: result._id,
-        aptModel: "AppointmentGoi",
-        message: `Lịch hẹn gói của bạn đã cập nhật trạng thái: ${updateGoi.status}`,
-        createdAt: new Date().toLocaleDateString("vi-VN"),
-      });
-
-      return result;
-    } catch (error) {
-      throw new Error(error.message);
-    }
-  }
-
-  async deleteGoi(id) {
-    try {
-      const result = await connectToDatabase.appointmentGois.findOneAndDelete({
-        _id: new ObjectId(id),
-      });
-      return "Xoa thanh cong";
-    } catch (error) {
-      throw new Error(error.message);
-    }
-  }
-
-  async updateDose(appointmentId, doseNumber, status) {
-    try {
-      // Tìm appointment gói theo ID
-      const appointment = await connectToDatabase.appointmentGois.findOne({
-        _id: new ObjectId(appointmentId),
-      });
-
-      if (!appointment) {
-        throw new Error(`Không tìm thấy lịch hẹn với ID: ${appointmentId}`);
-      }
-
-      // Kiểm tra doseSchedule
-      if (
-        !appointment.doseSchedule ||
-        !Array.isArray(appointment.doseSchedule)
-      ) {
-        throw new Error("Lịch hẹn không có thông tin lịch tiêm");
-      }
-
-      // Tìm dose cần cập nhật
-      const doseIndex = appointment.doseSchedule.findIndex(
-        (dose) => dose.doseNumber === parseInt(doseNumber)
-      );
-
-      if (doseIndex === -1) {
-        throw new Error(`Không tìm thấy mũi tiêm số ${doseNumber}`);
-      }
-
-      // Cập nhật trạng thái của dose
-      const updatedDoseSchedule = [...appointment.doseSchedule];
-      updatedDoseSchedule[doseIndex] = {
-        ...updatedDoseSchedule[doseIndex],
-        status,
-      };
-
-      // Cập nhật lịch hẹn với doseSchedule mới
-      const result = await connectToDatabase.appointmentGois.findOneAndUpdate(
-        { _id: new ObjectId(appointmentId) },
-        { $set: { doseSchedule: updatedDoseSchedule } },
-        { returnDocument: "after" }
-      );
-      return result;
-    } catch (error) {
-      console.error("Error updating dose:", error);
-      throw new Error(error.message);
-    }
-  }
-
-  async searchAptGoiById(id) {
-    try {
-      const appointmentGois = await connectToDatabase.appointmentGois.findOne({
-        _id: new ObjectId(id),
-      });
-
-      const customer = await connectToDatabase.customers.findOne({
-        _id: appointmentGois.cusId,
-      });
-
-      const vaccinePakage = await connectToDatabase.vaccinepackages.findOne({
-        _id: appointmentGois.vaccinePakageId,
-      });
-
-      const child = await connectToDatabase.childs.findOne({
-        _id: appointmentGois.childId,
-      });
-
-      delete appointmentGois.cusId;
-      delete appointmentGois.vaccinePakageId;
-      delete appointmentGois.childId;
-
-      appointmentGois.customer = customer;
-      appointmentGois.vaccinePackage = vaccinePakage;
-      appointmentGois.child = child;
-
-      if (!appointmentGois) throw new Error("Khong tìm thấy thông tin apt này");
-      return appointmentGois;
-    } catch (error) {
-      console.log(error.message);
       throw new Error(error.message);
     }
   }
