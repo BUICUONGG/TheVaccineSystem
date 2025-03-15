@@ -26,6 +26,7 @@ import ProfileHistory from "./pages/homepage/profile/components/ProfileHistory";
 import Profile from "./pages/homepage/profile/Profile";
 import ProfileAccount from "./pages/homepage/profile/components/ProfileAccount";
 import FeedbackManagement from "./pages/usersRole/admin/FeedbackManagement";
+// import VaccineShopDetailPage from "./pages/homepage/vaccineShop/vaccineShopDetailPage";
 import StaffsPage from "./pages/usersRole/admin/staffsPage";
 
 const router = createBrowserRouter([
@@ -53,6 +54,10 @@ const router = createBrowserRouter([
     path: "/pricelist",
     element: <VaccinePriceList />,
   },
+  // {
+  //   path: "/vaccineDetail",
+  //   element: <VaccineShopDetailPage />,
+  // },
   {
     path: "/registerinjection",
     element: <RegisterInjection />,

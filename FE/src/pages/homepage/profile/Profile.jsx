@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate, Outlet, useLocation } from "react-router-dom";
+import { useNavigate, Outlet, useLocation, Link } from "react-router-dom";
 import { Layout, Menu, message } from "antd";
 import {
   UserOutlined,
@@ -90,9 +90,16 @@ const Profile = () => {
     <Layout className="profile-layout">
       <Sider className="profile-sider" width={280}>
         <div className="profile-menu-header">
-          <div className="user-info">
-            <h3>{userData?.customerName || "Người dùng"}</h3>
-            <p>{userData?.email || "Email chưa cập nhật"}</p>
+          <div className="logo">
+            <Link to="/homepage">
+              <div className="logo-icon">
+                <img src="/images/LogoHeader.png" alt="Logo" />
+              </div>
+              <div className="logo-text">
+                <span className="diary">Diary</span>
+                <span className="vaccine">Vaccine</span>
+              </div>
+            </Link>
           </div>
         </div>
         <Menu

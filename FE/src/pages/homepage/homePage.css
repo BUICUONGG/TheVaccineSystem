@@ -282,26 +282,26 @@ nav ul li button:hover {
   color: #333;
 }
 
-.vaccine-types {
+.home-vaccine-types {
   display: flex;
   justify-content: center;
   gap: 2rem;
 }
 
-.vaccine-card {
+.home-vaccine-card {
   flex: 1;
   max-width: 300px;
   text-align: center;
 }
 
-.vaccine-card img {
+.home-vaccine-card img {
   width: 100%;
   height: 200px;
   object-fit: cover;
   border-radius: 8px;
 }
 
-.vaccine-card h3 {
+.home-vaccine-card h3 {
   margin: 1rem 0;
   color: #333;
 }
@@ -641,65 +641,6 @@ nav ul li button:hover {
 .avatar-dropdown:hover .avatar-container::after {
   width: 100%;
 }
-
-/* Responsive Design */
-/* @media (max-width: 768px) {
-  .quick-access,
-  .vaccine-types,
-  .guide-icons {
-    flex-direction: column;
-    align-items: center;
-    gap: 1.5rem;
-  }
-
-  .vaccine-card {
-    max-width: 100%;
-  }
-
-  .header-content {
-    flex-direction: column;
-    gap: 15px;
-  }
-
-  .header-right .nav-menu {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 1rem;
-  }
-} */
-/* 
-@media (max-width: 992px) {
-  .news-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .footer-content {
-    grid-template-columns: repeat(2, 1fr);
-  }
-} */
-/* 
-@media (max-width: 768px) {
-  .news-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .news-content h3 {
-    height: auto;
-  }
-
-  .news-content p {
-    height: auto;
-  }
-
-  .footer-content {
-    grid-template-columns: 1fr;
-    text-align: center;
-  }
-
-  .social-links {
-    justify-content: center;
-  }
-} */
 
 /* Pagination styles */
 .swiper-pagination {
@@ -1216,30 +1157,6 @@ nav ul li button:hover {
   font-size: 18px;
   color: #666;
 }
-/* 
-@media (max-width: 768px) {
-  .vaccine-carousel {
-    height: 400px;
-  }
-  
-  .vaccine-card-item {
-    width: 200px;
-    height: 340px;
-  }
-  
-  .vaccine-nav {
-    width: 40px;
-    height: 40px;
-  }
-  
-  .vaccine-nav.prev {
-    left: 10px;
-  }
-  
-  .vaccine-nav.next {
-    right: 10px;
-  }
-} */
 
 /* ===== Phiên bản 1: Carousel dạng thẻ với hiệu ứng 3D ===== */
 .vaccine-carousel-section-v1 {
@@ -1574,13 +1491,6 @@ nav ul li button:hover {
   font-weight: 500;
 }
 
-/* @media (max-width: 768px) {
-  .feedback-floating-button {
-    padding: 8px 16px;
-    bottom: 80px;
-  }
-} */
-
 /* User Dropdown Styles */
 .user-dropdown {
   display: flex;
@@ -1627,17 +1537,6 @@ nav ul li button:hover {
   background-color: #1890ff;
   cursor: pointer;
 }
-
-/* Responsive adjustments */
-/* @media (max-width: 768px) {
-  .username {
-    display: none;
-  }
-  
-  .user-dropdown a {
-    padding: 5px;
-  }
-} */
 
 /* Customer Feedback Section */
 .feedback-section {
