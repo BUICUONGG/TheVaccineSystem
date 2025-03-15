@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { FiUser, FiLock, FiEye, FiEyeOff } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
-// import axios from "axios";
 import "./forgotPassword.css";
 import { toast } from "react-toastify";
 import axiosInstance from "../../service/api";
@@ -21,7 +20,7 @@ const ForgotPassword = () => {
   const validateUsername = () => {
     const newErrors = {};
     if (!username) {
-      newErrors.username = "Username is required";
+      newErrors.username = "Tên đăng nhập là bắt buộc";
     }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -38,25 +37,9 @@ const ForgotPassword = () => {
   };
 
   const validateConfirmPassword = (confirmPassword, password) => {
-    if (!password) return "Password is required";
-    if (confirmPassword !== password) return "Passwords do not match";
+    if (!password) return "Yêu cầu mật khẩu mới";
+    if (confirmPassword !== password) return "Mật khẩu không khớp";
     return "";
-  };
-
-  const validatePasswords = () => {
-    const newErrors = {};
-    const passwordError = validatePassword(newPassword);
-    const confirmError = validateConfirmPassword(confirmPassword, newPassword);
-
-    if (passwordError) {
-      newErrors.newPassword = passwordError;
-    }
-    if (confirmError) {
-      newErrors.confirmPassword = confirmError;
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
   };
 
   const handleCheckUsername = async (e) => {
@@ -70,10 +53,10 @@ const ForgotPassword = () => {
         if (response.data.exists) {
           setUserId(response.data.userId);
           setStep(2);
-          toast.success("Username found! Please set your new password.");
+          toast.success("Tìm thấy tên đăng nhập! Vui lòng nhập mật khẩu mới");
         }
       } catch (error) {
-        toast.error(error.response?.data?.message || "Username not found");
+        toast.error(error.response?.data?.message || "Tên đăng nhập không tồn tại");
       } finally {
         setIsLoading(false);
       }
@@ -98,11 +81,11 @@ const ForgotPassword = () => {
         await axiosInstance.post(`/user/update/${userId}`, {
           password: newPassword,
         });
-        toast.success("Password updated successfully!");
+        toast.success("Mật khẩu mới cập nhập thành công");
         navigate("/login");
       } catch (error) {
         toast.error(
-          error.response?.data?.message || "Failed to update password"
+          error.response?.data?.message || "Thất bại"
         );
       } finally {
         setIsLoading(false);
@@ -112,20 +95,17 @@ const ForgotPassword = () => {
 
   return (
     <div className="forgot-min-h-screen">
-      {/* <Link to="/homepage" className="forgot-back-home">
-        Về trang chủ
-      </Link> */}
       <div className="forgot-container">
         <div className="forgot-image-container">
           <div className="forgot-image-overlay"></div>
         </div>
         <div className="forgot-form-container">
           <div className="forgot-form-header">
-            <h2>{step === 1 ? "Forgot Password" : "Reset Password"}</h2>
+            <h2>{step === 1 ? "Quên mật khẩu" : "Nhập mật khẩu mới"}</h2>
             <p>
               {step === 1
-                ? "Enter your username to reset password"
-                : "Enter your new password"}
+                ? "Nhập tên đăng nhập để đặt lại mật khẩu"
+                : "Nhập mật khẩu mới"}
             </p>
           </div>
 
@@ -136,7 +116,7 @@ const ForgotPassword = () => {
                 <input
                   type="text"
                   className="forgot-input"
-                  placeholder="Username"
+                  placeholder="Tên đăng nhập"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                 />
@@ -150,7 +130,7 @@ const ForgotPassword = () => {
                   disabled={isLoading}
                   className="forgot-btn forgot-btn-primary"
                 >
-                  {isLoading ? "Checking..." : "Continue"}
+                  {isLoading ? "Đang kiểm tra..." : "Tiếp tục"}
                 </button>
               </div>
             </form>
@@ -161,7 +141,7 @@ const ForgotPassword = () => {
                 <input
                   type={showPassword ? "text" : "password"}
                   className="forgot-input"
-                  placeholder="New Password"
+                  placeholder="Nhập mật khẩu mới"
                   value={newPassword}
                   onChange={(e) => {
                     setNewPassword(e.target.value);
@@ -189,7 +169,7 @@ const ForgotPassword = () => {
                 <input
                   type={showConfirmPassword ? "text" : "password"}
                   className="forgot-input"
-                  placeholder="Confirm Password"
+                  placeholder="Nhập lại mật khẩu"
                   value={confirmPassword}
                   onChange={(e) => {
                     setConfirmPassword(e.target.value);
@@ -224,7 +204,7 @@ const ForgotPassword = () => {
                   }
                   className="forgot-btn forgot-btn-primary"
                 >
-                  {isLoading ? "Updating..." : "Reset Password"}
+                  {isLoading ? "Đang cập nhập..." : "Đặt lại mật khẩu"}
                 </button>
               </div>
             </form>

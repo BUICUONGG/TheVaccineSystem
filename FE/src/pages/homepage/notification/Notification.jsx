@@ -81,19 +81,24 @@ const NotificationIcon = ({ cusId: propsCusId }) => {
           const simplifiedNotifications = response.data.map(noti => ({
             id: noti._id || 'unknown',
             message: noti.message || 'Không có nội dung',
-            read: readNotificationIds.includes(noti._id) // Kiểm tra xem thông báo đã được đọc chưa
+            read: readNotificationIds.includes(noti._id), // Kiểm tra xem thông báo đã được đọc chưa
+            createdAt: noti.createdAt || new Date().toISOString() // Lấy thời gian tạo thông báo
           }));
           
-          // Lọc ra các thông báo chưa đọc
-          const unreadNotifications = simplifiedNotifications.filter(noti => !noti.read);
+          // Sắp xếp thông báo theo thời gian tạo (mới nhất lên đầu)
+          const sortedNotifications = simplifiedNotifications.sort((a, b) => 
+            new Date(b.createdAt) - new Date(a.createdAt)
+          );
           
-          console.log("Thông báo đã xử lý:", simplifiedNotifications);
+          // Lọc ra các thông báo chưa đọc
+          const unreadNotifications = sortedNotifications.filter(noti => !noti.read);
+          
+          console.log("Thông báo đã xử lý và sắp xếp:", sortedNotifications);
           console.log("Thông báo chưa đọc:", unreadNotifications.length);
           
-          // Sắp xếp thông báo theo thời gian tạo (mới nhất lên đầu)
-          setNotifications(simplifiedNotifications);
+          setNotifications(sortedNotifications);
           setUnreadCount(unreadNotifications.length);
-          console.log("Đã cập nhật thông báo:", simplifiedNotifications.length);
+          console.log("Đã cập nhật thông báo:", sortedNotifications.length);
         } else {
           console.log("Mảng thông báo rỗng");
           // Tạo một thông báo mặc định khi không có thông báo nào

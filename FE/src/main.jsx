@@ -1,14 +1,14 @@
 import { createRoot } from "react-dom/client";
 import "./index.css";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { ToastContainer } from "react-toastify";
 import LoginPage from "./pages/login/loginPage";
 import RegisterPage from "./pages/register/registerPage";
 import HomePage from "./pages/homepage/homePage";
 import AdminLayout from "./pages/usersRole/admin/adminLayout";
 import AccountsPage from "./pages/usersRole/admin/accountsPage";
 import VaccinesPage from "./pages/usersRole/admin/vaccinesPage";
-import { ToastContainer } from "react-toastify";
-import AllCustomerPage from "./pages/usersRole/customer/allCustomerPage";
+import AllCustomerPage from "./pages/usersRole/admin/allCustomerPage";
 import VaccinePriceList from "./pages/homepage/vaccineShop/vaccineShopPage";
 import BlogList from "./pages/blog/BlogList";
 import BlogManagement from "./pages/usersRole/admin/BlogManagement";
@@ -75,7 +75,7 @@ const router = createBrowserRouter([
     children: [
       {
         path: "",
-        element: <div>Chào mừng đến trang quản lý của Staff</div>,
+        element: <AppointmentManagement />,
       },
 
       {
