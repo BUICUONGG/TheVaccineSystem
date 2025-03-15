@@ -1,0 +1,275 @@
+/* Reset và style chung */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  line-height: 1.5;
+  color: #333;
+  background-color: #f4f6f8;
+  margin: 0;
+}
+
+/* Container chính */
+.blog-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: transparent;
+}
+
+/* Layout 2 cột giống Viblo */
+.blog-layout {
+  display: flex;
+  gap: 20px;
+}
+
+.blog-main {
+  flex: 1;
+  min-width: 0; /* Để tránh overflow trên flex items */
+}
+
+.blog-sidebar {
+  width: 300px;
+  flex-shrink: 0;
+}
+
+/* Header */
+.blog-header {
+  margin-bottom: 24px;
+}
+
+.main-title {
+  text-align: center;
+  margin-bottom: 40px;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+.fade-in {
+  opacity: 1;
+}
+
+/* Bộ lọc */
+.blog-filters {
+  background-color: #fff;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+/* Tags phổ biến */
+.popular-tags {
+  background-color: #fff;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.popular-tags .ant-tag {
+  margin: 4px;
+  cursor: pointer;
+}
+
+/* Danh sách bài viết */
+.blog-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Card bài viết */
+.blog-card {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  overflow: hidden;
+  border: none !important;
+}
+
+.blog-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Thumbnail */
+.blog-thumbnail {
+  width: 100%;
+  height: 180px;
+  overflow: hidden;
+  border-radius: 4px;
+}
+
+.blog-thumbnail img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.blog-card:hover .blog-thumbnail img {
+  transform: scale(1.05);
+}
+
+/* Nội dung bài viết */
+.blog-content {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+}
+
+.blog-title {
+  font-size: 20px !important;
+  font-weight: 600 !important;
+  margin-bottom: 12px !important;
+  color: #0f1419 !important;
+  line-height: 1.4 !important;
+}
+
+.blog-title:hover {
+  color: #1890ff !important;
+}
+
+.blog-meta {
+  margin-bottom: 12px;
+  color: #6e7781;
+  font-size: 14px;
+}
+
+.blog-excerpt {
+  color: #444;
+  margin-bottom: 16px;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.blog-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px solid #f0f2f5;
+}
+
+.blog-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.blog-stats {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  color: #6e7781;
+  font-size: 14px;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.stat-item:hover {
+  color: #1890ff;
+}
+
+.like-button {
+  cursor: pointer;
+}
+
+.like-button.liked {
+  color: #ff4d4f;
+}
+
+/* Sidebar components */
+.sidebar-card {
+  background-color: #fff;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.sidebar-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  color: #0f1419;
+  border-bottom: 1px solid #f0f2f5;
+  padding-bottom: 8px;
+}
+
+/* Loading và No Content */
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.no-blogs {
+  text-align: center;
+  padding: 40px 0;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+/* Animations */
+.fade-in-blog {
+  animation: fadeIn 0.5s ease forwards;
+  opacity: 0;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+  .blog-layout {
+    flex-direction: column;
+  }
+  
+  .blog-sidebar {
+    width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .blog-container {
+    padding: 16px;
+  }
+  
+  .blog-footer {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  
+  .blog-stats {
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  .blog-thumbnail {
+    height: 160px;
+  }
+}

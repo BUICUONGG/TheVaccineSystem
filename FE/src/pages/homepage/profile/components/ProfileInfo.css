@@ -1,0 +1,123 @@
+/* Container styles */
+.info-profile-info-container {
+  display: flex;
+  gap: 60px;
+  padding: 40px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Avatar section */
+.info-avatar-section {
+  flex: 0 0 250px;
+  text-align: center;
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 12px;
+  height: fit-content;
+}
+
+.info-avatar-container {
+  width: 200px;
+  height: 200px;
+  margin: 0 auto 20px;
+  border-radius: 50%;
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 3px solid #4A90E2;
+  box-shadow: 0 4px 15px rgba(74,144,226,0.2);
+}
+
+.info-avatar-container .anticon {
+  font-size: 80px;
+  color: #4A90E2;
+}
+
+.info-user-name {
+  font-size: 20px;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-top: 15px;
+  text-align: center;
+  letter-spacing: 0.5px;
+}
+
+/* Form section */
+.info-form-section {
+  flex: 1;
+  animation: updateSuccess 0.3s ease;
+}
+
+/* Input styles */
+.ant-form-item {
+  margin-bottom: 20px;
+}
+
+.ant-input,
+.ant-input-textarea textarea {
+  padding: 8px 12px;
+  border: 1px solid #d9d9d9;
+  border-radius: 6px;
+  font-size: 14px;
+  color: #2c3e50;
+  transition: all 0.3s ease;
+}
+
+.ant-input:hover,
+.ant-input:focus {
+  border-color: #4A90E2;
+  box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
+}
+
+/* Radio buttons */
+.ant-radio-group {
+  display: flex;
+  gap: 10px;
+}
+
+.ant-radio-button-wrapper {
+  min-width: 100px;
+  height: 36px;
+  line-height: 34px;
+  text-align: center;
+  border-radius: 6px;
+  border: 1px solid #d9d9d9;
+}
+
+/* Update button */
+.info-update-all-btn,
+.ant-btn.ant-btn-primary.info-update-all-btn {
+  width: 100%;
+  height: 45px;
+  margin-top: 30px;
+  background: #1890ff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transition: all 0.3s ease;
+}
+
+.info-update-all-btn:hover,
+.ant-btn.ant-btn-primary.info-update-all-btn:hover {
+  background: #40a9ff;
+  transform: translateY(-1px);  
+  box-shadow: 0 4px 12px rgba(24,144,255,0.4);
+}
+
+/* Animation */
+@keyframes updateSuccess {
+  0% { opacity: 1; transform: scale(0.98); }
+  50% { opacity: 1; transform: scale(1.02); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+

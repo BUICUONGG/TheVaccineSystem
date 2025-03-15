@@ -1,0 +1,360 @@
+/* Adjust the top position of the main content to account for the fixed sub-navbar */
+.new-page {
+  padding-top: 160px; /* Adjust based on header and sub-navbar height */
+}
+
+.product-filter {
+  margin: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.product-filter label {
+  margin-right: 10px;
+  font-weight: bold;
+}
+
+.product-filter select {
+  padding: 5px 10px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
+
+.product-list {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* Ensure 3 products per row */
+  gap: 30px; /* Increase gap for better spacing */
+  padding: 20px;
+  justify-items: center; /* Center align items horizontally */
+}
+
+.product-card, .package-card {
+  background-color: #ffffff;
+  border: 2px solid #2d2d2d;
+  border-radius: 12px;
+  padding: 25px;
+  width: 310px;
+  min-height: 450px; /* Increased height to accommodate button */
+  text-align: center;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: all 0.3s ease;
+  position: relative;
+  padding-bottom: 60px; /* Add space for button */
+}
+
+.product-card:hover, .package-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  border-color: #4A90E2;
+}
+
+.product-card h3, .package-card h3 {
+  color: #2d2d2d;
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 18px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid #2d2d2d;
+  transition: all 0.3s ease;
+  font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+  letter-spacing: 0.3px;
+}
+
+.product-card:hover h3, .package-card:hover h3 {
+  color: #4A90E2;
+  border-bottom-color: #4A90E2;
+  transform: translateY(-2px);
+}
+
+.product-card p, .package-card p {
+  color: #444;
+  font-size: 15px;
+  line-height: 1.7;
+  margin: 15px 0;
+  flex-grow: 1;
+  font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+  letter-spacing: 0.2px;
+}
+
+.product-card img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  border: 1px solid #2d2d2d;
+}
+
+.product-card p, .package-card p {
+  color: #555;
+  font-size: 16px;
+  line-height: 1.6;
+  margin: 15px 0;
+  flex-grow: 1;
+}
+
+.price-container, .package-price {
+  margin-top: auto;
+  padding: 15px;
+  border-top: 2px solid #2d2d2d;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.product-card:hover .price-container,
+.package-card:hover .package-price {
+  border-top-color: #4A90E2;
+}
+
+.price-content {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 150px;
+  justify-content: center;
+}
+
+.price-label {
+  font-weight: 600;
+  color: #2d2d2d;
+  font-size: 17px;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.price-value, .package-price {
+  color: #e41749;
+  font-weight: 700;
+  font-size: 26px;
+  letter-spacing: 0.5px;
+  font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.package-price::after, .price-value::after {
+  content: ' VNĐ';
+  font-size: 15px;
+  color: #666;
+  font-weight: 500;
+  margin-left: 4px;
+  letter-spacing: 0.5px;
+}
+
+.price-label {
+  font-weight: 500;
+  color: #333;
+}
+
+.price-value {
+  color: #f5222d;
+  font-weight: 600;
+  font-size: 18px;
+}
+
+.product-card h3,
+.product-card p,
+.product-card {
+  margin-top: 10px;
+}
+
+.product-card h3 {
+  margin: 0 0 10px;
+  font-size: 18px;
+  color: #333;
+}
+
+.product-card p {
+  margin: 5px 0;
+  color: #666;
+}
+
+.no-data {
+  text-align: center;
+  font-size: 50px;
+  color: #888;
+  margin-top: 20px;
+}
+
+.pagination-container {
+  display: flex;
+  justify-content: flex-end;
+  padding: 20px;
+}
+
+.price-label {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.price-value {
+  color: #ff4d4f;
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.price-value::after {
+  content: 'VNĐ';
+  font-size: 14px;
+  color: #666;
+  font-weight: normal;
+  margin-left: 4px;
+}
+
+.price-unavailable {
+  color: #bfbfbf;
+  font-style: italic;
+  font-size: 16px;
+  margin: 0;
+}
+
+.product-card:hover .price-section {
+  background: #fff;
+  border-color: #ff4d4f;
+  transition: all 0.3s ease;
+}
+
+.price-unavailable {
+  color: #888;
+  font-style: italic;
+  font-size: 15px;
+  letter-spacing: 0.2px;
+  font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.price-label {
+  font-weight: 500;
+  color: #333;
+}
+
+.price-value {
+  color: #ff4d4f;
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.price-unavailable {
+  color: #999;
+  font-style: italic;
+}
+
+.price-container {
+  margin-top: auto;
+  padding: 15px;
+  border-top: 2px solid #eee;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.price-content {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 150px;
+  justify-content: space-between;
+}
+
+.price-label {
+  font-weight: 500;
+  color: #ff4d4f;
+  font-size: 16px;
+}
+
+.price-value {
+  color: #ff4d4f;
+  font-weight: 900;
+  font-size: 25px;
+}
+
+.price-unavailable {
+  color: #999;
+  font-style: italic;
+  font-size: 16px;
+}
+
+.back-home-wrapper {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  z-index: 10;
+}
+
+.back-home {
+  text-decoration: none;
+  font-size: 18px;
+  color: #333;
+  padding: 8px 12px;
+  border-radius: 4px;
+  transition: background 0.3s ease, color 0.3s ease, font-weight 0.3s ease;
+}
+
+.back-home:hover {
+  background: #333;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.description {
+  font-size: 16px;
+  line-height: 1.6;
+  color: #555;
+  font-weight: 400;
+  margin: 20px 0;
+  letter-spacing: 0.2px;
+}
+
+.product-card span, .package-card span {
+  color: #555;
+  font-size: 15px;
+  line-height: 1.6;
+  display: block;
+  margin: 8px 0;
+  font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+  
+.view-more-btn {
+  background-color: #4A90E2;
+  color: white;
+  border: none;
+  padding: 10px 25px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  transition: all 0.3s ease;
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80%;
+}
+
+.view-more-btn:hover {
+  background-color: #357abd;
+  transform: translateX(-50%) translateY(-2px);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+  width: 100%;
+}
