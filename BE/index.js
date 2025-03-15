@@ -129,7 +129,6 @@ app.post("/payment", async (req, res) => {
   }
 });
 
-// Lắng nghe cổng
 app.listen(PORT, () => {
   console.log(`Server đang chạy tại http://localhost:${PORT}`);
 });
