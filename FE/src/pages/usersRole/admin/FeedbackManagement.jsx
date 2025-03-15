@@ -21,7 +21,6 @@ const FeedbackManagement = () => {
     oneStars: 0,
   });
 
-  // Fetch all feedbacks
   const fetchFeedbacks = async () => {
     try {
       setLoading(true);
@@ -35,7 +34,6 @@ const FeedbackManagement = () => {
       });
       
       if (response.status === 200) {
-        // Sort feedbacks by date (newest first)
         const sortedFeedbacks = response.data.sort((a, b) => 
           new Date(b.createAt) - new Date(a.createAt)
         );
@@ -83,13 +81,11 @@ const FeedbackManagement = () => {
     }
   };
 
-  // Calculate statistics from feedbacks
   const calculateStats = (feedbackData) => {
     const total = feedbackData.length;
     const ratingSum = feedbackData.reduce((sum, feedback) => sum + feedback.rating, 0);
     const averageRating = total > 0 ? (ratingSum / total).toFixed(1) : 0;
     
-    // Count ratings by star level
     const ratingCounts = {
       5: feedbackData.filter(f => f.rating === 5).length,
       4: feedbackData.filter(f => f.rating === 4).length,
@@ -109,7 +105,6 @@ const FeedbackManagement = () => {
     });
   };
 
-  // Delete feedback
   const handleDelete = async (id) => {
     try {
       const accesstoken = localStorage.getItem("accesstoken");
@@ -135,7 +130,6 @@ const FeedbackManagement = () => {
     }
   };
 
-  // Search feedbacks
   const handleSearch = (value) => {
     setSearchText(value);
     
@@ -159,7 +153,6 @@ const FeedbackManagement = () => {
     fetchFeedbacks();
   }, []);
 
-  // Table columns
   const columns = [
     {
       title: 'Khách hàng',
@@ -221,7 +214,6 @@ const FeedbackManagement = () => {
     <div className="feedback-management">
       <h1 className="page-title">Quản lý đánh giá khách hàng</h1>
       
-      {/* Statistics Cards */}
       <div className="stats-container">
         <Row gutter={[16, 16]}>
           <Col xs={24} sm={12} md={8} lg={6}>
@@ -268,7 +260,6 @@ const FeedbackManagement = () => {
         </Row>
       </div>
       
-      {/* Search Bar */}
       <div className="search-container">
         <Search
           placeholder="Tìm kiếm theo tên khách hàng, email, số điện thoại hoặc nội dung bình luận"
@@ -281,7 +272,6 @@ const FeedbackManagement = () => {
         />
       </div>
       
-      {/* Feedback Table */}
       <Table
         columns={columns}
         dataSource={filteredFeedbacks}

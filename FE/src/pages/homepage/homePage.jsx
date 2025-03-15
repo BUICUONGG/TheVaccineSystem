@@ -130,13 +130,8 @@ const HomePage = () => {
       setFadeIn(true);
     }, 200);
   };
-
   const handleLogout = () => {
-    // Clear all localStorage items
     localStorage.clear();
-    // Update state
-    setIsLoggedIn(false);
-    setUserRole("");
     navigate("/thank-you");
   };
 
@@ -343,7 +338,6 @@ const HomePage = () => {
         </Menu>
       );
     } else {
-      // Customer menu
       return (
         <Menu>
           <Menu.Item key="profile" icon={<UserOutlined />}>

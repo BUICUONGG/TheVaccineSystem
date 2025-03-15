@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { Table, Input, Button, Modal, Form, Select } from "antd";
-import { EditOutlined } from "@ant-design/icons";
-// import axios from "axios";
+import { EditOutlined, SearchOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../../../service/api";
 
@@ -27,7 +26,8 @@ const AllCustomerPage = () => {
         customer.customerName
           ?.toLowerCase()
           .includes(searchText.toLowerCase()) ||
-        customer.username?.toLowerCase().includes(searchText.toLowerCase())
+        customer.username?.toLowerCase().includes(searchText.toLowerCase()) ||
+        customer.phone?.includes(searchText)
     );
     setFilteredCustomers(filtered);
   }, [customerList, searchText]);
@@ -149,7 +149,7 @@ const AllCustomerPage = () => {
       width: 70,
     },
     {
-      title: "Username",
+      title: "Tên đăng nhập",
       dataIndex: "username",
       key: "username",
       render: (text) => text || "Chưa cập nhật",
@@ -227,10 +227,11 @@ const AllCustomerPage = () => {
     <div style={{ padding: "20px" }}>
       <h2>Customer Information Management</h2>
       <Input
-        placeholder="Search by customer name"
+        prefix={<SearchOutlined />}
+        placeholder="Tìm kiếm theo tên, tên đăng nhập hoặc số điện thoại"
         allowClear
         onChange={handleSearch}
-        style={{ width: 300, marginBottom: 16 }}
+        style={{ width: 400, marginBottom: 16 }}
       />
       <Table
         dataSource={filteredCustomers}
@@ -238,8 +239,6 @@ const AllCustomerPage = () => {
         loading={loading}
         rowKey="userId"
         pagination={{
-          pageSize: 10,
-          showSizeChanger: true,
           showTotal: (total) => `Total ${total} customers`,
         }}
       />

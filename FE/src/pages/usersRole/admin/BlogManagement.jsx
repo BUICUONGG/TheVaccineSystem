@@ -1,17 +1,12 @@
 import { useState, useEffect } from "react";
 import { Table, Input, Button, Modal, Form, Popconfirm, Select, Tag, Rate, Typography, Space, Tooltip, Divider, Badge, Card } from "antd";
 import { EditOutlined, DeleteOutlined, PlusOutlined, FilterOutlined, EyeOutlined, ClockCircleOutlined, LikeOutlined, CommentOutlined, InfoCircleOutlined, StarOutlined } from "@ant-design/icons";
-// import axios from "axios";
-// import { useNavigate } from "react-router-dom";
-
 import axiosInstance from "../../../service/api";
 
-const { Search } = Input;
 const { Option } = Select;
 const { Text, Paragraph } = Typography;
 
 const BlogManagement = () => {
-  // const navigate = useNavigate();
   const [blogs, setBlogs] = useState([]);
   const [loading, setLoading] = useState(false);
   const [filteredBlogs, setFilteredBlogs] = useState([]);
@@ -26,7 +21,6 @@ const BlogManagement = () => {
   const [statusFilter, setStatusFilter] = useState(null);
   const [form] = Form.useForm();
 
-  // Danh sách các danh mục blog
   const categories = [
     { value: "lich-tiem-chung", label: "Lịch tiêm chủng" },
     { value: "hoat-dong-tiem-chung", label: "Hoạt động tiêm chủng" },
@@ -91,7 +85,6 @@ const BlogManagement = () => {
 
   const handleCreate = async (values) => {
     try {
-      // Xử lý tags nếu có
       let tags = [];
       if (values.tags) {
         tags = values.tags.split(',').map(tag => tag.trim());
@@ -117,7 +110,7 @@ const BlogManagement = () => {
 
       setIsModalVisible(false);
       form.resetFields();
-      fetchBlogs(); // Refresh danh sách blog
+      fetchBlogs(); 
     } catch (error) {
       console.error("Error creating blog:", error);
       Modal.error({
@@ -134,7 +127,6 @@ const BlogManagement = () => {
         tags = values.tags.split(',').map(tag => tag.trim());
       }
 
-      // Validate data before sending
       const updatedData = {
         blogTitle: values.blogTitle?.trim() || null,
         blogContent: values.blogContent?.trim() || null,
