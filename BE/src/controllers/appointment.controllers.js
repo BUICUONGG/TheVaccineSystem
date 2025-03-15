@@ -73,6 +73,16 @@ export const searchAppointmentsController = async (req, res) => {
   }
 };
 
+export const handleVNPayReturn = async (req, res) => {
+  try {
+    const vnpParams = req.query;
+    const result = await appointmentService.updateAptStatus(vnpParams);
+    res.status(200).json({ success: true, data: result });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+};
+
 // ======================================================================================================
 
 export const listAllAptGoiController = async (req, res) => {
