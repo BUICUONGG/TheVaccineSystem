@@ -61,7 +61,6 @@ app.use("/staff", staffRoutes);
 app.use("/vaccinepakage", vaccinePakageRoutes);
 app.use("/noti", notiRoutes);
 app.use("/feedback", feedbackRoutes);
-// app.use("/payment", zalopayRoutes);
 // Lắng nghe cổng
 app.listen(PORT, () => {
   console.log(`Server đang chạy tại http://localhost:${PORT}`);

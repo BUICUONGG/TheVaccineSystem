@@ -1,13 +1,14 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation, Outlet } from "react-router-dom";
 import { Button } from "antd";
-import { LogoutOutlined } from "@ant-design/icons";
+import { LogoutOutlined, RollbackOutlined } from "@ant-design/icons";
 import "./staffLayout.css";
 
 const StaffLayout = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [staffName, setStaffName] = useState("");
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     // Kiểm tra authentication và authorization
@@ -28,6 +29,11 @@ const StaffLayout = () => {
         return;
       }
 
+      // Kiểm tra nếu là admin
+      if (payload.role === "admin") {
+        setIsAdmin(true);
+      }
+
       // Nếu là staff, set tên staff
       const username = localStorage.getItem("username");
       if (username) {
@@ -40,14 +46,12 @@ const StaffLayout = () => {
   }, [navigate]);
 
   const handleLogout = () => {
-    // Xóa tất cả thông tin người dùng khỏi localStorage
-    localStorage.removeItem('accesstoken');
-    localStorage.removeItem('role');
-    localStorage.removeItem('userId');
-    localStorage.removeItem('username');
-    
-    // Điều hướng đến trang Thank
-    navigate('/thank-you');
+    localStorage.clear();
+    navigate("/thank-you");
+  };
+
+  const handleBackToAdmin = () => {
+    navigate("/admin");
   };
 
   return (
@@ -78,6 +82,17 @@ const StaffLayout = () => {
         </ul>
 
         <div className="staff-logout">
+          {isAdmin && (
+            <Button
+              type="primary"
+              icon={<RollbackOutlined />}
+              onClick={handleBackToAdmin}
+              className="staff-back-to-admin-btn"
+              style={{ marginBottom: '10px' }}
+            >
+              Quay về trang Admin
+            </Button>
+          )}
           <Button
             type="primary"
             danger
@@ -96,7 +111,6 @@ const StaffLayout = () => {
             <Link to="/homepage" className="staff-nav-link">
               Trang chủ
             </Link>
-            <span className="staff-nav-link">Liên hệ</span>
           </div>
         </header>
         <main className="staff-content">

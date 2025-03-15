@@ -4,7 +4,6 @@ import AppointmentLe from "../model/appointmentSchemaLe.js";
 import Child from "../model/childSchema.js";
 import AppointmentGoi from "../model/appointmentSchemaGoi.js";
 import notiService from "./noti.services.js";
-import { createZaloPayOrder } from "./zalopay.services.js";
 
 class AppointmentService {
   // Kiểm tra tồn kho của vaccine
@@ -129,7 +128,6 @@ class AppointmentService {
         note: note || "",
         status: status || "pending",
       };
-
       // Lưu lịch hẹn vào DB
       const result = await connectToDatabase.appointmentLes.insertOne(aptLe);
 
@@ -143,14 +141,13 @@ class AppointmentService {
       );
 
       //  Tạo thông báo với ID lịch hẹn thay vì object
-      await notiService.createNoti({
+      const noti = await notiService.createNoti({
         cusId: new ObjectId(cusId),
         apt: result.insertedId,
         aptModel: "AppointmentLe",
         message: `Lịch hẹn lẻ của bạn vào lúc ${time} đang trạng thái chờ duyệt`,
         createdAt: new Date().toLocaleDateString("vi-VN"),
       });
-
       return {
         _id: result.insertedId,
         ...aptLe,
@@ -160,6 +157,8 @@ class AppointmentService {
       throw new Error(error.message);
     }
   }
+
+  // Hàm tạo URL thanh toán VNPay
 
   async updateAptLe(id, updateAptLe) {
     try {

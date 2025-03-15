@@ -1,9 +1,7 @@
 import { useState } from "react";
-import { FiUser, FiLock, FiEye, FiEyeOff } from "react-icons/fi";
-import { FcGoogle } from "react-icons/fc";
+import { FiUser, FiLock, FiEye, FiEyeOff } from "react-icons/fi";;
 import { useNavigate, Link } from "react-router-dom";
-// import axios from "axios";
-import "./loginPage.css"; // Import file css mới
+import "./loginPage.css";
 import { toast } from "react-toastify";
 import axiosInstance from "../../service/api";
 
@@ -42,15 +40,11 @@ const LoginPage = () => {
           { username, password },
           { withCredentials: true }
         );
-
-        // Lưu token và username vào localStorage
         localStorage.setItem("accesstoken", response.data.accesstoken);
         localStorage.setItem("userId", response.data.userId);
         localStorage.setItem("cusId", response.data.cusId);
-        // Lưu username vào localStorage
         localStorage.setItem("username", username);
         
-        // Decode token để lấy role
         const tokenParts = response.data.accesstoken.split(".");
         const payload = JSON.parse(atob(tokenParts[1]));
         const userRole = payload.role;
@@ -59,9 +53,6 @@ const LoginPage = () => {
 
         setIsLoading(false);
         toast.success("Đăng nhập thành công!");
-
-        // Kiểm tra role và điều hướng
-        //
         navigate("/welcome");
       } catch (error) {
         setIsLoading(false);
@@ -87,7 +78,7 @@ const LoginPage = () => {
         </div>
         <div className="login-form-container">
           <div className="login-form-header">
-            <h2>Welcome</h2>
+            <h2>Diary Vaccine Xin Chào</h2>
             <p>Vui lòng đăng nhập để tiếp tục</p>
           </div>
           <form onSubmit={handleSubmit}>
@@ -96,7 +87,7 @@ const LoginPage = () => {
               <input
                 type="text"
                 className="login-input"
-                placeholder="Username"
+                placeholder="Tên đăng nhập"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
               />
@@ -106,7 +97,7 @@ const LoginPage = () => {
               <input
                 type={showPassword ? "text" : "password"}
                 className="login-input"
-                placeholder="Password"
+                placeholder="Mật khẩu"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
@@ -147,7 +138,6 @@ const LoginPage = () => {
                 {isLoading ? "Signing in..." : "Đăng Nhập"}
               </button>
             </div>
-            
           </form>
         </div>
       </div>
