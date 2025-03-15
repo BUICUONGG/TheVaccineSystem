@@ -19,6 +19,12 @@ import staffRoutes from "./src/routes/staffs.routes.js";
 import vaccinePakageRoutes from "./src/routes/vaccinePakages.routes.js";
 import notiRoutes from "./src/routes/noti.routes.js";
 import feedbackRoutes from "./src/routes/feedback.routes.js";
+
+//====================================================
+import axios from "axios";
+import CryptoJS from "crypto-js";
+import moment from "moment/moment.js";
+//====================================================
 const app = express();
 app.use(express.json());
 const PORT = 8080 || process.env.PORT;
@@ -61,6 +67,69 @@ app.use("/staff", staffRoutes);
 app.use("/vaccinepakage", vaccinePakageRoutes);
 app.use("/noti", notiRoutes);
 app.use("/feedback", feedbackRoutes);
+app.use(express.urlencoded({ extended: true }));
+// ====================== CẤU HÌNH ZALOPAY ======================
+const config = {
+  appid: "554",
+  key1: "8NdU5pG5R2spGHGhyO99HN1OhD8IQJBn",
+  key2: "uUfsWgfLkRLzq6W2uNXTCxrfxs51auny",
+  endpoint: "https://sandbox.zalopay.com.vn/v001/tpe/createorder",
+};
+
+app.post("/payment", async (req, res) => {
+  try {
+    const embed_data = {
+      redirecturl: "http://localhost5173/homepage",
+    };
+
+    const items = [{}]; // Lưu ý: Cần truyền dữ liệu hợp lệ vào mảng này
+    const transID = Math.floor(Math.random() * 1000000);
+
+    const order = {
+      appid: config.appid,
+      apptransid: `${moment().format("YYMMDD")}_${transID}`, // Mã giao dịch có định dạng yyMMdd_xxxx
+      appuser: "demo",
+      apptime: Date.now(), // miliseconds
+      item: JSON.stringify(items),
+      embeddata: JSON.stringify(embed_data),
+      amount: 1000000000,
+      description: "ZaloPay Integration Demo",
+      bankcode: "",
+    };
+
+    // Chuỗi dữ liệu cần hash
+    const dataToHash = [
+      config.appid,
+      order.apptransid,
+      order.appuser,
+      order.amount,
+      order.apptime,
+      order.embeddata,
+      order.item,
+    ].join("|");
+
+    order.mac = CryptoJS.HmacSHA256(dataToHash, config.key1).toString();
+
+    // Gửi yêu cầu tới ZaloPay
+    const result = await axios.post(config.endpoint, null, { params: order });
+
+    // Trả về kết quả cho client
+    return res.json({
+      success: true,
+      message: "Giao dịch đã được tạo",
+      data: result.data,
+    });
+  } catch (error) {
+    console.error("Lỗi khi xử lý thanh toán:", error.message);
+
+    return res.status(500).json({
+      success: false,
+      message: "Đã xảy ra lỗi khi tạo giao dịch",
+      error: error.message,
+    });
+  }
+});
+
 // Lắng nghe cổng
 app.listen(PORT, () => {
   console.log(`Server đang chạy tại http://localhost:${PORT}`);
