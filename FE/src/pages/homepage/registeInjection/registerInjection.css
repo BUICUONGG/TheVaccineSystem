@@ -1,4 +1,4 @@
-/* Header Framework styles */
+Header Framework styles
 .form-register-page {
   background: #f5f5f5;
 }
@@ -213,7 +213,7 @@
 }
 
 .ant-switch-checked {
-  background-color: #4A90E2 !important;
+  background-color: #4A90E2;
 }
 
 /* Thêm styles cho phần thông tin phụ huynh */
@@ -783,4 +783,225 @@
 .vaccine-registration-section .ant-form-item-label > label {
   font-size: 14px;
   color: #666;
+}
+
+.vaccine-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  padding: 24px;
+  margin: 0 auto;
+}
+
+/* Cập nhật style cho vaccine card */
+.vaccine-card {
+  position: relative;
+  background: white;
+  border: 1px solid #e8e8e8;
+  border-radius: 8px;
+  padding: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  min-height: fit-content;
+}
+
+/* Checkbox */
+.vaccine-checkbox {
+  position: relative;
+  top: 2px;
+  left: 0;
+}
+
+.vaccine-checkbox .ant-checkbox-inner {
+  width: 18px;
+  height: 18px;
+  border-radius: 3px;
+}
+
+/* Nội dung card */
+.vaccine-card-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-left: 8px;
+}
+
+.vaccine-card:hover {
+  transform: translateY(-2px);
+  border-color: #004085;
+  box-shadow: 0 2px 8px rgba(0,64,133,0.1);
+}
+
+.vaccine-card.selected {
+  background-color: #e8f1ff;
+  border: 1px solid #004085;
+}
+
+/* Nội dung card */
+.vaccine-card-content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.vaccine-card h3 {
+  font-size: 14px;
+  font-weight: 600;
+  color: #004085;
+  margin: 0;
+  line-height: 1.4;
+  margin-bottom: 8px;
+}
+
+.vaccine-description {
+  font-size: 12px;
+  color: #666;
+  line-height: 1.5;
+  margin: 0;
+  padding: 8px;
+  border-radius: 4px;
+  flex-grow: 1;
+}
+
+.vaccine-price {
+  font-size: 14px;
+  font-weight: 500;
+  color: #c82333;
+  background: #f8d7da;
+  padding: 6px 12px;
+  border-radius: 4px;
+  display: inline-block;
+  align-self: flex-start;
+  margin-top: auto;
+}
+
+/* Checkbox */
+.vaccine-checkbox {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+}
+
+.vaccine-checkbox .ant-checkbox-inner {
+  width: 16px;
+  height: 16px;
+  border-radius: 3px;
+}
+
+/* Hiệu ứng khi chọn */
+.vaccine-card.selected .vaccine-checkbox .ant-checkbox-inner {
+  background-color: #004085;
+  border-color: #004085;
+}
+
+.vaccine-card.selected::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 3px;
+  background: #004085;
+}
+
+/* Animation khi chọn */
+@keyframes selectPulse {
+  0% { box-shadow: 0 0 0 0 rgba(0,64,133,0.2); }
+  70% { box-shadow: 0 0 0 8px rgba(0,64,133,0); }
+  100% { box-shadow: 0 0 0 0 rgba(0,64,133,0); }
+}
+
+.vaccine-card.selected {
+  animation: selectPulse 1s;
+}
+
+/* Checkbox styles */
+.ant-checkbox-wrapper {
+  margin-right: 8px;
+}
+
+.ant-checkbox-checked .ant-checkbox-inner {
+  background-color: #1890ff;
+  border-color: #1890ff;
+}
+
+.ant-checkbox-wrapper:hover .ant-checkbox-inner,
+.ant-checkbox:hover .ant-checkbox-inner {
+  border-color: #1890ff;
+}
+
+.vaccine-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: #1890ff;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.vaccine-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  border-color: #1890ff;
+}
+
+.vaccine-card.selected {
+  background-color: #e6f7ff;
+  border-color: #1890ff;
+}
+
+.vaccine-card.selected::before {
+  opacity: 1;
+}
+
+.vaccine-card h3 {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1890ff;
+  margin: 0;
+  line-height: 1.4;
+  flex-grow: 1;
+}
+
+.vaccine-card p {
+  font-size: 16px;
+  color: #f5222d;
+  font-weight: 500;
+  margin: 0;
+  padding: 8px 12px;
+  background: #fff2f0;
+  border-radius: 6px;
+  text-align: center;
+}
+
+.vaccine-card .description {
+  font-size: 14px;
+  color: #666;
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+  .vaccine-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .vaccine-cards {
+    grid-template-columns: 1fr;
+  }
+  
+  .vaccine-card {
+    min-height: 120px;
+  }
 }

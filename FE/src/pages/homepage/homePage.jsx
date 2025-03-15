@@ -548,8 +548,8 @@ const HomePage = () => {
 
       <div className="vaccine-info">
         <h2>THÔNG TIN VACCINE</h2>
-        <div className="vaccine-types">
-          <div className="vaccine-card">
+        <div className="home-vaccine-types">
+          <div className="home-vaccine-card">
             <img
               src="/images/vaccineInfo1.webp"
               alt="Tiêm chủng theo yêu cầu"
@@ -559,7 +559,7 @@ const HomePage = () => {
               XEM THÊM
             </a>
           </div>
-          <div className="vaccine-card">
+          <div className="home-vaccine-card">
             <img src="/images/vaccineInfo2.jpg" alt="Tiêm chủng trọn gói" />
             <h3>TIÊM CHỦNG TRỌN GÓI</h3>
             <a href="#" className="read-more">
@@ -619,7 +619,7 @@ const HomePage = () => {
                       {vaccine.vaccineImports &&
                       vaccine.vaccineImports.length > 0 &&
                       vaccine.vaccineImports[0].price
-                        ? `${vaccine.vaccineImports[0].price.toLocaleString()} VNĐ`
+                        ? `${vaccine?.vaccineImports[0]?.totalPrice.toLocaleString()} VNĐ`
                         : "Liên hệ"}
                     </div>
                     <Link to="/pricelist" className="vaccine-view-more-v1">

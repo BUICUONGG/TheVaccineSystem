@@ -171,7 +171,7 @@ const VaccinePriceList = () => {
                             {product.vaccineImports &&
                             product.vaccineImports.length > 0 ? (
                               <span className="price-value">
-                                {product.vaccineImports[0].price}
+                                {product?.vaccineImports[0]?.totalPrice.toLocaleString()}
                               </span>
                             ) : (
                               <span className="price-unavailable">

@@ -123,7 +123,7 @@ class AppointmentService {
         vaccineId: new ObjectId(vaccineId),
         batchId: nearestBatch._id,
         date,
-        date: time,
+        time: time,
         createdAt: new Date().toLocaleDateString("vi-VN"),
         price,
         note: note || "",

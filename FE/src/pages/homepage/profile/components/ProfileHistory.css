@@ -59,7 +59,7 @@
 
 /* Hover effect cho rows */
 .history-table .ant-table-tbody > tr:hover > td {
-  background: #fafafa !important;
+  background: #fafafa;
 }
 
 /* Responsive adjustments */
