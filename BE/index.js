@@ -94,6 +94,7 @@ app.post("/payment", async (req, res) => {
       embeddata: JSON.stringify(embed_data),
       amount: 1000000000,
       description: "ZaloPay Integration Demo",
+      bankcode: "",
     };
 
     // Chuỗi dữ liệu cần hash
