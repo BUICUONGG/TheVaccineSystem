@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Card, Row, Col, Typography, Tag, Space, Divider, Select, Input, Button, Tooltip, Spin, Avatar, Badge, List } from "antd";
+import { Card, Row, Col, Typography, Tag, Space, Divider, Select, Input, Button, Tooltip, Spin, Avatar, List } from "antd";
 import {
   EyeOutlined,
   HeartOutlined,
@@ -16,8 +16,8 @@ import {
   BarsOutlined,
   HomeOutlined,
 } from "@ant-design/icons";
+import slugify from 'slugify';
 import { Link } from "react-router-dom";
-// import axios from "axios";
 import "./BlogList.css";
 import axiosInstance from "../../service/api";
 
@@ -193,8 +193,16 @@ const BlogList = () => {
     // Tăng lượt xem
     incrementViews(blogId);
     
-    // Chuyển hướng đến trang chi tiết bài viết
-    // Lưu ý: Việc chuyển hướng sẽ được xử lý bởi Link component
+    // Chuyển hướng đến trang chi tiết bài viết sẽ được xử lý bởi Link component
+  };
+
+  // Hàm tạo slug an toàn từ tiếng Việt
+  const createSafeSlug = (text) => {
+    return slugify(text, {
+      lower: true,      // Chuyển thành chữ thường
+      strict: true,     // Loại bỏ các ký tự đặc biệt
+      locale: 'vi'      // Hỗ trợ tiếng Việt
+    });
   };
 
   // Render blog item
@@ -209,7 +217,7 @@ const BlogList = () => {
         {blog.thumbnail && (
           <Col xs={24} sm={6} md={4} lg={4}>
             <div className="blog-thumbnail">
-              <Link to={`/blog/${blog.slug}`} onClick={() => incrementViews(blog._id)}>
+              <Link to={`/blog/${createSafeSlug(blog.blogTitle)}`} onClick={() => incrementViews(blog._id)}>
                 <img 
                   src={blog.thumbnail || "./images/blog1.png"} 
                   alt={blog.blogTitle}
@@ -221,7 +229,7 @@ const BlogList = () => {
         
         <Col xs={24} sm={blog.thumbnail ? 18 : 24} md={blog.thumbnail ? 20 : 24} lg={blog.thumbnail ? 20 : 24}>
           <div className="blog-content">
-            <Link to={`/blog/${blog.slug}`} onClick={() => incrementViews(blog._id)}>
+            <Link to={`/blog/${createSafeSlug(blog.blogTitle)}`} onClick={() => incrementViews(blog._id)}>
               <Title level={4} className="blog-title">{blog.blogTitle}</Title>
             </Link>
             
@@ -297,7 +305,7 @@ const BlogList = () => {
             
             {/* Thêm nút xem chi tiết */}
             <div style={{ marginTop: 12, textAlign: 'right' }}>
-              <Link to={`/blog/${blog.slug}`} onClick={() => incrementViews(blog._id)}>
+              <Link to={`/blog/${createSafeSlug(blog.blogTitle)}`} onClick={() => incrementViews(blog._id)}>
                 <Button type="primary" size="small">Xem chi tiết</Button>
               </Link>
             </div>

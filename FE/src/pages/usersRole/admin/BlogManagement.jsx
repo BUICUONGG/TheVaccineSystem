@@ -269,15 +269,15 @@ const BlogManagement = () => {
       render: (text) => text || "Chưa cập nhật",
       width: 120,
     },
-    {
-      title: "Danh mục",
-      dataIndex: "category",
-      key: "category",
-      width: 150,
-      render: (category) => (
-        <Tag color="blue">{getCategoryLabel(category) || "Chưa phân loại"}</Tag>
-      ),
-    },
+    // {
+    //   title: "Danh mục",
+    //   dataIndex: "category",
+    //   key: "category",
+    //   width: 150,
+    //   render: (category) => (
+    //     <Tag color="blue">{getCategoryLabel(category) || "Chưa phân loại"}</Tag>
+    //   ),
+    // },
     
     {
       title: "Trạng thái",
