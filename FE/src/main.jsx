@@ -28,6 +28,7 @@ import ProfileAccount from "./pages/homepage/profile/components/ProfileAccount";
 import FeedbackManagement from "./pages/usersRole/admin/FeedbackManagement";
 // import VaccineShopDetailPage from "./pages/homepage/vaccineShop/vaccineShopDetailPage";
 import StaffsPage from "./pages/usersRole/admin/staffsPage";
+import PaymentPage from "./components/payment/payment";
 
 const router = createBrowserRouter([
   {
@@ -153,6 +154,11 @@ const router = createBrowserRouter([
   {
     path: "/forgot-password",
     element: <ForgotPassword />,
+  },
+
+  {
+    path: "payment",
+    element: <PaymentPage />,
   },
 ]);
 
