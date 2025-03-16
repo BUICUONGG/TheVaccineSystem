@@ -68,66 +68,107 @@ app.use("/vaccinepakage", vaccinePakageRoutes);
 app.use("/noti", notiRoutes);
 app.use("/feedback", feedbackRoutes);
 app.use(express.urlencoded({ extended: true }));
+
 // ====================== CẤU HÌNH ZALOPAY ======================
 const config = {
-  appid: "554",
-  key1: "8NdU5pG5R2spGHGhyO99HN1OhD8IQJBn",
-  key2: "uUfsWgfLkRLzq6W2uNXTCxrfxs51auny",
-  endpoint: "https://sandbox.zalopay.com.vn/v001/tpe/createorder",
+  app_id: "2554",
+  key1: "sdngKKJmqEMzvh5QQcdD2A9XBSKUNaYn",
+  key2: "trMrHtvjo6myautxDUiAcYsVtaeQ8nhf",
+  endpoint: "https://sb-openapi.zalopay.vn/v2/create",
 };
 
 app.post("/payment", async (req, res) => {
+  const embed_data = {
+    redirecturl: "http://localhost:5173/",
+  };
+
+  const items = [
+    {
+      itemid: "001",
+      itemname: "Gói vaccine ABC",
+      itemprice: 50000,
+      itemquantity: 1,
+    },
+  ];
+
+  const transID = Math.floor(Math.random() * 1000000);
+  const order = {
+    app_id: config.app_id,
+    app_trans_id: `${moment().format("YYMMDD")}_${transID}`, // translation missing: vi.docs.shared.sample_code.comments.app_trans_id
+    app_user: "user123",
+    app_time: Date.now(), // miliseconds
+    item: JSON.stringify(items),
+    embed_data: JSON.stringify(embed_data),
+    amount: 50000,
+    description: `Lazada - Payment for the order #${transID}`,
+    bank_code: "",
+    callback_url: "https://dbfd-58-187-185-8.ngrok-free.app/callback",
+  };
+
+  // Chuỗi dữ liệu cần hash
+  const data =
+    config.app_id +
+    "|" +
+    order.app_trans_id +
+    "|" +
+    order.app_user +
+    "|" +
+    order.amount +
+    "|" +
+    order.app_time +
+    "|" +
+    order.embed_data +
+    "|" +
+    order.item;
+  order.mac = CryptoJS.HmacSHA256(data, config.key1).toString();
+  // Gửi yêu cầu tới ZaloPay
+  // const result = await axios.post(config.endpoint, null, { params: order });
   try {
-    const embed_data = {
-      redirecturl: "http://localhost5173/homepage",
-    };
-
-    const items = [{}]; // Lưu ý: Cần truyền dữ liệu hợp lệ vào mảng này
-    const transID = Math.floor(Math.random() * 1000000);
-
-    const order = {
-      appid: config.appid,
-      apptransid: `${moment().format("YYMMDD")}_${transID}`, // Mã giao dịch có định dạng yyMMdd_xxxx
-      appuser: "demo",
-      apptime: Date.now(), // miliseconds
-      item: JSON.stringify(items),
-      embeddata: JSON.stringify(embed_data),
-      amount: 1000000000,
-      description: "ZaloPay Integration Demo",
-      bankcode: "",
-    };
-
-    // Chuỗi dữ liệu cần hash
-    const dataToHash = [
-      config.appid,
-      order.apptransid,
-      order.appuser,
-      order.amount,
-      order.apptime,
-      order.embeddata,
-      order.item,
-    ].join("|");
-
-    order.mac = CryptoJS.HmacSHA256(dataToHash, config.key1).toString();
-
-    // Gửi yêu cầu tới ZaloPay
     const result = await axios.post(config.endpoint, null, { params: order });
-
-    // Trả về kết quả cho client
-    return res.json({
-      success: true,
-      message: "Giao dịch đã được tạo",
-      data: result.data,
-    });
+    return res.status(200).json(result.data);
   } catch (error) {
-    console.error("Lỗi khi xử lý thanh toán:", error.message);
-
-    return res.status(500).json({
-      success: false,
-      message: "Đã xảy ra lỗi khi tạo giao dịch",
-      error: error.message,
-    });
+    console.log(error.message);
   }
+});
+
+app.post("/callback", (req, res) => {
+  let result = {};
+
+  try {
+    let dataStr = req.body.data;
+    let reqMac = req.body.mac;
+
+    let mac = CryptoJS.HmacSHA256(dataStr, config.key2).toString();
+    console.log("mac =", mac);
+
+    // kiểm tra callback hợp lệ (đến từ ZaloPay server)
+    if (reqMac !== mac) {
+      // callback không hợp lệ
+      result.return_code = -1;
+      result.return_message = "mac not equal";
+    } else {
+      // thanh toán thành công
+      // merchant cập nhật trạng thái cho đơn hàng
+      let dataJson = JSON.parse(dataStr, config.key2);
+      console.log(
+        "update order's status = success where app_trans_id =",
+        dataJson["app_trans_id"]
+      );
+
+      result.return_code = 1;
+      result.return_message = "success";
+    }
+  } catch (ex) {
+    result.return_code = 0; // ZaloPay server sẽ callback lại (tối đa 3 lần)
+    result.return_message = ex.message;
+  }
+
+  // thông báo kết quả cho ZaloPay server
+  res.json(result);
+});
+
+app.listen(8080, function () {
+  console.log("Server is listening at port :8080");
 });
 
 app.listen(PORT, () => {
