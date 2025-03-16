@@ -1,6 +1,5 @@
 import express from "express";
 import path from "path";
-// import "dotenv/config";
 import dotenv from "dotenv";
 dotenv.config();
 import cookieParser from "cookie-parser";
@@ -19,11 +18,13 @@ import staffRoutes from "./src/routes/staffs.routes.js";
 import vaccinePakageRoutes from "./src/routes/vaccinePakages.routes.js";
 import notiRoutes from "./src/routes/noti.routes.js";
 import feedbackRoutes from "./src/routes/feedback.routes.js";
-
+import qs from "qs";
 //====================================================
 import axios from "axios";
 import CryptoJS from "crypto-js";
 import moment from "moment/moment.js";
+import { log } from "console";
+import QueryString from "qs";
 //====================================================
 const app = express();
 app.use(express.json());
@@ -167,8 +168,31 @@ app.post("/callback", (req, res) => {
   res.json(result);
 });
 
-app.listen(8080, function () {
-  console.log("Server is listening at port :8080");
+app.post("/order-status/:id", async (req, res) => {
+  const app_trans_id = req.params.id;
+  let postData = {
+    app_id: config.app_id,
+    app_trans_id: app_trans_id, // Input your apptransid
+  };
+
+  let data = postData.app_id + "|" + postData.app_trans_id + "|" + config.key1; // appid|app_trans_id|key1
+  postData.mac = CryptoJS.HmacSHA256(data, config.key1).toString();
+
+  let postConfig = {
+    method: "post",
+    url: "https://sb-openapi.zalopay.vn/v2/query",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    data: qs.stringify(postData),
+  };
+
+  try {
+    const result = await axios(postConfig);
+    return res.status(200).json(result.data);
+  } catch (error) {
+    console.log(error.message);
+  }
 });
 
 app.listen(PORT, () => {
