@@ -6,7 +6,6 @@ import {
   deleteAptLeController,
   getAppointmentsController,
   getAppointmentsWithDetailsByIdController,
-  handleVNPayReturn,
   listAllAptGoiController,
   listAllAptLeController,
   searchAppointmentsController,
@@ -58,9 +57,6 @@ aptLeRoutes.post(
   validateAccessToken,
   searchAppointmentsController
 );
-
-aptLeRoutes.get("/vnpay_return", handleVNPayReturn);
-
 //-----------------Apt Gois ------------------------------------------
 aptGoiRoutes.get("/showInfo", validateAccessToken, listAllAptGoiController);
 

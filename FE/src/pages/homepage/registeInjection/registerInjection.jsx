@@ -1,11 +1,10 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Form, Select, Button, DatePicker, Input, Radio, Switch } from "antd";
+import { Form, Button, DatePicker, Input, Radio, Switch, Checkbox } from "antd";
 import { UserOutlined, UserAddOutlined } from "@ant-design/icons";
 import dayjs from "dayjs"; // Thay moment bằng dayjs
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-// import axios from "axios";
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import "./registerInjection.css";
 import axiosInstance from "../../../service/api";
@@ -18,7 +17,8 @@ const RegisterInjection = () => {
   const [parentInfo, setParentInfo] = useState(null);
   const [isChildRegistration, setIsChildRegistration] = useState(false);
   const [vaccinePackages, setVaccinePackages] = useState([]); // Thêm state cho vaccine gói
-  const [selectedVaccineType, setSelectedVaccineType] = useState("single"); // 'single' hoặc 'package'
+  const [selectedVaccineType, setSelectedVaccineType] = useState(null); // 'single' hoặc 'package'
+  const [selectedVaccineId, setSelectedVaccineId] = useState(null); // Lưu trữ ID của vaccine được chọn
 
   useEffect(() => {
     const token = localStorage.getItem("accesstoken");
@@ -108,56 +108,49 @@ const RegisterInjection = () => {
     }
   }, [isLoggedIn, form]);
 
-  // const handleLogin = () => navigate("/login");
-  // const handleRegister = () => navigate("/register");
+  const handleVaccineSelect = (vaccine) => {
+    // Cập nhật ID vaccine được chọn
+    setSelectedVaccineId(vaccine._id);
 
-  // const handleLogout = async () => {
-  //   try {
-  //     const userId = localStorage.getItem("userId");
-  //     const accesstoken = localStorage.getItem("accesstoken");
-
-  //     if (userId && accesstoken) {
-  //       await axiosInstance.post(
-  //         `/user/logout/${userId}`,
-  //         {},
-  //         {
-  //           headers: {
-  //             Authorization: `Bearer ${accesstoken}`,
-  //           },
-  //         }
-  //       );
-  //     }
-
-  //     localStorage.removeItem("accesstoken");
-  //     localStorage.removeItem("username");
-  //     localStorage.removeItem("userId");
-  //     isCookie.removeItem("refreshToken");
-  //     setIsLoggedIn(false);
-  //     navigate("/login");
-  //   } catch (error) {
-  //     console.error("Logout error:", error);
-  //     toast.error("Logout failed. Please try again.", {
-  //       position: "top-right",
-  //       autoClose: 3000,
-  //     });
-  //   }
-  // };
+    // Cập nhật form values tùy theo loại vaccine
+    if (selectedVaccineType === "single") {
+      form.setFieldsValue({
+        vaccineId: vaccine._id,
+        vaccinePackageId: undefined
+      });
+    } else {
+      form.setFieldsValue({
+        vaccineId: undefined,
+        vaccinePackageId: vaccine._id
+      });
+    }
+  };
 
   const onFinish = async (values) => {
     try {
       const accesstoken = localStorage.getItem("accesstoken");
-      // const userId = localStorage.getItem("userId");
       const cusId = localStorage.getItem("cusId");
-      const today = new Date();
-      const createAt = `${String(today.getDate()).padStart(2, "0")}/${String(
-        today.getMonth() + 1
-      ).padStart(2, "0")}/${today.getFullYear()}`;
-      const formattedDate = values.date.format("DD/MM/YYYY");
+
+      if (!selectedVaccineId) {
+        toast.error("Vui lòng chọn vaccine trước khi đăng ký!");
+        return;
+      }
+
+      // Format thời gian
+      const now = new Date();
+      const createAt = `${String(now.getDate()).padStart(2, "0")}/${String(
+        now.getMonth() + 1
+      ).padStart(2, "0")}/${now.getFullYear()}`;
+      const time = `${String(now.getHours()).padStart(2, "0")}:${String(
+        now.getMinutes()
+      ).padStart(2, "0")}`;
+      const selectedDate = values.date.format("DD/MM/YYYY");
 
       // Chuẩn bị dữ liệu chung
       const requestData = {
         cusId: cusId,
-        date: formattedDate,
+        date: selectedDate,
+        time: time,
         createAt: createAt,
         status: "pending",
         ...(isChildRegistration && {
@@ -168,38 +161,42 @@ const RegisterInjection = () => {
         }),
       };
 
-      // Kiểm tra loại vaccine để gửi đúng API
-      if (selectedVaccineType === "single") {
-        requestData.vaccineId = values.vaccineId; // Nếu chọn vaccine lẻ, thêm vaccineId
-        await axiosInstance.post("/appointmentLe/create", requestData, {
-          headers: { Authorization: `Bearer ${accesstoken}` },
-        });
-      }
-      if (selectedVaccineType === "package") {
-        requestData.vaccinePakageId = values.vaccinePakageId; // Nếu chọn gói, thêm vaccinePakageId
-        await axiosInstance.post("/appointmentGoi/create", requestData, {
-          headers: { Authorization: `Bearer ${accesstoken}` },
-        });
-      }
+      console.log("Request Data:", requestData);
 
-      // Thông báo thành công
-      toast.success(
-        `Đăng ký tiêm chủng ${
-          selectedVaccineType === "single" ? "vaccine lẻ" : "gói vaccine"
-        } thành công!`,
-        {
+      // Gọi API riêng biệt cho từng loại vaccine
+      if (selectedVaccineType === "single") {
+        // Đăng ký vaccine lẻ
+        await axiosInstance.post("/appointmentLe/create", {
+          ...requestData,
+          vaccineId: selectedVaccineId,
+        }, {
+          headers: { Authorization: `Bearer ${accesstoken}` },
+        });
+
+        toast.success("Đăng ký tiêm vaccine lẻ thành công!", {
           position: "top-right",
           autoClose: 2000,
           onClose: () => navigate("/homepage"),
-        }
-      );
-      console.log("Dữ liệu gửi đi:", requestData);
+        });
+      } else {
+        // Đăng ký gói vaccine
+        await axiosInstance.post("/appointmentGoi/create", {
+          ...requestData,
+          vaccinePackageId: selectedVaccineId,
+        }, {
+          headers: { Authorization: `Bearer ${accesstoken}` },
+        });
+
+        toast.success("Đăng ký tiêm gói vaccine thành công!", {
+          position: "top-right",
+          autoClose: 2000,
+          onClose: () => navigate("/homepage"),
+        });
+      }
     } catch (error) {
       console.error("Registration error:", error);
       toast.error(
-        `Đăng ký ${
-          selectedVaccineType === "single" ? "vaccine lẻ" : "gói vaccine"
-        } thất bại, vui lòng thử lại`,
+        `Đăng ký ${selectedVaccineType === "single" ? "vaccine lẻ" : "gói vaccine"} thất bại, vui lòng thử lại`,
         {
           position: "top-right",
           autoClose: 3000,
@@ -335,15 +332,15 @@ const RegisterInjection = () => {
                 {(!parentInfo?.customerName ||
                   !parentInfo?.phone ||
                   !parentInfo?.address) && (
-                  <div className="update-info-notice">
-                    <span className="notice-text">
-                      Vui lòng cập nhật đầy đủ thông tin cá nhân!
-                    </span>
-                    <Link to="/profile" className="update-link">
-                      Cập nhật ngay
-                    </Link>
-                  </div>
-                )}
+                    <div className="update-info-notice">
+                      <span className="notice-text">
+                        Vui lòng cập nhật đầy đủ thông tin cá nhân!
+                      </span>
+                      <Link to="/profile" className="update-link">
+                        Cập nhật ngay
+                      </Link>
+                    </div>
+                  )}
               </div>
             )}
 
@@ -366,26 +363,64 @@ const RegisterInjection = () => {
                 name={
                   selectedVaccineType === "single"
                     ? "vaccineId"
-                    : "vaccinePakageId"
+                    : "vaccinePackageId"
                 }
                 label="Chọn Vaccine"
                 rules={[{ required: true, message: "Vui lòng chọn vaccine!" }]}
               >
-                <Select placeholder="Chọn loại vắc xin">
+                <div className="vaccine-cards">
                   {selectedVaccineType === "single"
                     ? vaccineList.map((vaccine) => (
-                        <Select.Option key={vaccine._id} value={vaccine._id}>
-                          {vaccine.vaccineName} -{" "}
-                          {vaccine.vaccineImports?.[0]?.price || "Chưa có giá"}{" "}
-                          VNĐ
-                        </Select.Option>
-                      ))
+                      <div
+                        key={vaccine._id}
+                        className={`vaccine-card ${selectedVaccineId === vaccine._id ? "selected" : ""
+                          }`}
+                        onClick={() => handleVaccineSelect(vaccine)}
+                      >
+                        <Checkbox
+                          checked={selectedVaccineId === vaccine._id}
+                          onChange={(e) => {
+                            e.stopPropagation();
+                            handleVaccineSelect(vaccine);
+                          }}
+                          className="vaccine-checkbox"
+                        />
+                        <div className="vaccine-card-content">
+                          <h3>{vaccine.vaccineName}</h3>
+                          <p className="vaccine-description">{vaccine.description}</p>
+                          <p className="vaccine-price">
+                            {vaccine.vaccineImports?.[0]?.price
+                              ? `${vaccine.vaccineImports[0].price.toLocaleString()} VNĐ`
+                              : "Chưa có giá"}
+                          </p>
+                        </div>
+                      </div>
+                    ))
                     : vaccinePackages.map((pack) => (
-                        <Select.Option key={pack._id} value={pack._id}>
-                          {pack.packageName} - {pack.price || "Chưa có giá"} VNĐ
-                        </Select.Option>
-                      ))}
-                </Select>
+                      <div
+                        key={pack._id}
+                        className={`vaccine-card ${selectedVaccineId === pack._id ? "selected" : ""
+                          }`}
+                        onClick={() => handleVaccineSelect(pack)}
+                      >
+                        <Checkbox
+                          checked={selectedVaccineId === pack._id}
+                          onChange={(e) => {
+                            e.stopPropagation();
+                            handleVaccineSelect(pack);
+                          }}
+                          className="vaccine-checkbox"
+                        />
+                        <div className="vaccine-card-content">
+                          <h3>{pack.packageName}</h3>
+                          <p className="vaccine-description">{pack.description}</p>
+                          <p className="vaccine-price">
+                            {pack.price ? `${pack.price.toLocaleString()} VNĐ` : "Chưa có giá"}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                </div>
               </Form.Item>
 
               <Form.Item
@@ -420,6 +455,7 @@ const RegisterInjection = () => {
                 className="form-submit-btn"
                 size="large"
                 onClick={() => form.submit()}
+                disabled={!selectedVaccineId}
               >
                 Xác nhận đăng ký
               </Button>
