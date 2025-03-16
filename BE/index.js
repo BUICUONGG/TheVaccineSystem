@@ -18,13 +18,14 @@ import staffRoutes from "./src/routes/staffs.routes.js";
 import vaccinePakageRoutes from "./src/routes/vaccinePakages.routes.js";
 import notiRoutes from "./src/routes/noti.routes.js";
 import feedbackRoutes from "./src/routes/feedback.routes.js";
-import qs from "qs";
+// import qs from "qs";
 //====================================================
-import axios from "axios";
-import CryptoJS from "crypto-js";
-import moment from "moment/moment.js";
-import { log } from "console";
-import QueryString from "qs";
+// import axios from "axios";
+// import CryptoJS from "crypto-js";
+// import moment from "moment/moment.js";
+// import { log } from "console";
+// import QueryString from "qs";
+import paymentRoutes from "./src/routes/payment.routes.js";
 //====================================================
 const app = express();
 app.use(express.json());
@@ -68,6 +69,7 @@ app.use("/staff", staffRoutes);
 app.use("/vaccinepakage", vaccinePakageRoutes);
 app.use("/noti", notiRoutes);
 app.use("/feedback", feedbackRoutes);
+app.use("/zalopay", paymentRoutes);
 app.use(express.urlencoded({ extended: true }));
 
 // ====================== CẤU HÌNH ZALOPAY ======================
