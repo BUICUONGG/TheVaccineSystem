@@ -18,14 +18,13 @@ import staffRoutes from "./src/routes/staffs.routes.js";
 import vaccinePakageRoutes from "./src/routes/vaccinePakages.routes.js";
 import notiRoutes from "./src/routes/noti.routes.js";
 import feedbackRoutes from "./src/routes/feedback.routes.js";
+import paymentRoutes from "./src/routes/payment.routes.js";
 // import qs from "qs";
-//====================================================
+// // ====================================================
 // import axios from "axios";
 // import CryptoJS from "crypto-js";
 // import moment from "moment/moment.js";
-// import { log } from "console";
-// import QueryString from "qs";
-import paymentRoutes from "./src/routes/payment.routes.js";
+
 //====================================================
 const app = express();
 app.use(express.json());
@@ -105,7 +104,7 @@ app.use(express.urlencoded({ extended: true }));
 //     amount: 50000,
 //     description: `Lazada - Payment for the order #${transID}`,
 //     bank_code: "",
-//     callback_url: "https://dbfd-58-187-185-8.ngrok-free.app/callback",
+//     callback_url: "https://ea2d-58-187-185-8.ngrok-free.app/callback",
 //   };
 
 //   // Chuỗi dữ liệu cần hash
