@@ -1,254 +1,204 @@
-import { useState, useEffect } from "react";
-import { Card, Row, Col, Typography, Spin, Pagination, Input, Empty, Breadcrumb } from "antd";
-import {
-  EyeOutlined,
-  CalendarOutlined,
-  SearchOutlined,
-  HomeOutlined
-} from "@ant-design/icons";
-import { Link, useParams, useNavigate, useLocation } from "react-router-dom";
-import "./NewsList.css";
-import axiosInstance from "../../service/api";
-import NewsNavigation from "../../components/NewsNavigation";
+import React, { useState, useEffect } from 'react';
+import { Card, Row, Col, Typography, Spin, Empty, Button, message, Divider, Tag } from 'antd';
+import { Link, useNavigate } from 'react-router-dom';
+import { HomeOutlined, CalendarOutlined } from '@ant-design/icons';
+import axiosInstance from '../../service/api';
+import './NewsList.css';
 
-const { Title, Paragraph } = Typography;
-const { Search } = Input;
+const { Title, Text, Paragraph } = Typography;
 
 const NewsList = () => {
-  const [news, setNews] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [pagination, setPagination] = useState({
-    current: 1,
-    pageSize: 9,
-    total: 0
-  });
-  const [searchQuery, setSearchQuery] = useState("");
-  
-  const { category } = useParams();
-  const navigate = useNavigate();
-  const location = useLocation();
-  
-  // Get current page from URL query params
-  const queryParams = new URLSearchParams(location.search);
-  const page = parseInt(queryParams.get('page')) || 1;
-  
-  useEffect(() => {
-    if (category) {
-      fetchNewsByCategory(category, page);
-    } else if (searchQuery) {
-      searchNews(searchQuery, page);
-    } else {
-      fetchAllNews(page);
-    }
-  }, [category, page, searchQuery]);
+    const [news, setNews] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const navigate = useNavigate();
 
-  const fetchAllNews = async (page = 1) => {
-    try {
-      setLoading(true);
-      const response = await axiosInstance.get(`/news?page=${page}&limit=${pagination.pageSize}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("accesstoken")}`,
-        },
-      });
-      
-      setNews(response.data.data);
-      setPagination({
-        ...pagination,
-        current: page,
-        total: response.data.pagination.total
-      });
-      setLoading(false);
-    } catch (error) {
-      console.error("Failed to fetch news:", error);
-      setLoading(false);
-    }
-  };
-  
-  const fetchNewsByCategory = async (category, page = 1) => {
-    try {
-      setLoading(true);
-      const response = await axiosInstance.get(`/news/category/${category}?page=${page}&limit=${pagination.pageSize}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("accesstoken")}`,
-        },
-      });
-      
-      setNews(response.data.data);
-      setPagination({
-        ...pagination,
-        current: page,
-        total: response.data.pagination.total
-      });
-      setLoading(false);
-    } catch (error) {
-      console.error(`Failed to fetch ${category} news:`, error);
-      setLoading(false);
-    }
-  };
-  
-  const searchNews = async (query, page = 1) => {
-    try {
-      setLoading(true);
-      const response = await axiosInstance.get(`/news/search?q=${query}&page=${page}&limit=${pagination.pageSize}`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("accesstoken")}`,
-        },
-      });
-      
-      setNews(response.data.data);
-      setPagination({
-        ...pagination,
-        current: page,
-        total: response.data.pagination.total
-      });
-      setLoading(false);
-    } catch (error) {
-      console.error("Failed to search news:", error);
-      setLoading(false);
-    }
-  };
-  
-  const handlePageChange = (page) => {
-    // Update URL with new page parameter
-    navigate(`${location.pathname}?page=${page}`);
-  };
-  
-  const handleSearch = (value) => {
-    setSearchQuery(value);
-    // Reset to page 1 when searching
-    navigate(`/news?page=1&search=${value}`);
-  };
-  
-  const incrementViewCount = async (id) => {
-    try {
-      await axiosInstance.post(`/news/view/${id}`, {}, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("accesstoken")}`,
-        },
-      });
-    } catch (error) {
-      console.error("Failed to increment view count:", error);
-    }
-  };
-  
-  const getCategoryName = () => {
-    if (!category) return "Tất cả tin tức";
-    
+    // Category mapping
     const categoryMap = {
-      'uu-dai': 'Ưu đãi hấp dẫn',
-      'tin-tuc-suc-khoe': 'Tin tức sức khoẻ',
-      'hoat-dong': 'Hoạt động VNVC toàn quốc',
-      'khai-truong': 'Khai trương VNVC toàn quốc',
-      'livestream': 'Livestream tư vấn',
-      'tu-van': 'Tư vấn kiến thức sức khoẻ',
-      'cuoc-thi': 'Cuộc thi và sự kiện',
-      'doi-tac': 'Đối tác và hợp tác'
+        'tin-tuc-suc-khoe': 'Tin tức sức khoẻ',
+        'hoat-dong': 'Hoạt động VNVC toàn quốc',
+        'tu-van': 'Tư vấn kiến thức sức khoẻ',
+        'general': 'Tin tức chung'
     };
-    
-    return categoryMap[category] || 'Tin tức';
-  };
 
-  return (
-    <div className="news-container">
-      <div className="news-header">
-        <Breadcrumb className="news-breadcrumb">
-          <Breadcrumb.Item>
-            <Link to="/homepage"><HomeOutlined /> Trang chủ</Link>
-          </Breadcrumb.Item>
-          <Breadcrumb.Item>
-            <Link to="/news">Tin tức</Link>
-          </Breadcrumb.Item>
-          {category && (
-            <Breadcrumb.Item>{getCategoryName()}</Breadcrumb.Item>
-          )}
-        </Breadcrumb>
-        
-        <Search
-          placeholder="Tìm kiếm tin tức"
-          enterButton={<SearchOutlined />}
-          size="large"
-          onSearch={handleSearch}
-          className="news-search"
-        />
-      </div>
+    useEffect(() => {
+        fetchAllNews();
+    }, []);
 
-      <div className="news-content">
-        <Row gutter={24}>
-          <Col xs={24} sm={24} md={6} lg={6} xl={6}>
-            <div className="news-sidebar">
-              <div className="news-category-title">Danh mục tin tức</div>
-              <NewsNavigation />
+    const fetchAllNews = async () => {
+        try {
+            setLoading(true);
+            const response = await axiosInstance.get('/news/getAllNews');
+            console.log('News data:', response.data);
+            
+            if (response.data && response.data.result) {
+                // Filter only published news
+                const publishedNews = response.data.result.filter(item => item.status === 'published');
+                setNews(publishedNews);
+            } else {
+                setNews([]);
+            }
+        } catch (error) {
+            console.error('Error fetching news:', error);
+            message.error('Không thể tải dữ liệu tin tức');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const formatDate = (dateString) => {
+        if (!dateString) return '';
+        try {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('vi-VN', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            });
+        } catch (error) {
+            return '';
+        }
+    };
+
+    const getCategoryName = (category) => {
+        return categoryMap[category] || category || 'Không xác định';
+    };
+
+    const truncateText = (text, maxLength = 150) => {
+        if (!text) return '';
+        return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
+    };
+
+    return (
+        <div className="news-container">
+            <div className="news-header">
+                <Button 
+                    className="back-home-button"
+                    type="primary" 
+                    icon={<HomeOutlined />} 
+                    onClick={() => navigate('/')}
+                >
+                    Quay về trang chủ
+                </Button>
+                <Title level={2} className="news-title">TIN TỨC</Title>
             </div>
-          </Col>
-          
-          <Col xs={24} sm={24} md={18} lg={18} xl={18}>
-            <div className="news-main">
-              <Title level={2} className="news-section-title">
-                {searchQuery ? `Kết quả tìm kiếm: ${searchQuery}` : getCategoryName()}
-              </Title>
-              
-              {loading ? (
-                <div className="news-loading">
-                  <Spin size="large" />
+
+            <Divider />
+
+            {loading ? (
+                <div className="loading-container">
+                    <Spin size="large" />
+                    <p>Đang tải dữ liệu...</p>
                 </div>
-              ) : news.length === 0 ? (
-                <Empty description="Không tìm thấy tin tức nào" />
-              ) : (
-                <>
-                  <Row gutter={[24, 24]}>
-                    {news.map((newsItem) => (
-                      <Col xs={24} sm={12} md={8} key={newsItem._id}>
-                        <Link 
-                          to={`/news/detail/${newsItem._id}`}
-                          onClick={() => incrementViewCount(newsItem._id)}
-                        >
-                          <Card 
-                            hoverable
-                            className="news-card"
-                            cover={
-                              <img
-                                alt={newsItem.newsTitle}
-                                src={newsItem.imageUrl || "/images/news/default.jpg"}
-                                className="news-card-image"
-                              />
-                            }
-                          >
-                            <div className="news-card-category">{newsItem.categoryName}</div>
-                            <Title level={4} className="news-card-title">{newsItem.newsTitle}</Title>
-                            <Paragraph ellipsis={{ rows: 3 }} className="news-card-summary">
-                              {newsItem.summary || newsItem.newsContent.substring(0, 150) + '...'}
-                            </Paragraph>
-                            <div className="news-card-meta">
-                              <span className="news-card-date">
-                                <CalendarOutlined /> {new Date(newsItem.createDate).toLocaleDateString('vi-VN')}
-                              </span>
-                              <span className="news-card-views">
-                                <EyeOutlined /> {newsItem.viewCount || 0}
-                              </span>
-                            </div>
-                          </Card>
-                        </Link>
-                      </Col>
-                    ))}
-                  </Row>
-                  
-                  <div className="news-pagination">
-                    <Pagination
-                      current={pagination.current}
-                      pageSize={pagination.pageSize}
-                      total={pagination.total}
-                      onChange={handlePageChange}
-                      showSizeChanger={false}
-                    />
-                  </div>
-                </>
-              )}
-            </div>
-          </Col>
-        </Row>
-      </div>
-    </div>
-  );
+            ) : news.length === 0 ? (
+                <Empty description="Không có tin tức nào" />
+            ) : (
+                <div>
+                    {/* Featured/Latest News */}
+                    <div className="featured-news">
+                        {news.slice(0, 1).map(item => (
+                            <Card key={item._id} hoverable>
+                                <div className="featured-news-container">
+                                    <div className="featured-news-image">
+                                        {item.imageUrl ? (
+                                            <>
+                                                <img 
+                                                    alt={item.newsTitle} 
+                                                    src={item.imageUrl}
+                                                />
+                                                <img 
+                                                    src="../images/LogoHeader.png"
+                                                    alt="VNVC Logo"
+                                                    className="news-logo-overlay"
+                                                />
+                                            </>
+                                        ) : (
+                                            <div className="news-card-placeholder">
+                                                <Text type="secondary">Không có hình ảnh</Text>
+                                            </div>
+                                        )}
+                                    </div>
+                                    <div className="featured-news-content">
+                                        <div>
+                                            <Tag color="blue">{getCategoryName(item.category)}</Tag>
+                                            {item.featured && <Tag color="gold">Nổi bật</Tag>}
+                                        </div>
+                                        <Link to={`/news/detail/${item._id}`}>
+                                            <Title level={2} className="featured-news-title">
+                                                {item.newsTitle}
+                                            </Title>
+                                        </Link>
+                                        <Paragraph className="featured-news-description">
+                                            {truncateText(item.newsContent, 300)}
+                                        </Paragraph>
+                                        <div className="news-card-meta">
+                                            <Text type="secondary">
+                                                <CalendarOutlined style={{ marginRight: '5px' }} />
+                                                {formatDate(item.createDate)}
+                                            </Text>
+                                        </div>
+                                        <div className="news-card-action">
+                                            <Link to={`/news/detail/${item._id}`}>
+                                                <Button type="link">Xem chi tiết</Button>
+                                            </Link>
+                                        </div>
+                                    </div>
+                                </div>
+                            </Card>
+                        ))}
+                    </div>
+
+                    {/* Regular News Grid */}
+                    <div className="news-grid">
+                        {news.slice(1).map(item => (
+                            <Card
+                                key={item._id}
+                                hoverable
+                                cover={
+                                    item.imageUrl ? (
+                                        <div className="news-card-image-container">
+                                            <img 
+                                                alt={item.newsTitle} 
+                                                src={item.imageUrl} 
+                                                className="news-card-image"
+                                            />
+                                            <img 
+                                                src="../images/LogoHeader.png"
+                                                alt="VNVC Logo"
+                                                className="news-logo-overlay"
+                                            />
+                                        </div>
+                                    ) : (
+                                        <div className="news-card-placeholder">
+                                            <Text type="secondary">Không có hình ảnh</Text>
+                                        </div>
+                                    )
+                                }
+                            >
+                                <div>
+                                    <Tag color="blue">{getCategoryName(item.category)}</Tag>
+                                    {item.featured && <Tag color="gold">Nổi bật</Tag>}
+                                </div>
+                                <Link to={`/news/detail/${item._id}`}>
+                                    <Title level={4} className="news-card-title">{item.newsTitle}</Title>
+                                </Link>
+                                <div className="news-card-meta">
+                                    <Text type="secondary">
+                                        <CalendarOutlined style={{ marginRight: '5px' }} />
+                                        {formatDate(item.createDate)}
+                                    </Text>
+                                </div>
+                                <div className="news-card-action">
+                                    <Link to={`/news/detail/${item._id}`}>
+                                        <Button type="link">Xem chi tiết</Button>
+                                    </Link>
+                                </div>
+                            </Card>
+                        ))}
+                    </div>
+                </div>
+            )}
+        </div>
+    );
 };
 
 export default NewsList;

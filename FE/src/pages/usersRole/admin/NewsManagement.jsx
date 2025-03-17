@@ -45,37 +45,25 @@ const NewsManagement = () => {
     const [editForm] = Form.useForm();
     const [imageUrl, setImageUrl] = useState(null);
     const [uploadLoading, setUploadLoading] = useState(false);
-    const [pagination, setPagination] = useState({
-        current: 1,
-        pageSize: 10,
-        total: 0
-    });
-    const [filterStatus, setFilterStatus] = useState("all");
 
-    // Category options
+    // Category options based on updated schema
     const categoryOptions = [
-        { value: 'uu-dai', label: 'Ưu đãi hấp dẫn' },
         { value: 'tin-tuc-suc-khoe', label: 'Tin tức sức khoẻ' },
-        { value: 'hoat-dong', label: 'Hoạt động VNVC toàn quốc' },
-        { value: 'khai-truong', label: 'Khai trương VNVC toàn quốc' },
-        { value: 'livestream', label: 'Livestream tư vấn' },
-        { value: 'tu-van', label: 'Tư vấn kiến thức sức khoẻ' },
-        { value: 'cuoc-thi', label: 'Cuộc thi và sự kiện' },
-        { value: 'doi-tac', label: 'Đối tác và hợp tác' },
+        { value: 'hoat-dong', label: 'Hoạt động' },
+        { value: 'tu-van', label: 'Tư vấn kiến thức' },
         { value: 'general', label: 'Tin tức chung' }
     ];
 
     useEffect(() => {
         fetchNews();
-    }, [pagination.current, pagination.pageSize, filterStatus]);
+    }, []);
 
     useEffect(() => {
         if (searchText) {
             const filtered = news.filter(
                 (item) =>
-                    item.newsTitle.toLowerCase().includes(searchText.toLowerCase()) ||
-                    item.newsContent.toLowerCase().includes(searchText.toLowerCase()) ||
-                    (item.categoryName && item.categoryName.toLowerCase().includes(searchText.toLowerCase()))
+                    item.newsTitle?.toLowerCase().includes(searchText.toLowerCase()) ||
+                    item.newsContent?.toLowerCase().includes(searchText.toLowerCase())
             );
             setFilteredNews(filtered);
         } else {
@@ -90,53 +78,27 @@ const NewsManagement = () => {
     const fetchNews = async () => {
         try {
             setLoading(true);
+            const response = await axiosInstance.get("/news/getAllNews");
+            console.log("API response:", response.data);
             
-            // Construct query parameters
-            let url = `/news?page=${pagination.current}&limit=${pagination.pageSize}`;
-            if (filterStatus !== "all") {
-                url += `&status=${filterStatus}`;
+            if (response.data && response.data.result) {
+                setNews(response.data.result);
+                setFilteredNews(response.data.result);
+            } else {
+                setNews([]);
+                setFilteredNews([]);
             }
-            
-            const response = await axiosInstance.get(url, {
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem("accesstoken")}`,
-                },
-            });
-            
-            setNews(response.data.data);
-            setFilteredNews(response.data.data);
-            setPagination({
-                ...pagination,
-                total: response.data.pagination.total
-            });
         } catch (error) {
             console.error("Error fetching news:", error);
-            message.error("Failed to fetch news");
+            message.error("Không thể tải dữ liệu tin tức");
         } finally {
             setLoading(false);
         }
     };
 
-    const handleTableChange = (pagination) => {
-        setPagination({
-            ...pagination
-        });
-    };
-
-    const handleStatusFilterChange = (value) => {
-        setFilterStatus(value);
-        setPagination({
-            ...pagination,
-            current: 1
-        });
-    };
-
-    // Mock image upload function - replace with your actual upload logic
+    // Image upload function
     const handleImageUpload = async (file) => {
         setUploadLoading(true);
-        
-        // In a real application, you would upload the file to your server or a cloud storage service
-        // For this example, we'll just simulate an upload with a timeout
         
         try {
             // Simulate API call
@@ -148,13 +110,13 @@ const NewsManagement = () => {
             reader.onload = () => {
                 setImageUrl(reader.result);
                 setUploadLoading(false);
-                message.success("Image uploaded successfully");
+                message.success("Tải ảnh lên thành công");
             };
             
             return false; // Prevent default upload behavior
         } catch (error) {
             console.error("Error uploading image:", error);
-            message.error("Failed to upload image");
+            message.error("Tải ảnh lên thất bại");
             setUploadLoading(false);
             return false;
         }
@@ -166,16 +128,12 @@ const NewsManagement = () => {
                 ? values.createDate.format('YYYY-MM-DD') 
                 : new Date().toISOString().split('T')[0];
             
-            // Process tags if provided
-            const tags = values.tags ? values.tags.split(',').map(tag => tag.trim()) : [];
-            
             const newsData = {
                 ...values,
                 userId: localStorage.getItem("userId") || "defaultUserId",
                 createDate: createDate,
                 imageUrl: imageUrl,
-                tags: tags,
-                status: values.status || "draft"
+                featured: values.featured || false
             };
             
             await axiosInstance.post("/news/create", 
@@ -194,22 +152,18 @@ const NewsManagement = () => {
             fetchNews();
         } catch (error) {
             console.error("Error creating news:", error);
-            message.error("Failed to create news: " + (error.response?.data?.error || error.message));
+            message.error("Tạo tin tức thất bại: " + (error.response?.data?.error || error.message));
         }
     };
 
     const handleUpdate = async (values) => {
         try {
-            // Process tags if provided
-            const tags = values.tags ? values.tags.split(',').map(tag => tag.trim()) : [];
-            
             const updatedData = {
                 ...values,
-                tags: tags,
                 imageUrl: imageUrl || editingNews.imageUrl
             };
             
-            await axiosInstance.put(
+            await axiosInstance.post(
                 `/news/update/${editingNews._id}`,
                 updatedData,
                 {
@@ -224,14 +178,15 @@ const NewsManagement = () => {
             fetchNews();
         } catch (error) {
             console.error("Error updating news:", error);
-            message.error("Failed to update news: " + (error.response?.data?.error || error.message));
+            message.error("Cập nhật tin tức thất bại: " + (error.response?.data?.error || error.message));
         }
     };
 
     const handleDelete = async (newsId) => {
         try {
-            await axiosInstance.delete(
+            await axiosInstance.post(
                 `/news/delete/${newsId}`,
+                {},
                 {
                     headers: {
                         Authorization: `Bearer ${localStorage.getItem("accesstoken")}`,
@@ -243,13 +198,13 @@ const NewsManagement = () => {
             fetchNews();
         } catch (error) {
             console.error("Error deleting news:", error);
-            message.error("Failed to delete news: " + (error.response?.data?.error || error.message));
+            message.error("Xóa tin tức thất bại: " + (error.response?.data?.error || error.message));
         }
     };
 
     const handleArchive = async (newsId) => {
         try {
-            await axiosInstance.put(
+            await axiosInstance.post(
                 `/news/archive/${newsId}`,
                 {},
                 {
@@ -263,13 +218,13 @@ const NewsManagement = () => {
             fetchNews();
         } catch (error) {
             console.error("Error archiving news:", error);
-            message.error("Failed to archive news: " + (error.response?.data?.error || error.message));
+            message.error("Lưu trữ tin tức thất bại: " + (error.response?.data?.error || error.message));
         }
     };
 
     const handleRestore = async (newsId) => {
         try {
-            await axiosInstance.put(
+            await axiosInstance.post(
                 `/news/restore/${newsId}`,
                 {},
                 {
@@ -283,7 +238,7 @@ const NewsManagement = () => {
             fetchNews();
         } catch (error) {
             console.error("Error restoring news:", error);
-            message.error("Failed to restore news: " + (error.response?.data?.error || error.message));
+            message.error("Khôi phục tin tức thất bại: " + (error.response?.data?.error || error.message));
         }
     };
 
@@ -294,9 +249,7 @@ const NewsManagement = () => {
         editForm.setFieldsValue({
             newsTitle: news.newsTitle,
             newsContent: news.newsContent,
-            summary: news.summary,
             category: news.category,
-            tags: news.tags ? news.tags.join(', ') : '',
             status: news.status,
             featured: news.featured
         });
@@ -318,15 +271,20 @@ const NewsManagement = () => {
             case 'archived':
                 return <Tag color="red">Đã lưu trữ</Tag>;
             default:
-                return <Tag color="default">{status}</Tag>;
+                return <Tag color="default">{status || "Không xác định"}</Tag>;
         }
+    };
+
+    const getCategoryName = (categoryValue) => {
+        const category = categoryOptions.find(cat => cat.value === categoryValue);
+        return category ? category.label : categoryValue || "Không xác định";
     };
 
     const columns = [
         {
             title: "STT",
             key: "stt",
-            render: (_, record, index) => (pagination.current - 1) * pagination.pageSize + index + 1,
+            render: (_, record, index) => index + 1,
             width: 70,
         },
         {
@@ -338,10 +296,27 @@ const NewsManagement = () => {
         },
         {
             title: "Danh mục",
-            dataIndex: "categoryName",
-            key: "categoryName",
+            dataIndex: "category",
+            key: "category",
             width: 180,
-            render: (text) => text || "Chưa phân loại",
+            filters: [
+                { text: "Tin tức sức khoẻ", value: "tin-tuc-suc-khoe" },
+                { text: "Hoạt động", value: "hoat-dong" },
+                { text: "Tư vấn kiến thức", value: "tu-van" },
+                { text: "Tin tức chung", value: "general" }
+            ],
+            onFilter: (value, record) => record.category === value,
+            render: (category) => (
+                <span style={{
+                    textTransform: "capitalize",
+                    color: category === "tin-tuc-suc-khoe" ? "#ff4d4f" :
+                           category === "hoat-dong" ? "#1890ff" :
+                           category === "tu-van" ? "#52c41a" :
+                           category === "general" ? "#faad14" : "#000000"
+                }}>
+                    {getCategoryName(category)}
+                </span>
+            ),
         },
         {
             title: "Ngày tạo",
@@ -473,22 +448,15 @@ const NewsManagement = () => {
                 gap: "10px"
             }}>
                 <Search
-                    placeholder="Tìm kiếm theo tiêu đề, nội dung hoặc danh mục"
+                    placeholder="Tìm kiếm theo tiêu đề hoặc nội dung"
                     enterButton
                     onSearch={handleSearch}
                     style={{ width: 300 }}
                 />
                 
-                <Select
-                    defaultValue="all"
-                    style={{ width: 150 }}
-                    onChange={handleStatusFilterChange}
-                >
-                    <Option value="all">Tất cả trạng thái</Option>
-                    <Option value="published">Đã xuất bản</Option>
-                    <Option value="draft">Bản nháp</Option>
-                    <Option value="archived">Đã lưu trữ</Option>
-                </Select>
+                <Button onClick={fetchNews} type="default">
+                    Làm mới dữ liệu
+                </Button>
             </div>
             
             <Table
@@ -497,11 +465,10 @@ const NewsManagement = () => {
                 loading={loading}
                 rowKey="_id"
                 pagination={{
-                    ...pagination,
+                    pageSize: 10,
                     showSizeChanger: true,
                     showTotal: (total) => `Tổng ${total} tin tức`,
                 }}
-                onChange={handleTableChange}
             />
 
             {/* Create News Modal */}
@@ -522,19 +489,11 @@ const NewsManagement = () => {
                     </Form.Item>
                     
                     <Form.Item
-                        name="summary"
-                        label="Tóm tắt"
-                        rules={[{ max: 500, message: "Tóm tắt không quá 500 ký tự" }]}
-                    >
-                        <TextArea rows={3} maxLength={500} />
-                    </Form.Item>
-                    
-                    <Form.Item
                         name="newsContent"
                         label="Nội dung"
                         rules={[{ required: true, message: "Vui lòng nhập nội dung" }]}
                     >
-                        <TextArea rows={8} maxLength={5000} />
+                        <TextArea rows={8} />
                     </Form.Item>
                     
                     <Form.Item
@@ -549,13 +508,6 @@ const NewsManagement = () => {
                                 </Option>
                             ))}
                         </Select>
-                    </Form.Item>
-                    
-                    <Form.Item
-                        name="tags"
-                        label="Tags (phân cách bằng dấu phẩy)"
-                    >
-                        <Input placeholder="tag1, tag2, tag3" />
                     </Form.Item>
                     
                     <Form.Item
@@ -589,17 +541,6 @@ const NewsManagement = () => {
                             placeholder="Chọn ngày tạo"
                             style={{ width: '100%' }}
                         />
-                    </Form.Item>
-                    
-                    <Form.Item
-                        name="status"
-                        label="Trạng thái"
-                        initialValue="draft"
-                    >
-                        <Select>
-                            <Option value="published">Xuất bản</Option>
-                            <Option value="draft">Lưu nháp</Option>
-                        </Select>
                     </Form.Item>
                     
                     <Form.Item
@@ -641,14 +582,6 @@ const NewsManagement = () => {
                     </Form.Item>
                     
                     <Form.Item
-                        name="summary"
-                        label="Tóm tắt"
-                        rules={[{ max: 500, message: "Tóm tắt không quá 500 ký tự" }]}
-                    >
-                        <TextArea rows={3} maxLength={500} />
-                    </Form.Item>
-                    
-                    <Form.Item
                         name="newsContent"
                         label="Nội dung"
                         rules={[
@@ -656,7 +589,7 @@ const NewsManagement = () => {
                             { whitespace: true, message: "Không được chỉ chứa khoảng trắng" }
                         ]}
                     >
-                        <TextArea rows={8} maxLength={5000} />
+                        <TextArea rows={8} />
                     </Form.Item>
                     
                     <Form.Item
@@ -671,13 +604,6 @@ const NewsManagement = () => {
                                 </Option>
                             ))}
                         </Select>
-                    </Form.Item>
-                    
-                    <Form.Item
-                        name="tags"
-                        label="Tags (phân cách bằng dấu phẩy)"
-                    >
-                        <Input placeholder="tag1, tag2, tag3" />
                     </Form.Item>
                     
                     <Form.Item
@@ -738,37 +664,20 @@ const NewsManagement = () => {
                     <Button key="back" onClick={() => setIsViewModalVisible(false)}>
                         Đóng
                     </Button>,
-                    <Button 
-                        key="edit" 
-                        type="primary" 
-                        onClick={() => {
-                            setIsViewModalVisible(false);
-                            showEditModal(viewingNews);
-                        }}
-                    >
-                        Chỉnh sửa
-                    </Button>
                 ]}
                 width={800}
             >
                 {viewingNews && (
-                    <div className="news-view-container">
-                        <h2>{viewingNews.newsTitle}</h2>
-                        
+                    <div className="news-view-container" style={{ padding: '20px' , gap: '20px'}}>
+                        <h2><strong>Tiêu đề:</strong> {viewingNews.newsTitle}</h2>
                         <div className="news-view-meta">
-                            <p><strong>Danh mục:</strong> {viewingNews.categoryName}</p>
+                            <p><strong>ID:</strong> {viewingNews._id}</p>
+                            <p><strong>Danh mục:</strong> {getCategoryName(viewingNews.category)}</p>
                             <p><strong>Ngày tạo:</strong> {new Date(viewingNews.createDate).toLocaleDateString('vi-VN')}</p>
                             <p><strong>Trạng thái:</strong> {getStatusTag(viewingNews.status)}</p>
                             <p><strong>Lượt xem:</strong> {viewingNews.viewCount || 0}</p>
                             <p><strong>Nổi bật:</strong> {viewingNews.featured ? "Có" : "Không"}</p>
                         </div>
-                        
-                        {viewingNews.summary && (
-                            <div className="news-view-summary">
-                                <h3>Tóm tắt:</h3>
-                                <p>{viewingNews.summary}</p>
-                            </div>
-                        )}
                         
                         {viewingNews.imageUrl && (
                             <div className="news-view-image">
@@ -778,18 +687,9 @@ const NewsManagement = () => {
                         )}
                         
                         <div className="news-view-content">
-                            <h3>Nội dung:</h3>
+                            <h3><strong>Nội dung: </strong></h3>
                             <div style={{ whiteSpace: 'pre-wrap' }}>{viewingNews.newsContent}</div>
                         </div>
-                        
-                        {viewingNews.tags && viewingNews.tags.length > 0 && (
-                            <div className="news-view-tags">
-                                <h3>Tags:</h3>
-                                {viewingNews.tags.map(tag => (
-                                    <Tag key={tag} color="blue">{tag}</Tag>
-                                ))}
-                            </div>
-                        )}
                     </div>
                 )}
             </Modal>
