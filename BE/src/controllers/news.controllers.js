@@ -3,16 +3,10 @@ import newsService from "../services/news.services.js";
 // Get all news with pagination
 export const getAllNewsController = async (req, res) => {
   try {
-    const { page = 1, limit = 10, status = "published" } = req.query;
-    const news = await newsService.getAllNews(
-      parseInt(page), 
-      parseInt(limit), 
-      status
-    );
-    return res.status(200).json(news);
+    const result = await newsService.getAllNews();
+    res.json({ result });
   } catch (error) {
-    console.error("Error fetching all news:", error);
-    return res.status(500).json({ error: error.message });
+    res.status(500).json(error.message);  
   }
 };
 

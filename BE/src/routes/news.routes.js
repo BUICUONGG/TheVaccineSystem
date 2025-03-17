@@ -20,7 +20,7 @@ const newsRoutes = Router();
 // PATH: http://localhost:8080/news/......
 
 // Public routes (no authentication required)
-newsRoutes.get("/", getAllNewsController);
+newsRoutes.get("/getAllNews", getAllNewsController);
 newsRoutes.get("/featured", getFeaturedNewsController);
 newsRoutes.get("/search", searchNewsController);
 newsRoutes.get("/category/:category", getNewsByCategoryController);
