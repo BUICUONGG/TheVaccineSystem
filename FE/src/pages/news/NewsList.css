@@ -197,3 +197,34 @@
     height: 30px;
   }
 }
+
+.category-filter {
+    margin: 20px 0;
+    text-align: center;
+}
+
+.category-filter .ant-space {
+    justify-content: center;
+}
+
+.category-filter .ant-btn {
+    margin: 5px;
+    min-width: 150px;
+    height: 40px;
+    border-radius: 20px;
+    transition: all 0.3s ease;
+}
+
+.category-filter .ant-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.category-filter .ant-btn-primary {
+    background-color: #1890ff;
+}
+
+.category-filter .ant-btn-default:hover {
+    color: #1890ff;
+    border-color: #1890ff;
+}

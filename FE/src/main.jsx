@@ -14,6 +14,7 @@ import BlogList from "./pages/blog/BlogList";
 // import BlogDetail from "./pages/blog/BlogDetail";
 import BlogManagement from "./pages/usersRole/admin/BlogManagement";
 import NewsList from "./pages/news/NewsList";
+import NewsDetail from "./pages/news/NewsDetail";
 import NewsManagement from "./pages/usersRole/admin/NewsManagement";
 import DashboardPage from "./pages/usersRole/admin/dashboardPage";
 import RegisterInjection from "./pages/homepage/registeInjection/registerInjection";
@@ -71,6 +72,10 @@ const router = createBrowserRouter([
   {
     path: "/news",
     element: <NewsList />,
+  },
+  {
+    path: "/news/detail/:id",
+    element: <NewsDetail />,
   },
   {
     path: "/blogs",
