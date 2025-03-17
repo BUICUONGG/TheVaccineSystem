@@ -25,15 +25,15 @@ newsRoutes.get("/featured", getFeaturedNewsController);
 newsRoutes.get("/search", searchNewsController);
 newsRoutes.get("/category/:category", getNewsByCategoryController);
 newsRoutes.get("/related/:id", getRelatedNewsController);
+newsRoutes.get("/detail/:id", getNewsByIdController);
 newsRoutes.get("/:id", getNewsByIdController);
-newsRoutes.get("/:slug", getNewsByIdController);
 newsRoutes.post("/view/:id", incrementViewCountController);
 
 // Protected routes (authentication required)
 newsRoutes.post("/create", validateAccessToken, isAdmin, createNewsController);
-newsRoutes.put("/update/:id", validateAccessToken, isAdmin, updateNewsController);
-newsRoutes.delete("/delete/:id", validateAccessToken, isAdmin, deleteNewsController);
-newsRoutes.put("/archive/:id", validateAccessToken, isAdmin, archiveNewsController);
-newsRoutes.put("/restore/:id", validateAccessToken, isAdmin, restoreNewsController);
+newsRoutes.post("/update/:id", validateAccessToken, isAdmin, updateNewsController);
+newsRoutes.post("/delete/:id", validateAccessToken, isAdmin, deleteNewsController);
+newsRoutes.post("/archive/:id", validateAccessToken, isAdmin, archiveNewsController);
+newsRoutes.post("/restore/:id", validateAccessToken, isAdmin, restoreNewsController);
 
 export default newsRoutes;

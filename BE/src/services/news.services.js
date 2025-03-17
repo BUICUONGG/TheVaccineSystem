@@ -44,19 +44,15 @@ class NewsService {
         }
     }
     
-    // Get news by ID or slug
-    async getNewsById(idOrSlug) {
+    // Get news by ID
+    async getNewsById(id) {
         try {
-            let query = {};
-            
             // Check if the parameter is an ObjectId
-            if (ObjectId.isValid(idOrSlug)) {
-                query = { _id: new ObjectId(idOrSlug) };
-            } else {
-                // Otherwise, treat it as a slug
-                query = { slug: idOrSlug };
+            if (!ObjectId.isValid(id)) {
+                throw new Error("Invalid news ID");
             }
             
+            const query = { _id: new ObjectId(id) };
             const result = await connectToDatabase.news.findOne(query);
             
             if (!result) {
@@ -73,6 +69,12 @@ class NewsService {
     // Get news by category
     async getNewsByCategory(category, page = 1, limit = 10) {
         try {
+            // Validate category against the enum values in schema
+            const validCategories = ["tin-tuc-suc-khoe", "hoat-dong", "tu-van", "general"];
+            if (!validCategories.includes(category)) {
+                throw new Error("Invalid category");
+            }
+            
             const skip = (page - 1) * limit;
             const query = { category, status: "published" };
             
@@ -154,6 +156,12 @@ class NewsService {
     // Create news
     async createNews(newsData) {
         try {
+            // Validate category
+            const validCategories = ["tin-tuc-suc-khoe", "hoat-dong", "tu-van", "general"];
+            if (!validCategories.includes(newsData.category)) {
+                throw new Error("Invalid category");
+            }
+            
             const news = new News(newsData);
             await news.validate();
             const result = await connectToDatabase.news.insertOne(news);
@@ -167,6 +175,14 @@ class NewsService {
     // Update news
     async updateNews(id, dataUpdate) {
         try {
+            // Validate category if provided
+            if (dataUpdate.category) {
+                const validCategories = ["tin-tuc-suc-khoe", "hoat-dong", "tu-van", "general"];
+                if (!validCategories.includes(dataUpdate.category)) {
+                    throw new Error("Invalid category");
+                }
+            }
+            
             // Add updateDate
             dataUpdate.updateDate = new Date();
             
@@ -275,14 +291,11 @@ class NewsService {
                 throw new Error("News not found");
             }
             
-            // Find related news by category and tags
+            // Find related news by category
             const relatedNews = await connectToDatabase.news.find({
                 _id: { $ne: new ObjectId(id) }, // Exclude current news
                 status: "published",
-                $or: [
-                    { category: news.category },
-                    { tags: { $in: news.tags || [] } }
-                ]
+                category: news.category
             })
             .sort({ createDate: -1 })
             .limit(limit)

@@ -16,11 +16,11 @@ export const getAllNewsController = async (req, res) => {
   }
 };
 
-// Get news by ID or slug
+// Get news by ID
 export const getNewsByIdController = async (req, res) => {
   try {
-    const idOrSlug = req.params.id || req.params.slug;
-    const news = await newsService.getNewsById(idOrSlug);
+    const id = req.params.id;
+    const news = await newsService.getNewsById(id);
     return res.status(200).json(news);
   } catch (error) {
     console.error("Error fetching news by ID:", error);
@@ -33,6 +33,13 @@ export const getNewsByCategoryController = async (req, res) => {
   try {
     const { category } = req.params;
     const { page = 1, limit = 10 } = req.query;
+    
+    // Validate category
+    const validCategories = ["tin-tuc-suc-khoe", "hoat-dong", "tu-van", "general"];
+    if (!validCategories.includes(category)) {
+      return res.status(400).json({ error: "Invalid category" });
+    }
+    
     const news = await newsService.getNewsByCategory(
       category,
       parseInt(page),
@@ -81,6 +88,12 @@ export const searchNewsController = async (req, res) => {
 // Create news
 export const createNewsController = async (req, res) => {
   try {
+    // Validate category
+    const validCategories = ["tin-tuc-suc-khoe", "hoat-dong", "tu-van", "general"];
+    if (!validCategories.includes(req.body.category)) {
+      return res.status(400).json({ error: "Invalid category" });
+    }
+    
     // Add userId from authenticated user
     const newsData = {
       ...req.body,
@@ -105,6 +118,14 @@ export const updateNewsController = async (req, res) => {
   try {
     const id = req.params.id;
     const dataUpdate = req.body;
+    
+    // Validate category if provided
+    if (dataUpdate.category) {
+      const validCategories = ["tin-tuc-suc-khoe", "hoat-dong", "tu-van", "general"];
+      if (!validCategories.includes(dataUpdate.category)) {
+        return res.status(400).json({ error: "Invalid category" });
+      }
+    }
     
     // Prevent updating userId
     if (dataUpdate.userId) {
