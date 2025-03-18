@@ -77,7 +77,7 @@ const BlogList = () => {
         params.sortOrder = "desc";
       }
       
-      const response = await axiosInstance.get("/blogs/showBlog", {
+      const response = await axiosInstance.get("/blog/showBlog", {
         params,
         headers: {
           Authorization: `Bearer ${localStorage.getItem("accesstoken")}`,
@@ -95,7 +95,7 @@ const BlogList = () => {
 
   const fetchPopularTags = async () => {
     try {
-      const response = await axiosInstance.get("/blogs/tags/popular", {
+      const response = await axiosInstance.get("/blog/tags/popular", {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("accesstoken")}`,
         },
@@ -108,7 +108,7 @@ const BlogList = () => {
 
   const toggleLike = async (blogId) => {
     try {
-      await axiosInstance.post(`/blogs/like/${blogId}`, {}, {
+      await axiosInstance.post(`/blog/like/${blogId}`, {}, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("accesstoken")}`,
         },
@@ -165,7 +165,7 @@ const BlogList = () => {
   // Hàm tăng lượt xem khi người dùng xem chi tiết bài viết
   const incrementViews = async (blogId) => {
     try {
-      const response = await axiosInstance.post(`/blogs/incrementViews/${blogId}`, {}, {
+      const response = await axiosInstance.post(`/blog/view/${blogId}`, {}, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("accesstoken")}`,
         },

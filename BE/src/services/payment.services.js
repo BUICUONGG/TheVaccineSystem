@@ -13,7 +13,9 @@ const config = {
 class PaymentService {
   async createPayment(paymentData) {
     try {
-      const embed_data = { redirecturl: "http://localhost:5173/" };
+      const embed_data = {
+        redirecturl: "http://localhost:5173/payment-success",
+      };
 
       const items = [{ paymentData }];
 

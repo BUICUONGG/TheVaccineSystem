@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { Table, Input, Button, Modal, Form, Popconfirm, Select, Tag, Rate, Typography, Space, Tooltip, Divider, Badge, Card } from "antd";
-import { EditOutlined, DeleteOutlined, PlusOutlined, FilterOutlined, EyeOutlined, ClockCircleOutlined, LikeOutlined, CommentOutlined, InfoCircleOutlined, StarOutlined } from "@ant-design/icons";
+import { EditOutlined, DeleteOutlined, PlusOutlined, FilterOutlined, EyeOutlined, ClockCircleOutlined, LikeOutlined, CommentOutlined, InfoCircleOutlined, StarOutlined, UndoOutlined } from "@ant-design/icons";
 import axiosInstance from "../../../service/api";
 
+const { Search } = Input;
 const { Option } = Select;
 const { Text, Paragraph } = Typography;
 
@@ -10,6 +11,7 @@ const BlogManagement = () => {
   const [blogs, setBlogs] = useState([]);
   const [loading, setLoading] = useState(false);
   const [filteredBlogs, setFilteredBlogs] = useState([]);
+  const [searchText, setSearchText] = useState("");
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
   const [isDetailModalVisible, setIsDetailModalVisible] = useState(false);
@@ -20,6 +22,9 @@ const BlogManagement = () => {
   const [categoryFilter, setCategoryFilter] = useState(null);
   const [statusFilter, setStatusFilter] = useState(null);
   const [form] = Form.useForm();
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalBlogs, setTotalBlogs] = useState(0);
+  const pageSize = 10;
 
   const categories = [
     { value: "lich-tiem-chung", label: "Lịch tiêm chủng" },
@@ -35,20 +40,21 @@ const BlogManagement = () => {
   }, []);
 
   useEffect(() => {
-    let filtered = blogs;
-    
-    // Lọc theo danh mục
-    if (categoryFilter) {
-      filtered = filtered.filter(blog => blog.category === categoryFilter);
+    if (searchText) {
+      const filtered = blogs.filter(
+        (item) =>
+          item.blogTitle?.toLowerCase().includes(searchText.toLowerCase()) ||
+          item.blogContent?.toLowerCase().includes(searchText.toLowerCase())
+      );
+      setFilteredBlogs(filtered);
+    } else {
+      setFilteredBlogs(blogs);
     }
-    
-    // Lọc theo trạng thái
-    if (statusFilter) {
-      filtered = filtered.filter(blog => blog.status === statusFilter);
-    }
-    
-    setFilteredBlogs(filtered);
-  }, [blogs, categoryFilter, statusFilter]);
+  }, [blogs, searchText]);
+
+  const handleSearch = (value) => {
+    setSearchText(value);
+  };
 
   const handleCategoryFilter = (value) => {
     setCategoryFilter(value);
@@ -58,22 +64,26 @@ const BlogManagement = () => {
     setStatusFilter(value);
   };
 
-  const fetchBlogs = async () => {
+  const fetchBlogs = async (page = currentPage) => {
     try {
       setLoading(true);
-      const response = await axiosInstance.get("/blogs/showBlog", {
+      const response = await axiosInstance.get("/blog/showBlog", {
         params: {
-          includeDeleted: true  // Thêm tham số để lấy cả bài viết đã ẩn
+          page: page,
+          limit: pageSize,
+          includeDeleted: true
         },
         headers: {
           Authorization: `Bearer ${localStorage.getItem("accesstoken")}`,
         },
       });
-      // Hiển thị tất cả các blog, bao gồm cả những blog có trạng thái "none" và "active"
-      const blogsData = response.data.blogs || response.data;
-      console.log("Fetched blogs:", blogsData); // Log để kiểm tra dữ liệu
+      
+      const blogsData = response.data.blogs || [];
+      const total = response.data.total || 0;
+      
       setBlogs(blogsData);
       setFilteredBlogs(blogsData);
+      setTotalBlogs(total);
       setLoading(false);
     } catch (error) {
       console.error("Failed to fetch blogs:", error);
@@ -81,6 +91,11 @@ const BlogManagement = () => {
         content: "Không thể tải danh sách blog",
       });
     }
+  };
+
+  const handleTableChange = (pagination) => {
+    setCurrentPage(pagination.current);
+    fetchBlogs(pagination.current);
   };
 
   const handleCreate = async (values) => {
@@ -91,7 +106,7 @@ const BlogManagement = () => {
       }
 
       await axiosInstance.post(
-        "/blogs/createBlog",
+        "/blog/create",
         {
           ...values,
           tags,
@@ -134,11 +149,10 @@ const BlogManagement = () => {
         category: values.category || editingBlog.category,
         tags,
         status: editingBlog.status,
-        thumbnail: values.thumbnail || editingBlog.thumbnail,
       };
 
       await axiosInstance.post(
-        `/blogs/update/${editingBlog._id}`,
+        `/blog/update/${editingBlog._id}`,
         updatedData,
         {
           headers: {
@@ -163,7 +177,7 @@ const BlogManagement = () => {
   const handleDelete = async (blogId) => {
     try {
       await axiosInstance.post(
-        `/blogs/delete/${blogId}`,
+        `/blog/delete/${blogId}`,
         {},
         {
           headers: {
@@ -188,7 +202,7 @@ const BlogManagement = () => {
   const handleRestore = async (blogId) => {
     try {
       await axiosInstance.post(
-        `/blogs/restore/${blogId}`,
+        `/blog/restore/${blogId}`,
         {},
         {
           headers: {
@@ -234,56 +248,57 @@ const BlogManagement = () => {
       width: 60,
     },
     {
-      title: "Title",
+      title: "Tiêu đề",
       dataIndex: "blogTitle",
       key: "blogTitle",
-      render: (text) => text || "Chưa cập nhật",
-      ellipsis: true,
-      width: 200,
-    },
-    {
-      title: "Content",
-      dataIndex: "blogContent",
-      key: "blogContent",
       ellipsis: true,
       width: 250,
-      render: (text, record) => (
-        <Space direction="vertical">
-          <Paragraph ellipsis={{ rows: 2 }}>
-            {text || "Chưa cập nhật"}
-          </Paragraph>
-          {/* <Button 
-            type="link" 
-            icon={<EyeOutlined />} 
-            onClick={() => showDetailModal(record)}
-          >
-            Xem chi tiết
-          </Button> */}
-        </Space>
-      ),
+      render: (text) => text || "Chưa cập nhật",
     },
     {
-      title: "Author",
+      title: "Tác giả",
       dataIndex: "author",
       key: "author",
+      width: 150,
       render: (text) => text || "Chưa cập nhật",
-      width: 120,
     },
-    // {
-    //   title: "Danh mục",
-    //   dataIndex: "category",
-    //   key: "category",
-    //   width: 150,
-    //   render: (category) => (
-    //     <Tag color="blue">{getCategoryLabel(category) || "Chưa phân loại"}</Tag>
-    //   ),
-    // },
-    
+    {
+      title: "Danh mục",
+      dataIndex: "category",
+      key: "category",
+      width: 200,
+      filters: [
+        { text: "Lịch tiêm chủng", value: "lich-tiem-chung" },
+        { text: "Hoạt động tiêm chủng", value: "hoat-dong-tiem-chung" },
+        { text: "Quy trình tiêm chủng", value: "quy-trinh-tiem-chung" },
+        { text: "Những điều cần biết trước khi tiêm", value: "nhung-dieu-can-biet-truoc-khi-tiem" },
+        { text: "Những điều cần biết sau khi tiêm", value: "nhung-dieu-can-biet-sau-khi-tiem" },
+        { text: "Khác", value: "khac" }
+      ],
+      onFilter: (value, record) => record.category === value,
+      render: (category) => (
+        <Tag color={
+          category === "lich-tiem-chung" ? "blue" :
+          category === "hoat-dong-tiem-chung" ? "green" :
+          category === "quy-trinh-tiem-chung" ? "orange" :
+          category === "nhung-dieu-can-biet-truoc-khi-tiem" ? "red" :
+          category === "nhung-dieu-can-biet-sau-khi-tiem" ? "purple" :
+          "default"
+        }>
+          {getCategoryLabel(category) || "Chưa phân loại"}
+        </Tag>
+      ),
+    },
     {
       title: "Trạng thái",
       dataIndex: "status",
       key: "status",
       width: 120,
+      filters: [
+        { text: "Hoạt động", value: "active" },
+        { text: "Tạm ẩn", value: "none" }
+      ],
+      onFilter: (value, record) => record.status === value,
       render: (status) => (
         <Badge 
           status={status === "active" ? "success" : "error"} 
@@ -294,45 +309,45 @@ const BlogManagement = () => {
     {
       title: "Hành động",
       key: "action",
-      width: 120,
+      width: 180,
       render: (_, record) => (
-        <div style={{ display: "flex", gap: "8px" }}>
-          <Button
-            icon={<EditOutlined />}
-            onClick={() => showEditModal(record)}
-          />
+        <Space>
+          <Tooltip title="Xem chi tiết">
+            <Button
+              icon={<EyeOutlined />}
+              onClick={() => showDetailModal(record)}
+            />
+          </Tooltip>
+          <Tooltip title="Chỉnh sửa">
+            <Button
+              icon={<EditOutlined />}
+              onClick={() => showEditModal(record)}
+            />
+          </Tooltip>
           {record.status === "active" ? (
-            <Popconfirm
-              title="Bạn có chắc chắn muốn tạm ẩn blog này?"
-              onConfirm={() => handleDelete(record._id)}
-              okText="Có"
-              cancelText="Không"
-            >
-              <Button danger icon={<DeleteOutlined />} />
-            </Popconfirm>
+            <Tooltip title="Lưu trữ">
+              <Popconfirm
+                title="Bạn có chắc chắn muốn lưu trữ blog này?"
+                onConfirm={() => handleDelete(record._id)}
+                okText="Có"
+                cancelText="Không"
+              >
+                <Button danger icon={<DeleteOutlined />} />
+              </Popconfirm>
+            </Tooltip>
           ) : (
-            <Popconfirm
-              title="Bạn có chắc chắn muốn khôi phục blog này?"
-              onConfirm={() => handleRestore(record._id)}
-              okText="Có"
-              cancelText="Không"
-            >
-              <Button type="primary" icon={<PlusOutlined />} />
-            </Popconfirm>
+            <Tooltip title="Khôi phục">
+              <Popconfirm
+                title="Bạn có chắc chắn muốn khôi phục blog này?"
+                onConfirm={() => handleRestore(record._id)}
+                okText="Có"
+                cancelText="Không"
+              >
+                <Button type="primary" icon={<UndoOutlined />} />
+              </Popconfirm>
+            </Tooltip>
           )}
-        </div>
-      ),
-    },
-    {
-      title: "Chi tiết",
-      key: "details",
-      width: 100,
-      render: (_, record) => (
-        <Button 
-          type="primary" 
-          icon={<InfoCircleOutlined />} 
-          onClick={() => showStatsModal(record)}
-        ></Button>
+        </Space>
       ),
     },
   ];
@@ -345,7 +360,6 @@ const BlogManagement = () => {
       author: blog.author,
       category: blog.category,
       tags: blog.tags ? blog.tags.join(', ') : '',
-      thumbnail: blog.thumbnail,
     });
     setIsEditModalVisible(true);
   };
@@ -359,7 +373,7 @@ const BlogManagement = () => {
           marginBottom: "16px",
         }}
       >
-        <h2>Blog Management</h2>
+        <h2>Quản lý Blog</h2>
         <Button
           type="primary"
           icon={<PlusOutlined />}
@@ -368,35 +382,27 @@ const BlogManagement = () => {
             setIsModalVisible(true);
           }}
         >
-          Create New Blog
+          Tạo Blog mới
         </Button>
       </div>
 
-      <div style={{ marginBottom: "16px", display: "flex", gap: "16px" }}>
-        <Select
-          placeholder="Lọc theo danh mục"
-          style={{ width: 250 }}
-          onChange={handleCategoryFilter}
-          allowClear
-          suffixIcon={<FilterOutlined />}
-        >
-          {categories.map(category => (
-            <Option key={category.value} value={category.value}>
-              {category.label}
-            </Option>
-          ))}
-        </Select>
+      <div style={{
+        display: "flex",
+        justifyContent: "space-between",
+        marginBottom: "16px",
+        flexWrap: "wrap",
+        gap: "10px"
+      }}>
+        <Search
+          placeholder="Tìm kiếm theo tiêu đề hoặc nội dung"
+          enterButton
+          onSearch={handleSearch}
+          style={{ width: 300 }}
+        />
         
-        <Select
-          placeholder="Lọc theo trạng thái"
-          style={{ width: 200 }}
-          onChange={handleStatusFilter}
-          allowClear
-          suffixIcon={<FilterOutlined />}
-        >
-          <Option value="active">Hoạt động</Option>
-          <Option value="none">Tạm ẩn</Option>
-        </Select>
+        <Button onClick={fetchBlogs} type="default">
+          Làm mới dữ liệu
+        </Button>
       </div>
 
       <Table
@@ -405,10 +411,13 @@ const BlogManagement = () => {
         loading={loading}
         rowKey="_id"
         pagination={{
-          pageSize: 10,
-          showSizeChanger: true,
-          showTotal: (total) => `Total ${total} blogs`,
+          current: currentPage,
+          pageSize: pageSize,
+          total: totalBlogs,
+          showSizeChanger: false,
+          showTotal: (total) => `Tổng ${total} bài viết`,
         }}
+        onChange={handleTableChange}
         scroll={{ x: 1200 }}
       />
 
@@ -479,17 +488,7 @@ const BlogManagement = () => {
         footer={[
           <Button key="back" onClick={() => setIsDetailModalVisible(false)}>
             Đóng
-          </Button>,
-          <Button 
-            key="edit" 
-            type="primary" 
-            onClick={() => {
-              setIsDetailModalVisible(false);
-              showEditModal(detailBlog);
-            }}
-          >
-            Chỉnh sửa
-          </Button>,
+          </Button>
         ]}
       >
         {detailBlog && (
@@ -518,16 +517,6 @@ const BlogManagement = () => {
                 <span>Ngày tạo: {new Date(detailBlog.createDate).toLocaleDateString()}</span>
               </Space>
             </div>
-            
-            {detailBlog.thumbnail && (
-              <div style={{ marginBottom: 20 }}>
-                <img 
-                  src={detailBlog.thumbnail} 
-                  alt={detailBlog.blogTitle} 
-                  style={{ maxWidth: '100%', maxHeight: 300 }}
-                />
-              </div>
-            )}
             
             <div style={{ whiteSpace: 'pre-wrap' }}>
               {detailBlog.blogContent}
@@ -627,13 +616,6 @@ const BlogManagement = () => {
             <Input placeholder="tag1, tag2, tag3" />
           </Form.Item>
 
-          <Form.Item
-            name="thumbnail"
-            label="Thumbnail URL"
-          >
-            <Input placeholder="https://example.com/image.jpg" />
-          </Form.Item>
-
           <Form.Item>
             <Button type="primary" htmlType="submit" style={{ marginRight: 8 }}>
               Cập nhật
@@ -695,13 +677,6 @@ const BlogManagement = () => {
             label="Tags (comma separated)"
           >
             <Input placeholder="tag1, tag2, tag3" />
-          </Form.Item>
-
-          <Form.Item
-            name="thumbnail"
-            label="Thumbnail URL"
-          >
-            <Input placeholder="https://example.com/image.jpg" />
           </Form.Item>
 
           <Form.Item className="text-right">

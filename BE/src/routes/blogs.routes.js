@@ -2,85 +2,45 @@ import { Router } from "express";
 import {
   showBlogsController,
   createBlogController,
-  incrementViewsController,
-  toggleLikeController,
+  getBlogByIdController,
+  getBlogByCategoryController,
   updateBlogController,
   deleteBlogController,
   restoreBlogController,
-  getBlogBySlugController,
+  incrementViewsController,
+  toggleLikeController,
   rateBlogController,
   getRelatedBlogsController,
   getPopularTagsController,
-  addCommentController
+  addCommentController,
+  hideCommentController,
+  showCommentController
 } from "../controllers/blog.controllers.js";
-import { validateAccessToken } from "../middlewares/user.middleware.js";
-import { validateSlug } from "../middlewares/blog.middleware.js";
+import { validateAccessToken, isAdmin } from "../middlewares/user.middleware.js";
 
 const blogRoutes = Router();
 
-//PATH:          http://localhost:8080/blog/......
+//PATH: http://localhost:8080/blog/......
 
-// Hiển thị blog với các tùy chọn lọc và phân trang
+// Public routes (no authentication required)
 blogRoutes.get("/showBlog", showBlogsController);
-
-// Lấy danh sách tags phổ biến
 blogRoutes.get("/tags/popular", getPopularTagsController);
-
-// Lấy blog theo slug
-blogRoutes.get("/:slug", validateSlug, getBlogBySlugController);
-
-// Lấy các blog liên quan
+blogRoutes.get("/category/:category", getBlogByCategoryController);
 blogRoutes.get("/related/:blogId", getRelatedBlogsController);
+blogRoutes.get("/:id", getBlogByIdController);
+blogRoutes.post("/view/:blogId", incrementViewsController);
 
-// Tạo blog mới
-blogRoutes.post("/createBlog", validateAccessToken, createBlogController);
+// Protected routes (authentication required)
+blogRoutes.post("/create", validateAccessToken, createBlogController);
+blogRoutes.post("/update/:id", validateAccessToken, updateBlogController);
+blogRoutes.post("/delete/:id", validateAccessToken, deleteBlogController);
+blogRoutes.post("/restore/:id", validateAccessToken, restoreBlogController);
+blogRoutes.post("/like/:blogId", validateAccessToken, toggleLikeController);
+blogRoutes.post("/rate/:blogId", validateAccessToken, rateBlogController);
 
-// Tăng lượt xem
-blogRoutes.post(
-  "/incrementViews/:blogId",
-  incrementViewsController
-);
-
-// Thích blog
-blogRoutes.post(
-  "/like/:blogId", 
-  validateAccessToken, 
-  toggleLikeController
-);
-
-// Đánh giá blog
-blogRoutes.post(
-  "/rate/:blogId", 
-  validateAccessToken, 
-  rateBlogController
-);
-
-// Thêm bình luận
-blogRoutes.post(
-  "/comment/:blogId",
-  validateAccessToken,
-  addCommentController
-);
-
-// Cập nhật blog
-blogRoutes.post(
-  "/update/:id", 
-  validateAccessToken, 
-  updateBlogController
-);
-
-// Xóa blog
-blogRoutes.post(
-  "/delete/:id", 
-  validateAccessToken, 
-  deleteBlogController
-);
-
-// Khôi phục blog
-blogRoutes.post(
-  "/restore/:id", 
-  validateAccessToken, 
-  restoreBlogController
-);
+// Comment routes
+blogRoutes.post("/comment/:blogId", validateAccessToken, addCommentController);
+blogRoutes.post("/comment/:blogId/:commentId/hide", validateAccessToken, hideCommentController);
+blogRoutes.post("/comment/:blogId/:commentId/show", validateAccessToken, showCommentController);
 
 export default blogRoutes;
