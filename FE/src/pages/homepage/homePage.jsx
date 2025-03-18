@@ -21,7 +21,7 @@ const HomePage = () => {
   const [flippedCardIndex, setFlippedCardIndex] = useState(null);
   const [cusId, setCusId] = useState(null);
   const [showFeedbackForm, setShowFeedbackForm] = useState(false);
-  const [username, setUsername] = useState(""); 
+  const [username, setUsername] = useState("");
   // Thêm state cho blog
   const [blogs, setBlogs] = useState([]);
   const [loadingBlogs, setLoadingBlogs] = useState(false);
@@ -29,7 +29,7 @@ const HomePage = () => {
   // Thêm state cho news
   const [news, setNews] = useState([]);
   const [loadingNews, setLoadingNews] = useState(false);
-  
+
   // Mảng đường dẫn hình ảnh news
   const newsImages = [
     "/images/news/news1.jpeg",
@@ -74,13 +74,13 @@ const HomePage = () => {
         const payload = JSON.parse(atob(tokenParts[1]));
         const role = payload.role;
         setUserRole(role);
-        
+
         // Get username from localStorage with consistent key
         const storedUsername = localStorage.getItem("username");
         if (storedUsername) {
           setUsername(storedUsername);
         }
-        
+
         // Lấy cusId từ localStorage nếu là customer
         if (role === "customer") {
           const storedCusId = localStorage.getItem("cusId");
@@ -213,6 +213,8 @@ const HomePage = () => {
     fetchVaccines();
   }, []);
 
+
+
   // Handle vaccine carousel navigation
   const nextVaccine = () => {
     if (vaccines.length > 0) {
@@ -247,7 +249,7 @@ const HomePage = () => {
   const fetchBlogs = async () => {
     try {
       setLoadingBlogs(true);
-      const response = await axiosInstance.get("/blogs/showBlog");
+      const response = await axiosInstance.get("/blog/showBlog");
       // Lọc chỉ hiển thị các blog có trạng thái "active"
       const activeBlogs = response.data.filter(blog => blog.status === "active");
       // Lấy 3 bài blog mới nhất
@@ -256,6 +258,7 @@ const HomePage = () => {
         views: 1000
       }));
       setBlogs(latestBlogs);
+      console.log("Fetched blogs:", latestBlogs);
     } catch (error) {
       console.error("Failed to fetch blogs:", error);
     } finally {
@@ -364,13 +367,13 @@ const HomePage = () => {
     try {
       setLoadingFeedbacks(true);
       const response = await axiosInstance.get("/feedback/getAllFeedback");
-      
+
       if (response.status === 200 && Array.isArray(response.data)) {
         // Sort by rating (highest first) and then take top 6
         const sortedFeedbacks = response.data
           .sort((a, b) => b.rating - a.rating)
           .slice(0, 6);
-        
+
         // Fetch customer details for each feedback
         const feedbacksWithCustomerDetails = await Promise.all(
           sortedFeedbacks.map(async (feedback) => {
@@ -391,7 +394,7 @@ const HomePage = () => {
             }
           })
         );
-        
+
         setCustomerFeedbacks(feedbacksWithCustomerDetails);
       }
     } catch (error) {
@@ -404,7 +407,7 @@ const HomePage = () => {
   return (
     <div className="homepage">
       <HeaderLayouts footerRef={footerRef} />
-      
+
       {/* Remove old nav section and continue with existing code */}
       <div className="banner-container">
         <div
@@ -420,9 +423,8 @@ const HomePage = () => {
                 className="banner-image"
               />
               <div
-                className={`slide-content ${
-                  currentSlide === index ? "active" : ""
-                } ${fadeIn && currentSlide === index ? "fade-in" : ""}`}
+                className={`slide-content ${currentSlide === index ? "active" : ""
+                  } ${fadeIn && currentSlide === index ? "fade-in" : ""}`}
               >
                 <div className="elementor-slide-heading">{banner.title}</div>
                 <div className="elementor-slide-description">
@@ -447,9 +449,8 @@ const HomePage = () => {
           {banners.map((_, index) => (
             <span
               key={index}
-              className={`swiper-pagination-bullet ${
-                currentSlide === index ? "active" : ""
-              }`}
+              className={`swiper-pagination-bullet ${currentSlide === index ? "active" : ""
+                }`}
               onClick={() => setCurrentSlide(index)}
             ></span>
           ))}
@@ -534,15 +535,12 @@ const HomePage = () => {
               return isVisible ? (
                 <div
                   key={`v1-${vaccine._id}`}
-                  className={`vaccine-card-item-v1 ${
-                    displayPosition === 0 ? "center" : ""
-                  }`}
+                  className={`vaccine-card-item-v1 ${displayPosition === 0 ? "center" : ""
+                    }`}
                   style={{
-                    transform: `translateX(${
-                      displayPosition * 150
-                    }px) translateZ(${
-                      displayPosition === 0 ? 0 : -100
-                    }px) rotateY(${displayPosition * 15}deg)`,
+                    transform: `translateX(${displayPosition * 150
+                      }px) translateZ(${displayPosition === 0 ? 0 : -100
+                      }px) rotateY(${displayPosition * 15}deg)`,
                     zIndex: 3 - Math.abs(displayPosition),
                     opacity: displayPosition === 0 ? 1 : 0.7,
                   }}
@@ -556,8 +554,8 @@ const HomePage = () => {
                     <p>Nhà sản xuất: {vaccine.manufacturer}</p>
                     <div className="vaccine-price-v1">
                       {vaccine.vaccineImports &&
-                      vaccine.vaccineImports.length > 0 &&
-                      vaccine.vaccineImports[0].totalPrice
+                        vaccine.vaccineImports.length > 0 &&
+                        vaccine.vaccineImports[0].totalPrice
                         ? `${vaccine?.vaccineImports[0]?.totalPrice.toLocaleString()} VNĐ`
                         : "Liên hệ"}
                     </div>
@@ -590,8 +588,8 @@ const HomePage = () => {
                 <div className="news-content">
                   <h3>{newsItem.newsTitle}</h3>
                   <p>
-                    {newsItem.newsContent.length > 150 
-                      ? `${newsItem.newsContent.substring(0, 150)}...` 
+                    {newsItem.newsContent.length > 150
+                      ? `${newsItem.newsContent.substring(0, 150)}...`
                       : newsItem.newsContent}
                   </p>
                   <Link to="/news" className="read-more">
@@ -615,16 +613,16 @@ const HomePage = () => {
               {blogs.map((blog, index) => (
                 <div className="blog-card" key={blog._id}>
                   <div className="blog-image">
-                    <img 
-                      src={blog.imageUrl || "/images/blog1.png"} 
-                      alt={blog.blogTitle} 
+                    <img
+                      src={blog.imageUrl || "/images/blog1.png"}
+                      alt={blog.blogTitle}
                     />
                   </div>
                   <div className="blog-content">
                     <h3>{blog.blogTitle}</h3>
                     <p className="blog-excerpt">
-                      {blog.blogContent.length > 150 
-                        ? `${blog.blogContent.substring(0, 150)}...` 
+                      {blog.blogContent.length > 150
+                        ? `${blog.blogContent.substring(0, 150)}...`
                         : blog.blogContent}
                     </p>
                     <div className="blog-meta">
@@ -632,8 +630,8 @@ const HomePage = () => {
                       <span className="blog-date">Ngày: {new Date(blog.createDate).toLocaleDateString()}</span>
                     </div>
                     <div className="blog-actions">
-                      <span 
-                        className={`like-button ${likedBlogStates[blog._id] ? 'liked' : ''}`} 
+                      <span
+                        className={`like-button ${likedBlogStates[blog._id] ? 'liked' : ''}`}
                         onClick={() => toggleLike(blog._id)}
                       >
                         {likedBlogStates[blog._id] ? <HeartFilled /> : <HeartOutlined />}
@@ -665,8 +663,8 @@ const HomePage = () => {
             {loadingFeedbacks ? (
               <div className="loading-spinner">Đang tải đánh giá...</div>
             ) : customerFeedbacks.length > 0 ? (
-              <Carousel 
-                autoplay 
+              <Carousel
+                autoplay
                 dots={true}
                 autoplaySpeed={5000}
                 className="feedback-carousel"
@@ -687,9 +685,9 @@ const HomePage = () => {
                               <Rate disabled defaultValue={feedback.rating} />
                             </div>
                             <div className="feedback-customer">
-                              <Avatar 
-                                size={50} 
-                                icon={<UserOutlined />} 
+                              <Avatar
+                                size={50}
+                                icon={<UserOutlined />}
                                 src={feedback.customerAvatar}
                                 style={{ backgroundColor: '#1890ff' }}
                               />
@@ -715,7 +713,7 @@ const HomePage = () => {
                 )}
               </div>
             )}
-            
+
             {isLoggedIn && userRole === "customer" && customerFeedbacks.length > 0 && (
               <div className="feedback-action">
                 <button className="feedback-button" onClick={openFeedbackForm}>
@@ -803,9 +801,9 @@ const HomePage = () => {
       )}
 
       {/* Feedback Form Modal */}
-      <FeedbackForm 
-        isOpen={showFeedbackForm} 
-        onClose={() => setShowFeedbackForm(false)} 
+      <FeedbackForm
+        isOpen={showFeedbackForm}
+        onClose={() => setShowFeedbackForm(false)}
       />
     </div>
   );
