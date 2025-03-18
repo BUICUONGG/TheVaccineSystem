@@ -4,20 +4,35 @@ import axios from "axios";
 // import bodyParser from "body-parser";
 import qs from "qs";
 import connectToDatabase from "../config/database.js";
+import "dotenv/config";
+import notiService from "./noti.services.js";
+import { ObjectId } from "mongodb";
+import appointmentService from "./appointment.services.js";
+
 const config = {
-  app_id: "2554",
-  key1: "sdngKKJmqEMzvh5QQcdD2A9XBSKUNaYn",
-  key2: "trMrHtvjo6myautxDUiAcYsVtaeQ8nhf",
-  endpoint: "https://sb-openapi.zalopay.vn/v2/create",
+  app_id: process.env.APP_ID,
+  key1: process.env.KEY1,
+  key2: process.env.KEY2,
+  endpoint: process.env.ENDPOINT,
 };
+
 class PaymentService {
   async createPayment(paymentData) {
     try {
       const embed_data = {
-        redirecturl: "http://localhost:5173/payment-success",
+        redirecturl: "http://localhost:5173/",
       };
 
-      const items = [{ paymentData }];
+      // Chuyển đổi ObjectId
+      const transformedPaymentData = {
+        ...paymentData,
+        cusId: new ObjectId(paymentData.cusId),
+        vaccineId: new ObjectId(paymentData.vaccineId),
+        childId: paymentData.childId ? new ObjectId(paymentData.childId) : null,
+        batchId: paymentData.batchId ? new ObjectId(paymentData.batchId) : null,
+      };
+
+      const items = [{ transformedPaymentData }];
 
       const transID = Math.floor(Math.random() * 1000000);
       const order = {
@@ -27,25 +42,54 @@ class PaymentService {
         app_time: Date.now(),
         item: JSON.stringify(items),
         embed_data: JSON.stringify(embed_data),
-        amount: paymentData.price,
+        amount: transformedPaymentData.price,
         description: `Payment for the order #${transID}`,
         bank_code: "",
         callback_url:
-          "https://ea2d-58-187-185-8.ngrok-free.app/zalopay/callback",
+          "https://0dfb-58-187-185-42.ngrok-free.app/zalopay/callback",
       };
 
       const data = `${config.app_id}|${order.app_trans_id}|${order.app_user}|${order.amount}|${order.app_time}|${order.embed_data}|${order.item}`;
       order.mac = CryptoJS.HmacSHA256(data, config.key1).toString();
 
       const result = await axios.post(config.endpoint, null, { params: order });
-      await connectToDatabase.payments.insertOne({
-        paymentData,
-        app_trans_id: order.app_trans_id,
-        zp_trans_token: result.data.zp_trans_token,
-        order_token: result.data.order_token,
-        status: "PENDING", // Giao dịch đang chờ xử lý
-        createdAt: new Date().toLocaleDateString("vi-VN"),
-      });
+      const status = "Pending";
+      if (paymentData.type === "aptLe") {
+        const aptle = await connectToDatabase.appointmentLes.insertOne({
+          ...transformedPaymentData,
+          app_trans_id: order.app_trans_id,
+          zp_trans_token: result.data.zp_trans_token,
+          order_token: result.data.order_token,
+          status, // Giao dịch đang chờ xử lý
+          createdAt: new Date().toLocaleDateString("vi-VN"),
+        });
+
+        await notiService.createNoti({
+          cusId: transformedPaymentData.cusId,
+          apt: aptle.insertedId,
+          aptModel: "AppointmentLe",
+          message: `Lịch hẹn lẻ của bạn vào lúc ${paymentData.time} đang trong trạng thái ${status}`,
+          createdAt: new Date().toLocaleDateString("vi-VN"),
+        });
+      } else {
+        const aptGoi = await connectToDatabase.appointmentGois.insertOne({
+          ...transformedPaymentData,
+          app_trans_id: order.app_trans_id,
+          zp_trans_token: result.data.zp_trans_token,
+          order_token: result.data.order_token,
+          status, // Giao dịch đang chờ xử lý
+          createdAt: new Date().toLocaleDateString("vi-VN"),
+        });
+
+        await notiService.createNoti({
+          cusId: transformedPaymentData.cusId,
+          apt: aptGoi.insertedId,
+          aptModel: "AppointmentGoi",
+          message: `Lịch hẹn lẻ của bạn vào lúc ${paymentData.time} đang ở trạng thái ${status} `,
+          createdAt: new Date().toLocaleDateString("vi-VN"),
+        });
+      }
+
       return result.data;
     } catch (error) {
       throw new Error(error.message);
@@ -59,22 +103,55 @@ class PaymentService {
 
       // Xác minh chữ ký MAC
       const mac = CryptoJS.HmacSHA256(data, config.key2).toString();
-
       if (reqMac !== mac) {
         result.return_code = -1;
         result.return_message = "mac not equal";
-      } else {
-        // Thanh toán thành công, cập nhật database
-        const dataJson = JSON.parse(data);
+        return result;
+      }
 
-        await connectToDatabase.payments.updateOne(
-          { app_trans_id: dataJson["app_trans_id"] },
-          { $set: { status: "PAID" } }
+      // Thanh toán thành công, cập nhật database
+      const dataJson = JSON.parse(data);
+      const { app_trans_id } = dataJson;
+
+      // Kiểm tra đơn hàng có tồn tại trong `appointmentLes`
+      const aptLe = await connectToDatabase.appointmentLes.findOne({
+        app_trans_id,
+      });
+      if (aptLe) {
+        await connectToDatabase.appointmentLes.updateOne(
+          { app_trans_id },
+          { $set: { status: "Paid" } }
         );
+
+        // Cập nhật thông báo
+        await appointmentService.updateAptLe(aptLe._id, { status: "Paid" });
 
         result.return_code = 1;
         result.return_message = "success";
+        return result;
       }
+
+      // Kiểm tra đơn hàng có tồn tại trong `appointmentGois`
+      const aptGoi = await connectToDatabase.appointmentGois.findOne({
+        app_trans_id,
+      });
+      if (aptGoi) {
+        await connectToDatabase.appointmentGois.updateOne(
+          { app_trans_id },
+          { $set: { status: "Paid" } }
+        );
+
+        // Cập nhật thông báo
+        await appointmentService.updateAptLe(aptGoi._id, { status: "Paid" });
+
+        result.return_code = 1;
+        result.return_message = "success";
+        return result;
+      }
+
+      // Nếu không tìm thấy trong cả 2 collection
+      result.return_code = 0;
+      result.return_message = "Order not found";
     } catch (ex) {
       result.return_code = 0;
       result.return_message = ex.message;

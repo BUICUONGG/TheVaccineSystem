@@ -123,13 +123,9 @@ class AppointmentService {
         batchId: nearestBatch._id,
         date,
         time: time,
-        createdAt: new Date().toLocaleDateString("vi-VN"),
         price,
         note: note || "",
-        status: status || "pending",
       };
-      // Lưu lịch hẹn vào DB
-      const result = await connectToDatabase.appointmentLes.insertOne(aptLe);
 
       // Cập nhật số lượng vaccine trong kho
       await connectToDatabase.vaccineImports.updateOne(
@@ -140,18 +136,8 @@ class AppointmentService {
         { $inc: { "vaccines.$.quantity": -1 } }
       );
 
-      //  Tạo thông báo với ID lịch hẹn thay vì object
-      const noti = await notiService.createNoti({
-        cusId: new ObjectId(cusId),
-        apt: result.insertedId,
-        aptModel: "AppointmentLe",
-        message: `Lịch hẹn lẻ của bạn vào lúc ${time} đang trạng thái chờ duyệt`,
-        createdAt: new Date().toLocaleDateString("vi-VN"),
-      });
-      return {
-        _id: result.insertedId,
-        ...aptLe,
-      };
+      return { ...aptLe };
+      // _id: result.insertedId,
     } catch (error) {
       console.error(error.message);
       throw new Error(error.message);
@@ -170,6 +156,7 @@ class AppointmentService {
       if (!result) {
         throw new Error("Không thể update");
       }
+
       // Xóa thông báo cũ cho appointment này
       await notiService.deleteNotiById(result._id);
       // Tạo thông báo mới
@@ -455,22 +442,39 @@ class AppointmentService {
         status: status || "pending",
       };
 
-      const result = await connectToDatabase.appointmentGois.insertOne(aptGoi);
-
-      await notiService.createNoti({
-        cusId: new ObjectId(cusId),
-        apt: result.insertedId,
-        aptModel: "AppointmentGoi",
-        message: `Lịch hẹn gói của bạn vào ngày ${date} lúc ${time} đang trạng thái chờ duyệt`,
-        createdAt: new Date().toLocaleDateString("vi-VN"),
-      });
-
       return {
-        _id: result.insertedId,
         ...aptGoi,
       };
     } catch (error) {
       console.error("Lỗi trong createAptGoi:", error.message);
+      throw new Error(error.message);
+    }
+  }
+
+  async updateAptGoi(id, updateAptGoi) {
+    try {
+      const result = await connectToDatabase.appointmentLes.findOneAndUpdate(
+        { _id: new ObjectId(id) },
+        { $set: updateAptGoi },
+        { returnDocument: "after" }
+      );
+      if (!result) {
+        throw new Error("Không thể update");
+      }
+
+      // Xóa thông báo cũ cho appointment này
+      await notiService.deleteNotiById(result._id);
+      // Tạo thông báo mới
+      await notiService.createNoti({
+        cusId: result.cusId,
+        apt: result._id,
+        aptModel: "AppointmentGoi",
+        message: `Lịch hẹn của bạn đã cập nhật trạng thái: ${updateAptGoi.status}`,
+        createdAt: new Date().toLocaleDateString("vi-VN"),
+      });
+
+      return result;
+    } catch (error) {
       throw new Error(error.message);
     }
   }
