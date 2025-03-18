@@ -383,13 +383,13 @@ class AppointmentService {
         throw new Error("Không tìm thấy gói vaccine.");
       }
 
-      // 🔹 Tính lịch tiêm dự kiến từ ngày đặt lịch và lịch gói
+      // Tính lịch tiêm dự kiến từ ngày đặt lịch và lịch gói
       const doseSchedule = await this.calculateVaccinationSchedule(
         date,
         vaccinePackage.schedule
       );
 
-      // 🔹 Gán vaccineId cho từng liều tiêm
+      // Gán vaccineId cho từng liều tiêm
       doseSchedule.forEach((dose, index) => {
         const vaccineData = vaccinePackage.vaccines[index]; // Lấy vaccine theo thứ tự
         if (vaccineData) {
@@ -399,12 +399,12 @@ class AppointmentService {
         }
       });
 
-      // 🔹 Lấy danh sách vaccineId từ lịch tiêm (sau khi gán vaccineId)
+      // Lấy danh sách vaccineId từ lịch tiêm (sau khi gán vaccineId)
       const vaccineIds = doseSchedule
         .map((dose) => dose.vaccineId)
         .filter(Boolean);
 
-      // 🔹 Lấy thông tin lô vaccine gần hết hạn nhất
+      // Lấy thông tin lô vaccine gần hết hạn nhất
       const nearestBatches = await this.getNearestExpiryBatches(vaccineIds);
 
       let totalPrice = 0; // Tổng giá tiền của gói vaccine
@@ -428,7 +428,7 @@ class AppointmentService {
         totalPrice += vaccineBatchInfo.unitPrice; // Cộng dồn vào tổng giá gói
       }
 
-      // 🔹 Tạo lịch hẹn gói
+      // Tạo lịch hẹn gói
       const aptGoi = {
         cusId: new ObjectId(cusId),
         childId: finalChildId,
@@ -442,7 +442,18 @@ class AppointmentService {
         status: status || "pending",
       };
 
+      const result = await connectToDatabase.appointmentGois.insertOne(aptGoi);
+
+      // await notiService.createNoti({
+      //   cusId: new ObjectId(cusId),
+      //   apt: result.insertedId,
+      //   aptModel: "AppointmentGoi",
+      //   message: `Lịch hẹn gói của bạn vào ngày ${date} lúc ${time} đang trạng thái chờ duyệt`,
+      //   createdAt: new Date().toLocaleDateString("vi-VN"),
+      // });
+
       return {
+        _id: result.insertedId,
         ...aptGoi,
       };
     } catch (error) {
@@ -453,7 +464,7 @@ class AppointmentService {
 
   async updateAptGoi(id, updateAptGoi) {
     try {
-      const result = await connectToDatabase.appointmentLes.findOneAndUpdate(
+      const result = await connectToDatabase.appointmentGois.findOneAndUpdate(
         { _id: new ObjectId(id) },
         { $set: updateAptGoi },
         { returnDocument: "after" }

@@ -23,11 +23,12 @@ class PaymentService {
         redirecturl: "http://localhost:5173/",
       };
 
-      // Chuyển đổi ObjectId
+      // Chuyển đổi các giá trị sang ObjectId nếu cần
       const transformedPaymentData = {
         ...paymentData,
         cusId: new ObjectId(paymentData.cusId),
         vaccineId: new ObjectId(paymentData.vaccineId),
+        vaccinePackageId: new ObjectId(paymentData.vaccinePackageId),
         childId: paymentData.childId ? new ObjectId(paymentData.childId) : null,
         batchId: paymentData.batchId ? new ObjectId(paymentData.batchId) : null,
       };
@@ -53,7 +54,9 @@ class PaymentService {
       order.mac = CryptoJS.HmacSHA256(data, config.key1).toString();
 
       const result = await axios.post(config.endpoint, null, { params: order });
+
       const status = "Pending";
+
       if (paymentData.type === "aptLe") {
         const aptle = await connectToDatabase.appointmentLes.insertOne({
           ...transformedPaymentData,
@@ -72,20 +75,28 @@ class PaymentService {
           createdAt: new Date().toLocaleDateString("vi-VN"),
         });
       } else {
-        const aptGoi = await connectToDatabase.appointmentGois.insertOne({
-          ...transformedPaymentData,
-          app_trans_id: order.app_trans_id,
-          zp_trans_token: result.data.zp_trans_token,
-          order_token: result.data.order_token,
-          status, // Giao dịch đang chờ xử lý
-          createdAt: new Date().toLocaleDateString("vi-VN"),
-        });
+        // Gọi `createAptGoi` để tạo lịch hẹn gói
+        const aptGoi = await appointmentService.createAptGoi(
+          transformedPaymentData
+        );
+
+        // Sau khi tạo lịch hẹn gói, cập nhật thông tin thanh toán
+        await connectToDatabase.appointmentGois.updateOne(
+          { _id: aptGoi._id },
+          {
+            $set: {
+              app_trans_id: order.app_trans_id,
+              zp_trans_token: result.data.zp_trans_token,
+              order_token: result.data.order_token,
+            },
+          }
+        );
 
         await notiService.createNoti({
           cusId: transformedPaymentData.cusId,
-          apt: aptGoi.insertedId,
+          apt: aptGoi._id,
           aptModel: "AppointmentGoi",
-          message: `Lịch hẹn lẻ của bạn vào lúc ${paymentData.time} đang ở trạng thái ${status} `,
+          message: `Lịch hẹn gói của bạn vào lúc ${paymentData.time} đang ở trạng thái ${status}`,
           createdAt: new Date().toLocaleDateString("vi-VN"),
         });
       }
@@ -142,7 +153,7 @@ class PaymentService {
         );
 
         // Cập nhật thông báo
-        await appointmentService.updateAptLe(aptGoi._id, { status: "Paid" });
+        await appointmentService.updateAptGoi(aptGoi._id, { status: "Paid" });
 
         result.return_code = 1;
         result.return_message = "success";
