@@ -168,10 +168,14 @@ useEffect(() => {
       const accesstoken = localStorage.getItem("accesstoken");
       const cusId = localStorage.getItem("cusId");
 
+     
+
       if (!selectedVaccineId) {
         toast.error("Vui lòng chọn vaccine trước khi đăng ký!");
         return;
       }
+
+
 
       // Format thời gian
       const now = new Date();
@@ -190,6 +194,7 @@ useEffect(() => {
         time: time,
         createAt: createAt,
         status: "pending",
+
         ...(isChildRegistration && {
           childInfo: {
             ...values.childInfo,
@@ -198,45 +203,34 @@ useEffect(() => {
         }),
       };
 
+    
       // Xác định thông tin vaccine và giá tiền để chuyển sang trang thanh toán
-      let paymentData = {
-        cusId: cusId,
+      const paymentData = {
+        ...requestData,
+        // Thêm dữ liệu phân biệt giữa lẻ và gói
+        ...(selectedVaccineType === "single"
+          ? {
+              vaccineId: selectedVaccineId,
+              vaccineName: vaccineList.find(v => v._id === selectedVaccineId)?.vaccineName || '',
+              price: importProductsPrice[selectedVaccineId]?.unitPrice || 0,
+              type: "aptLe",
+            }
+          : {
+              vaccinePackageId: selectedVaccineId,
+              vaccineName: vaccinePackages.find(p => p._id === selectedVaccineId)?.packageName || '',
+              price: vaccinePackages.find(p => p._id === selectedVaccineId)?.price || 0,
+              type: "aptGoi",
+            }),
         customerName: parentInfo?.customerName || "Khách hàng",
       };
 
-      if (selectedVaccineType === "single") {
-        // Lấy thông tin vaccine đã chọn
-        const selectedVaccine = vaccineList.find(v => v._id === selectedVaccineId);
-        if (selectedVaccine) {
-          paymentData = {
-            ...paymentData,
-            vaccineId: selectedVaccineId,
-            vaccineName: selectedVaccine.vaccineName,
-            price: importProductsPrice[selectedVaccineId]?.unitPrice || 0,
-            appointmentData: {
-              ...requestData,
-              vaccineId: selectedVaccineId
-            },
-            type: "single"
-          };
-        }
-      } else {
-        // Lấy thông tin gói vaccine đã chọn
-        const selectedPackage = vaccinePackages.find(p => p._id === selectedVaccineId);
-        if (selectedPackage) {
-          paymentData = {
-            ...paymentData,
-            vaccineId: selectedVaccineId,
-            vaccineName: selectedPackage.packageName,
-            price: selectedPackage.price || 0,
-            appointmentData: {
-              ...requestData,
-              vaccinePackageId: selectedVaccineId
-            },
-            type: "package"
-          };
-        }
+      const response = await axiosInstance.post(`/zalopay/payment`, paymentData , {
+        headers: {
+          Authorization: `Bearer ${accesstoken}`,
+        },
       }
+      );
+
 
       // Chuyển hướng đến trang thanh toán với dữ liệu đã chuẩn bị
       navigate('/payment', { state: { paymentData } });

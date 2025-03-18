@@ -81,6 +81,11 @@ const VaccinePriceList = () => {
     document.title = "Bảng giá vắc-xin";
   }, []);
 
+  // Xóa vaccineId khỏi localStorage khi component mount
+  useEffect(() => {
+    localStorage.removeItem('vaccineId');
+  }, []);
+
   const handleCategoryChange = (event) => {
     setSelectedCategory(event.target.value);
     setCurrentPage(1);
@@ -114,9 +119,11 @@ const VaccinePriceList = () => {
     return filtered;
   };
 
-  const handleMoreInfo = () => {
-    navigate("/vaccineDetail");
-  } 
+  const handleMoreInfo = (productId) => {
+    localStorage.setItem('vaccineId', productId);
+    
+    navigate(`/vaccineDetail/${productId}`);
+  };
 
   const footerRef = useRef(null);
 
@@ -197,7 +204,7 @@ const VaccinePriceList = () => {
                         <span className="price-label">Giá:</span>
                         <span className="price-value">
                           {importProductsPrice[product._id]?.unitPrice?.toLocaleString() ||
-                            // product.price?.toLocaleString() ||
+                            product.price?.toLocaleString() ||
                             "Chưa có hàng"}
                         </span>
                       </div>

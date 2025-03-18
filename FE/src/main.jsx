@@ -58,7 +58,7 @@ const router = createBrowserRouter([
     element: <VaccinePriceList />,
   },
   {
-    path: "/vaccineDetail",
+    path: "/vaccineDetail/:id",
     element: <VaccineDetail />,
   },
   {
