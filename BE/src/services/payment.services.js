@@ -13,7 +13,7 @@ const config = {
 class PaymentService {
   async createPayment(paymentData) {
     try {
-      const embed_data = { redirecturl: "http://localhost:5173/" };
+      const embed_data = { redirecturl: "http://localhost:5173/payment-success" };
 
       const items = [{ paymentData }];
 
@@ -42,6 +42,9 @@ class PaymentService {
         order_token: result.data.order_token,
         cusId: paymentData.cusId,
         vaccineId: paymentData.vaccineId,
+        price: paymentData.price,
+        type: paymentData.type,
+        appointmentData: paymentData.appointmentData,
         status: "PENDING", // Giao dịch đang chờ xử lý
         createdAt: new Date().toLocaleDateString("vi-VN"),
       });
