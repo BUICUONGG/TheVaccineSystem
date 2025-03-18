@@ -134,7 +134,7 @@ const router = createBrowserRouter([
         element: <StaffsPage />,
       },
       {
-        path: "blog",
+        path: "blogManagement",
         element: <BlogManagement />,
       },
       {
@@ -165,9 +165,8 @@ const router = createBrowserRouter([
     path: "/forgot-password",
     element: <ForgotPassword />,
   },
-
   {
-    path: "payment",
+    path: "/payment",
     element: <PaymentPage />,
   },
 ]);

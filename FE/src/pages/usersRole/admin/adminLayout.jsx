@@ -103,8 +103,8 @@ const AdminLayout = () => {
           </li>
           <li className="admin-menu-item">
             <Link
-              to="/admin/blog"
-              className={location.pathname === "/admin/blog" ? "active" : ""}
+              to="/admin/blogManagement"
+              className={location.pathname === "/admin/blogManagement" ? "active" : ""}
             >Cẩm nang
             </Link>
           </li>
