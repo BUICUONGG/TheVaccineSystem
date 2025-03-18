@@ -28,9 +28,9 @@ import ProfileHistory from "./pages/homepage/profile/components/ProfileHistory";
 import Profile from "./pages/homepage/profile/Profile";
 import ProfileAccount from "./pages/homepage/profile/components/ProfileAccount";
 import FeedbackManagement from "./pages/usersRole/admin/FeedbackManagement";
-// import VaccineShopDetailPage from "./pages/homepage/vaccineShop/vaccineShopDetailPage";
 import StaffsPage from "./pages/usersRole/admin/staffsPage";
 import PaymentPage from "./components/payment/payment";
+import VaccineDetail from "./pages/homepage/vaccineShop/vaccineDetail";
 
 const router = createBrowserRouter([
   {
@@ -57,10 +57,10 @@ const router = createBrowserRouter([
     path: "/pricelist",
     element: <VaccinePriceList />,
   },
-  // {
-  //   path: "/vaccineDetail",
-  //   element: <VaccineShopDetailPage />,
-  // },
+  {
+    path: "/vaccineDetail",
+    element: <VaccineDetail />,
+  },
   {
     path: "/registerinjection",
     element: <RegisterInjection />,

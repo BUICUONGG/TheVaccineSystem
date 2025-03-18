@@ -6,8 +6,9 @@ import "@fortawesome/fontawesome-free/css/all.min.css";
 import "./homePage.css";
 import { useNavigate, Link } from "react-router-dom";
 import axiosInstance from "../../service/api";
-import NotificationIcon from "./notification/Notification";
 import FeedbackForm from "../../components/Feedback/FeedbackForm";
+import HeaderLayouts from "../../components/layouts/header";
+
 const HomePage = () => {
   const navigate = useNavigate();
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -20,13 +21,11 @@ const HomePage = () => {
   const [flippedCardIndex, setFlippedCardIndex] = useState(null);
   const [cusId, setCusId] = useState(null);
   const [showFeedbackForm, setShowFeedbackForm] = useState(false);
-  const [username, setUsername] = useState("");
-  
+  const [username, setUsername] = useState(""); 
   // Thêm state cho blog
   const [blogs, setBlogs] = useState([]);
   const [loadingBlogs, setLoadingBlogs] = useState(false);
   const [likedBlogStates, setLikedBlogStates] = useState({});
-
   // Thêm state cho news
   const [news, setNews] = useState([]);
   const [loadingNews, setLoadingNews] = useState(false);
@@ -404,63 +403,9 @@ const HomePage = () => {
 
   return (
     <div className="homepage">
-      <nav>
-        <div className="logo">
-          <Link to="/homepage">
-            <img src="/images/LogoHeader.png" alt="Logo" className="logo-image" />
-            Diary Vaccine
-          </Link>
-        </div>
-        <ul>
-          <li>
-            <Link to="/homepage">Trang chủ</Link>
-          </li>
-          <li>
-            <Link to="/blogs">Blog</Link>
-          </li>
-          <li>
-            <Link to="/news">Tin tức</Link>
-          </li>
-          <li>
-            <Link to="#" onClick={scrollToFooter}>
-              Liên hệ
-            </Link>
-          </li>
-          {!isLoggedIn ? (
-            <>
-              <li>
-                <Link to="/login">Đăng Nhập</Link>
-              </li>
-              <li>
-                <Link to="/register">Đăng Ký</Link>
-              </li>
-            </>
-          ) : (
-            <>
-              {userRole === "customer" && cusId && (
-                <li className="notification-container">
-                  <NotificationIcon cusId={cusId} />
-                </li>
-              )}
-              <li className="user-dropdown">
-                <Dropdown overlay={getUserMenuItems()} trigger={['click']}>
-                  <a onClick={(e) => e.preventDefault()}>
-                    <Space>
-                      <Avatar 
-                        icon={<UserOutlined />} 
-                        style={{ backgroundColor: userRole === 'admin' ? '#ff4d4f' : userRole === 'staff' ? '#1890ff' : '#52c41a' }} 
-                      />
-                      <span className="username">{username}</span>
-                      <DownOutlined />
-                    </Space>
-                  </a>
-                </Dropdown>
-              </li>
-            </>
-          )}
-        </ul>
-      </nav>
-
+      <HeaderLayouts footerRef={footerRef} />
+      
+      {/* Remove old nav section and continue with existing code */}
       <div className="banner-container">
         <div
           className="banner-slider"
@@ -612,7 +557,7 @@ const HomePage = () => {
                     <div className="vaccine-price-v1">
                       {vaccine.vaccineImports &&
                       vaccine.vaccineImports.length > 0 &&
-                      vaccine.vaccineImports[0].price
+                      vaccine.vaccineImports[0].totalPrice
                         ? `${vaccine?.vaccineImports[0]?.totalPrice.toLocaleString()} VNĐ`
                         : "Liên hệ"}
                     </div>

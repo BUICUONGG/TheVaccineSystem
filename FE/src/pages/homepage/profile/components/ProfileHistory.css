@@ -142,6 +142,7 @@
 
 .ant-table-filter-dropdown {
   min-width: 140px;
+  padding: 12px;
 }
 
 .ant-table-column-sorter {
@@ -468,4 +469,38 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
+}
+
+/* Thêm style cho DatePicker trong filter */
+.ant-table-filter-dropdown .ant-picker {
+  margin-bottom: 8px;
+  width: 200px;
+}
+
+.ant-table-filter-dropdown .ant-space {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+/* Style cho hover state của các dòng trong bảng */
+.appointment-table .ant-table-tbody > tr:hover {
+  background-color: #f0f7ff;
+}
+
+/* Style cho header của bảng */
+.appointment-table .ant-table-thead > tr > th {
+  background-color: #f7f9fc;
+  color: #2c3e50;
+  font-weight: 600;
+}
+
+/* Style cho các nút sắp xếp */
+.appointment-table .ant-table-column-sorter {
+  color: #4A90E2;
+}
+
+/* Style cho trạng thái đang sắp xếp */
+.appointment-table .ant-table-column-sort {
+  background: #e6f7ff;
 }
