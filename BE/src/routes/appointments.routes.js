@@ -84,7 +84,7 @@ aptGoiRoutes.post("/updateDose/:id", validateAccessToken, updateDoseController);
 aptGoiRoutes.post(
   "/searchAptGoiById/:id",
   validateAccessToken,
-  searchAptGoiByIdController
+  searchAptGoiByIdController 
 );
 
 export { aptGoiRoutes, aptLeRoutes };

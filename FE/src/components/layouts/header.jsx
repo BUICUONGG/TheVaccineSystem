@@ -11,6 +11,8 @@ function HeaderLayouts({ footerRef }) {
   const [username, setUsername] = useState("");
   const [showFeedbackForm, setShowFeedbackForm] = useState(false);
   const [cusId, setCusId] = useState(null);
+  const [navVisible, setNavVisible] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
 
   useEffect(() => {
     const token = localStorage.getItem("accesstoken");
@@ -37,7 +39,33 @@ function HeaderLayouts({ footerRef }) {
         console.error("Error parsing token:", error);
       }
     }
-  }, []);
+
+    // Add scroll event listener
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      
+      if (currentScrollY > 100) { // Only apply behavior after scrolling past 100px
+        if (currentScrollY > lastScrollY) {
+          // Scrolling down - hide nav
+          setNavVisible(false);
+        } else {
+          // Scrolling up - show nav
+          setNavVisible(true);
+        }
+      } else {
+        // Always show nav at the top of the page
+        setNavVisible(true);
+      }
+      
+      setLastScrollY(currentScrollY);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, [lastScrollY]);
 
   const handleLogout = () => {
     localStorage.clear();
@@ -99,8 +127,19 @@ function HeaderLayouts({ footerRef }) {
     }
   };
 
+  const navStyle = {
+    position: 'fixed',
+    top: navVisible ? '0' : '-80px', // Adjust this value based on your nav height
+    left: 0,
+    right: 0,
+    zIndex: 1000,
+    transition: 'top 0.3s ease-in-out',
+    background: 'white',
+    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
+  };
+
   return (
-    <nav>
+    <nav style={navStyle}>
       <div className="logo">
         <Link to="/homepage">
           <img src="/images/LogoHeader.png" alt="Logo" className="logo-image" />

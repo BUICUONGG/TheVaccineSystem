@@ -131,6 +131,7 @@ const NewsDetail = () => {
                 <Divider />
 
                 <div className="news-detail-text">
+                <Title level={3} className="news-detail-title">{news.newsTitle}</Title>
                     <Paragraph>{news.newsContent}</Paragraph>
                 </div>
             </div>

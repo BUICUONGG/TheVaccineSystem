@@ -217,7 +217,7 @@ const BlogList = () => {
         {blog.thumbnail && (
           <Col xs={24} sm={6} md={4} lg={4}>
             <div className="blog-thumbnail">
-              <Link to={`/blog/${createSafeSlug(blog.blogTitle)}`} onClick={() => incrementViews(blog._id)}>
+              <Link to={`/blogs/${blog._id}`} onClick={() => incrementViews(blog._id)}>
                 <img 
                   src={blog.thumbnail || "./images/blog1.png"} 
                   alt={blog.blogTitle}
@@ -229,7 +229,7 @@ const BlogList = () => {
         
         <Col xs={24} sm={blog.thumbnail ? 18 : 24} md={blog.thumbnail ? 20 : 24} lg={blog.thumbnail ? 20 : 24}>
           <div className="blog-content">
-            <Link to={`/blog/${createSafeSlug(blog.blogTitle)}`} onClick={() => incrementViews(blog._id)}>
+            <Link to={`/blogs/${blog._id}`} onClick={() => incrementViews(blog._id)}>
               <Title level={4} className="blog-title">{blog.blogTitle}</Title>
             </Link>
             
@@ -305,7 +305,7 @@ const BlogList = () => {
             
             {/* Thêm nút xem chi tiết */}
             <div style={{ marginTop: 12, textAlign: 'right' }}>
-              <Link to={`/blog/${createSafeSlug(blog.blogTitle)}`} onClick={() => incrementViews(blog._id)}>
+              <Link to={`/blogs/${blog._id}`} onClick={() => incrementViews(blog._id)}>
                 <Button type="primary" size="small">Xem chi tiết</Button>
               </Link>
             </div>

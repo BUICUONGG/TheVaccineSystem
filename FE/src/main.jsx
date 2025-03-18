@@ -11,7 +11,6 @@ import VaccinesPage from "./pages/usersRole/admin/vaccinesPage";
 import AllCustomerPage from "./pages/usersRole/admin/allCustomerPage";
 import VaccinePriceList from "./pages/homepage/vaccineShop/vaccineShopPage";
 import BlogList from "./pages/blog/BlogList";
-// import BlogDetail from "./pages/blog/BlogDetail";
 import BlogManagement from "./pages/usersRole/admin/BlogManagement";
 import NewsList from "./pages/news/NewsList";
 import NewsDetail from "./pages/news/NewsDetail";
@@ -82,10 +81,7 @@ const router = createBrowserRouter([
     path: "/blogs",
     element: <BlogList />,
   },
-  // {
-  //   path: "/blog/:slug",
-  //   element: <BlogDetail />,
-  // },
+
   {
     path: "/staffLayout",
     element: <StaffLayout />,

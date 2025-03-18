@@ -465,8 +465,8 @@ const NewsManagement = () => {
                 loading={loading}
                 rowKey="_id"
                 pagination={{
-                    pageSize: 10,
-                    showSizeChanger: true,
+                    // pageSize: 10,
+                    // showSizeChanger: true,
                     showTotal: (total) => `Tổng ${total} tin tức`,
                 }}
             />

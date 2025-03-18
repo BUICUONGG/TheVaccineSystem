@@ -27,7 +27,7 @@ blogRoutes.get("/showBlog", showBlogsController);
 blogRoutes.get("/tags/popular", getPopularTagsController);
 blogRoutes.get("/category/:category", getBlogByCategoryController);
 blogRoutes.get("/related/:blogId", getRelatedBlogsController);
-blogRoutes.get("/:id", getBlogByIdController);
+blogRoutes.get("/detail/:id", getBlogByIdController);
 blogRoutes.post("/view/:blogId", incrementViewsController);
 
 // Protected routes (authentication required)

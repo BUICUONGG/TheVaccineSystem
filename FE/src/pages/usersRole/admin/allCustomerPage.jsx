@@ -225,7 +225,7 @@ const AllCustomerPage = () => {
 
   return (
     <div style={{ padding: "20px" }}>
-      <h2>Customer Information Management</h2>
+      <h2 style={{marginBottom: "20px"}}>Quản lý khách hàng</h2>
       <Input
         prefix={<SearchOutlined />}
         placeholder="Tìm kiếm theo tên, tên đăng nhập hoặc số điện thoại"

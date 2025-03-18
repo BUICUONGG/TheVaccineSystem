@@ -157,8 +157,6 @@ const AppointmentManagement = () => {
         return "red";
       case "pending":
         return "orange";
-      case "approve":
-        return "blue";
       default:
         return "default";
     }
@@ -172,8 +170,6 @@ const AppointmentManagement = () => {
         return "Đã hủy";
       case "pending":
         return "Đang chờ";
-      case "approve":
-        return "Đã duyệt";
       default:
         return "Không xác định";
     }
@@ -195,8 +191,6 @@ const AppointmentManagement = () => {
       let successMessage = "";
       if (status === "completed") {
         successMessage = "Đã hoàn thành đơn thành công";
-      } else if (status === "approve") {
-        successMessage = "Đã duyệt đơn thành công";
       } else if (status === "incomplete") {
         successMessage = "Đã hủy đơn thành công";
       } else {
@@ -222,8 +216,6 @@ const AppointmentManagement = () => {
       let errorMessage = "";
       if (status === "completed") {
         errorMessage = "Không thể hoàn thành đơn";
-      } else if (status === "approve") {
-        errorMessage = "Không thể duyệt đơn";
       } else if (status === "incomplete") {
         errorMessage = "Không thể hủy đơn";
       } else {
@@ -432,7 +424,6 @@ const AppointmentManagement = () => {
       key: "status",
       filters: [
         { text: "Hoàn thành", value: "completed" },
-        { text: "Đã duyệt", value: "approve" },
         { text: "Đang chờ", value: "pending" },
         { text: "Đã hủy", value: "incomplete" },
       ],
@@ -446,16 +437,7 @@ const AppointmentManagement = () => {
       key: "action",
       render: (_, record) => (
         <div className="action-buttons">
-          {record.status === "pending" ? (
-            <Button
-              type="primary"
-              className="approve-button"
-              onClick={() => handleStatusChange(record._id, "approve", false)}
-              disabled={record.status === "incomplete" || record.status === "completed"}
-            >
-              Duyệt
-            </Button>
-          ) : record.status === "approve" ? (
+          {record.status === "pending" && (
             <Button
               type="primary"
               className="complete-button"
@@ -464,7 +446,7 @@ const AppointmentManagement = () => {
             >
               Hoàn thành
             </Button>
-          ) : null}
+          )}
           <Button
             danger
             className="cancel-button"
@@ -578,7 +560,6 @@ const AppointmentManagement = () => {
       key: "status",
       filters: [
         { text: "Hoàn thành", value: "completed" },
-        { text: "Đã duyệt", value: "approve" },
         { text: "Đang chờ", value: "pending" },
         { text: "Đã hủy", value: "incomplete" },
       ],
@@ -592,23 +573,21 @@ const AppointmentManagement = () => {
       key: "action",
       render: (_, record) => (
         <div className="action-buttons">
-          <Button
-            type="primary"
-            className="approve-button"
-            onClick={() => handleStatusChange(record._id, "approve", true)}
-            disabled={
-              record.status === "incomplete" || record.status === "completed"
-            }
-          >
-            Duyệt
-          </Button>
+          {record.status === "pending" && (
+            <Button
+              type="primary"
+              className="complete-button"
+              onClick={() => handleStatusChange(record._id, "completed", true)}
+              disabled={record.status === "incomplete" || record.status === "completed"}
+            >
+              Hoàn thành
+            </Button>
+          )}
           <Button
             danger
             className="cancel-button"
             onClick={() => handleStatusChange(record._id, "incomplete", true)}
-            disabled={
-              record.status === "incomplete" || record.status === "completed"
-            }
+            disabled={record.status === "incomplete" || record.status === "completed"}
           >
             Hủy Đơn
           </Button>

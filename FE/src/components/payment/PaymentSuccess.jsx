@@ -1,7 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import './PaymentSuccess.css';
 import axiosInstance from '../../service/api';
+import HeaderLayouts from '../layouts/header';
+import FooterLayouts from '../layouts/footer';
 
 const PaymentSuccess = () => {
   const location = useLocation();
@@ -9,8 +11,13 @@ const PaymentSuccess = () => {
   const [paymentResult, setPaymentResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [fadeOut, setFadeOut] = useState(false);
+  const [progressActive, setProgressActive] = useState(false);
+  const footerRef = useRef(null);
 
   useEffect(() => {
+    // Set document title
+    document.title = "Thanh toán thành công";
+
     // Get payment result from location state
     if (location.state?.paymentResult) {
       setPaymentResult(location.state.paymentResult);
@@ -47,6 +54,9 @@ const PaymentSuccess = () => {
     // Clean up localStorage when component mounts
     localStorage.removeItem('pendingPayment');
     
+    // Start progress bar immediately
+    setProgressActive(true);
+    
     // Start fade out after 4 seconds
     const fadeTimer = setTimeout(() => {
       setFadeOut(true);
@@ -77,6 +87,9 @@ const PaymentSuccess = () => {
           // Try to get more details from localStorage
           ...getPaymentDetailsFromLocalStorage()
         });
+        
+        // Start progress immediately after confirming payment success
+        setProgressActive(true);
       } else {
         // Payment failed or pending
         navigate('/payment', { 
@@ -103,78 +116,95 @@ const PaymentSuccess = () => {
     return {};
   };
 
-  if (loading) {
+  const renderContent = () => {
+    if (loading) {
+      return (
+        <div className="payment-success-container">
+          <div className="success-card">
+            <h2>Đang xác thực thanh toán...</h2>
+            <p>Vui lòng đợi trong giây lát</p>
+            <div className="loading-dots">
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
     return (
-      <div className="payment-success-container">
+      <div className={`payment-success-container ${fadeOut ? 'fade-out' : 'fade-in'}`}>
         <div className="success-card">
-          <h2>Đang xác thực thanh toán...</h2>
-          <p>Vui lòng đợi trong giây lát</p>
+          <div className="success-icon">
+            <svg viewBox="0 0 24 24" width="90" height="90">
+              <path
+                fill="#4CAF50"
+                d="M12,0A12,12,0,1,0,24,12,12,12,0,0,0,12,0Zm0,22A10,10,0,1,1,22,12,10,10,0,0,1,12,22Z"
+              />
+              <path
+                fill="#4CAF50"
+                d="M10.5,16.5,6,12l1.4-1.4,3.1,3.1,6.1-6.1L18,9Z"
+              />
+            </svg>
+          </div>
+          
+          <h1>Thanh Toán Thành Công!</h1>
+          <p>Thanh toán của bạn đã được xử lý thành công.</p>
+          
+          {paymentResult && (
+            <div className="transaction-details">
+              <h3>Chi Tiết Giao Dịch</h3>
+              {paymentResult.app_trans_id && (
+                <div className="detail-item">
+                  <span>Mã giao dịch:</span>
+                  <span>{paymentResult.app_trans_id}</span>
+                </div>
+              )}
+              {paymentResult.vaccineName && (
+                <div className="detail-item">
+                  <span>Vaccine:</span>
+                  <span>{paymentResult.vaccineName}</span>
+                </div>
+              )}
+              {paymentResult.amount && (
+                <div className="detail-item">
+                  <span>Số tiền:</span>
+                  <span>{Number(paymentResult.amount).toLocaleString('vi-VN')} VND</span>
+                </div>
+              )}
+              {paymentResult.date && (
+                <div className="detail-item">
+                  <span>Ngày tiêm:</span>
+                  <span>{paymentResult.date}</span>
+                </div>
+              )}
+              {paymentResult.time && (
+                <div className="detail-item">
+                  <span>Thời gian thanh toán:</span>
+                  <span>{new Date(paymentResult.time).toLocaleString('vi-VN')}</span>
+                </div>
+              )}
+            </div>
+          )}
+          
+          <p>Đang chuyển hướng đến trang lịch hẹn của bạn...</p>
+          <div className="redirect-progress">
+            <div className={`redirect-progress-bar ${progressActive ? 'active' : ''}`}></div>
+          </div>
         </div>
       </div>
     );
-  }
+  };
 
   return (
-    <div className={`payment-success-container ${fadeOut ? 'fade-out' : 'fade-in'}`}>
-      <div className="success-card">
-        <div className="success-icon">
-          <svg viewBox="0 0 24 24" width="90" height="90">
-            <path
-              fill="#4CAF50"
-              d="M12,0A12,12,0,1,0,24,12,12,12,0,0,0,12,0Zm0,22A10,10,0,1,1,22,12,10,10,0,0,1,12,22Z"
-            />
-            <path
-              fill="#4CAF50"
-              d="M10.5,16.5,6,12l1.4-1.4,3.1,3.1,6.1-6.1L18,9Z"
-            />
-          </svg>
-        </div>
-        
-        <h1>Thanh Toán Thành Công!</h1>
-        <p>Thanh toán của bạn đã được xử lý thành công.</p>
-        
-        {paymentResult && (
-          <div className="transaction-details">
-            <h3>Chi Tiết Giao Dịch</h3>
-            {paymentResult.app_trans_id && (
-              <div className="detail-item">
-                <span>Mã giao dịch:</span>
-                <span>{paymentResult.app_trans_id}</span>
-              </div>
-            )}
-            {paymentResult.vaccineName && (
-              <div className="detail-item">
-                <span>Vaccine:</span>
-                <span>{paymentResult.vaccineName}</span>
-              </div>
-            )}
-            {paymentResult.amount && (
-              <div className="detail-item">
-                <span>Số tiền:</span>
-                <span>{Number(paymentResult.amount).toLocaleString('vi-VN')} VND</span>
-              </div>
-            )}
-            {paymentResult.date && (
-              <div className="detail-item">
-                <span>Ngày tiêm:</span>
-                <span>{paymentResult.date}</span>
-              </div>
-            )}
-            {paymentResult.time && (
-              <div className="detail-item">
-                <span>Thời gian thanh toán:</span>
-                <span>{new Date(paymentResult.time).toLocaleString('vi-VN')}</span>
-              </div>
-            )}
-          </div>
-        )}
-        
-        <p>Đang chuyển hướng đến trang lịch hẹn của bạn...</p>
-        <div className="loading-dots">
-          <span></span>
-          <span></span>
-          <span></span>
-        </div>
+    <div className="payment-success-page">
+      <HeaderLayouts footerRef={footerRef} />
+      <div className="payment-success-content">
+        {renderContent()}
+      </div>
+      <div ref={footerRef}>
+        <FooterLayouts />
       </div>
     </div>
   );
