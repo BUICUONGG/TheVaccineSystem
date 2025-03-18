@@ -188,6 +188,7 @@ useEffect(() => {
         cusId: cusId,
         date: selectedDate,
         time: time,
+        type: selectedVaccineType,
         createAt: createAt,
         status: "pending",
         ...(isChildRegistration && {
@@ -199,7 +200,7 @@ useEffect(() => {
       };
 
       // Xác định thông tin vaccine và giá tiền để chuyển sang trang thanh toán
-      let paymentData = {
+      let invoiceData = {
         cusId: cusId,
         customerName: parentInfo?.customerName || "Khách hàng",
       };
@@ -208,8 +209,8 @@ useEffect(() => {
         // Lấy thông tin vaccine đã chọn
         const selectedVaccine = vaccineList.find(v => v._id === selectedVaccineId);
         if (selectedVaccine) {
-          paymentData = {
-            ...paymentData,
+          invoiceData = {
+            ...invoiceData,
             vaccineId: selectedVaccineId,
             vaccineName: selectedVaccine.vaccineName,
             price: importProductsPrice[selectedVaccineId]?.unitPrice || 0,
@@ -217,15 +218,15 @@ useEffect(() => {
               ...requestData,
               vaccineId: selectedVaccineId
             },
-            type: "single"
+            type: "aptLe"
           };
         }
       } else {
         // Lấy thông tin gói vaccine đã chọn
         const selectedPackage = vaccinePackages.find(p => p._id === selectedVaccineId);
         if (selectedPackage) {
-          paymentData = {
-            ...paymentData,
+          invoiceData = {
+            ...invoiceData,
             vaccineId: selectedVaccineId,
             vaccineName: selectedPackage.packageName,
             price: selectedPackage.price || 0,
@@ -233,13 +234,14 @@ useEffect(() => {
               ...requestData,
               vaccinePackageId: selectedVaccineId
             },
-            type: "package"
+            type: "aptGoi"
           };
         }
       }
 
-      // Chuyển hướng đến trang thanh toán với dữ liệu đã chuẩn bị
-      navigate('/payment', { state: { paymentData } });
+      // Chuyển hướng đến trang xác nhận hóa đơn trước khi thanh toán
+      navigate('/invoice-confirmation', { state: { invoiceData } });
+      
     } catch (error) {
       console.error("Registration error:", error);
       toast.error(

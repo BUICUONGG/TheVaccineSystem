@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Table, Input, Button, Modal, Form, Popconfirm, Select, Tag, Rate, Typography, Space, Tooltip, Divider, Badge, Card } from "antd";
+import { Table, Input, Button, Modal, Form, Popconfirm, Select, Tag, Rate, Typography, Space, Tooltip, Divider, Badge, Card, Empty, Title } from "antd";
 import { EditOutlined, DeleteOutlined, PlusOutlined, FilterOutlined, EyeOutlined, ClockCircleOutlined, LikeOutlined, CommentOutlined, InfoCircleOutlined, StarOutlined, UndoOutlined } from "@ant-design/icons";
 import axiosInstance from "../../../service/api";
 
@@ -16,9 +16,11 @@ const BlogManagement = () => {
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
   const [isDetailModalVisible, setIsDetailModalVisible] = useState(false);
   const [isStatsModalVisible, setIsStatsModalVisible] = useState(false);
+  const [isCommentsModalVisible, setIsCommentsModalVisible] = useState(false);
   const [editingBlog, setEditingBlog] = useState(null);
   const [detailBlog, setDetailBlog] = useState(null);
   const [statsBlog, setStatsBlog] = useState(null);
+  const [currentBlogComments, setCurrentBlogComments] = useState(null);
   const [categoryFilter, setCategoryFilter] = useState(null);
   const [statusFilter, setStatusFilter] = useState(null);
   const [form] = Form.useForm();
@@ -41,12 +43,12 @@ const BlogManagement = () => {
 
   useEffect(() => {
     if (searchText) {
-      const filtered = blogs.filter(
+    const filtered = blogs.filter(
         (item) =>
           item.blogTitle?.toLowerCase().includes(searchText.toLowerCase()) ||
           item.blogContent?.toLowerCase().includes(searchText.toLowerCase())
-      );
-      setFilteredBlogs(filtered);
+    );
+    setFilteredBlogs(filtered);
     } else {
       setFilteredBlogs(blogs);
     }
@@ -240,6 +242,49 @@ const BlogManagement = () => {
     setIsStatsModalVisible(true);
   };
 
+  const showCommentsModal = (blog) => {
+    setCurrentBlogComments(blog);
+    setIsCommentsModalVisible(true);
+  };
+
+  const handleCommentStatusChange = async (blogId, commentId, status) => {
+    try {
+      let endpoint = status === "active" ? "show" : "hide";
+      
+      await axiosInstance.post(
+        `/blog/comment/${blogId}/${commentId}/${endpoint}`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("accesstoken")}`,
+          },
+        }
+      );
+
+      // Refresh blog data after comment status change
+      fetchBlogs();
+      
+      // If the modal is still open, refresh the current blog comments
+      if (currentBlogComments && currentBlogComments._id === blogId) {
+        const updatedBlog = await axiosInstance.get(`/blog/detail/${blogId}`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("accesstoken")}`,
+          },
+        });
+        setCurrentBlogComments(updatedBlog.data);
+      }
+
+      Modal.success({
+        content: `Bình luận đã được ${status === "active" ? "hiện" : "ẩn"} thành công!`,
+      });
+    } catch (error) {
+      console.error(`Error ${status === "active" ? "showing" : "hiding"} comment:`, error);
+      Modal.error({
+        content: `Không thể ${status === "active" ? "hiện" : "ẩn"} bình luận`,
+      });
+    }
+  };
+
   const columns = [
     {
       title: "STT",
@@ -290,6 +335,22 @@ const BlogManagement = () => {
       ),
     },
     {
+      title: "Bình luận",
+      dataIndex: "comments",
+      key: "comments",
+      width: 120,
+      render: (comments, record) => (
+        <Tooltip title="Xem bình luận">
+          <Button 
+            icon={<CommentOutlined />} 
+            onClick={() => showCommentsModal(record)}
+          >
+            {comments?.length || 0}
+          </Button>
+        </Tooltip>
+      ),
+    },
+    {
       title: "Trạng thái",
       dataIndex: "status",
       key: "status",
@@ -319,18 +380,18 @@ const BlogManagement = () => {
             />
           </Tooltip>
           <Tooltip title="Chỉnh sửa">
-            <Button
-              icon={<EditOutlined />}
-              onClick={() => showEditModal(record)}
-            />
+          <Button
+            icon={<EditOutlined />}
+            onClick={() => showEditModal(record)}
+          />
           </Tooltip>
           {record.status === "active" ? (
             <Tooltip title="Lưu trữ">
-              <Popconfirm
+          <Popconfirm
                 title="Bạn có chắc chắn muốn lưu trữ blog này?"
-                onConfirm={() => handleDelete(record._id)}
-                okText="Có"
-                cancelText="Không"
+            onConfirm={() => handleDelete(record._id)}
+            okText="Có"
+            cancelText="Không"
               >
                 <Button danger icon={<DeleteOutlined />} />
               </Popconfirm>
@@ -344,7 +405,7 @@ const BlogManagement = () => {
                 cancelText="Không"
               >
                 <Button type="primary" icon={<UndoOutlined />} />
-              </Popconfirm>
+          </Popconfirm>
             </Tooltip>
           )}
         </Space>
@@ -393,12 +454,12 @@ const BlogManagement = () => {
         flexWrap: "wrap",
         gap: "10px"
       }}>
-        <Search
+      <Search
           placeholder="Tìm kiếm theo tiêu đề hoặc nội dung"
-          enterButton
-          onSearch={handleSearch}
+        enterButton
+        onSearch={handleSearch}
           style={{ width: 300 }}
-        />
+      />
         
         <Button onClick={fetchBlogs} type="default">
           Làm mới dữ liệu
@@ -537,6 +598,84 @@ const BlogManagement = () => {
                   </div>
                 ))}
               </div>
+            )}
+          </div>
+        )}
+      </Modal>
+
+      {/* Modal Quản lý bình luận */}
+      <Modal
+        title="Quản lý bình luận"
+        open={isCommentsModalVisible}
+        onCancel={() => setIsCommentsModalVisible(false)}
+        footer={[
+          <Button key="back" onClick={() => setIsCommentsModalVisible(false)}>
+            Đóng
+          </Button>
+        ]}
+        width={800}
+      >
+        {currentBlogComments && (
+          <div>
+            <div style={{ marginBottom: 16 }}>
+              <Title level={4}>{currentBlogComments.blogTitle}</Title>
+              <Text type="secondary">Tổng số bình luận: {currentBlogComments.comments?.length || 0}</Text>
+            </div>
+
+            {currentBlogComments.comments && currentBlogComments.comments.length > 0 ? (
+              <div className="comments-list">
+                {currentBlogComments.comments.map((comment, index) => (
+                  <Card 
+                    key={index} 
+                    style={{ marginBottom: 16 }}
+                    extra={
+                      <Space>
+                        {comment.status === "active" ? (
+                          <Popconfirm
+                            title="Bạn có chắc chắn muốn ẩn bình luận này?"
+                            onConfirm={() => handleCommentStatusChange(currentBlogComments._id, comment.userId, "hidden")}
+                            okText="Có"
+                            cancelText="Không"
+                          >
+                            <Button danger size="small">Ẩn</Button>
+                          </Popconfirm>
+                        ) : (
+                          <Popconfirm
+                            title="Bạn có chắc chắn muốn hiển thị bình luận này?"
+                            onConfirm={() => handleCommentStatusChange(currentBlogComments._id, comment.userId, "active")}
+                            okText="Có"
+                            cancelText="Không"
+                          >
+                            <Button type="primary" size="small">Hiển thị</Button>
+                          </Popconfirm>
+                        )}
+                      </Space>
+                    }
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+                      <div>
+                        <Text strong>User ID: {comment.userId.toString()}</Text>
+                        <Badge
+                          style={{ marginLeft: 8 }}
+                          status={comment.status === "active" ? "success" : "error"}
+                          text={comment.status === "active" ? "Hiển thị" : "Đã ẩn"}
+                        />
+                      </div>
+                      <Text type="secondary">{new Date(comment.createdAt).toLocaleString()}</Text>
+                    </div>
+                    <Paragraph
+                      style={{
+                        opacity: comment.status === "active" ? 1 : 0.5,
+                        whiteSpace: 'pre-wrap'
+                      }}
+                    >
+                      {comment.content}
+                    </Paragraph>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <Empty description="Chưa có bình luận nào" />
             )}
           </div>
         )}

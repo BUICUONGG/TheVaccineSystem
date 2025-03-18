@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Card, Row, Col, Typography, Tag, Space, Divider, Select, Input, Button, Tooltip, Spin, Avatar, List } from "antd";
+import { Card, Row, Col, Typography, Tag, Space, Divider, Select, Input, Button, Tooltip, Spin, Avatar, List, message, Modal, Form } from "antd";
 import {
   EyeOutlined,
   HeartOutlined,
@@ -35,6 +35,10 @@ const BlogList = () => {
   const [tagFilter, setTagFilter] = useState(null);
   const [searchKeyword, setSearchKeyword] = useState("");
   const [sortBy, setSortBy] = useState("newest");
+  const [isDetailModalVisible, setIsDetailModalVisible] = useState(false);
+  const [selectedBlog, setSelectedBlog] = useState(null);
+  const [commentContent, setCommentContent] = useState("");
+  const [submittingComment, setSubmittingComment] = useState(false);
 
   // Danh sách các danh mục blog
   const categories = [
@@ -114,10 +118,10 @@ const BlogList = () => {
         },
       });
       
-      setLikedStates((prev) => ({
-        ...prev,
-        [blogId]: !prev[blogId],
-      }));
+    setLikedStates((prev) => ({
+      ...prev,
+      [blogId]: !prev[blogId],
+    }));
       
       // Cập nhật số lượt thích trong danh sách blog
       setBlogs(blogs.map(blog => {
@@ -189,11 +193,86 @@ const BlogList = () => {
   };
 
   // Xử lý khi người dùng nhấp vào để xem chi tiết bài viết
-  const handleViewBlogDetail = (blogId, slug) => {
+  const handleViewBlogDetail = (blog) => {
     // Tăng lượt xem
-    incrementViews(blogId);
+    incrementViews(blog._id);
     
-    // Chuyển hướng đến trang chi tiết bài viết sẽ được xử lý bởi Link component
+    // Lấy chi tiết blog nếu cần
+    fetchBlogDetail(blog._id);
+  };
+
+  // Fetch blog detail with comments
+  const fetchBlogDetail = async (blogId) => {
+    try {
+      const response = await axiosInstance.get(`/blog/detail/${blogId}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accesstoken")}`,
+        },
+      });
+      
+      if (response.data) {
+        setSelectedBlog(response.data);
+        setIsDetailModalVisible(true);
+      }
+    } catch (error) {
+      console.error("Failed to fetch blog detail:", error);
+      message.error("Không thể tải chi tiết bài viết");
+    }
+  };
+
+  // Handle closing the detail modal
+  const handleCloseDetailModal = () => {
+    setIsDetailModalVisible(false);
+    setSelectedBlog(null);
+    setCommentContent("");
+  };
+
+  // Handle comment submission
+  const handleCommentSubmit = async () => {
+    if (!commentContent.trim() || !selectedBlog) return;
+    
+    try {
+      setSubmittingComment(true);
+      
+      await axiosInstance.post(`/blog/comment/${selectedBlog._id}`, {
+        content: commentContent
+      }, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accesstoken")}`,
+        },
+      });
+      
+      // Refresh blog detail to show the new comment
+      const updatedBlogResponse = await axiosInstance.get(`/blog/detail/${selectedBlog._id}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accesstoken")}`,
+        },
+      });
+      
+      if (updatedBlogResponse.data) {
+        const updatedBlog = updatedBlogResponse.data;
+        
+        // Update selectedBlog state with new data
+        setSelectedBlog(updatedBlog);
+        
+        // Update blogs state to reflect the new comment count
+        setBlogs(prevBlogs => 
+          prevBlogs.map(blog => 
+            blog._id === updatedBlog._id 
+              ? { ...blog, comments: updatedBlog.comments } 
+              : blog
+          )
+        );
+      }
+      
+      setCommentContent("");
+      message.success("Bình luận đã được thêm");
+    } catch (error) {
+      console.error("Failed to submit comment:", error);
+      message.error("Bạn cần đăng nhập để bình luận");
+    } finally {
+      setSubmittingComment(false);
+    }
   };
 
   // Hàm tạo slug an toàn từ tiếng Việt
@@ -212,26 +291,24 @@ const BlogList = () => {
       className={`blog-card fade-in-blog`} 
       style={{ animationDelay: `${index * 0.1}s` }}
       bordered={false}
+      onClick={() => handleViewBlogDetail(blog)}
+      hoverable
     >
       <Row gutter={[16, 0]}>
         {blog.thumbnail && (
           <Col xs={24} sm={6} md={4} lg={4}>
             <div className="blog-thumbnail">
-              <Link to={`/blogs/${blog._id}`} onClick={() => incrementViews(blog._id)}>
-                <img 
-                  src={blog.thumbnail || "./images/blog1.png"} 
-                  alt={blog.blogTitle}
-                />
-              </Link>
+              <img 
+                src={blog.thumbnail || "./images/blog1.png"} 
+                alt={blog.blogTitle}
+              />
             </div>
           </Col>
         )}
         
         <Col xs={24} sm={blog.thumbnail ? 18 : 24} md={blog.thumbnail ? 20 : 24} lg={blog.thumbnail ? 20 : 24}>
           <div className="blog-content">
-            <Link to={`/blogs/${blog._id}`} onClick={() => incrementViews(blog._id)}>
-              <Title level={4} className="blog-title">{blog.blogTitle}</Title>
-            </Link>
+            <Title level={4} className="blog-title">{blog.blogTitle}</Title>
             
             <div className="blog-meta">
               <Space split={<Divider type="vertical" />}>
@@ -262,6 +339,7 @@ const BlogList = () => {
                     style={{ cursor: 'pointer' }}
                     onClick={(e) => {
                       e.preventDefault();
+                      e.stopPropagation();
                       handleTagClick(tag);
                     }}
                   >
@@ -282,6 +360,7 @@ const BlogList = () => {
                     className={`stat-item like-button ${likedStates[blog._id] ? "liked" : ""}`}
                     onClick={(e) => {
                       e.preventDefault();
+                      e.stopPropagation();
                       toggleLike(blog._id);
                     }}
                   >
@@ -303,11 +382,18 @@ const BlogList = () => {
               </div>
             </div>
             
-            {/* Thêm nút xem chi tiết */}
+            {/* Nút xem chi tiết (chỉ hiển thị, click vào card cũng sẽ mở chi tiết) */}
             <div style={{ marginTop: 12, textAlign: 'right' }}>
-              <Link to={`/blogs/${blog._id}`} onClick={() => incrementViews(blog._id)}>
-                <Button type="primary" size="small">Xem chi tiết</Button>
-              </Link>
+              <Button 
+                type="primary" 
+                size="small"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleViewBlogDetail(blog);
+                }}
+              >
+                Xem chi tiết
+              </Button>
             </div>
           </div>
         </Col>
@@ -439,6 +525,177 @@ const BlogList = () => {
           </div>
         </div>
       </div>
+
+      {/* Blog Detail Modal - giống Facebook */}
+      <Modal
+        open={isDetailModalVisible}
+        onCancel={handleCloseDetailModal}
+        footer={null}
+        width={1000}
+        centered
+        className="blog-detail-modal"
+        bodyStyle={{ padding: 0, height: '80vh', overflow: 'hidden' }}
+      >
+        {selectedBlog && (
+          <div className="blog-detail-container">
+            <Row className="blog-detail-wrapper">
+              {/* Left side - Blog content */}
+              <Col xs={24} sm={24} md={16} className="blog-detail-content">
+                <div className="blog-detail-header">
+                  <div className="blog-detail-title">
+                    <Title level={3}>{selectedBlog.blogTitle}</Title>
+                  </div>
+                  <div className="blog-detail-meta">
+                    <Space split={<Divider type="vertical" />}>
+                      <span>
+                        <Avatar size="small" icon={<UserOutlined />} />
+                        <Text style={{ marginLeft: 8 }}>{selectedBlog.author}</Text>
+                      </span>
+                      <span>
+                        <CalendarOutlined />
+                        <Text style={{ marginLeft: 8 }}>{new Date(selectedBlog.createDate).toLocaleDateString()}</Text>
+                      </span>
+                      <span>
+                        <Tag color="blue">{getCategoryLabel(selectedBlog.category)}</Tag>
+                      </span>
+                    </Space>
+                  </div>
+                </div>
+
+                {selectedBlog.thumbnail && (
+                  <div className="blog-detail-image">
+                    <img src={selectedBlog.thumbnail} alt={selectedBlog.blogTitle} />
+                  </div>
+                )}
+
+                <div className="blog-detail-text">
+                  <Paragraph style={{ whiteSpace: 'pre-wrap', fontSize: '16px', lineHeight: '1.8' }}>
+                    {selectedBlog.blogContent}
+                  </Paragraph>
+                </div>
+
+                <div className="blog-detail-footer">
+                  <div className="blog-detail-tags">
+                    {selectedBlog.tags && selectedBlog.tags.map(tag => (
+                      <Tag 
+                        key={tag} 
+                        color="green" 
+                        style={{ cursor: 'pointer' }}
+                        onClick={() => {
+                          handleTagClick(tag);
+                          handleCloseDetailModal();
+                        }}
+                      >
+                        {tag}
+                      </Tag>
+                    ))}
+                  </div>
+                  
+                  <div className="blog-stats-bar">
+                    <Space size="large">
+                      <Tooltip title="Lượt xem">
+                        <span className="stat-item">
+                          <EyeOutlined /> {selectedBlog.views || 0}
+                        </span>
+                      </Tooltip>
+                      
+                      <Tooltip title={likedStates[selectedBlog._id] ? "Bỏ thích" : "Thích"}>
+                        <span 
+                          className={`stat-item like-button ${likedStates[selectedBlog._id] ? "liked" : ""}`}
+                          onClick={() => toggleLike(selectedBlog._id)}
+                        >
+                          {likedStates[selectedBlog._id] ? <HeartFilled /> : <HeartOutlined />} {selectedBlog.likes || 0}
+                        </span>
+                      </Tooltip>
+                      
+                      <Tooltip title="Bình luận">
+                        <span className="stat-item">
+                          <CommentOutlined /> {selectedBlog.comments?.length || 0}
+                        </span>
+                      </Tooltip>
+                      
+                      <Tooltip title="Thời gian đọc">
+                        <span className="stat-item">
+                          <ClockCircleOutlined /> {selectedBlog.readingTime || 5} phút
+                        </span>
+                      </Tooltip>
+                    </Space>
+                  </div>
+                </div>
+              </Col>
+
+              {/* Right side - Comments */}
+              <Col xs={24} sm={24} md={8} className="blog-detail-comments">
+                <div className="comments-header">
+                  <Title level={4}>Bình luận ({selectedBlog.comments?.length || 0})</Title>
+                </div>
+                
+                <div className="comments-list">
+                  {selectedBlog.comments && selectedBlog.comments.length > 0 ? (
+                    <div className="comments-list-content">
+                      {selectedBlog.comments.map((comment, index) => (
+                        <div key={index} className="comment-item">
+                          <div className="comment-author">
+                            <Avatar icon={<UserOutlined />} />
+                            <div className="comment-info">
+                              <Text strong>Người dùng</Text>
+                              <Text type="secondary" style={{ fontSize: '12px' }}>
+                                {new Date(comment.createdAt).toLocaleString()}
+                              </Text>
+                            </div>
+                          </div>
+                          <div className="comment-content">
+                            <div className="comment-bubble">
+                              {comment.content}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="no-comments">
+                      <div style={{ textAlign: 'center', padding: '20px 0' }}>
+                        <CommentOutlined style={{ fontSize: 24, opacity: 0.5 }} />
+                        <Paragraph style={{ marginTop: 8 }}>Chưa có bình luận. Hãy là người đầu tiên bình luận!</Paragraph>
+                      </div>
+                    </div>
+                  )}
+                </div>
+                
+                <div className="comment-input">
+                  <Form.Item style={{ marginBottom: 0 }}>
+                    <div style={{ display: 'flex' }}>
+                      <Avatar size="small" icon={<UserOutlined />} style={{ marginRight: 8 }} />
+                      <Input.TextArea
+                        rows={2}
+                        placeholder="Viết bình luận..."
+                        value={commentContent}
+                        onChange={(e) => setCommentContent(e.target.value)}
+                        onPressEnter={(e) => {
+                          if (!e.shiftKey) {
+                            e.preventDefault();
+                            handleCommentSubmit();
+                          }
+                        }}
+                      />
+                    </div>
+                  </Form.Item>
+                  <div style={{ textAlign: 'right', marginTop: 8 }}>
+                    <Button 
+                      type="primary" 
+                      onClick={handleCommentSubmit} 
+                      disabled={!commentContent.trim()}
+                      loading={submittingComment}
+                    >
+                      Bình luận
+                    </Button>
+                  </div>
+                </div>
+              </Col>
+            </Row>
+          </div>
+        )}
+      </Modal>
     </div>
   );
 };

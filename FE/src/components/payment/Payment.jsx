@@ -4,6 +4,7 @@ import './Payment.css';
 import axiosInstance from '../../service/api';
 import { Spin, Button, Modal } from 'antd';
 import { toast } from 'react-toastify';
+import HeaderLayouts from '../layouts/header';
 
 const Payment = () => {
   const location = useLocation();
@@ -26,21 +27,22 @@ const Payment = () => {
   const processPayment = async (data) => {
     setLoading(true);
     try {
-      // Save payment information to localStorage before redirecting
-      // This allows us to retrieve it when returning from ZaloPay
+      // Lưu thông tin thanh toán vào localStorage trước khi chuyển hướng
       localStorage.setItem('pendingPayment', JSON.stringify({
-        vaccineName: data.vaccineName,
-        customerName: data.customerName,
-        price: data.price,
-        type: data.type,
-        date: data.appointmentData?.date || new Date().toLocaleDateString('vi-VN')
+        cusId: data.cusId,
+        vaccineId: data.vaccineId,
+        date: data.date,
+        type: data.type, // aptLe hoặc aptGoi
+        time: data.time,
+        price: data.price
       }));
       
+      // Gửi dữ liệu theo định dạng mới đến API
       const response = await axiosInstance.post('/zalopay/payment', data);
       
       if (response.data && response.data.order_url) {
         setPaymentUrl(response.data.order_url);
-        // Auto redirect to ZaloPay payment page
+        // Tự động chuyển hướng đến trang thanh toán ZaloPay
         window.location.href = response.data.order_url;
       } else {
         setError('Không thể tạo đường dẫn thanh toán');
@@ -69,91 +71,97 @@ const Payment = () => {
   
   if (loading) {
     return (
-      <div className="payment-container">
-        <h2>Đang xử lý thanh toán</h2>
-        <div style={{ textAlign: 'center', padding: '2rem' }}>
-          <Spin size="large" />
-          <p style={{ marginTop: '1rem' }}>Vui lòng đợi trong giây lát...</p>
+      <>
+        <HeaderLayouts />
+        <div className="payment-container">
+          <h2>Đang xử lý thanh toán</h2>
+          <div style={{ textAlign: 'center', padding: '2rem' }}>
+            <Spin size="large" />
+            <p style={{ marginTop: '1rem' }}>Vui lòng đợi trong giây lát...</p>
+          </div>
         </div>
-      </div>
+      </>
     );
   }
   
   if (error) {
     return (
-      <div className="payment-container error">
-        <h2>Lỗi thanh toán</h2>
-        <p>{error}</p>
-        <div className="payment-actions">
-          <Button type="primary" onClick={() => navigate('/registerinjection')}>
-            Quay lại đăng ký
-          </Button>
+      <>
+        <HeaderLayouts />
+        <div className="payment-container error">
+          <h2>Lỗi thanh toán</h2>
+          <p>{error}</p>
+          <div className="payment-actions">
+            <Button type="primary" onClick={() => navigate('/registerinjection')}>
+              Quay lại đăng ký
+            </Button>
+          </div>
         </div>
-      </div>
+      </>
     );
   }
   
   if (!paymentData) {
     return (
-      <div className="payment-container">
-        <h2>Không có thông tin thanh toán</h2>
-        <div className="payment-actions">
-          <Button type="primary" onClick={() => navigate('/registerinjection')}>
-            Quay lại đăng ký
-          </Button>
+      <>
+        <HeaderLayouts />
+        <div className="payment-container">
+          <h2>Không có thông tin thanh toán</h2>
+          <div className="payment-actions">
+            <Button type="primary" onClick={() => navigate('/registerinjection')}>
+              Quay lại đăng ký
+            </Button>
+          </div>
         </div>
-      </div>
+      </>
     );
   }
   
   return (
-    <div className="payment-container">
-      <h2>Xác nhận thanh toán</h2>
-      
-      <div className="payment-details">
-        <h3>Chi tiết đơn hàng</h3>
-        <div className="detail-row">
-          <span>Tên vaccine:</span>
-          <span>{paymentData.vaccineName}</span>
-        </div>
-        <div className="detail-row">
-          <span>Khách hàng:</span>
-          <span>{paymentData.customerName}</span>
-        </div>
-        <div className="detail-row">
-          <span>Số tiền:</span>
-          <span>{Number(paymentData.price).toLocaleString('vi-VN')} VND</span>
-        </div>
-        {paymentData.appointmentData?.date && (
+    <>
+      <HeaderLayouts />
+      <div className="payment-container">
+        <h2>Xác nhận thanh toán</h2>
+        
+        <div className="payment-details">
+          <h3>Chi tiết đơn hàng</h3>
           <div className="detail-row">
-            <span>Ngày đăng ký:</span>
-            <span>{paymentData.appointmentData.date}</span>
+            <span>Loại:</span>
+            <span>{paymentData.type === 'aptLe' ? 'Vaccine Lẻ' : 'Gói Vaccine'}</span>
+          </div>
+          <div className="detail-row">
+            <span>Ngày tiêm:</span>
+            <span>{paymentData.date}</span>
+          </div>
+          <div className="detail-row">
+            <span>Số tiền:</span>
+            <span>{Number(paymentData.price).toLocaleString('vi-VN')} VND</span>
+          </div>
+        </div>
+        
+        {paymentUrl && (
+          <div className="payment-url">
+            <p>Nếu bạn không được chuyển hướng tự động, vui lòng bấm vào đường dẫn dưới đây:</p>
+            <a href={paymentUrl} target="_blank" rel="noopener noreferrer">
+              Thanh toán qua ZaloPay
+            </a>
           </div>
         )}
-      </div>
-      
-      {paymentUrl && (
-        <div className="payment-url">
-          <p>Nếu bạn không được chuyển hướng tự động, vui lòng bấm vào đường dẫn dưới đây:</p>
-          <a href={paymentUrl} target="_blank" rel="noopener noreferrer">
-            Thanh toán qua ZaloPay
-          </a>
+        
+        <div className="payment-actions">
+          <Button className="cancel-btn" onClick={handleCancel}>
+            Hủy
+          </Button>
+          <Button 
+            className="confirm-btn" 
+            disabled={!paymentUrl}
+            onClick={() => window.location.href = paymentUrl}
+          >
+            Xác nhận thanh toán
+          </Button>
         </div>
-      )}
-      
-      <div className="payment-actions">
-        <Button className="cancel-btn" onClick={handleCancel}>
-          Hủy
-        </Button>
-        <Button 
-          className="confirm-btn" 
-          disabled={!paymentUrl}
-          onClick={() => window.location.href = paymentUrl}
-        >
-          Xác nhận thanh toán
-        </Button>
       </div>
-    </div>
+    </>
   );
 };
 
