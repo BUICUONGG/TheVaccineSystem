@@ -3,29 +3,29 @@ import Blog from "../model/blogSchema.js";
 import { ObjectId } from "mongodb";
 
 class BlogService {
+  // Get all blogs with pagination and filters
   async showData(options = {}) {
     try {
       let query = {};
       
-      // Lọc theo category nếu được cung cấp
+      // Filter by category
       if (options.category) {
         query.category = options.category;
       }
       
-      // Lọc theo tags nếu được cung cấp
+      // Filter by tags
       if (options.tags && options.tags.length > 0) {
         query.tags = { $in: options.tags };
       }
       
-      // Lọc theo trạng thái nếu được cung cấp
+      // Filter by status
       if (options.status) {
         query.status = options.status;
       } else if (!options.includeDeleted) {
-        // Mặc định chỉ hiển thị blog active nếu không yêu cầu hiển thị cả blog đã ẩn
         query.status = "active";
       }
       
-      // Tìm kiếm theo từ khóa nếu được cung cấp
+      // Search by keyword
       if (options.keyword) {
         const keyword = options.keyword;
         query.$or = [
@@ -36,45 +36,32 @@ class BlogService {
         ];
       }
       
-      // Sắp xếp
+      // Sorting
       let sort = {};
       if (options.sortBy) {
         sort[options.sortBy] = options.sortOrder === 'asc' ? 1 : -1;
       } else {
-        // Mặc định sắp xếp theo ngày tạo mới nhất
         sort = { createDate: -1 };
       }
       
-      // Phân trang
+      // Get total count before pagination
+      const total = await connectToDatabase.blogs.countDocuments(query);
+      
+      // Pagination
       const page = options.page || 1;
       const limit = options.limit || 10;
       const skip = (page - 1) * limit;
       
-      // Thực hiện truy vấn
-      const result = await connectToDatabase.blogs
+      const blogs = await connectToDatabase.blogs
         .find(query)
         .sort(sort)
         .skip(skip)
         .limit(limit)
         .toArray();
       
-      // Đếm tổng số bài viết thỏa mãn điều kiện
-      const total = await connectToDatabase.blogs.countDocuments(query);
-      
-      if (!result || result.length === 0) {
-        return {
-          blogs: [],
-          pagination: {
-            total,
-            page,
-            limit,
-            totalPages: Math.ceil(total / limit)
-          }
-        };
-      }
-      
       return {
-        blogs: result,
+        blogs,
+        total,
         pagination: {
           total,
           page,
@@ -83,52 +70,93 @@ class BlogService {
         }
       };
     } catch (error) {
-      console.error("Display data error:", error);
       throw new Error(error.message);
     }
   }
 
-  async getBlogBySlug(slug) {
+  // Get blog by ID
+  async getBlogById(id) {
     try {
-      const blog = await connectToDatabase.blogs.findOne({ slug: slug });
+      if (!ObjectId.isValid(id)) {
+        throw new Error("Invalid blog ID");
+      }
+
+      const blog = await connectToDatabase.blogs.findOne({ 
+        _id: new ObjectId(id),
+        status: "active"
+      });
+
       if (!blog) {
         throw new Error("Blog not found");
       }
+
       return blog;
     } catch (error) {
-      console.error("Get blog by slug error:", error);
       throw new Error(error.message);
     }
   }
 
-  async getRelatedBlogs(blogId, category, tags, limit = 5) {
+  // Get blogs by category
+  async getBlogByCategory(category, page = 1, limit = 10) {
     try {
-      // Tìm các bài viết liên quan dựa trên category và tags
+      const skip = (page - 1) * limit;
+      const query = { 
+        category,
+        status: "active"
+      };
+
+      const blogs = await connectToDatabase.blogs
+        .find(query)
+        .sort({ createDate: -1 })
+        .skip(skip)
+        .limit(limit)
+        .toArray();
+
+      const total = await connectToDatabase.blogs.countDocuments(query);
+
+      return {
+        blogs,
+        pagination: {
+          total,
+          page,
+          limit,
+          totalPages: Math.ceil(total / limit)
+        }
+      };
+    } catch (error) {
+      throw new Error(error.message);
+    }
+  }
+
+  // Get related blogs
+  async getRelatedBlogs(blogId, limit = 3) {
+    try {
+      const blog = await this.getBlogById(blogId);
+      
       const query = {
-        _id: { $ne: new ObjectId(blogId) }, // Loại trừ bài viết hiện tại
+        _id: { $ne: new ObjectId(blogId) },
         status: "active",
         $or: [
-          { category: category },
-          { tags: { $in: tags } }
+          { category: blog.category },
+          { tags: { $in: blog.tags || [] } }
         ]
       };
-      
+
       const relatedBlogs = await connectToDatabase.blogs
         .find(query)
         .sort({ createDate: -1 })
         .limit(limit)
         .toArray();
-        
+
       return relatedBlogs;
     } catch (error) {
-      console.error("Get related blogs error:", error);
       throw new Error(error.message);
     }
   }
 
+  // Get popular tags
   async getPopularTags(limit = 20) {
     try {
-      // Lấy danh sách các tags phổ biến nhất
       const pipeline = [
         { $match: { status: "active" } },
         { $unwind: "$tags" },
@@ -137,25 +165,22 @@ class BlogService {
         { $limit: limit }
       ];
       
-      const popularTags = await connectToDatabase.blogs.aggregate(pipeline).toArray();
-      return popularTags.map(tag => ({ name: tag._id, count: tag.count }));
+      const popularTags = await connectToDatabase.blogs
+        .aggregate(pipeline)
+        .toArray();
+
+      return popularTags.map(tag => ({ 
+        name: tag._id, 
+        count: tag.count 
+      }));
     } catch (error) {
-      console.error("Get popular tags error:", error);
       throw new Error(error.message);
     }
   }
 
+  // Create new blog
   async createBlog(blogData) {
     try {
-      // Generate slug if not provided
-      if (!blogData.slug) {
-        blogData.slug = blogData.blogTitle
-          .toLowerCase()
-          .replace(/[^\w\s-]/g, '')
-          .replace(/\s+/g, '-');
-      }
-      
-      // Đảm bảo tags là một mảng
       if (blogData.tags && !Array.isArray(blogData.tags)) {
         blogData.tags = [blogData.tags];
       } else if (!blogData.tags) {
@@ -164,162 +189,219 @@ class BlogService {
       
       const blog = new Blog(blogData);
       await blog.validate();
+      
       const result = await connectToDatabase.blogs.insertOne(blog);
       return { _id: result.insertedId, ...blogData };
     } catch (error) {
-      console.error("Create blog error", error.message);
-      throw new Error({ error: error.message });
-    }
-  }
-
-  async incrementViews(blogId) {
-    try {
-      // Chỉ tăng lượt xem cho bài viết có trạng thái "active"
-      const result = await connectToDatabase.blogs.findOneAndUpdate(
-        { 
-          _id: new ObjectId(blogId),
-          status: "active" // Chỉ tăng lượt xem cho bài viết đang hoạt động
-        },
-        { $inc: { views: 1 } },
-        { returnDocument: "after" }
-      );
-      
-      if (!result) {
-        throw new Error("Blog not found or not active");
-      }
-      return result;
-    } catch (error) {
-      console.error("Increment views error:", error);
       throw new Error(error.message);
     }
   }
 
+  // Update blog
+  async updateBlog(id, dataUpdate) {
+    try {
+      if (!ObjectId.isValid(id)) {
+        throw new Error("Invalid blog ID");
+      }
+
+      if (dataUpdate.tags && !Array.isArray(dataUpdate.tags)) {
+        dataUpdate.tags = [dataUpdate.tags];
+      }
+      
+      if (dataUpdate.blogContent) {
+        const wordsPerMinute = 200;
+        const wordCount = dataUpdate.blogContent.split(/\s+/).length;
+        dataUpdate.readingTime = Math.ceil(wordCount / wordsPerMinute);
+      }
+
+      const result = await connectToDatabase.blogs.findOneAndUpdate(
+        { _id: new ObjectId(id) },
+        { $set: dataUpdate },
+        { returnDocument: "after" }
+      );
+
+      if (!result) {
+        throw new Error("Blog not found");
+      }
+
+      return result;
+    } catch (error) {
+      throw new Error(error.message);
+    }
+  }
+
+  // Delete blog (soft delete)
+  async deleteBlog(id) {
+    try {
+      if (!ObjectId.isValid(id)) {
+        throw new Error("Invalid blog ID");
+      }
+
+      const result = await connectToDatabase.blogs.findOneAndUpdate(
+        { _id: new ObjectId(id) },
+        { $set: { status: "none" } },
+        { returnDocument: "after" }
+      );
+
+      if (!result) {
+        throw new Error("Blog not found");
+      }
+
+      return result;
+    } catch (error) {
+      throw new Error(error.message);
+    }
+  }
+
+  // Restore blog
+  async restoreBlog(id) {
+    try {
+      if (!ObjectId.isValid(id)) {
+        throw new Error("Invalid blog ID");
+      }
+
+      const result = await connectToDatabase.blogs.findOneAndUpdate(
+        { _id: new ObjectId(id) },
+        { $set: { status: "active" } },
+        { returnDocument: "after" }
+      );
+
+      if (!result) {
+        throw new Error("Blog not found");
+      }
+
+      return result;
+    } catch (error) {
+      throw new Error(error.message);
+    }
+  }
+
+  // Increment views
+  async incrementViews(blogId) {
+    try {
+      if (!ObjectId.isValid(blogId)) {
+        throw new Error("Invalid blog ID");
+      }
+
+      const result = await connectToDatabase.blogs.findOneAndUpdate(
+        { 
+          _id: new ObjectId(blogId),
+          status: "active"
+        },
+        { $inc: { views: 1 } },
+        { returnDocument: "after" }
+      );
+
+      if (!result) {
+        throw new Error("Blog not found or not active");
+      }
+
+      return result;
+    } catch (error) {
+      throw new Error(error.message);
+    }
+  }
+
+  // Toggle like
   async toggleLike(blogId, userId) {
     try {
-      // Kiểm tra xem người dùng đã like bài viết chưa
-      // Trong thực tế, bạn có thể cần một collection riêng để lưu trữ likes
-      
-      // Tạm thời chỉ tăng số lượng likes
+      if (!ObjectId.isValid(blogId)) {
+        throw new Error("Invalid blog ID");
+      }
+
       const result = await connectToDatabase.blogs.findOneAndUpdate(
         { _id: new ObjectId(blogId) },
         { $inc: { likes: 1 } },
         { returnDocument: "after" }
       );
-      
+
       if (!result) {
         throw new Error("Blog not found");
       }
+
       return result;
     } catch (error) {
-      console.error("Like error:", error);
       throw new Error(error.message);
     }
   }
 
+  // Rate blog
   async rateBlog(blogId, rating) {
     try {
+      if (!ObjectId.isValid(blogId)) {
+        throw new Error("Invalid blog ID");
+      }
+
       if (rating < 1 || rating > 5) {
         throw new Error("Rating must be between 1 and 5");
       }
-      
+
       const result = await connectToDatabase.blogs.findOneAndUpdate(
         { _id: new ObjectId(blogId) },
         { $set: { rating: rating } },
         { returnDocument: "after" }
       );
-      
+
       if (!result) {
         throw new Error("Blog not found");
       }
-      
+
       return result;
     } catch (error) {
-      console.error("Rate blog error:", error);
       throw new Error(error.message);
     }
   }
 
+  // Add comment
   async addComment(blogId, userId, content) {
     try {
+      if (!ObjectId.isValid(blogId)) {
+        throw new Error("Invalid blog ID");
+      }
+
       const comment = {
         userId: new ObjectId(userId),
         content,
         createdAt: new Date(),
         status: "active"
       };
-      
+
       const result = await connectToDatabase.blogs.findOneAndUpdate(
         { _id: new ObjectId(blogId) },
         { $push: { comments: comment } },
         { returnDocument: "after" }
       );
-      
+
       if (!result) {
         throw new Error("Blog not found");
       }
-      
+
       return result;
     } catch (error) {
-      console.error("Add comment error:", error);
       throw new Error(error.message);
     }
   }
 
-  async updateBlog(id, dataUpdate) {
+  // Update comment status
+  async updateCommentStatus(blogId, commentId, status) {
     try {
-      // Update slug if title is changed
-      if (dataUpdate.blogTitle && !dataUpdate.slug) {
-        dataUpdate.slug = dataUpdate.blogTitle
-          .toLowerCase()
-          .replace(/[^\w\s-]/g, '')
-          .replace(/\s+/g, '-');
+      if (!ObjectId.isValid(blogId)) {
+        throw new Error("Invalid blog ID");
       }
-      
-      // Đảm bảo tags là một mảng
-      if (dataUpdate.tags && !Array.isArray(dataUpdate.tags)) {
-        dataUpdate.tags = [dataUpdate.tags];
-      }
-      
-      // Tính lại thời gian đọc nếu nội dung thay đổi
-      if (dataUpdate.blogContent) {
-        const wordsPerMinute = 200;
-        const wordCount = dataUpdate.blogContent.split(/\s+/).length;
-        dataUpdate.readingTime = Math.ceil(wordCount / wordsPerMinute);
-      }
-      
+
       const result = await connectToDatabase.blogs.findOneAndUpdate(
-        {
-          _id: new ObjectId(id),
+        { 
+          _id: new ObjectId(blogId),
+          "comments.userId": new ObjectId(commentId)
         },
-        { $set: dataUpdate },
+        { $set: { "comments.$.status": status } },
         { returnDocument: "after" }
       );
-      return result;
-    } catch (error) {
-      throw new Error(error.message);
-    }
-  }
 
-  async deleteBlog(id) {
-    try {
-      const result = await connectToDatabase.blogs.findOneAndUpdate(
-        { _id: new ObjectId(id) },
-        { $set: { status: "none" } },
-        { returnDocument: "after" }
-      );
-      return result;
-    } catch (error) {
-      throw new Error(error.message);
-    }
-  }
+      if (!result) {
+        throw new Error("Blog or comment not found");
+      }
 
-  async restoreBlog(id) {
-    try {
-      const result = await connectToDatabase.blogs.findOneAndUpdate(
-        { _id: new ObjectId(id) },
-        { $set: { status: "active" } },
-        { returnDocument: "after" }
-      );
       return result;
     } catch (error) {
       throw new Error(error.message);

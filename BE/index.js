@@ -58,7 +58,7 @@ app.use("/images", express.static(path.join(__dirname, "src", "public")));
 app.use("/user", usersRoutes);
 app.use("/vaccine", vaccinesRoutes);
 app.use("/child", childRoutes);
-app.use("/blogs", blogRoutes);
+app.use("/blog", blogRoutes);
 app.use("/news", newsRoutes);
 app.use("/customer", customerRoutes);
 app.use("/appointmentLe", aptLeRoutes);
