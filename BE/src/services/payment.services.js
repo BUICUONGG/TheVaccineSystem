@@ -54,16 +54,27 @@ class PaymentService {
       order.mac = CryptoJS.HmacSHA256(data, config.key1).toString();
 
       const result = await axios.post(config.endpoint, null, { params: order });
-
       const status = "Pending";
 
       if (paymentData.type === "aptLe") {
         const aptLe = await appointmentService.createAptLe(
           transformedPaymentData
         );
+
+        await connectToDatabase.appointmentLes.updateOne(
+          { _id: aptLe._id },
+          {
+            $set: {
+              status: status,
+              app_trans_id: order.app_trans_id,
+              zp_trans_token: result.data.zp_trans_token,
+              order_token: result.data.order_token,
+            },
+          }
+        );
         await notiService.createNoti({
           cusId: transformedPaymentData.cusId,
-          apt: aptLe._id,
+          apt: aptLe.insertedId,
           aptModel: "AppointmentLe",
           message: `Lịch hẹn lẻ của bạn vào lúc ${paymentData.time} đang trong trạng thái ${status}`,
           createdAt: new Date().toLocaleDateString("vi-VN"),
@@ -79,6 +90,7 @@ class PaymentService {
           { _id: aptGoi._id },
           {
             $set: {
+              status: status,
               app_trans_id: order.app_trans_id,
               zp_trans_token: result.data.zp_trans_token,
               order_token: result.data.order_token,
