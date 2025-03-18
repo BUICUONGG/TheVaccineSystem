@@ -1294,6 +1294,12 @@ nav ul li button:hover {
 .blog-section {
   padding: 60px 0;
   background-color: #f9f9f9;
+  position: relative;
+  margin-top: 2rem;
+  margin-left: calc(-50vw + 50%);
+  margin-right: calc(-50vw + 50%);
+  width: 100vw;          /* Giống feedback-section */
+  max-width: none;
 }
 
 .blog-section .section-title {
@@ -1317,8 +1323,11 @@ nav ul li button:hover {
 
 .blog-container {
   max-width: 1200px;
+  position: relative;
   margin: 0 auto;
+  margin-left: calc(50% - 500px);
   padding: 0 20px;
+  width: 80%;
 }
 
 .blog-grid {
@@ -1437,26 +1446,7 @@ nav ul li button:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 15px rgba(74, 144, 226, 0.4);
 }
-/* 
-@media (max-width: 992px) {
-  .blog-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
 
-@media (max-width: 768px) {
-  .blog-grid {
-    grid-template-columns: 1fr;
-  }
-  
-  .blog-section {
-    padding: 40px 0;
-  }
-  
-  .blog-section .section-title {
-    font-size: 28px;
-  }
-} */
 
 /* Feedback Floating Button */
 .feedback-floating-button {
@@ -1544,6 +1534,12 @@ nav ul li button:hover {
   background-color: #f8f9fa;
   position: relative;
   margin-top: 2rem;
+  margin-left: 0;
+  margin-right: 0;
+  max-width: non;
+  width: none;
+  
+  
 }
 
 .feedback-section:before {
@@ -1564,7 +1560,7 @@ nav ul li button:hover {
 }
 
 .feedback-container {
-  max-width: 1200px;
+  max-width: 100%;
   margin: 0 auto;
   padding: 0 20px;
 }
@@ -1726,22 +1722,3 @@ nav ul li button:hover {
   color: #888;
 }
 
-/* Responsive adjustments for feedback section  */
-/* @media (max-width: 1200) {
-  .feedback-row {
-    flex-direction: column;
-  }
-  
-  .feedback-card {
-    max-width: 100%;
-  }
-  
-  .feedback-quote p {
-    font-size: 14px;
-  }
-  
-  .feedback-button {
-    padding: 10px 20px;
-    font-size: 14px;
-  }
-} */

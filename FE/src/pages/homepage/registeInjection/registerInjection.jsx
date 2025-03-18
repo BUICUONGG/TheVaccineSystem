@@ -20,6 +20,7 @@ const RegisterInjection = () => {
   const [vaccinePackages, setVaccinePackages] = useState([]); // Thêm state cho vaccine gói
   const [selectedVaccineType, setSelectedVaccineType] = useState(null); // 'single' hoặc 'package'
   const [selectedVaccineId, setSelectedVaccineId] = useState(null); // Lưu trữ ID của vaccine được chọn
+  const [importProductsPrice, setImportProductsPrice] = useState({});
 
   useEffect(() => {
     const token = localStorage.getItem("accesstoken");
@@ -64,6 +65,41 @@ const RegisterInjection = () => {
     };
     fetchVaccinePackages();
   }, []);
+
+useEffect(() => {
+  const fetchImportPrices = async () => {
+    try {
+      const token = localStorage.getItem("accesstoken");
+      const response = await axiosInstance.get("/vaccineimport/getfullData", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      // Xử lý dữ liệu giá
+      const priceMap = {};
+      response.data.forEach(importData => {
+        importData.vaccines.forEach(vaccine => {
+          if (!priceMap[vaccine.vaccineId] || 
+              new Date(importData.importDate) > new Date(priceMap[vaccine.vaccineId].importDate)) {
+            priceMap[vaccine.vaccineId] = {
+              unitPrice: vaccine.unitPrice,
+              importDate: importData.importDate
+            };
+          }
+        });
+      });
+      setImportProductsPrice(priceMap);
+    } catch (error) {
+      console.error("Error fetching import prices:", error);
+      toast.error("Không thể tải thông tin giá", {
+        position: "top-right",
+        autoClose: 3000,
+      });
+    }
+  };
+
+  fetchImportPrices();
+}, []);
+
 
   // Fetch user info khi component mount và user đã đăng nhập
   useEffect(() => {
@@ -176,7 +212,7 @@ const RegisterInjection = () => {
             ...paymentData,
             vaccineId: selectedVaccineId,
             vaccineName: selectedVaccine.vaccineName,
-            price: selectedVaccine.vaccineImports?.[0]?.totalPrice || 0,
+            price: importProductsPrice[selectedVaccineId]?.unitPrice || 0,
             appointmentData: {
               ...requestData,
               vaccineId: selectedVaccineId
@@ -405,8 +441,8 @@ const RegisterInjection = () => {
                           <h3>{vaccine.vaccineName}</h3>
                           <p className="register-vaccine-description">{vaccine.description}</p>
                           <p className="vaccine-price">
-                            {vaccine.vaccineImports?.[0]?.totalPrice
-                              ? `${vaccine.vaccineImports[0].totalPrice.toLocaleString()} VNĐ`
+                            {importProductsPrice[vaccine._id]?.unitPrice
+                              ? `${importProductsPrice[vaccine._id]?.unitPrice?.toLocaleString()} VNĐ`
                               : "Chưa có giá"}
                           </p>
                         </div>

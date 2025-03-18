@@ -608,7 +608,7 @@ const HomePage = () => {
 
       {/* Thêm phần hiển thị blog trước footer */}
       <section className="blog-section">
-        <div className="container">
+        <div className="blog-container">
           <h2 className="section-title">Bài Viết Mới Nhất</h2>
           <div className="blog-container">
             <div className="blog-grid">
@@ -659,7 +659,7 @@ const HomePage = () => {
 
       {/* Add Customer Feedback Section */}
       <section className="feedback-section">
-        <div className="container">
+        <div className="feedback-container">
           <h2>ĐÁNH GIÁ TỪ KHÁCH HÀNG</h2>
           <div className="feedback-container">
             {loadingFeedbacks ? (

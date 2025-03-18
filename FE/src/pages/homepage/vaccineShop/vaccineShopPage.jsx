@@ -13,6 +13,7 @@ const VaccinePriceList = () => {
   const [selectedCategory, setSelectedCategory] = useState("Single");
   const [products, setProducts] = useState([]);
   const [packageProducts, setPackageProducts] = useState([]);
+  const [importProductsPrice, setImportProductsPrice] = useState({});
   const [currentPage, setCurrentPage] = useState(1);
   const productsPerPage = 9;
   const [isLoading, setIsLoading] = useState(true);
@@ -25,17 +26,35 @@ const VaccinePriceList = () => {
     setIsLoading(true);
     try {
       const token = localStorage.getItem("accesstoken");
-      const [vaccineResponse, packageResponse] = await Promise.all([
+      const [vaccineResponse, packageResponse, importResponse] = await Promise.all([
         axiosInstance.get("/vaccine/showInfo", {
           headers: { Authorization: `Bearer ${token}` },
         }),
         axiosInstance.get("/vaccinepakage/showVaccinePakage", {
           headers: { Authorization: `Bearer ${token}` },
         }),
+        axiosInstance.get("/vaccineimport/getfullData", {
+          headers: { Authorization: `Bearer ${token}` },
+        }), 
       ]);
+
+      const priceMap = {};
+      importResponse.data.forEach(importData => {
+        importData.vaccines.forEach(vaccine => {
+          if (!priceMap[vaccine.vaccineId] || 
+              new Date(importData.importDate) > new Date(priceMap[vaccine.vaccineId].importDate)) {
+            priceMap[vaccine.vaccineId] = {
+              unitPrice: vaccine.unitPrice,
+              importDate: importData.importDate
+            };
+          }
+        });
+      });
 
       setProducts(vaccineResponse.data);
       setPackageProducts(packageResponse.data);
+      setImportProductsPrice(priceMap);
+      console.log(priceMap);
     } catch (error) {
       console.error("Error fetching data:", error);
       if (error.response?.status === 401) {
@@ -177,9 +196,9 @@ const VaccinePriceList = () => {
                       <div className="price-section">
                         <span className="price-label">Giá:</span>
                         <span className="price-value">
-                          {product.vaccineImports?.[0]?.totalPrice?.toLocaleString() ||
-                            product.price?.toLocaleString() ||
-                            "Chưa cập nhật"}
+                          {importProductsPrice[product._id]?.unitPrice?.toLocaleString() ||
+                            // product.price?.toLocaleString() ||
+                            "Chưa có hàng"}
                         </span>
                       </div>
                       <button
