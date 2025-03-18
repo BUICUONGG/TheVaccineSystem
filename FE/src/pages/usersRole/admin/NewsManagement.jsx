@@ -22,7 +22,8 @@ import {
   PlusOutlined, 
   EyeOutlined, 
   UploadOutlined,
-  UndoOutlined
+  UndoOutlined,
+  FilterOutlined
 } from "@ant-design/icons";
 import moment from 'moment'; 
 import axiosInstance from "../../../service/api";
@@ -45,6 +46,7 @@ const NewsManagement = () => {
     const [editForm] = Form.useForm();
     const [imageUrl, setImageUrl] = useState(null);
     const [uploadLoading, setUploadLoading] = useState(false);
+    const [showFeaturedOnly, setShowFeaturedOnly] = useState(false);
 
     // Category options based on updated schema
     const categoryOptions = [
@@ -54,25 +56,43 @@ const NewsManagement = () => {
         { value: 'general', label: 'Tin tức chung' }
     ];
 
+    // Status options
+    const statusOptions = [
+        { value: 'published', label: 'Đã xuất bản' },
+        { value: 'draft', label: 'Bản nháp' },
+        { value: 'archived', label: 'Đã lưu trữ' }
+    ];
+
     useEffect(() => {
         fetchNews();
     }, []);
 
     useEffect(() => {
+        let result = [...news];
+        
+        // Lọc theo text tìm kiếm
         if (searchText) {
-            const filtered = news.filter(
+            result = result.filter(
                 (item) =>
                     item.newsTitle?.toLowerCase().includes(searchText.toLowerCase()) ||
                     item.newsContent?.toLowerCase().includes(searchText.toLowerCase())
             );
-            setFilteredNews(filtered);
-        } else {
-            setFilteredNews(news);
         }
-    }, [news, searchText]);
+        
+        // Lọc theo tin nổi bật nếu được bật
+        if (showFeaturedOnly) {
+            result = result.filter(item => item.featured === true);
+        }
+        
+        setFilteredNews(result);
+    }, [news, searchText, showFeaturedOnly]);
 
     const handleSearch = (value) => {
         setSearchText(value);
+    };
+
+    const toggleFeaturedFilter = () => {
+        setShowFeaturedOnly(!showFeaturedOnly);
     };
 
     const fetchNews = async () => {
@@ -351,6 +371,12 @@ const NewsManagement = () => {
             dataIndex: "status",
             key: "status",
             width: 120,
+            filters: [
+                { text: "Đã xuất bản", value: "published" },
+                { text: "Bản nháp", value: "draft" },
+                { text: "Đã lưu trữ", value: "archived" }
+            ],
+            onFilter: (value, record) => record.status === value,
             render: (status) => getStatusTag(status),
         },
         {
@@ -447,12 +473,22 @@ const NewsManagement = () => {
                 flexWrap: "wrap",
                 gap: "10px"
             }}>
-                <Search
-                    placeholder="Tìm kiếm theo tiêu đề hoặc nội dung"
-                    enterButton
-                    onSearch={handleSearch}
-                    style={{ width: 300 }}
-                />
+                <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+                    <Search
+                        placeholder="Tìm kiếm theo tiêu đề hoặc nội dung"
+                        enterButton
+                        onSearch={handleSearch}
+                        style={{ width: 300 }}
+                    />
+                    
+                    <Button
+                        type={showFeaturedOnly ? "primary" : "default"}
+                        onClick={toggleFeaturedFilter}
+                        icon={<FilterOutlined />}
+                    >
+                        {showFeaturedOnly ? "Tất cả tin tức" : "Chỉ tin nổi bật"}
+                    </Button>
+                </div>
                 
                 <Button onClick={fetchNews} type="default">
                     Làm mới dữ liệu
@@ -465,8 +501,8 @@ const NewsManagement = () => {
                 loading={loading}
                 rowKey="_id"
                 pagination={{
-                    // pageSize: 10,
-                    // showSizeChanger: true,
+                    pageSize: 10,
+                    showSizeChanger: true,
                     showTotal: (total) => `Tổng ${total} tin tức`,
                 }}
             />
