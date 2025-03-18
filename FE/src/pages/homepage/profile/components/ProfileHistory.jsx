@@ -106,12 +106,24 @@ const ProfileHistory = () => {
   };
 
   const getFilteredAppointments = (tabKey) => {
-    let filtered = [...appointments].sort((a, b) => new Date(b.createAt) - new Date(a.createAt));
+    // Sắp xếp tất cả các đơn theo ngày đăng ký (sớm nhất lên đầu)
+    let filtered = [...appointments].sort((a, b) => {
+      // Chuyển đổi định dạng ngày từ DD/MM/YYYY sang Date object
+      const [dayA, monthA, yearA] = a.createdAt.split('/');
+      const [dayB, monthB, yearB] = b.createdAt.split('/');
+      
+      const dateA = new Date(yearA, monthA - 1, dayA);
+      const dateB = new Date(yearB, monthB - 1, dayB);
+      
+      return dateB - dateA; // Sắp xếp để ngày sớm hơn hiển thị trước
+    });
     
+    // Lọc theo tab
     if (tabKey === 'pending') {
-      filtered = appointments.filter(apt => apt.status?.toLowerCase() === 'pending');
+      filtered = filtered.filter(apt => apt.status?.toLowerCase() === 'pending');
     }
 
+    // Lọc theo search text
     if (searchText) {
       const searchLower = searchText.toLowerCase();
       filtered = filtered.filter(apt => {
@@ -194,7 +206,7 @@ const ProfileHistory = () => {
             <Descriptions.Item label="Mô tả vaccine">{appointment.vaccine?.description}</Descriptions.Item>
           </>
         )}
-        <Descriptions.Item label="Ngày đăng ký">{appointment.createAt}</Descriptions.Item>
+        <Descriptions.Item label="Ngày đăng ký">{appointment.createdAt}</Descriptions.Item>
         <Descriptions.Item label="Ngày tiêm">{appointment.date}</Descriptions.Item>
         <Descriptions.Item label="Trạng thái">
           <Tag color={getStatusColor(appointment.status)}>
@@ -212,11 +224,21 @@ const ProfileHistory = () => {
   const columns = [
     {
       title: 'Ngày đăng ký',
-      dataIndex: 'createAt',
-      key: 'createAt',
+      dataIndex: 'createdAt',
+      key: 'createdAt',
       width: '15%',
-      sorter: (a, b) => new Date(a.createAt) - new Date(b.createAt),
-      sortOrder: sortedInfo.columnKey === 'createAt' && sortedInfo.order,
+      sorter: (a, b) => {
+        // Chuyển đổi định dạng ngày từ DD/MM/YYYY sang Date object
+        const [dayA, monthA, yearA] = a.createdAt.split('/');
+        const [dayB, monthB, yearB] = b.createdAt.split('/');
+        
+        const dateA = new Date(yearA, monthA - 1, dayA);
+        const dateB = new Date(yearB, monthB - 1, dayB);
+        
+        return dateB - dateA; // Sắp xếp để ngày sớm hơn hiển thị trước
+      },
+      defaultSortOrder: 'ascend',
+      sortDirections: ['ascend', 'descend'],
     },
     {
       title: 'Người tiêm',

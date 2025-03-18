@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Form, Button, DatePicker, Input, Radio, Switch, Checkbox } from "antd";
 import { UserOutlined, UserAddOutlined } from "@ant-design/icons";
@@ -8,6 +8,7 @@ import "react-toastify/dist/ReactToastify.css";
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import "./registerInjection.css";
 import axiosInstance from "../../../service/api";
+import HeaderLayouts from "../../../components/layouts/header";
 
 const RegisterInjection = () => {
   const navigate = useNavigate();
@@ -210,8 +211,13 @@ const RegisterInjection = () => {
     return current && current < dayjs().startOf("day");
   };
 
+
+  const footerRef = useRef(null);
+
+
   return (
     <div className="form-register-page">
+      <HeaderLayouts footerRef={footerRef} />
       <div className="form-main-content">
         <div className="form-back-home-wrapper">
           <Link to="/homepage" className="form-back-home">
@@ -387,10 +393,10 @@ const RegisterInjection = () => {
                         />
                         <div className="vaccine-card-content">
                           <h3>{vaccine.vaccineName}</h3>
-                          <p className="vaccine-description">{vaccine.description}</p>
+                          <p className="register-vaccine-description">{vaccine.description}</p>
                           <p className="vaccine-price">
-                            {vaccine.vaccineImports?.[0]?.price
-                              ? `${vaccine.vaccineImports[0].price.toLocaleString()} VNĐ`
+                            {vaccine.vaccineImports?.[0]?.totalPrice
+                              ? `${vaccine.vaccineImports[0].totalPrice.toLocaleString()} VNĐ`
                               : "Chưa có giá"}
                           </p>
                         </div>
@@ -413,7 +419,7 @@ const RegisterInjection = () => {
                         />
                         <div className="vaccine-card-content">
                           <h3>{pack.packageName}</h3>
-                          <p className="vaccine-description">{pack.description}</p>
+                          <p className="register-vaccine-description">{pack.description}</p>
                           <p className="vaccine-price">
                             {pack.price ? `${pack.price.toLocaleString()} VNĐ` : "Chưa có giá"}
                           </p>

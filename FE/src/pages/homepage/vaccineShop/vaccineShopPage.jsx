@@ -1,9 +1,10 @@
-import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
-// import axios from "axios";
-import { Pagination, Spin } from "antd"; // Thêm Modal và Spin từ antd để hiển thị thông báo lỗi và loading
+import { useState, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import { Pagination, Spin, Slider, Checkbox, Radio } from "antd";
+import { FilterOutlined } from "@ant-design/icons";
 import "./vaccineShopPage.css";
 import axiosInstance from "../../../service/api";
+import HeaderLayouts from "../../../components/layouts/header";
 
 const VaccinePriceList = () => {
   const navigate = useNavigate();
@@ -15,6 +16,10 @@ const VaccinePriceList = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const productsPerPage = 9;
   const [isLoading, setIsLoading] = useState(true);
+  const [priceRange, setPriceRange] = useState([0, 1000000]);
+  const [selectedManufacturers, setSelectedManufacturers] = useState([]);
+  const [selectedAgeGroups, setSelectedAgeGroups] = useState([]);
+  const [selectedDiseases, setSelectedDiseases] = useState([]);
 
   const prefetchData = async () => {
     setIsLoading(true);
@@ -42,11 +47,9 @@ const VaccinePriceList = () => {
   };
 
   useEffect(() => {
-    // Kiểm tra authentication
     const token = localStorage.getItem("accesstoken");
     if (token) {
       setIsLoggedIn(true);
-      // Decode token để lấy role
       const tokenParts = token.split(".");
       const payload = JSON.parse(atob(tokenParts[1]));
       setUserRole(payload.role);
@@ -59,162 +62,152 @@ const VaccinePriceList = () => {
     document.title = "Bảng giá vắc-xin";
   }, []);
 
-  // const handleLogin = () => navigate("/login");
-  // const handleRegister = () => navigate("/register");
-
-  // const handleLogout = async () => {
-  //   try {
-  //     // Lấy thông tin userId và accesstoken từ localStorage
-  //     const userId = localStorage.getItem("userId");
-  //     const accesstoken = localStorage.getItem("accesstoken");
-
-  //     // Kiểm tra xem có userId và accesstoken không
-  //     if (userId && accesstoken) {
-  //       // Gọi API logout
-  //       await axios.post(
-  //         `http://localhost:8080/user/logout/${userId}`,
-  //         {},
-  //         {
-  //           headers: {
-  //             Authorization: `Bearer ${accesstoken}`,
-  //           },
-  //         }
-  //       );
-  //     }
-
-  //     // Xóa hết thông tin người dùng khỏi localStorage
-  //     localStorage.removeItem("accesstoken");
-  //     localStorage.removeItem("username");
-  //     localStorage.removeItem("userId");
-  //     setIsLoggedIn(false);
-
-  //     // Chuyển hướng về trang đăng nhập
-  //     navigate("/login");
-  //   } catch (error) {
-  //     console.error("Logout error:", error);
-  //     // Hiển thị thông báo lỗi nếu đăng xuất thất bại
-  //     Modal.error({
-  //       content: "Logout failed. Please try again.",
-  //     });
-  //   }
-  // };
-
-  // Sửa hàm handleCategoryChange để reset currentPage
   const handleCategoryChange = (event) => {
     setSelectedCategory(event.target.value);
-    setCurrentPage(1); // Reset về trang 1 khi chuyển loại
+    setCurrentPage(1);
   };
 
-  // Tính toán lại số trang dựa trên dữ liệu đã lọc
-  const filteredProducts =
-    selectedCategory === "Single" ? products : packageProducts;
+  const handlePriceChange = (value) => {
+    setPriceRange(value);
+  };
 
-  const totalItems = filteredProducts.length;
-  const indexOfLastProduct = currentPage * productsPerPage;
-  const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
-  const currentProducts = filteredProducts.slice(
-    indexOfFirstProduct,
-    indexOfLastProduct
-  );
+  const handleManufacturerChange = (checkedValues) => {
+    setSelectedManufacturers(checkedValues);
+  };
+
+  const handleAgeGroupChange = (checkedValues) => {
+    setSelectedAgeGroups(checkedValues);
+  };
+
+  const handleDiseaseChange = (checkedValues) => {
+    setSelectedDiseases(checkedValues);
+  };
+
+  const getFilteredProducts = () => {
+    let filtered = selectedCategory === "Single" ? products : packageProducts;
+
+    if (selectedManufacturers.length > 0) {
+      filtered = filtered.filter((p) =>
+        selectedManufacturers.includes(p.manufacturer)
+      );
+    }
+
+    return filtered;
+  };
+
+  const handleMoreInfo = () => {
+    navigate("/vaccineDetail");
+  } 
+
+  const footerRef = useRef(null);
 
   return (
-    <div className="new-page">
-      {isLoading ? (
-        <div className="loading-container">
-          <Spin size="large" tip="Đang tải dữ liệu..." />
-        </div>
-      ) : (
-        <>
-          <div className="back-home-wrapper">
-            <Link to="/homepage" className="back-home">
-              Back home
-            </Link>
-          </div>
-          <div className="product-filter">
-            <label htmlFor="category">Chọn loại sản phẩm:</label>
-            <select
-              id="category"
-              value={selectedCategory}
-              onChange={handleCategoryChange}
-            >
-              <option value="Single">Vắc-xin lẻ</option>
-              <option value="Pack">Vắc-xin gói</option>
-            </select>
-          </div>
+    <div className="home-new-page">
+      <HeaderLayouts footerRef={footerRef} />
 
-          <div className="product-list">
-            {filteredProducts.length === 0 ? (
-              <p className="no-data">No Data</p>
-            ) : (
-              <>
-                {currentProducts.map((product) => (
-                  <div
-                    className={
-                      selectedCategory === "Pack"
-                        ? "package-card"
-                        : "product-card"
-                    }
-                    key={product._id}
-                  >
-                    {selectedCategory === "Single" ? (
-                      // Single vaccine display
-                      <>
-                        <img src={product.imageUrl} alt={product.vaccineName} />
-                        <h3>
-                          <b>{product.vaccineName}</b>
-                        </h3>
-                        <p>Nhà sản xuất: {product.manufacturer}</p>
-                        <span>Mô tả: {product.description}</span>
-                        <div className="price-container">
-                          <div className="price-content">
-                            <span className="price-label">Giá: </span>
-                            {product.vaccineImports &&
-                            product.vaccineImports.length > 0 ? (
-                              <span className="price-value">
-                                {product?.vaccineImports[0]?.totalPrice.toLocaleString()}
-                              </span>
-                            ) : (
-                              <span className="price-unavailable">
-                                Chưa có giá
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                        <button className="view-more-btn">XEM THÊM</button>
-                      </>
-                    ) : (
-                      // Package display
-                      <>
-                        <h3>
-                          <b>{product.packageName}</b>
-                        </h3>
-                        <p className="description">{product.description}</p>
-                        <div className="package-price">
-                          {product.price.toLocaleString()}
-                        </div>
-                        <button onClick={() => navigate("/vaccineDetail")} className="view-more-btn">XEM THÊM</button>
-                      </>
-                    )}
+      <div className="shop-container">
+        {isLoading ? (
+          <div className="loading-container">
+            <Spin size="large" tip="Đang tải dữ liệu..." />
+          </div>
+        ) : (
+          <>
+            <div className="shop-sidebar">
+              <h3 className="sidebar-title">
+                <FilterOutlined /> Bộ lọc sản phẩm
+              </h3>
+
+              <div className="sidebar-section">
+                <h4>Loại vaccine</h4>
+                <Radio.Group
+                  value={selectedCategory}
+                  onChange={handleCategoryChange}
+                >
+                  <Radio.Button value="Single">Vắc-xin lẻ</Radio.Button>
+                  <Radio.Button value="Pack">Vắc-xin gói</Radio.Button>
+                </Radio.Group>
+              </div>
+
+              <div className="sidebar-section">
+                <h4>Khoảng giá</h4>
+                <Slider
+                  range
+                  min={0}
+                  max={1000000}
+                  step={50000}
+                  value={priceRange}
+                  onChange={handlePriceChange}
+                  tipFormatter={(value) => `${value.toLocaleString()}đ`}
+                />
+              </div>
+
+              <div className="sidebar-section">
+                <h4>Nhà sản xuất</h4>
+                <Checkbox.Group
+                  options={[
+                    { label: "GSK", value: "GSK" },
+                    { label: "Pfizer", value: "Pfizer" },
+                  ]}
+                  value={selectedManufacturers}
+                  onChange={handleManufacturerChange}
+                />
+              </div>
+            </div>
+
+            <div className="shop-main-content">
+              <div className="shop-header">
+                <h2>
+                  {selectedCategory === "Single" ? "Vắc-xin lẻ" : "Gói vắc-xin"}
+                </h2>
+                <span>{getFilteredProducts().length} sản phẩm</span>
+              </div>
+
+              <div className="product-grid">
+                {getFilteredProducts().map((product) => (
+                  <div className="product-card" key={product._id}>
+                    <div className="product-image">
+                      <img src={product.imageUrl} alt={product.vaccineName} />
+                    </div>
+                    <div className="product-info">
+                      <h3>{product.vaccineName || product.packageName}</h3>
+                      <p className="manufacturer">
+                        Nhà sản xuất: {product.manufacturer}
+                      </p>
+                      <p className="description">{product.description}</p>
+                      <div className="price-section">
+                        <span className="price-label">Giá:</span>
+                        <span className="price-value">
+                          {product.vaccineImports?.[0]?.totalPrice?.toLocaleString() ||
+                            product.price?.toLocaleString() ||
+                            "Chưa cập nhật"}
+                        </span>
+                      </div>
+                      <button
+                        className="view-more-btn"
+                        onClick={() => handleMoreInfo(product._id)}
+                      >
+                        XEM THÊM
+                      </button>
+                    </div>
                   </div>
                 ))}
-              </>
-            )}
-          </div>
+              </div>
 
-          {/* Chỉ hiển thị pagination khi có sản phẩm */}
-          {filteredProducts.length > 0 && (
-            <div className="pagination-container">
-              <Pagination
-                current={currentPage}
-                total={totalItems}
-                pageSize={productsPerPage}
-                onChange={(page) => setCurrentPage(page)}
-                showSizeChanger={false} // Tắt chức năng thay đổi số items/trang
-              />
+              {getFilteredProducts().length > 0 && (
+                <div className="pagination-container">
+                  <Pagination
+                    current={currentPage}
+                    total={getFilteredProducts().length}
+                    pageSize={productsPerPage}
+                    onChange={(page) => setCurrentPage(page)}
+                    showSizeChanger={false}
+                  />
+                </div>
+              )}
             </div>
-          )}
-        </>
-      )}
+          </>
+        )}
+      </div>
     </div>
   );
 };
