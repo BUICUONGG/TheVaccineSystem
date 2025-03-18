@@ -37,11 +37,10 @@ class PaymentService {
 
       const result = await axios.post(config.endpoint, null, { params: order });
       await connectToDatabase.payments.insertOne({
+        paymentData,
         app_trans_id: order.app_trans_id,
         zp_trans_token: result.data.zp_trans_token,
         order_token: result.data.order_token,
-        cusId: paymentData.cusId,
-        vaccineId: paymentData.vaccineId,
         status: "PENDING", // Giao dịch đang chờ xử lý
         createdAt: new Date().toLocaleDateString("vi-VN"),
       });
