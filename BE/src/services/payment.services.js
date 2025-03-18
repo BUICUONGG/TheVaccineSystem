@@ -58,18 +58,12 @@ class PaymentService {
       const status = "Pending";
 
       if (paymentData.type === "aptLe") {
-        const aptle = await connectToDatabase.appointmentLes.insertOne({
-          ...transformedPaymentData,
-          app_trans_id: order.app_trans_id,
-          zp_trans_token: result.data.zp_trans_token,
-          order_token: result.data.order_token,
-          status, // Giao dịch đang chờ xử lý
-          createdAt: new Date().toLocaleDateString("vi-VN"),
-        });
-
+        const aptLe = await appointmentService.createAptLe(
+          transformedPaymentData
+        );
         await notiService.createNoti({
           cusId: transformedPaymentData.cusId,
-          apt: aptle.insertedId,
+          apt: aptLe._id,
           aptModel: "AppointmentLe",
           message: `Lịch hẹn lẻ của bạn vào lúc ${paymentData.time} đang trong trạng thái ${status}`,
           createdAt: new Date().toLocaleDateString("vi-VN"),

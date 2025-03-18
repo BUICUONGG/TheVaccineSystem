@@ -127,6 +127,7 @@ class AppointmentService {
         note: note || "",
       };
 
+      await connectToDatabase.appointmentLes.insertOne(aptLe);
       // Cập nhật số lượng vaccine trong kho
       await connectToDatabase.vaccineImports.updateOne(
         {
@@ -443,14 +444,6 @@ class AppointmentService {
       };
 
       const result = await connectToDatabase.appointmentGois.insertOne(aptGoi);
-
-      // await notiService.createNoti({
-      //   cusId: new ObjectId(cusId),
-      //   apt: result.insertedId,
-      //   aptModel: "AppointmentGoi",
-      //   message: `Lịch hẹn gói của bạn vào ngày ${date} lúc ${time} đang trạng thái chờ duyệt`,
-      //   createdAt: new Date().toLocaleDateString("vi-VN"),
-      // });
 
       return {
         _id: result.insertedId,
