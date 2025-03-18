@@ -162,38 +162,48 @@ const RegisterInjection = () => {
         }),
       };
 
-      console.log("Request Data:", requestData);
+      // Xác định thông tin vaccine và giá tiền để chuyển sang trang thanh toán
+      let paymentData = {
+        cusId: cusId,
+        customerName: parentInfo?.customerName || "Khách hàng",
+      };
 
-      // Gọi API riêng biệt cho từng loại vaccine
       if (selectedVaccineType === "single") {
-        // Đăng ký vaccine lẻ
-        await axiosInstance.post("/appointmentLe/create", {
-          ...requestData,
-          vaccineId: selectedVaccineId,
-        }, {
-          headers: { Authorization: `Bearer ${accesstoken}` },
-        });
-
-        toast.success("Đăng ký tiêm vaccine lẻ thành công!", {
-          position: "top-right",
-          autoClose: 2000,
-          onClose: () => navigate("/homepage"),
-        });
+        // Lấy thông tin vaccine đã chọn
+        const selectedVaccine = vaccineList.find(v => v._id === selectedVaccineId);
+        if (selectedVaccine) {
+          paymentData = {
+            ...paymentData,
+            vaccineId: selectedVaccineId,
+            vaccineName: selectedVaccine.vaccineName,
+            price: selectedVaccine.vaccineImports?.[0]?.totalPrice || 0,
+            appointmentData: {
+              ...requestData,
+              vaccineId: selectedVaccineId
+            },
+            type: "single"
+          };
+        }
       } else {
-        // Đăng ký gói vaccine
-        await axiosInstance.post("/appointmentGoi/create", {
-          ...requestData,
-          vaccinePackageId: selectedVaccineId,
-        }, {
-          headers: { Authorization: `Bearer ${accesstoken}` },
-        });
-
-        toast.success("Đăng ký tiêm gói vaccine thành công!", {
-          position: "top-right",
-          autoClose: 2000,
-          onClose: () => navigate("/homepage"),
-        });
+        // Lấy thông tin gói vaccine đã chọn
+        const selectedPackage = vaccinePackages.find(p => p._id === selectedVaccineId);
+        if (selectedPackage) {
+          paymentData = {
+            ...paymentData,
+            vaccineId: selectedVaccineId,
+            vaccineName: selectedPackage.packageName,
+            price: selectedPackage.price || 0,
+            appointmentData: {
+              ...requestData,
+              vaccinePackageId: selectedVaccineId
+            },
+            type: "package"
+          };
+        }
       }
+
+      // Chuyển hướng đến trang thanh toán với dữ liệu đã chuẩn bị
+      navigate('/payment', { state: { paymentData } });
     } catch (error) {
       console.error("Registration error:", error);
       toast.error(
