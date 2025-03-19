@@ -31,7 +31,6 @@ import StaffsPage from "./pages/usersRole/admin/staffsPage";
 import PaymentPage from "./components/payment/payment";
 import PaymentSuccess from "./components/Payment/PaymentSuccess";
 import VaccineDetail from "./pages/homepage/vaccineShop/vaccineDetail";
-import InvoiceConfirmation from "./components/Invoice/InvoiceConfirmation";
 
 const router = createBrowserRouter([
   {
@@ -162,10 +161,6 @@ const router = createBrowserRouter([
   {
     path: "/forgot-password",
     element: <ForgotPassword />,
-  },
-  {
-    path: "/invoice-confirmation",
-    element: <InvoiceConfirmation />,
   },
   {
     path: "/payment",

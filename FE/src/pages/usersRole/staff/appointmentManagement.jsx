@@ -117,7 +117,7 @@ const AppointmentManagement = () => {
     try {
       setLoading(true);
       const token = localStorage.getItem("accesstoken");
-      
+
       // Fetch appointments lẻ
       const responseLe = await axiosInstance.get(
         "/appointmentLe/getdetailallaptle",
@@ -125,7 +125,7 @@ const AppointmentManagement = () => {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      
+
       // Fetch appointments gói - sử dụng API chi tiết
       const responseGoi = await axiosInstance.get(
         "/appointmentGoi/showDetailAptGoi",
@@ -134,74 +134,8 @@ const AppointmentManagement = () => {
         }
       );
 
-      // Log dữ liệu để kiểm tra
-      console.log("Appointments Lẻ:", responseLe.data);
-      console.log("Appointments Gói:", responseGoi.data);
-      
-      // Log chi tiết về cấu trúc khách hàng
-      if (responseLe.data && responseLe.data.length > 0) {
-        console.log("Appointments Lẻ - First item:", responseLe.data[0]);
-        console.log("Appointments Lẻ - Customer info:", {
-          cusId: responseLe.data[0].cusId,
-          customer: responseLe.data[0].customer,
-          customerDetails: responseLe.data[0].customerDetails
-        });
-      }
-      
-      if (responseGoi.data && responseGoi.data.length > 0) {
-        console.log("Appointments Gói - First item:", responseGoi.data[0]);
-        console.log("Appointments Gói - Customer info:", {
-          cusId: responseGoi.data[0].cusId,
-          customer: responseGoi.data[0].customer,
-          customerDetails: responseGoi.data[0].customerDetails
-        });
-      }
-
-      // Xử lý dữ liệu cho appointmentsLe - thêm thông tin khách hàng
-      let appointmentsLeData = responseLe.data || [];
-
-      // Thử lấy thông tin khách hàng cho các lịch hẹn lẻ nếu cusId là string
-      const appointmentsLeWithCustomerInfo = await Promise.all(
-        appointmentsLeData.map(async (apt) => {
-          // Nếu cusId là chuỗi thì đây là ID, cần fetch thông tin khách hàng
-          if (typeof apt.cusId === 'string') {
-            try {
-              // Sử dụng API để lấy thông tin khách hàng
-              let customerResponse;
-              try {
-                customerResponse = await axiosInstance.get(
-                  `/customer/getCustomerById/${apt.cusId}`,
-                  { headers: { Authorization: `Bearer ${token}` } }
-                );
-              } catch (firstError) {
-                console.log("First API attempt failed, trying alternative API...");
-                // Nếu API đầu tiên thất bại, thử API thứ hai
-                try {
-                  customerResponse = await axiosInstance.get(
-                    `/customer/getOneCustomer/${apt.cusId}`,
-                    { headers: { Authorization: `Bearer ${token}` } }
-                  );
-                } catch (secondError) {
-                  console.error("Both API attempts failed:", secondError);
-                }
-              }
-              
-              if (customerResponse.data) {
-                return {
-                  ...apt,
-                  customer: customerResponse.data
-                };
-              }
-            } catch (error) {
-              console.error(`Error fetching customer details for ID ${apt.cusId}:`, error);
-            }
-          }
-          return apt;
-        })
-      );
-      
       // Không cần fetch thêm thông tin nếu API đã trả về đầy đủ
-      setAppointmentsLe(appointmentsLeWithCustomerInfo || []);
+      setAppointmentsLe(responseLe.data || []);
       setAppointmentsGoi(responseGoi.data || []);
     } catch (error) {
       console.error("Error fetching appointments:", error);
@@ -223,8 +157,6 @@ const AppointmentManagement = () => {
         return "red";
       case "pending":
         return "orange";
-      case "Paid":
-        return "blue";
       default:
         return "default";
     }
@@ -238,8 +170,6 @@ const AppointmentManagement = () => {
         return "Đã hủy";
       case "pending":
         return "Đang chờ";
-      case "Paid":
-        return "Đã thanh toán";
       default:
         return "Không xác định";
     }
@@ -248,16 +178,16 @@ const AppointmentManagement = () => {
   const handleStatusChange = async (id, status, isPackage) => {
     try {
       const token = localStorage.getItem("accesstoken");
-      const endpoint = isPackage 
+      const endpoint = isPackage
         ? `/appointmentGoi/update/${id}`
         : `/appointmentLe/update/${id}`;
-      
+
       await axiosInstance.post(
         endpoint,
         { status },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      
+
       let successMessage = "";
       if (status === "completed") {
         successMessage = "Đã hoàn thành đơn thành công";
@@ -269,7 +199,7 @@ const AppointmentManagement = () => {
 
       message.success(successMessage);
       fetchAppointments();
-      
+
       if (
         isModalVisible &&
         selectedAppointment &&
@@ -303,48 +233,48 @@ const AppointmentManagement = () => {
   ) => {
     try {
       const token = localStorage.getItem("accesstoken");
-      
+
       // Convert boolean to status string
       const status = completed ? "completed" : "pending";
-      
+
       console.log("Updating dose status:", {
         appointmentId,
         doseNumber,
         status,
       });
-      
+
       // Make API call to update dose status
       const response = await axiosInstance.post(
         `/appointmentGoi/updateDose/${appointmentId}`,
-        { 
+        {
           doseNumber: parseInt(doseNumber),
           status,
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      
+
       console.log("API response:", response.data);
-      
+
       if (response.data) {
         message.success(`Cập nhật trạng thái mũi ${doseNumber} thành công`);
-        
+
         // Update the UI immediately
         if (selectedAppointment && selectedAppointment._id === appointmentId) {
           // Create a new dose schedule array with the updated status
           const updatedDoseSchedule = selectedAppointment.doseSchedule.map(
             (dose) => {
-            if (dose.doseNumber === parseInt(doseNumber)) {
+              if (dose.doseNumber === parseInt(doseNumber)) {
                 console.log(
                   `Updating dose ${doseNumber} from ${dose.status} to ${status}`
                 );
-              return { ...dose, status };
-            }
-            return dose;
+                return { ...dose, status };
+              }
+              return dose;
             }
           );
-          
+
           console.log("Updated dose schedule:", updatedDoseSchedule);
-          
+
           // Update the selected appointment state with the new dose schedule
           setSelectedAppointment({
             ...selectedAppointment,
@@ -371,13 +301,13 @@ const AppointmentManagement = () => {
             );
           }
         }
-        
+
         // Refresh the appointments list to ensure consistency
         fetchAppointments();
       }
     } catch (error) {
       console.error("Error updating dose status:", error);
-      
+
       // Hiển thị thông báo lỗi chi tiết hơn
       if (error.response) {
         console.log("Error response:", error.response);
@@ -407,10 +337,10 @@ const AppointmentManagement = () => {
 
       setDetailLoading(true);
       setIsModalVisible(true);
-      
+
       // Đánh dấu loại lịch hẹn
       record.isPackage = isPackage;
-      
+
       // Không cần fetch thêm thông tin nếu API đã trả về đầy đủ
       setSelectedAppointment(record);
     } catch (error) {
@@ -419,48 +349,6 @@ const AppointmentManagement = () => {
     } finally {
       setDetailLoading(false);
     }
-  };
-
-  // Hàm lấy tên khách hàng từ nhiều nguồn dữ liệu khác nhau
-  const getCustomerName = (record) => {
-    // Đối với lịch hẹn lẻ
-    if (!record.isPackage) {
-      return (
-        record.customerDetails?.customerName ||
-        record.customerDetails?.name ||
-        record.customer?.customerName ||
-        record.customer?.name ||
-        record.customerName ||
-        record.name ||
-        record.user?.customerName ||
-        record.user?.name ||
-        record.userId?.customerName ||
-        record.userId?.name ||
-        (record.cusId && typeof record.cusId === "object"
-          ? record.cusId.customerName || record.cusId.name
-          : "")
-      );
-    }
-    // Đối với lịch hẹn gói
-    else {
-      return (
-        record.customer?.customerName ||
-        record.customerDetails?.customerName ||
-        record.cusId?.customerName ||
-        record.cusId?.name ||
-        ""
-      );
-    }
-  };
-
-  // Hàm lấy ID khách hàng từ đối tượng lịch hẹn
-  const getCustomerId = (record) => {
-    if (typeof record.cusId === 'string') {
-      return record.cusId;
-    } else if (record.cusId && record.cusId._id) {
-      return record.cusId._id;
-    }
-    return null;
   };
 
   const columnsLe = [
@@ -475,16 +363,14 @@ const AppointmentManagement = () => {
       dataIndex: "cusId",
       key: "cusId",
       render: (cusId, record) => {
-        // Sử dụng hàm getCustomerName để lấy tên khách hàng
-        const customerName = getCustomerName({...record, isPackage: false});
-        
-        // Nếu không tìm thấy tên khách hàng, hiển thị ID hoặc "N/A"
-        return customerName || 
-          (typeof cusId === "object" 
-            ? cusId.customerName || cusId.name || "N/A" 
-            : typeof cusId === "string" 
-              ? "Khách hàng " + cusId.substring(0, 8) + "..." 
-              : "N/A");
+        // Try to get customer name from all possible sources
+        const customerName =
+          record.customer?.customerName ||
+          cusId?.customerName ||
+          cusId?.name ||
+          "N/A";
+
+        return customerName;
       },
     },
     {
@@ -540,7 +426,6 @@ const AppointmentManagement = () => {
         { text: "Hoàn thành", value: "completed" },
         { text: "Đang chờ", value: "pending" },
         { text: "Đã hủy", value: "incomplete" },
-        { text: "Đã thanh toán", value: "Paid" },
       ],
       onFilter: (value, record) => record.status === value,
       render: (status) => (
@@ -552,17 +437,17 @@ const AppointmentManagement = () => {
       key: "action",
       render: (_, record) => (
         <div className="action-buttons">
-          {(record.status === "pending" || record.status === "Paid") && (
-          <Button 
-            type="primary" 
+          {record.status === "pending" && (
+            <Button
+              type="primary"
               className="complete-button"
-            onClick={() => handleStatusChange(record._id, "completed", false)}
+              onClick={() => handleStatusChange(record._id, "completed", false)}
               disabled={record.status === "incomplete" || record.status === "completed"}
-          >
+            >
               Hoàn thành
-          </Button>
+            </Button>
           )}
-          <Button 
+          <Button
             danger
             className="cancel-button"
             onClick={() => handleStatusChange(record._id, "incomplete", false)}
@@ -600,16 +485,15 @@ const AppointmentManagement = () => {
       dataIndex: "cusId",
       key: "cusId",
       render: (cusId, record) => {
-        // Sử dụng hàm getCustomerName để lấy tên khách hàng
-        const customerName = getCustomerName({...record, isPackage: true});
-        
-        // Nếu không tìm thấy tên khách hàng, hiển thị ID hoặc "N/A"
-        return customerName || 
-          (typeof cusId === "object" 
-            ? cusId.customerName || cusId.name || "N/A" 
-            : typeof cusId === "string" 
-              ? "Khách hàng " + cusId.substring(0, 8) + "..." 
-              : "N/A");
+        // Try to get customer name from all possible sources
+        const customerName =
+          record.customer?.customerName ||
+          record.customerDetails?.customerName ||
+          cusId?.customerName ||
+          cusId?.name ||
+          (typeof cusId === "string" ? cusId : "N/A");
+
+        return customerName;
       },
     },
     {
@@ -618,21 +502,21 @@ const AppointmentManagement = () => {
       key: "vaccinePakageId",
       render: (pkg, record) => {
         // Try to get package name from all possible sources
-        const packageName = 
+        const packageName =
           record.package?.packageName ||
           record.vaccinePakage?.packageName ||
-          record.packageDetails?.packageName || 
-          pkg?.packageName || 
-          pkg?.name || 
+          record.packageDetails?.packageName ||
+          pkg?.packageName ||
+          pkg?.name ||
           (typeof pkg === "string" ? pkg : "N/A");
-        
+
         console.log("Vaccine Package Data:", {
           package: record.package,
           vaccinePakage: record.vaccinePakage,
           packageDetails: record.packageDetails,
           pkg: pkg,
         });
-        
+
         return packageName;
       },
     },
@@ -678,7 +562,6 @@ const AppointmentManagement = () => {
         { text: "Hoàn thành", value: "completed" },
         { text: "Đang chờ", value: "pending" },
         { text: "Đã hủy", value: "incomplete" },
-        { text: "Đã thanh toán", value: "Paid" },
       ],
       onFilter: (value, record) => record.status === value,
       render: (status) => (
@@ -690,17 +573,17 @@ const AppointmentManagement = () => {
       key: "action",
       render: (_, record) => (
         <div className="action-buttons">
-          {(record.status === "pending" || record.status === "Paid") && (
-          <Button 
-            type="primary" 
+          {record.status === "pending" && (
+            <Button
+              type="primary"
               className="complete-button"
-            onClick={() => handleStatusChange(record._id, "completed", true)}
+              onClick={() => handleStatusChange(record._id, "completed", true)}
               disabled={record.status === "incomplete" || record.status === "completed"}
-          >
+            >
               Hoàn thành
-          </Button>
+            </Button>
           )}
-          <Button 
+          <Button
             danger
             className="cancel-button"
             onClick={() => handleStatusChange(record._id, "incomplete", true)}
@@ -728,7 +611,7 @@ const AppointmentManagement = () => {
 
   const filteredAppointmentsLe = appointmentsLe.filter(
     (apt) =>
-    apt._id?.toLowerCase().includes(searchText.toLowerCase()) ||
+      apt._id?.toLowerCase().includes(searchText.toLowerCase()) ||
       (
         apt.customer?.customerName ||
         apt.cusId?.customerName ||
@@ -745,13 +628,13 @@ const AppointmentManagement = () => {
       )
         ?.toLowerCase()
         .includes(searchText.toLowerCase()) ||
-    apt.date?.toLowerCase().includes(searchText.toLowerCase()) ||
-    apt.status?.toLowerCase().includes(searchText.toLowerCase())
+      apt.date?.toLowerCase().includes(searchText.toLowerCase()) ||
+      apt.status?.toLowerCase().includes(searchText.toLowerCase())
   );
 
   const filteredAppointmentsGoi = appointmentsGoi.filter(
     (apt) =>
-    apt._id?.toLowerCase().includes(searchText.toLowerCase()) ||
+      apt._id?.toLowerCase().includes(searchText.toLowerCase()) ||
       (
         apt.customer?.customerName ||
         apt.customerDetails?.customerName ||
@@ -771,14 +654,14 @@ const AppointmentManagement = () => {
       )
         ?.toLowerCase()
         .includes(searchText.toLowerCase()) ||
-    apt.date?.toLowerCase().includes(searchText.toLowerCase()) ||
-    apt.status?.toLowerCase().includes(searchText.toLowerCase())
+      apt.date?.toLowerCase().includes(searchText.toLowerCase()) ||
+      apt.status?.toLowerCase().includes(searchText.toLowerCase())
   );
 
   return (
     <div className="appointment-management">
       <h1>Quản lý lịch hẹn</h1>
-      
+
       <div className="search-container">
         <Input
           placeholder="Tìm kiếm lịch hẹn..."
@@ -788,7 +671,7 @@ const AppointmentManagement = () => {
           className="search-input"
         />
       </div>
-      
+
       <Tabs activeKey={activeTab} onChange={setActiveTab}>
         <TabPane tab="Lịch hẹn lẻ" key="1">
           <Table
@@ -831,14 +714,20 @@ const AppointmentManagement = () => {
             <div className="detail-row">
               <span className="detail-label">Khách hàng:</span>
               <span className="detail-value">
-                {selectedAppointment.customer 
-                  ? (selectedAppointment.customer.customerName || selectedAppointment.customer.name || "N/A")
-                  : selectedAppointment.cusId && typeof selectedAppointment.cusId === "object"
-                    ? (selectedAppointment.cusId.customerName || selectedAppointment.cusId.name || "N/A")
-                    : typeof selectedAppointment.cusId === "string"
-                      ? "Khách hàng " + selectedAppointment.cusId.substring(0, 6) + "..."
-                      : "N/A"
-                }
+                {selectedAppointment.isPackage
+                  ? selectedAppointment.customer?.customerName ||
+                    selectedAppointment.customerDetails?.customerName ||
+                    selectedAppointment.cusId?.customerName ||
+                    selectedAppointment.cusId?.name ||
+                    (typeof selectedAppointment.cusId === "string"
+                      ? selectedAppointment.cusId
+                      : "N/A")
+                  : selectedAppointment.customer?.customerName ||
+                    selectedAppointment.cusId?.customerName ||
+                    selectedAppointment.cusId?.name ||
+                    (selectedAppointment.cusId
+                      ? selectedAppointment.cusId.toString()
+                      : "N/A")}
               </span>
             </div>
             <div className="detail-row">
@@ -846,7 +735,7 @@ const AppointmentManagement = () => {
               <span className="detail-value">
                 {selectedAppointment.isPackage
                   ? selectedAppointment.customer?.phone ||
-                     selectedAppointment.customerDetails?.phone || 
+                    selectedAppointment.customerDetails?.phone ||
                     selectedAppointment.cusId?.phone ||
                     "N/A"
                   : selectedAppointment.customer?.phone ||
@@ -859,7 +748,7 @@ const AppointmentManagement = () => {
               <span className="detail-value">
                 {selectedAppointment.isPackage
                   ? selectedAppointment.customer?.address ||
-                     selectedAppointment.customerDetails?.address || 
+                    selectedAppointment.customerDetails?.address ||
                     selectedAppointment.cusId?.address ||
                     "N/A"
                   : selectedAppointment.customer?.address ||
@@ -881,17 +770,17 @@ const AppointmentManagement = () => {
                 {selectedAppointment.isPackage ? "Gói vaccine:" : "Vaccine:"}
               </span>
               <span className="detail-value">
-                {selectedAppointment.isPackage 
+                {selectedAppointment.isPackage
                   ? selectedAppointment.package?.packageName ||
-                     selectedAppointment.vaccinePakage?.packageName ||
-                     selectedAppointment.packageDetails?.packageName || 
-                     selectedAppointment.vaccinePakageId?.packageName || 
-                     selectedAppointment.vaccinePakageId?.name || 
+                    selectedAppointment.vaccinePakage?.packageName ||
+                    selectedAppointment.packageDetails?.packageName ||
+                    selectedAppointment.vaccinePakageId?.packageName ||
+                    selectedAppointment.vaccinePakageId?.name ||
                     (selectedAppointment.vaccinePakageId
                       ? selectedAppointment.vaccinePakageId.toString()
                       : "N/A")
                   : selectedAppointment.vaccine?.vaccineName ||
-                     selectedAppointment.vaccineId?.vaccineName || 
+                    selectedAppointment.vaccineId?.vaccineName ||
                     selectedAppointment.vaccineId?.name ||
                     "N/A"}
               </span>
@@ -914,35 +803,35 @@ const AppointmentManagement = () => {
                 </Tag>
               </span>
             </div>
-            
+
             {/* Hiển thị lịch tiêm cho từng mũi (chỉ với lịch hẹn gói) */}
             {selectedAppointment.isPackage &&
               selectedAppointment.doseSchedule &&
               selectedAppointment.doseSchedule.length > 0 && (
-              <div className="dose-schedule-section">
+                <div className="dose-schedule-section">
                   <Title level={5}>
                     Lịch tiêm các mũi
                   </Title>
-                <List
-                  grid={{ gutter: 16, column: 1 }}
-                  dataSource={selectedAppointment.doseSchedule}
+                  <List
+                    grid={{ gutter: 16, column: 1 }}
+                    dataSource={selectedAppointment.doseSchedule}
                     renderItem={(item) => (
-                    <List.Item>
-                      <Card 
-                        title={`Mũi ${item.doseNumber}`} 
-                        size="small"
-                        style={{ marginBottom: 8 }}
-                        extra={
-                          <Tag color={getStatusColor(item.status)}>
-                            {getStatusText(item.status)}
-                          </Tag>
-                        }
-                      >
-                        <div className="dose-detail-row">
-                          <Text strong>Ngày tiêm:</Text> {item.date}
-                        </div>
+                      <List.Item>
+                        <Card
+                          title={`Mũi ${item.doseNumber}`}
+                          size="small"
+                          style={{ marginBottom: 8 }}
+                          extra={
+                            <Tag color={getStatusColor(item.status)}>
+                              {getStatusText(item.status)}
+                            </Tag>
+                          }
+                        >
+                          <div className="dose-detail-row">
+                            <Text strong>Ngày tiêm:</Text> {item.date}
+                          </div>
                           <div className="dose-detail-row dose-actions">
-                          <Button
+                            <Button
                               type={
                                 item.status === "completed"
                                   ? "primary"
@@ -953,7 +842,7 @@ const AppointmentManagement = () => {
                                   <CheckCircleFilled />
                                 ) : null
                               }
-                            onClick={() => {
+                              onClick={() => {
                                 const newStatus =
                                   item.status === "completed"
                                     ? "pending"
@@ -961,12 +850,12 @@ const AppointmentManagement = () => {
                                 console.log(
                                   `Toggling status for dose ${item.doseNumber} from ${item.status} to ${newStatus}`
                                 );
-                              handleDoseStatusChange(
-                                selectedAppointment._id,
-                                item.doseNumber,
-                                newStatus === "completed"
-                              );
-                            }}
+                                handleDoseStatusChange(
+                                  selectedAppointment._id,
+                                  item.doseNumber,
+                                  newStatus === "completed"
+                                );
+                              }}
                               className={
                                 item.status === "completed"
                                   ? "complete-dose-button"
@@ -976,14 +865,14 @@ const AppointmentManagement = () => {
                               {item.status === "completed"
                                 ? "Đã hoàn thành"
                                 : "Đánh dấu hoàn thành"}
-                          </Button>
-                        </div>
-                      </Card>
-                    </List.Item>
-                  )}
-                />
-              </div>
-            )}
+                            </Button>
+                          </div>
+                        </Card>
+                      </List.Item>
+                    )}
+                  />
+                </div>
+              )}
           </div>
         ) : (
           <div className="loading-details">Đang tải thông tin chi tiết...</div>
@@ -993,4 +882,4 @@ const AppointmentManagement = () => {
   );
 };
 
-export default AppointmentManagement; 
+export default AppointmentManagement;
