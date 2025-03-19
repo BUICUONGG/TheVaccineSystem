@@ -18,6 +18,7 @@ const HomePage = () => {
   const [showBackToTop, setShowBackToTop] = useState(false);
   const [vaccines, setVaccines] = useState([]);
   const [currentVaccineIndex, setCurrentVaccineIndex] = useState(0);
+
   const [flippedCardIndex, setFlippedCardIndex] = useState(null);
   const [cusId, setCusId] = useState(null);
   const [showFeedbackForm, setShowFeedbackForm] = useState(false);
@@ -29,6 +30,9 @@ const HomePage = () => {
   // Thêm state cho news
   const [news, setNews] = useState([]);
   const [loadingNews, setLoadingNews] = useState(false);
+  // Giá trị của unitprice
+  const [importProductsPrice, setImportProductsPrice] = useState({});
+
 
   // Mảng đường dẫn hình ảnh news
   const newsImages = [
@@ -213,6 +217,31 @@ const HomePage = () => {
     fetchVaccines();
   }, []);
 
+  // Print price of import vaccine
+  useEffect(() => {
+    const fetchVaccineImport = async () => {
+      try {
+        const response = await axiosInstance.get("/vaccineimport/getfullData");
+        const priceMap = {};
+        response.data.forEach(importData => {
+          importData.vaccines.forEach(vaccine => {
+            if (!priceMap[vaccine.vaccineId] ||
+              new Date(importData.importDate) > new Date(priceMap[vaccine.vaccineId].importDate)) {
+              priceMap[vaccine.vaccineId] = {
+                unitPrice: vaccine.unitPrice,
+                importDate: importData.importDate
+              };
+            }
+          });
+        });
+        setImportProductsPrice(priceMap);
+      } catch (error) {
+        console.error("Error fetching vaccine import data:", error);
+      }
+    }
+    fetchVaccineImport();
+  }, [])
+
 
 
   // Handle vaccine carousel navigation
@@ -243,28 +272,30 @@ const HomePage = () => {
 
   // Thêm hàm fetch blogs
   useEffect(() => {
+    const fetchBlogs = async () => {
+      try {
+        setLoadingBlogs(true);
+        const response = await axiosInstance.get("/blog/showBlog");
+        console.log("Data blog:", response.data);
+        const blogsData = response.data.blogs || [];
+        // Lọc chỉ hiển thị các blog có trạng thái "active"
+        const activeBlogs = blogsData .filter(blog => blog.status === "active");
+        // Lấy 3 bài blog mới nhất
+        const latestBlogs = activeBlogs.slice(0, 3).map(blog => ({
+          ...blog,
+          views: 1000
+        }));
+        setBlogs(latestBlogs);
+        console.log("Blog show ra:", latestBlogs);
+      } catch (error) {
+        console.error("Failed to fetch blogs:", error);
+      } finally {
+        setLoadingBlogs(false);
+      }
+    };
     fetchBlogs();
   }, []);
 
-  const fetchBlogs = async () => {
-    try {
-      setLoadingBlogs(true);
-      const response = await axiosInstance.get("/blog/showBlog");
-      // Lọc chỉ hiển thị các blog có trạng thái "active"
-      const activeBlogs = response.data.filter(blog => blog.status === "active");
-      // Lấy 3 bài blog mới nhất
-      const latestBlogs = activeBlogs.slice(0, 3).map(blog => ({
-        ...blog,
-        views: 1000
-      }));
-      setBlogs(latestBlogs);
-      console.log("Fetched blogs:", latestBlogs);
-    } catch (error) {
-      console.error("Failed to fetch blogs:", error);
-    } finally {
-      setLoadingBlogs(false);
-    }
-  };
 
   const toggleLike = (blogId) => {
     setLikedBlogStates(prev => ({
@@ -282,13 +313,15 @@ const HomePage = () => {
   const fetchNews = async () => {
     try {
       setLoadingNews(true);
-      const response = await axiosInstance.post("/news/showNews", {}, {
+      const response = await axiosInstance.get("/news/getAllNews", {}, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("accesstoken")}`,
         },
       });
+      console.log("Data news:", response.data.result);
+      
       // Lọc chỉ hiển thị các news có trạng thái "active"
-      const activeNews = response.data.filter(news => news.status === "active");
+      const activeNews = response.data.result.filter(news => news.status === "published");
       // Lấy 3 bài news mới nhất
       const latestNews = activeNews.slice(0, 3).map((news, index) => ({
         ...news,
@@ -555,8 +588,8 @@ const HomePage = () => {
                     <div className="vaccine-price-v1">
                       {vaccine.vaccineImports &&
                         vaccine.vaccineImports.length > 0 &&
-                        vaccine.vaccineImports[0].totalPrice
-                        ? `${vaccine?.vaccineImports[0]?.totalPrice.toLocaleString()} VNĐ`
+                        importProductsPrice[vaccine._id].unitPrice
+                        ? `${importProductsPrice[vaccine._id]?.unitPrice?.toLocaleString()} VNĐ`
                         : "Liên hệ"}
                     </div>
                     <Link to="/pricelist" className="vaccine-view-more-v1">
