@@ -168,14 +168,10 @@ useEffect(() => {
       const accesstoken = localStorage.getItem("accesstoken");
       const cusId = localStorage.getItem("cusId");
 
-     
-
       if (!selectedVaccineId) {
         toast.error("Vui lòng chọn vaccine trước khi đăng ký!");
         return;
       }
-
-
 
       // Format thời gian
       const now = new Date();
@@ -195,7 +191,6 @@ useEffect(() => {
         type: selectedVaccineType,
         createAt: createAt,
         status: "pending",
-
         ...(isChildRegistration && {
           childInfo: {
             ...values.childInfo,
@@ -204,24 +199,9 @@ useEffect(() => {
         }),
       };
 
-    
       // Xác định thông tin vaccine và giá tiền để chuyển sang trang thanh toán
-      const invoiceData = {
-        ...requestData,
-        // Thêm dữ liệu phân biệt giữa lẻ và gói
-        ...(selectedVaccineType === "single"
-          ? {
-              vaccineId: selectedVaccineId,
-              vaccineName: vaccineList.find(v => v._id === selectedVaccineId)?.vaccineName || '',
-              price: importProductsPrice[selectedVaccineId]?.unitPrice || 0,
-              type: "aptLe",
-            }
-          : {
-              vaccinePackageId: selectedVaccineId,
-              vaccineName: vaccinePackages.find(p => p._id === selectedVaccineId)?.packageName || '',
-              price: vaccinePackages.find(p => p._id === selectedVaccineId)?.price || 0,
-              type: "aptGoi",
-            }),
+      let invoiceData = {
+        cusId: cusId,
         customerName: parentInfo?.customerName || "Khách hàng",
       };
 
@@ -229,8 +209,8 @@ useEffect(() => {
         // Lấy thông tin vaccine đã chọn
         const selectedVaccine = vaccineList.find(v => v._id === selectedVaccineId);
         if (selectedVaccine) {
-          paymentData = {
-            ...paymentData,
+          invoiceData = {
+            ...invoiceData,
             vaccineId: selectedVaccineId,
             vaccineName: selectedVaccine.vaccineName,
             price: importProductsPrice[selectedVaccineId]?.unitPrice || 0,
@@ -238,15 +218,15 @@ useEffect(() => {
               ...requestData,
               vaccineId: selectedVaccineId
             },
-            type: "single"
+            type: "aptLe"
           };
         }
       } else {
         // Lấy thông tin gói vaccine đã chọn
         const selectedPackage = vaccinePackages.find(p => p._id === selectedVaccineId);
         if (selectedPackage) {
-          paymentData = {
-            ...paymentData,
+          invoiceData = {
+            ...invoiceData,
             vaccineId: selectedVaccineId,
             vaccineName: selectedPackage.packageName,
             price: selectedPackage.price || 0,
@@ -254,13 +234,13 @@ useEffect(() => {
               ...requestData,
               vaccinePackageId: selectedVaccineId
             },
-            type: "package"
+            type: "aptGoi"
           };
         }
       }
 
-      // Chuyển hướng đến trang xác nhận hóa đơn trước khi thanh toán
-      navigate('/invoice-confirmation', { state: { invoiceData } });
+      // Chuyển hướng trực tiếp đến trang thanh toán thay vì qua trang xác nhận hóa đơn
+      navigate('/payment', { state: { invoiceData } });
       
     } catch (error) {
       console.error("Registration error:", error);

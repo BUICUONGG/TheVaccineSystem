@@ -28,8 +28,8 @@ import Profile from "./pages/homepage/profile/Profile";
 import ProfileAccount from "./pages/homepage/profile/components/ProfileAccount";
 import FeedbackManagement from "./pages/usersRole/admin/FeedbackManagement";
 import StaffsPage from "./pages/usersRole/admin/staffsPage";
-import PaymentPage from "./components/payment/payment";
-import PaymentSuccess from "./components/Payment/PaymentSuccess";
+import PaymentPage from "./components/Payment/Payment";
+// import PaymentSuccess from "./components/Payment/PaymentSuccess";
 import VaccineDetail from "./pages/homepage/vaccineShop/vaccineDetail";
 
 const router = createBrowserRouter([
@@ -166,10 +166,10 @@ const router = createBrowserRouter([
     path: "/payment",
     element: <PaymentPage />,
   },
-  {
-    path: "/payment-success",
-    element: <PaymentSuccess />,
-  },
+  // {
+  //   path: "/payment-success",
+  //   element: <PaymentSuccess />,
+  // },
 ]);
 
 createRoot(document.getElementById("root")).render(
