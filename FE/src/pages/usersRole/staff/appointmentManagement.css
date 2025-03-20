@@ -1,53 +1,222 @@
 .appointment-management {
-  padding: 20px;
+  padding: 24px;
+  background-color: #f0f2f5;
+  min-height: 100vh;
 }
 
 .appointment-management h1 {
-  margin-bottom: 20px;
+  margin-bottom: 24px;
   color: #1890ff;
+  font-size: 24px;
+  font-weight: 600;
 }
 
-.appointment-management .search-container {
-  margin-bottom: 20px;
-}
-
-.appointment-management .search-input {
-  width: 300px;
-}
-
-.action-buttons {
+.search-container {
+  margin-bottom: 24px;
   display: flex;
   align-items: center;
-  justify-content: flex-start;
 }
 
-.id-column {
-  font-family: monospace;
-  background-color: #f0f0f0;
-  padding: 2px 6px;
+.search-input {
+  width: 100%;
+  max-width: 400px;
   border-radius: 4px;
 }
 
+/* Table Styles */
+.appointment-management .ant-table-wrapper {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  padding: 16px;
+}
+
+.appointment-management .ant-table-thead > tr > th {
+  background-color: #f5f7fa;
+  font-weight: 600;
+}
+
+.appointment-management .ant-table-tbody > tr:hover > td {
+  background-color: #e6f7ff;
+}
+
+/* Detail Modal Styles */
 .appointment-details {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+  padding: 0;
+}
+
+.detail-section {
+  margin-bottom: 24px;
+}
+
+.detail-section .ant-typography {
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #f0f0f0;
+  color: #1890ff;
 }
 
 .detail-row {
   display: flex;
-  border-bottom: 1px solid #f0f0f0;
-  padding-bottom: 8px;
+  margin-bottom: 16px;
+  align-items: flex-start;
+  border-bottom: 1px dashed #f0f0f0;
+  padding-bottom: 12px;
+}
+
+.detail-row:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
 }
 
 .detail-label {
-  width: 150px;
-  font-weight: bold;
-  color: #555;
+  font-weight: 600;
+  width: 140px;
+  color: #666;
+  flex-shrink: 0;
 }
 
 .detail-value {
   flex: 1;
+  color: #333;
+  word-break: break-word;
+}
+
+.loading-details {
+  text-align: center;
+  padding: 20px;
+  color: #999;
+}
+
+.dose-schedule-section {
+  margin-top: 24px;
+  border-top: 2px solid #f0f0f0;
+  padding-top: 16px;
+}
+
+.dose-schedule-section .ant-typography {
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #f0f0f0;
+  color: #1890ff;
+}
+
+.dose-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.dose-detail-row {
+  margin-bottom: 8px;
+}
+
+.dose-detail-row:last-child {
+  margin-bottom: 0;
+}
+
+.dose-actions {
+  margin-top: 12px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.complete-dose-button {
+  background-color: #52c41a;
+  border-color: #52c41a;
+}
+
+.mark-complete-button:hover {
+  background-color: #f6ffed;
+  border-color: #52c41a;
+  color: #52c41a;
+}
+
+/* Horizontal scrolling for wide tables */
+.appointment-management .ant-table-wrapper {
+  overflow-x: auto;
+}
+
+.appointment-management .ant-table table {
+  width: auto;
+  min-width: 100%;
+}
+
+/* Highlight for different information types */
+.detail-row.highlight-primary {
+  background-color: #e6f7ff;
+  padding: 12px 10px;
+  border-radius: 6px;
+  margin-left: -8px;
+  margin-right: -8px;
+  padding-left: 8px;
+  padding-right: 8px;
+  border-left: 4px solid #1890ff;
+  margin-bottom: 20px;
+}
+
+.detail-row.highlight-primary .detail-label {
+  color: #1890ff;
+  font-weight: 700;
+}
+
+.detail-row.highlight-primary .detail-value {
+  font-weight: 700;
+  color: #1890ff;
+  font-family: monospace;
+  font-size: 1.1rem;
+}
+
+.detail-row.highlight-info {
+  background-color: #f0f7ff;
+  padding: 10px 8px;
+  border-radius: 6px;
+  margin-left: -8px;
+  margin-right: -8px;
+  padding-left: 8px;
+  padding-right: 8px;
+  border-left: 3px solid #40a9ff;
+  margin-bottom: 18px;
+}
+
+.detail-row.highlight-info .detail-label {
+  color: #0050b3;
+  font-weight: 600;
+}
+
+.detail-row.highlight-info .detail-value {
+  font-weight: 600;
+  color: #096dd9;
+}
+
+/* Transaction ID styling */
+.detail-row:has(.detail-label:contains("Mã giao dịch")) {
+  background-color: #e6f7ff;
+  padding: 8px;
+  border-radius: 4px;
+  margin-left: -8px;
+  margin-right: -8px;
+  padding-left: 8px;
+  padding-right: 8px;
+}
+
+@media (max-width: 768px) {
+  .detail-row {
+    flex-direction: column;
+  }
+
+  .detail-label {
+    width: 100%;
+    margin-bottom: 4px;
+  }
+
+  .detail-value {
+    width: 100%;
+  }
+  
+  .dose-detail-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* Styles for buttons */
@@ -106,44 +275,6 @@
 .cancel-button:disabled {
   opacity: 0.7;
   cursor: not-allowed;
-}
-
-/* Dose schedule styles */
-.dose-schedule-section {
-  margin-top: 20px;
-  border-top: 1px solid #f0f0f0;
-  padding-top: 15px;
-}
-
-.dose-detail-row {
-  margin-bottom: 8px;
-}
-
-.dose-detail-row:last-child {
-  margin-bottom: 0;
-}
-
-.dose-actions {
-  display: flex;
-  align-items: center;
-  margin-top: 8px;
-}
-
-.complete-dose-button {
-  background-color: #52c41a !important;
-  border-color: #52c41a !important;
-}
-
-.mark-complete-button {
-  background-color: #ffffff;
-  border-color: #d9d9d9;
-}
-
-.loading-details {
-  text-align: center;
-  padding: 20px;
-  color: #999;
-  font-style: italic;
 }
 
 /* Modal styles */

@@ -11,6 +11,7 @@ import {
   List,
   Card,
   Typography,
+  Divider,
 } from "antd";
 import {
   SearchOutlined,
@@ -91,7 +92,6 @@ const buttonStyles = `
 
 const AppointmentManagement = () => {
   const [loading, setLoading] = useState(false);
-  const [appointmentsLe, setAppointmentsLe] = useState([]);
   const [appointmentsGoi, setAppointmentsGoi] = useState([]);
   const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -118,14 +118,6 @@ const AppointmentManagement = () => {
       setLoading(true);
       const token = localStorage.getItem("accesstoken");
 
-      // Fetch appointments lẻ
-      const responseLe = await axiosInstance.get(
-        "/appointmentLe/getdetailallaptle",
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-
       // Fetch appointments gói - sử dụng API chi tiết
       const responseGoi = await axiosInstance.get(
         "/appointmentGoi/showDetailAptGoi",
@@ -134,8 +126,14 @@ const AppointmentManagement = () => {
         }
       );
 
+      // Console log to debug
+      console.log("Appointment data:", {
+        firstRecord: responseGoi.data?.[0],
+        createAtExists: responseGoi.data?.[0]?.createAt ? true : false,
+        createdAtExists: responseGoi.data?.[0]?.createdAt ? true : false,
+      });
+
       // Không cần fetch thêm thông tin nếu API đã trả về đầy đủ
-      setAppointmentsLe(responseLe.data || []);
       setAppointmentsGoi(responseGoi.data || []);
     } catch (error) {
       console.error("Error fetching appointments:", error);
@@ -155,8 +153,13 @@ const AppointmentManagement = () => {
         return "green";
       case "incomplete":
         return "red";
+      case "Pending":
       case "pending":
         return "orange";
+      case "Paid":
+        return "blue";
+      case "approve":
+        return "blue";
       default:
         return "default";
     }
@@ -168,8 +171,24 @@ const AppointmentManagement = () => {
         return "Hoàn thành";
       case "incomplete":
         return "Đã hủy";
+      case "Pending":
       case "pending":
-        return "Đang chờ";
+        return "Chưa tiêm";
+      case "Paid":
+        return "Đã thanh toán";
+      case "approve":
+        return "Đã duyệt";
+      default:
+        return "Không xác định";
+    }
+  };
+
+  const getDoseStatusText = (status) => {
+    switch (status) {
+      case "completed":
+        return "Đã tiêm";
+      case "pending":
+        return "Chưa tiêm";
       default:
         return "Không xác định";
     }
@@ -178,9 +197,7 @@ const AppointmentManagement = () => {
   const handleStatusChange = async (id, status, isPackage) => {
     try {
       const token = localStorage.getItem("accesstoken");
-      const endpoint = isPackage
-        ? `/appointmentGoi/update/${id}`
-        : `/appointmentLe/update/${id}`;
+      const endpoint = `/appointmentGoi/update/${id}`;
 
       await axiosInstance.post(
         endpoint,
@@ -256,7 +273,7 @@ const AppointmentManagement = () => {
       console.log("API response:", response.data);
 
       if (response.data) {
-        message.success(`Cập nhật trạng thái mũi ${doseNumber} thành công`);
+        message.success(`${completed ? "Đánh dấu đã tiêm" : "Hủy đánh dấu"} mũi ${doseNumber} thành công`);
 
         // Update the UI immediately
         if (selectedAppointment && selectedAppointment._id === appointmentId) {
@@ -327,7 +344,7 @@ const AppointmentManagement = () => {
     }
   };
 
-  const showAppointmentDetails = async (record, isPackage) => {
+  const showAppointmentDetails = async (record) => {
     try {
       // Kiểm tra nếu đơn đã bị hủy thì không hiển thị chi tiết
       if (record.status === "incomplete") {
@@ -339,7 +356,7 @@ const AppointmentManagement = () => {
       setIsModalVisible(true);
 
       // Đánh dấu loại lịch hẹn
-      record.isPackage = isPackage;
+      record.isPackage = true;
 
       // Không cần fetch thêm thông tin nếu API đã trả về đầy đủ
       setSelectedAppointment(record);
@@ -350,128 +367,6 @@ const AppointmentManagement = () => {
       setDetailLoading(false);
     }
   };
-
-  const columnsLe = [
-    {
-      title: "STT",
-      key: "stt",
-      render: (_, record, index) => index + 1,
-      width: 50,
-    },
-    {
-      title: "Khách hàng",
-      dataIndex: "cusId",
-      key: "cusId",
-      render: (cusId, record) => {
-        // Try to get customer name from all possible sources
-        const customerName =
-          record.customer?.customerName ||
-          cusId?.customerName ||
-          cusId?.name ||
-          "N/A";
-
-        return customerName;
-      },
-    },
-    {
-      title: "Vaccine",
-      dataIndex: "vaccineId",
-      key: "vaccineId",
-      render: (vaccineId, record) => {
-        if (record.vaccine?.vaccineName) return record.vaccine.vaccineName;
-        if (vaccineId?.vaccineName) return vaccineId.vaccineName;
-        if (vaccineId?.name) return vaccineId.name;
-        return vaccineId ? vaccineId.toString().substring(0, 8) + "..." : "N/A";
-      },
-    },
-    {
-      title: "Ngày hẹn",
-      dataIndex: "date",
-      key: "date",
-      sorter: (a, b) => {
-        // Hàm chuyển đổi chuỗi ngày thành đối tượng Date
-        const parseDate = (dateStr) => {
-          // Thử các định dạng khác nhau
-          const formats = [
-            "DD/MM/YYYY",
-            "YYYY-MM-DD",
-            "MM/DD/YYYY",
-            "DD-MM-YYYY",
-          ];
-
-          for (const format of formats) {
-            const date = moment(dateStr, format, true);
-            if (date.isValid()) {
-              return date;
-            }
-          }
-
-          // Nếu không khớp với bất kỳ định dạng nào, thử chuyển đổi trực tiếp
-          return moment(new Date(dateStr));
-        };
-
-        const dateA = parseDate(a.date);
-        const dateB = parseDate(b.date);
-
-        return dateA - dateB;
-      },
-      sortDirections: ["ascend", "descend"],
-      defaultSortOrder: "descend",
-    },
-    {
-      title: "Trạng thái",
-      dataIndex: "status",
-      key: "status",
-      filters: [
-        { text: "Hoàn thành", value: "completed" },
-        { text: "Đang chờ", value: "pending" },
-        { text: "Đã hủy", value: "incomplete" },
-      ],
-      onFilter: (value, record) => record.status === value,
-      render: (status) => (
-        <Tag color={getStatusColor(status)}>{getStatusText(status)}</Tag>
-      ),
-    },
-    {
-      title: "Thao tác",
-      key: "action",
-      render: (_, record) => (
-        <div className="action-buttons">
-          {record.status === "pending" && (
-            <Button
-              type="primary"
-              className="complete-button"
-              onClick={() => handleStatusChange(record._id, "completed", false)}
-              disabled={record.status === "incomplete" || record.status === "completed"}
-            >
-              Hoàn thành
-            </Button>
-          )}
-          <Button
-            danger
-            className="cancel-button"
-            onClick={() => handleStatusChange(record._id, "incomplete", false)}
-            disabled={record.status === "incomplete" || record.status === "completed"}
-          >
-            Hủy Đơn
-          </Button>
-        </div>
-      ),
-    },
-    {
-      title: "Chi tiết",
-      key: "details",
-      width: 80,
-      render: (_, record) => (
-        <Button
-          type="primary"
-          icon={<MenuOutlined />}
-          onClick={() => showAppointmentDetails(record, false)}
-          disabled={record.status === "incomplete"}
-        />
-      ),
-    },
-  ];
 
   const columnsGoi = [
     {
@@ -484,6 +379,7 @@ const AppointmentManagement = () => {
       title: "Khách hàng",
       dataIndex: "cusId",
       key: "cusId",
+      width: 150,
       render: (cusId, record) => {
         // Try to get customer name from all possible sources
         const customerName =
@@ -497,33 +393,10 @@ const AppointmentManagement = () => {
       },
     },
     {
-      title: "Gói vaccine",
-      dataIndex: "vaccinePakageId",
-      key: "vaccinePakageId",
-      render: (pkg, record) => {
-        // Try to get package name from all possible sources
-        const packageName =
-          record.package?.packageName ||
-          record.vaccinePakage?.packageName ||
-          record.packageDetails?.packageName ||
-          pkg?.packageName ||
-          pkg?.name ||
-          (typeof pkg === "string" ? pkg : "N/A");
-
-        console.log("Vaccine Package Data:", {
-          package: record.package,
-          vaccinePakage: record.vaccinePakage,
-          packageDetails: record.packageDetails,
-          pkg: pkg,
-        });
-
-        return packageName;
-      },
-    },
-    {
       title: "Ngày hẹn",
       dataIndex: "date",
       key: "date",
+      width: 110,
       sorter: (a, b) => {
         // Hàm chuyển đổi chuỗi ngày thành đối tượng Date
         const parseDate = (dateStr) => {
@@ -555,13 +428,64 @@ const AppointmentManagement = () => {
       defaultSortOrder: "descend",
     },
     {
+      title: "Ngày tạo",
+      dataIndex: "createAt",
+      key: "createAt",
+      width: 110,
+      render: (createAt) => createAt || "N/A",
+    },
+    {
+      title: "Số mũi tiêm",
+      dataIndex: "doseSchedule",
+      key: "doseCount",
+      width: 100,
+      render: (doseSchedule) => doseSchedule?.length || 0,
+    },
+    {
+      title: "Tiến độ",
+      dataIndex: "doseSchedule",
+      key: "doseProgress",
+      width: 120,
+      render: (doseSchedule) => {
+        if (!doseSchedule || doseSchedule.length === 0) return "N/A";
+        
+        const completedDoses = doseSchedule.filter(
+          (dose) => dose.status === "completed"
+        ).length;
+        
+        const totalDoses = doseSchedule.length;
+        const progressPercent = Math.round((completedDoses / totalDoses) * 100);
+        
+        // Hiển thị tiến độ với màu sắc khác nhau dựa trên phần trăm hoàn thành
+        let color = "default";
+        if (progressPercent === 100) color = "green";
+        else if (progressPercent > 50) color = "blue";
+        else if (progressPercent > 0) color = "orange";
+        
+        return (
+          <div>
+            <Tag color={color} style={{ minWidth: '70px', textAlign: 'center' }}>
+              {completedDoses}/{totalDoses} mũi
+            </Tag>
+            {progressPercent === 100 && (
+              <span style={{ marginLeft: '5px', color: 'green', fontSize: '12px' }}>
+                ✓ Hoàn thành
+              </span>
+            )}
+          </div>
+        );
+      },
+    },
+    {
       title: "Trạng thái",
       dataIndex: "status",
       key: "status",
+      width: 110,
       filters: [
         { text: "Hoàn thành", value: "completed" },
         { text: "Đang chờ", value: "pending" },
         { text: "Đã hủy", value: "incomplete" },
+        { text: "Đã duyệt", value: "approve" },
       ],
       onFilter: (value, record) => record.status === value,
       render: (status) => (
@@ -569,68 +493,20 @@ const AppointmentManagement = () => {
       ),
     },
     {
-      title: "Thao tác",
-      key: "action",
-      render: (_, record) => (
-        <div className="action-buttons">
-          {record.status === "pending" && (
-            <Button
-              type="primary"
-              className="complete-button"
-              onClick={() => handleStatusChange(record._id, "completed", true)}
-              disabled={record.status === "incomplete" || record.status === "completed"}
-            >
-              Hoàn thành
-            </Button>
-          )}
-          <Button
-            danger
-            className="cancel-button"
-            onClick={() => handleStatusChange(record._id, "incomplete", true)}
-            disabled={record.status === "incomplete" || record.status === "completed"}
-          >
-            Hủy Đơn
-          </Button>
-        </div>
-      ),
-    },
-    {
       title: "Chi tiết",
       key: "details",
       width: 80,
+      fixed: 'right',
       render: (_, record) => (
         <Button
           type="primary"
           icon={<MenuOutlined />}
-          onClick={() => showAppointmentDetails(record, true)}
+          onClick={() => showAppointmentDetails(record)}
           disabled={record.status === "incomplete"}
         />
       ),
     },
   ];
-
-  const filteredAppointmentsLe = appointmentsLe.filter(
-    (apt) =>
-      apt._id?.toLowerCase().includes(searchText.toLowerCase()) ||
-      (
-        apt.customer?.customerName ||
-        apt.cusId?.customerName ||
-        apt.cusId?.name ||
-        ""
-      )
-        ?.toLowerCase()
-        .includes(searchText.toLowerCase()) ||
-      (
-        apt.vaccine?.vaccineName ||
-        apt.vaccineId?.vaccineName ||
-        apt.vaccineId?.name ||
-        ""
-      )
-        ?.toLowerCase()
-        .includes(searchText.toLowerCase()) ||
-      apt.date?.toLowerCase().includes(searchText.toLowerCase()) ||
-      apt.status?.toLowerCase().includes(searchText.toLowerCase())
-  );
 
   const filteredAppointmentsGoi = appointmentsGoi.filter(
     (apt) =>
@@ -655,12 +531,18 @@ const AppointmentManagement = () => {
         ?.toLowerCase()
         .includes(searchText.toLowerCase()) ||
       apt.date?.toLowerCase().includes(searchText.toLowerCase()) ||
-      apt.status?.toLowerCase().includes(searchText.toLowerCase())
+      apt.status?.toLowerCase().includes(searchText.toLowerCase()) ||
+      apt.price?.toString().includes(searchText.toLowerCase()) ||
+      apt.time?.toLowerCase().includes(searchText.toLowerCase()) ||
+      apt.createdAt?.toLowerCase().includes(searchText.toLowerCase()) ||
+      apt.createAt?.toLowerCase().includes(searchText.toLowerCase()) ||
+      apt.note?.toLowerCase().includes(searchText.toLowerCase()) ||
+      apt.app_trans_id?.toLowerCase().includes(searchText.toLowerCase())
   );
 
   return (
     <div className="appointment-management">
-      <h1>Quản lý lịch hẹn</h1>
+      <h1>Quản lý lịch hẹn gói</h1>
 
       <div className="search-container">
         <Input
@@ -672,17 +554,6 @@ const AppointmentManagement = () => {
         />
       </div>
 
-      <Tabs activeKey={activeTab} onChange={setActiveTab}>
-        <TabPane tab="Lịch hẹn lẻ" key="1">
-          <Table
-            columns={columnsLe}
-            dataSource={filteredAppointmentsLe}
-            rowKey="_id"
-            loading={loading}
-            pagination={{ pageSize: 10 }}
-          />
-        </TabPane>
-        <TabPane tab="Lịch hẹn gói" key="2">
           <Table
             columns={columnsGoi}
             dataSource={filteredAppointmentsGoi}
@@ -690,11 +561,9 @@ const AppointmentManagement = () => {
             loading={loading}
             pagination={{ pageSize: 10 }}
           />
-        </TabPane>
-      </Tabs>
 
       <Modal
-        title="Chi tiết lịch hẹn"
+        title="Chi tiết lịch hẹn gói"
         visible={isModalVisible}
         onCancel={() => setIsModalVisible(false)}
         footer={[
@@ -702,43 +571,34 @@ const AppointmentManagement = () => {
             Đóng
           </Button>,
         ]}
-        width={700}
+        width={800}
         confirmLoading={detailLoading}
       >
         {selectedAppointment && !detailLoading ? (
           <div className="appointment-details">
+            <div className="detail-section">
+              <Title level={4}>Thông tin cơ bản</Title>
             <div className="detail-row">
-              <span className="detail-label">Mã lịch hẹn:</span>
+                <span className="detail-label">Mã đơn:</span>
               <span className="detail-value">{selectedAppointment._id}</span>
             </div>
             <div className="detail-row">
               <span className="detail-label">Khách hàng:</span>
               <span className="detail-value">
-                {selectedAppointment.isPackage
-                  ? selectedAppointment.customer?.customerName ||
+                  {selectedAppointment.customer?.customerName ||
                     selectedAppointment.customerDetails?.customerName ||
                     selectedAppointment.cusId?.customerName ||
                     selectedAppointment.cusId?.name ||
                     (typeof selectedAppointment.cusId === "string"
                       ? selectedAppointment.cusId
-                      : "N/A")
-                  : selectedAppointment.customer?.customerName ||
-                    selectedAppointment.cusId?.customerName ||
-                    selectedAppointment.cusId?.name ||
-                    (selectedAppointment.cusId
-                      ? selectedAppointment.cusId.toString()
                       : "N/A")}
               </span>
             </div>
             <div className="detail-row">
               <span className="detail-label">Số điện thoại:</span>
               <span className="detail-value">
-                {selectedAppointment.isPackage
-                  ? selectedAppointment.customer?.phone ||
+                  {selectedAppointment.customer?.phone ||
                     selectedAppointment.customerDetails?.phone ||
-                    selectedAppointment.cusId?.phone ||
-                    "N/A"
-                  : selectedAppointment.customer?.phone ||
                     selectedAppointment.cusId?.phone ||
                     "N/A"}
               </span>
@@ -746,53 +606,60 @@ const AppointmentManagement = () => {
             <div className="detail-row">
               <span className="detail-label">Địa chỉ:</span>
               <span className="detail-value">
-                {selectedAppointment.isPackage
-                  ? selectedAppointment.customer?.address ||
+                  {selectedAppointment.customer?.address ||
                     selectedAppointment.customerDetails?.address ||
-                    selectedAppointment.cusId?.address ||
-                    "N/A"
-                  : selectedAppointment.customer?.address ||
                     selectedAppointment.cusId?.address ||
                     "N/A"}
               </span>
             </div>
-            {selectedAppointment.childId && (
               <div className="detail-row">
                 <span className="detail-label">Trẻ em:</span>
                 <span className="detail-value">
-                  {selectedAppointment.childId.childName ||
-                    selectedAppointment.childId.toString()}
+                  {selectedAppointment.childId ? 
+                    (selectedAppointment.childId.childName ||
+                     selectedAppointment.child?.childName ||
+                     selectedAppointment.childId.toString()) : "Không có"}
                 </span>
               </div>
-            )}
             <div className="detail-row">
-              <span className="detail-label">
-                {selectedAppointment.isPackage ? "Gói vaccine:" : "Vaccine:"}
-              </span>
+                <span className="detail-label">Gói vaccine:</span>
               <span className="detail-value">
-                {selectedAppointment.isPackage
-                  ? selectedAppointment.package?.packageName ||
+                  {selectedAppointment.package?.packageName ||
                     selectedAppointment.vaccinePakage?.packageName ||
                     selectedAppointment.packageDetails?.packageName ||
-                    selectedAppointment.vaccinePakageId?.packageName ||
+                    selectedAppointment.vaccinePackageId?.packageName ||
                     selectedAppointment.vaccinePakageId?.name ||
-                    (selectedAppointment.vaccinePakageId
-                      ? selectedAppointment.vaccinePakageId.toString()
-                      : "N/A")
-                  : selectedAppointment.vaccine?.vaccineName ||
-                    selectedAppointment.vaccineId?.vaccineName ||
-                    selectedAppointment.vaccineId?.name ||
-                    "N/A"}
+                    (selectedAppointment.vaccinePackageId
+                      ? selectedAppointment.vaccinePackageId.toString()
+                      : "N/A")}
               </span>
             </div>
             <div className="detail-row">
               <span className="detail-label">Ngày hẹn:</span>
               <span className="detail-value">{selectedAppointment.date}</span>
             </div>
+              <div className="detail-row">
+                <span className="detail-label">Thời gian:</span>
+                <span className="detail-value">{selectedAppointment.time || "Chưa xác định"}</span>
+              </div>
             <div className="detail-row">
               <span className="detail-label">Ngày tạo:</span>
               <span className="detail-value">
-                {selectedAppointment.createAt}
+                  {selectedAppointment.createdAt || selectedAppointment.createAt || "N/A"}
+                </span>
+              </div>
+              <div className="detail-row">
+                <span className="detail-label">Giá tiền gói:</span>
+                <span className="detail-value">
+                  {selectedAppointment.price
+                    ? selectedAppointment.price.toLocaleString("vi-VN") + " VNĐ"
+                    : "N/A"}
+                </span>
+              </div>
+              <div className="detail-row">
+                <span className="detail-label">Ghi chú:</span>
+                <span className="detail-value">
+                  {selectedAppointment.note || "Không có ghi chú"}
               </span>
             </div>
             <div className="detail-row">
@@ -802,16 +669,50 @@ const AppointmentManagement = () => {
                   {getStatusText(selectedAppointment.status)}
                 </Tag>
               </span>
+              </div>
+              {selectedAppointment.app_trans_id && (
+                <div className="detail-row">
+                  <span className="detail-label">Mã giao dịch:</span>
+                  <span className="detail-value">
+                    {selectedAppointment.app_trans_id}
+                  </span>
+                </div>
+              )}
             </div>
 
-            {/* Hiển thị lịch tiêm cho từng mũi (chỉ với lịch hẹn gói) */}
-            {selectedAppointment.isPackage &&
-              selectedAppointment.doseSchedule &&
+            {/* Hiển thị lịch tiêm cho từng mũi */}
+            {selectedAppointment.doseSchedule &&
               selectedAppointment.doseSchedule.length > 0 && (
                 <div className="dose-schedule-section">
-                  <Title level={5}>
-                    Lịch tiêm các mũi
-                  </Title>
+                  <div className="dose-header">
+                    <Title level={4}>Lịch tiêm các mũi</Title>
+                    <div className="dose-progress-summary">
+                      {(() => {
+                        const totalDoses = selectedAppointment.doseSchedule.length;
+                        const completedDoses = selectedAppointment.doseSchedule.filter(
+                          dose => dose.status === "completed"
+                        ).length;
+                        const progressPercent = Math.round((completedDoses / totalDoses) * 100);
+                        
+                        let color = "#bfbfbf";
+                        if (progressPercent === 100) color = "#52c41a";
+                        else if (progressPercent > 50) color = "#1890ff";
+                        else if (progressPercent > 0) color = "#faad14";
+                        
+                        return (
+                          <>
+                            <Tag color={color} style={{ marginRight: '5px' }}>
+                              {completedDoses}/{totalDoses}
+                            </Tag>
+                            <span style={{ color: color, fontWeight: 'bold' }}>
+                              {progressPercent}% đã tiêm
+                            </span>
+                          </>
+                        );
+                      })()}
+                    </div>
+                  </div>
+                  
                   <List
                     grid={{ gutter: 16, column: 1 }}
                     dataSource={selectedAppointment.doseSchedule}
@@ -823,13 +724,35 @@ const AppointmentManagement = () => {
                           style={{ marginBottom: 8 }}
                           extra={
                             <Tag color={getStatusColor(item.status)}>
-                              {getStatusText(item.status)}
+                              {getDoseStatusText(item.status)}
                             </Tag>
                           }
                         >
+                          <div className="dose-detail-grid">
                           <div className="dose-detail-row">
-                            <Text strong>Ngày tiêm:</Text> {item.date}
+                              <Text strong>Ngày tiêm:</Text> 
+                              {item.date instanceof Date 
+                                ? item.date.toLocaleDateString('vi-VN')
+                                : item.date?.toString()}
                           </div>
+                            <div className="dose-detail-row">
+                              <Text strong>Vaccine:</Text> 
+                              {(item.vaccineDetails?.vaccineName || 
+                                item.vaccineId?.toString() || 
+                                "Chưa xác định")}
+                            </div>
+                            <div className="dose-detail-row">
+                              <Text strong>Lô vaccine:</Text> 
+                              {(item.batchDetails?.importCode || 
+                                item.batchId?.toString() || 
+                                "Chưa xác định")}
+                            </div>
+                            <div className="dose-detail-row">
+                              <Text strong>Đơn giá:</Text> 
+                              {item.price ? item.price.toLocaleString('vi-VN') + ' VNĐ' : 'Chưa xác định'}
+                            </div>
+                          </div>
+                          <Divider style={{ margin: '12px 0' }} />
                           <div className="dose-detail-row dose-actions">
                             <Button
                               type={
@@ -863,8 +786,8 @@ const AppointmentManagement = () => {
                               }
                             >
                               {item.status === "completed"
-                                ? "Đã hoàn thành"
-                                : "Đánh dấu hoàn thành"}
+                                ? "Đã tiêm xong"
+                                : "Đánh dấu đã tiêm"}
                             </Button>
                           </div>
                         </Card>
