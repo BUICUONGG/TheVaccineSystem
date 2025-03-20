@@ -46,6 +46,18 @@
   padding-bottom: 60px; /* Add space for button */
 }
 
+.product-card:not(.package-card) {
+  min-height: 450px;
+  padding: 25px;
+  padding-bottom: 60px;
+}
+
+.package-card {
+  min-height: 300px; /* Giảm chiều cao */
+  padding: 20px;
+  justify-content: space-between; /* Đảm bảo nội dung được phân bố đều */
+}
+
 .product-card:hover, .package-card:hover {
   transform: translateY(-5px);
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
@@ -120,14 +132,7 @@
   justify-content: center;
 }
 
-.price-label {
-  font-weight: 600;
-  color: #2d2d2d;
-  font-size: 17px;
-  letter-spacing: 0.3px;
-  text-transform: uppercase;
-  font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
-}
+
 
 .price-value, .package-price {
   color: #e41749;
@@ -146,10 +151,7 @@
   letter-spacing: 0.5px;
 }
 
-.price-label {
-  font-weight: 500;
-  color: #333;
-}
+
 
 
 .product-card h3,
@@ -182,12 +184,7 @@
   padding: 20px;
 }
 
-.price-label {
-  font-size: 14px;
-  color: #666;
-  margin-bottom: 8px;
-  display: block;
-}
+
 
 .price-value {
   color: #ff4d4f;
@@ -215,6 +212,7 @@
   margin: 0;
 }
 
+
 .product-card:hover .price-section {
   background: #fff;
   border-color: #ff4d4f;
@@ -229,10 +227,7 @@
   font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
-.price-label {
-  font-weight: 500;
-  color: #333;
-}
+
 
 
 .price-unavailable {
@@ -257,11 +252,7 @@
   justify-content: space-between;
 }
 
-.price-label {
-  font-weight: 500;
-  color: #ff4d4f;
-  font-size: 16px;
-}
+
 
 
 
@@ -488,6 +479,7 @@
   font-weight: 500;
   display: block;
   margin-bottom: 4px;
+  text-transform: uppercase;
   font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
