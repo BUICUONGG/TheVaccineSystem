@@ -167,9 +167,12 @@ const RegisterInjection = () => {
 
   const onFinish = async (values) => {
     try {
-      // const accesstoken = localStorage.getItem("accesstoken");
+      const accesstoken = localStorage.getItem("accesstoken");
       const cusId = localStorage.getItem("cusId");
-
+      if (!accesstoken) {
+        navigate("/login");
+        return;
+      }
       if (!selectedVaccineId) {
         toast.error("Vui lòng chọn vaccine trước khi đăng ký!");
         return;
