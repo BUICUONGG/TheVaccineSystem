@@ -15,7 +15,7 @@ import {
 import { Pie, Column } from "@ant-design/plots";
 import axiosInstance from "../../../service/api";
 
-const OverviewPage = () => {
+const DashboardPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [stats, setStats] = useState({
@@ -53,117 +53,173 @@ const OverviewPage = () => {
       setLoading(true);
       setError(null);
       const accesstoken = localStorage.getItem("accesstoken");
-
-      // Fetch all data in parallel
-      const [
-        usersResponse, 
-        vaccinesResponse, 
-        blogsResponse,
-        appointmentsLeResponse,
-        appointmentsGoiResponse,
-        feedbackResponse
-      ] = await Promise.all([
-        axiosInstance.get("/user/showInfo", {
-          headers: { Authorization: `Bearer ${accesstoken}` },
-        }),
-        axiosInstance.get("/vaccine/showInfo", {
-          headers: { Authorization: `Bearer ${accesstoken}` },
-        }),
-        axiosInstance.get("/blogs/showBlog", {
-          headers: { Authorization: `Bearer ${accesstoken}` },
-        }),
-        axiosInstance.get("/appointmentLe/getdetailallaptle", {
-          headers: { Authorization: `Bearer ${accesstoken}` },
-        }).catch(() => ({ data: [] })),
-        axiosInstance.get("/appointmentGoi/showDetailAptGoi", {
-          headers: { Authorization: `Bearer ${accesstoken}` },
-        }).catch(() => ({ data: [] })),
-        axiosInstance.get("/feedback/getAllFeedback", {
-          headers: { Authorization: `Bearer ${accesstoken}` },
-        }).catch(() => ({ data: [] }))
-      ]);
-
-      const sortedUsers = Array.isArray(usersResponse.data) 
-        ? usersResponse.data 
-        : (usersResponse.data.result || []);
       
-      const totalCustomers = sortedUsers.filter(
-        (user) => user.role === "customer"
-      ).length;
+      if (!accesstoken) {
+        setError("Không tìm thấy token xác thực. Vui lòng đăng nhập lại.");
+        setLoading(false);
+        return;
+      }
 
-      // Process appointments
-      const appointmentsLe = Array.isArray(appointmentsLeResponse.data) 
-        ? appointmentsLeResponse.data 
-        : [];
-      
-      const appointmentsGoi = Array.isArray(appointmentsGoiResponse.data) 
-        ? appointmentsGoiResponse.data 
-        : [];
-      
-      const allAppointments = [...appointmentsLe, ...appointmentsGoi];
-      const totalAppointments = allAppointments.length;
+      console.log("Starting dashboard data fetch with token:", accesstoken.substring(0, 10) + "...");
 
-      // Calculate appointment statistics
-      const appointmentStats = {
-        pending: allAppointments.filter(a => a.status === "pending").length,
-        approved: allAppointments.filter(a => a.status === "approve").length,
-        completed: allAppointments.filter(a => a.status === "completed").length,
-        incomplete: allAppointments.filter(a => a.status === "incomplete").length
-      };
+      // Fetch all data in parallel with better error handling
+      try {
+        const [
+          usersResponse, 
+          vaccinesResponse, 
+          blogsResponse,
+          appointmentsLeResponse,
+          appointmentsGoiResponse,
+          feedbackResponse
+        ] = await Promise.all([
+          axiosInstance.get("/user/showInfo", {
+            headers: { Authorization: `Bearer ${accesstoken}` },
+          }).catch(err => {
+            console.error("Error fetching users:", err.response?.data || err.message);
+            return { data: [] };
+          }),
+          axiosInstance.get("/vaccine/showInfo", {
+            headers: { Authorization: `Bearer ${accesstoken}` },
+          }).catch(err => {
+            console.error("Error fetching vaccines:", err.response?.data || err.message);
+            return { data: [] };
+          }),
+          axiosInstance.get("/blogs/showBlog", {
+            headers: { Authorization: `Bearer ${accesstoken}` },
+          }).catch(err => {
+            console.error("Error fetching blogs:", err.response?.data || err.message);
+            return { data: [] };
+          }),
+          axiosInstance.get("/appointmentLe/getdetailallaptle", {
+            headers: { Authorization: `Bearer ${accesstoken}` },
+          }).catch(err => {
+            console.error("Error fetching appointmentsLe:", err.response?.data || err.message);
+            return { data: [] };
+          }),
+          axiosInstance.get("/appointmentGoi/showDetailAptGoi", {
+            headers: { Authorization: `Bearer ${accesstoken}` },
+          }).catch(err => {
+            console.error("Error fetching appointmentsGoi:", err.response?.data || err.message);
+            return { data: [] };
+          }),
+          axiosInstance.get("/feedback/getAllFeedback", {
+            headers: { Authorization: `Bearer ${accesstoken}` },
+          }).catch(err => {
+            console.error("Error fetching feedback:", err.response?.data || err.message);
+            return { data: [] };
+          })
+        ]);
 
-      // Get recent appointments (combine and sort by date)
-      const recentAppointments = allAppointments
-        .sort((a, b) => {
-          const dateA = new Date(a.date || a.createAt || 0);
-          const dateB = new Date(b.date || b.createAt || 0);
-          return dateB - dateA;
-        })
-        .slice(0, 5);
+        console.log("All API calls completed");
 
-      // Get recent vaccines
-      const recentVaccines = Array.isArray(vaccinesResponse.data) 
-        ? vaccinesResponse.data.slice(0, 5) 
-        : [];
+        // Process user data
+        let sortedUsers = [];
+        if (usersResponse && usersResponse.data) {
+          sortedUsers = Array.isArray(usersResponse.data) 
+            ? usersResponse.data 
+            : (usersResponse.data.result || []);
+          console.log(`Processed ${sortedUsers.length} users`);
+        }
+        
+        const totalCustomers = sortedUsers.filter(
+          (user) => user.role === "customer"
+        ).length;
 
-      // Process feedback data
-      const feedbacks = Array.isArray(feedbackResponse.data) 
-        ? feedbackResponse.data 
-        : [];
-      
-      const totalFeedback = feedbacks.length;
-      
-      // Calculate feedback statistics
-      const ratingSum = feedbacks.reduce((sum, feedback) => sum + feedback.rating, 0);
-      const averageRating = totalFeedback > 0 ? (ratingSum / totalFeedback).toFixed(1) : 0;
-      
-      const feedbackStats = {
-        averageRating,
-        fiveStars: feedbacks.filter(f => f.rating === 5).length,
-        fourStars: feedbacks.filter(f => f.rating === 4).length,
-        threeStars: feedbacks.filter(f => f.rating === 3).length,
-        twoStars: feedbacks.filter(f => f.rating === 2).length,
-        oneStars: feedbacks.filter(f => f.rating === 1).length
-      };
+        // Process appointments
+        let appointmentsLe = [];
+        if (appointmentsLeResponse && appointmentsLeResponse.data) {
+          appointmentsLe = Array.isArray(appointmentsLeResponse.data) 
+            ? appointmentsLeResponse.data 
+            : [];
+          console.log(`Processed ${appointmentsLe.length} lẻ appointments`);
+        }
+        
+        let appointmentsGoi = [];
+        if (appointmentsGoiResponse && appointmentsGoiResponse.data) {
+          appointmentsGoi = Array.isArray(appointmentsGoiResponse.data) 
+            ? appointmentsGoiResponse.data 
+            : [];
+          console.log(`Processed ${appointmentsGoi.length} gói appointments`);
+        }
+        
+        const allAppointments = [...appointmentsLe, ...appointmentsGoi];
+        const totalAppointments = allAppointments.length;
 
-      // Calculate monthly appointment data
-      const monthlyAppointments = calculateMonthlyData(allAppointments);
+        // Calculate appointment statistics
+        const appointmentStats = {
+          pending: allAppointments.filter(a => a.status === "pending").length,
+          approved: allAppointments.filter(a => a.status === "approve").length,
+          completed: allAppointments.filter(a => a.status === "completed").length,
+          incomplete: allAppointments.filter(a => a.status === "incomplete").length
+        };
 
-      setStats({
-        userList: sortedUsers,
-        totalVaccines: Array.isArray(vaccinesResponse.data) ? vaccinesResponse.data.length : 0,
-        totalBlogs: Array.isArray(blogsResponse.data) ? blogsResponse.data.length : 0,
-        totalCustomers,
-        totalAppointments,
-        totalFeedback,
-        recentAppointments,
-        recentVaccines,
-        appointmentStats,
-        feedbackStats,
-        monthlyAppointments
-      });
+        // Get recent appointments (combine and sort by date)
+        const recentAppointments = allAppointments
+          .sort((a, b) => {
+            const dateA = new Date(a.date || a.createAt || 0);
+            const dateB = new Date(b.date || b.createAt || 0);
+            return dateB - dateA;
+          })
+          .slice(0, 5);
+
+        // Get recent vaccines
+        let recentVaccines = [];
+        if (vaccinesResponse && vaccinesResponse.data) {
+          recentVaccines = Array.isArray(vaccinesResponse.data) 
+            ? vaccinesResponse.data.slice(0, 5) 
+            : [];
+          console.log(`Processed ${recentVaccines.length} recent vaccines`);
+        }
+
+        // Process feedback data
+        let feedbacks = [];
+        if (feedbackResponse && feedbackResponse.data) {
+          feedbacks = Array.isArray(feedbackResponse.data) 
+            ? feedbackResponse.data 
+            : [];
+          console.log(`Processed ${feedbacks.length} feedback entries`);
+        }
+        
+        const totalFeedback = feedbacks.length;
+        
+        // Calculate feedback statistics
+        const ratingSum = feedbacks.reduce((sum, feedback) => sum + (feedback.rating || 0), 0);
+        const averageRating = totalFeedback > 0 ? (ratingSum / totalFeedback).toFixed(1) : 0;
+        
+        const feedbackStats = {
+          averageRating,
+          fiveStars: feedbacks.filter(f => f.rating === 5).length,
+          fourStars: feedbacks.filter(f => f.rating === 4).length,
+          threeStars: feedbacks.filter(f => f.rating === 3).length,
+          twoStars: feedbacks.filter(f => f.rating === 2).length,
+          oneStars: feedbacks.filter(f => f.rating === 1).length
+        };
+
+        // Calculate monthly appointment data
+        const monthlyAppointments = calculateMonthlyData(allAppointments);
+
+        setStats({
+          userList: sortedUsers,
+          totalVaccines: Array.isArray(vaccinesResponse.data) ? vaccinesResponse.data.length : 0,
+          totalBlogs: Array.isArray(blogsResponse.data) ? blogsResponse.data.length : 0,
+          totalCustomers,
+          totalAppointments,
+          totalFeedback,
+          recentAppointments,
+          recentVaccines,
+          appointmentStats,
+          feedbackStats,
+          monthlyAppointments
+        });
+        
+        console.log("Dashboard data successfully processed and set");
+      } catch (apiError) {
+        console.error("API Promise.all error:", apiError);
+        setError("Lỗi kết nối đến máy chủ. Vui lòng thử lại sau.");
+      }
     } catch (error) {
-      console.error("Error fetching data:", error);
-      setError("Failed to load dashboard data. Please try again.");
+      console.error("Error fetching dashboard data:", error);
+      setError("Không thể tải dữ liệu bảng điều khiển. Vui lòng thử lại.");
     } finally {
       setLoading(false);
     }
@@ -617,4 +673,4 @@ const OverviewPage = () => {
   );
 };
 
-export default OverviewPage;
+export default DashboardPage;
