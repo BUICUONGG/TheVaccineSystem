@@ -72,7 +72,6 @@ export const searchAppointmentsController = async (req, res) => {
   }
 };
 
-
 // ======================================================================================================
 
 export const listAllAptGoiController = async (req, res) => {
