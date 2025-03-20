@@ -14,11 +14,7 @@ const vaccineImportRoutes = Router();
 //PATH:             http://localhost:8080/vaccineimport/.........
 
 // lấy hết thông tin trong lô db
-vaccineImportRoutes.get(
-  "/getfullData",
-  validateAccessToken,
-  getFullDataController
-);
+vaccineImportRoutes.get("/getfullData", getFullDataController);
 
 //lấy thông tin chi tiết của 1 lô
 vaccineImportRoutes.get(

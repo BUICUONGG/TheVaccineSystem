@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { Pagination, Spin, Slider, Checkbox, Radio } from "antd";
+import { Pagination, Spin, Checkbox, Radio } from "antd";
 import { FilterOutlined } from "@ant-design/icons";
 import "./vaccineShopPage.css";
 import axiosInstance from "../../../service/api";
@@ -19,33 +19,35 @@ const VaccinePriceList = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [priceRange, setPriceRange] = useState([0, 1000000]);
   const [selectedManufacturers, setSelectedManufacturers] = useState([]);
-  const [selectedAgeGroups, setSelectedAgeGroups] = useState([]);
-  const [selectedDiseases, setSelectedDiseases] = useState([]);
 
   const prefetchData = async () => {
     setIsLoading(true);
     try {
       const token = localStorage.getItem("accesstoken");
-      const [vaccineResponse, packageResponse, importResponse] = await Promise.all([
-        axiosInstance.get("/vaccine/showInfo", {
-          headers: { Authorization: `Bearer ${token}` },
-        }),
-        axiosInstance.get("/vaccinepakage/showVaccinePakage", {
-          headers: { Authorization: `Bearer ${token}` },
-        }),
-        axiosInstance.get("/vaccineimport/getfullData", {
-          headers: { Authorization: `Bearer ${token}` },
-        }),
-      ]);
+      const [vaccineResponse, packageResponse, importResponse] =
+        await Promise.all([
+          axiosInstance.get("/vaccine/showInfo", {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+          axiosInstance.get("/vaccinepakage/showVaccinePakage", {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+          axiosInstance.get("/vaccineimport/getfullData", {
+            headers: { Authorization: `Bearer ${token}` },
+          }),
+        ]);
 
       const priceMap = {};
-      importResponse.data.forEach(importData => {
-        importData.vaccines.forEach(vaccine => {
-          if (!priceMap[vaccine.vaccineId] ||
-            new Date(importData.importDate) > new Date(priceMap[vaccine.vaccineId].importDate)) {
+      importResponse.data.forEach((importData) => {
+        importData.vaccines.forEach((vaccine) => {
+          if (
+            !priceMap[vaccine.vaccineId] ||
+            new Date(importData.importDate) >
+              new Date(priceMap[vaccine.vaccineId].importDate)
+          ) {
             priceMap[vaccine.vaccineId] = {
               unitPrice: vaccine.unitPrice,
-              importDate: importData.importDate
+              importDate: importData.importDate,
             };
           }
         });
@@ -83,7 +85,7 @@ const VaccinePriceList = () => {
 
   // Xóa vaccineId khỏi localStorage khi component mount
   useEffect(() => {
-    localStorage.removeItem('vaccineId');
+    localStorage.removeItem("vaccineId");
   }, []);
 
   const handleCategoryChange = (event) => {
@@ -91,20 +93,8 @@ const VaccinePriceList = () => {
     setCurrentPage(1);
   };
 
-  const handlePriceChange = (value) => {
-    setPriceRange(value);
-  };
-
   const handleManufacturerChange = (checkedValues) => {
     setSelectedManufacturers(checkedValues);
-  };
-
-  const handleAgeGroupChange = (checkedValues) => {
-    setSelectedAgeGroups(checkedValues);
-  };
-
-  const handleDiseaseChange = (checkedValues) => {
-    setSelectedDiseases(checkedValues);
   };
 
   const getFilteredProducts = () => {
@@ -117,9 +107,10 @@ const VaccinePriceList = () => {
     }
 
     filtered = filtered.filter((product) => {
-      const productPrice = selectedCategory === "Single"
-        ? importProductsPrice[product._id]?.unitPrice
-        : product.price;
+      const productPrice =
+        selectedCategory === "Single"
+          ? importProductsPrice[product._id]?.unitPrice
+          : product.price;
 
       if (priceRange[0] === 0 && priceRange[1] === 0) {
         return !productPrice;
@@ -135,7 +126,7 @@ const VaccinePriceList = () => {
   };
 
   const handleMoreInfo = (productId) => {
-    localStorage.setItem('vaccineId', productId);
+    localStorage.setItem("vaccineId", productId);
 
     navigate(`/vaccineDetail/${productId}`);
   };
@@ -172,7 +163,11 @@ const VaccinePriceList = () => {
               <div className="sidebar-section">
                 <h4>Trạng thái giá</h4>
                 <Radio.Group
-                  value={priceRange[0] === 0 && priceRange[1] === 0 ? "noPrice" : "hasPrice"}
+                  value={
+                    priceRange[0] === 0 && priceRange[1] === 0
+                      ? "noPrice"
+                      : "hasPrice"
+                  }
                   onChange={(e) => {
                     if (e.target.value === "noPrice") {
                       setPriceRange([0, 0]); // Hiển thị sản phẩm chưa có giá
@@ -222,7 +217,9 @@ const VaccinePriceList = () => {
                       <div className="price-section">
                         <span className="price-label">Giá:</span>
                         <span className="price-value">
-                          {importProductsPrice[product._id]?.unitPrice?.toLocaleString() ||
+                          {importProductsPrice[
+                            product._id
+                          ]?.unitPrice?.toLocaleString() ||
                             product.price?.toLocaleString() ||
                             "Chưa có hàng"}
                         </span>

@@ -25,11 +25,7 @@ vaccinesRoutes.post(
   validateAccessToken,
   deleteVaccineController
 );
-vaccinesRoutes.get(
-  "/showInfo",
-  validateAccessToken,
-  showVaccineAndImportController
-);
+vaccinesRoutes.get("/showInfo", showVaccineAndImportController);
 
 vaccinesRoutes.post("/searchVaccineB/:id", getOneVaccineByIdController);
 

@@ -11,11 +11,7 @@ const vaccinePakageRoutes = Router();
 
 // PATH                    http://localhost:8080/vaccinepakage................
 
-vaccinePakageRoutes.get(
-  "/showVaccinePakage",
-  validateAccessToken,
-  getAllVaccinePakageController
-);
+vaccinePakageRoutes.get("/showVaccinePakage", getAllVaccinePakageController);
 
 vaccinePakageRoutes.post(
   "/createVaccinePakage",
