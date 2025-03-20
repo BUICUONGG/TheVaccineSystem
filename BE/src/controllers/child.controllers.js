@@ -31,9 +31,19 @@ export const updateChildController = async (req, res) => {
 
 export const deleteChildController = async (req, res) => {
   try {
-    const id = req.id.params;
+    const id = req.params.id;
     const result = await childService.deleteChild(id);
     res.status(200).json("Xoa thanh cong");
+  } catch (error) {
+    res.status(500).json(error.message);
+  }
+};
+
+export const getAllChildbyCusIController = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const result = await childService.getAllChildByCusId(id);
+    res.status(200).json(result);
   } catch (error) {
     res.status(500).json(error.message);
   }

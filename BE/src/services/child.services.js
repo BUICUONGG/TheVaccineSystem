@@ -60,6 +60,24 @@ class ChildService {
       throw new Error(error.message);
     }
   }
+
+  async getAllChildByCusId(cusId) {
+    try {
+      const result = connectToDatabase.childs
+        .find({
+          customerId: new ObjectId(cusId),
+        })
+        .toArray();
+
+      if (!result) {
+        throw new Error("Không có thông tin trẻ cho người dùng này");
+      }
+      return result;
+    } catch (error) {
+      console.log(error.message);
+      throw new Error(error.message);
+    }
+  }
 }
 
 const childService = new ChildService();

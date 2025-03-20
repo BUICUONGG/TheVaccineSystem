@@ -66,40 +66,42 @@ const RegisterInjection = () => {
     fetchVaccinePackages();
   }, []);
 
-useEffect(() => {
-  const fetchImportPrices = async () => {
-    try {
-      const token = localStorage.getItem("accesstoken");
-      const response = await axiosInstance.get("/vaccineimport/getfullData", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      // Xử lý dữ liệu giá
-      const priceMap = {};
-      response.data.forEach(importData => {
-        importData.vaccines.forEach(vaccine => {
-          if (!priceMap[vaccine.vaccineId] || 
-              new Date(importData.importDate) > new Date(priceMap[vaccine.vaccineId].importDate)) {
-            priceMap[vaccine.vaccineId] = {
-              unitPrice: vaccine.unitPrice,
-              importDate: importData.importDate
-            };
-          }
+  useEffect(() => {
+    const fetchImportPrices = async () => {
+      try {
+        const token = localStorage.getItem("accesstoken");
+        const response = await axiosInstance.get("/vaccineimport/getfullData", {
+          headers: { Authorization: `Bearer ${token}` },
         });
-      });
-      setImportProductsPrice(priceMap);
-    } catch (error) {
-      console.error("Error fetching import prices:", error);
-      toast.error("Không thể tải thông tin giá", {
-        position: "top-right",
-        autoClose: 3000,
-      });
-    }
-  };
 
-  fetchImportPrices();
-}, []);
+        // Xử lý dữ liệu giá
+        const priceMap = {};
+        response.data.forEach((importData) => {
+          importData.vaccines.forEach((vaccine) => {
+            if (
+              !priceMap[vaccine.vaccineId] ||
+              new Date(importData.importDate) >
+                new Date(priceMap[vaccine.vaccineId].importDate)
+            ) {
+              priceMap[vaccine.vaccineId] = {
+                unitPrice: vaccine.unitPrice,
+                importDate: importData.importDate,
+              };
+            }
+          });
+        });
+        setImportProductsPrice(priceMap);
+      } catch (error) {
+        console.error("Error fetching import prices:", error);
+        toast.error("Không thể tải thông tin giá", {
+          position: "top-right",
+          autoClose: 3000,
+        });
+      }
+    };
 
+    fetchImportPrices();
+  }, []);
 
   // Fetch user info khi component mount và user đã đăng nhập
   useEffect(() => {
@@ -153,12 +155,12 @@ useEffect(() => {
     if (selectedVaccineType === "single") {
       form.setFieldsValue({
         vaccineId: vaccine._id,
-        vaccinePackageId: undefined
+        vaccinePackageId: undefined,
       });
     } else {
       form.setFieldsValue({
         vaccineId: undefined,
-        vaccinePackageId: vaccine._id
+        vaccinePackageId: vaccine._id,
       });
     }
   };
@@ -168,14 +170,10 @@ useEffect(() => {
       const accesstoken = localStorage.getItem("accesstoken");
       const cusId = localStorage.getItem("cusId");
 
-     
-
       if (!selectedVaccineId) {
         toast.error("Vui lòng chọn vaccine trước khi đăng ký!");
         return;
       }
-
-
 
       // Format thời gian
       const now = new Date();
@@ -195,7 +193,6 @@ useEffect(() => {
         type: selectedVaccineType,
         createAt: createAt,
         status: "pending",
-
         ...(isChildRegistration && {
           childInfo: {
             ...values.childInfo,
@@ -204,68 +201,58 @@ useEffect(() => {
         }),
       };
 
-    
       // Xác định thông tin vaccine và giá tiền để chuyển sang trang thanh toán
-      const invoiceData = {
-        ...requestData,
-        // Thêm dữ liệu phân biệt giữa lẻ và gói
-        ...(selectedVaccineType === "single"
-          ? {
-              vaccineId: selectedVaccineId,
-              vaccineName: vaccineList.find(v => v._id === selectedVaccineId)?.vaccineName || '',
-              price: importProductsPrice[selectedVaccineId]?.unitPrice || 0,
-              type: "aptLe",
-            }
-          : {
-              vaccinePackageId: selectedVaccineId,
-              vaccineName: vaccinePackages.find(p => p._id === selectedVaccineId)?.packageName || '',
-              price: vaccinePackages.find(p => p._id === selectedVaccineId)?.price || 0,
-              type: "aptGoi",
-            }),
+      let invoiceData = {
+        cusId: cusId,
         customerName: parentInfo?.customerName || "Khách hàng",
       };
 
       if (selectedVaccineType === "single") {
         // Lấy thông tin vaccine đã chọn
-        const selectedVaccine = vaccineList.find(v => v._id === selectedVaccineId);
+        const selectedVaccine = vaccineList.find(
+          (v) => v._id === selectedVaccineId
+        );
         if (selectedVaccine) {
-          paymentData = {
-            ...paymentData,
+          invoiceData = {
+            ...invoiceData,
             vaccineId: selectedVaccineId,
             vaccineName: selectedVaccine.vaccineName,
             price: importProductsPrice[selectedVaccineId]?.unitPrice || 0,
             appointmentData: {
               ...requestData,
-              vaccineId: selectedVaccineId
+              vaccineId: selectedVaccineId,
             },
-            type: "single"
+            type: "aptLe",
           };
         }
       } else {
         // Lấy thông tin gói vaccine đã chọn
-        const selectedPackage = vaccinePackages.find(p => p._id === selectedVaccineId);
+        const selectedPackage = vaccinePackages.find(
+          (p) => p._id === selectedVaccineId
+        );
         if (selectedPackage) {
-          paymentData = {
-            ...paymentData,
+          invoiceData = {
+            ...invoiceData,
             vaccineId: selectedVaccineId,
             vaccineName: selectedPackage.packageName,
             price: selectedPackage.price || 0,
             appointmentData: {
               ...requestData,
-              vaccinePackageId: selectedVaccineId
+              vaccinePackageId: selectedVaccineId,
             },
-            type: "package"
+            type: "aptGoi",
           };
         }
       }
 
       // Chuyển hướng đến trang xác nhận hóa đơn trước khi thanh toán
-      navigate('/invoice-confirmation', { state: { invoiceData } });
-      
+      navigate("/invoice-confirmation", { state: { invoiceData } });
     } catch (error) {
       console.error("Registration error:", error);
       toast.error(
-        `Đăng ký ${selectedVaccineType === "single" ? "vaccine lẻ" : "gói vaccine"} thất bại, vui lòng thử lại`,
+        `Đăng ký ${
+          selectedVaccineType === "single" ? "vaccine lẻ" : "gói vaccine"
+        } thất bại, vui lòng thử lại`,
         {
           position: "top-right",
           autoClose: 3000,
@@ -279,9 +266,7 @@ useEffect(() => {
     return current && current < dayjs().startOf("day");
   };
 
-
   const footerRef = useRef(null);
-
 
   return (
     <div className="form-register-page">
@@ -406,15 +391,15 @@ useEffect(() => {
                 {(!parentInfo?.customerName ||
                   !parentInfo?.phone ||
                   !parentInfo?.address) && (
-                    <div className="update-info-notice">
-                      <span className="notice-text">
-                        Vui lòng cập nhật đầy đủ thông tin cá nhân!
-                      </span>
-                      <Link to="/profile" className="update-link">
-                        Cập nhật ngay
-                      </Link>
-                    </div>
-                  )}
+                  <div className="update-info-notice">
+                    <span className="notice-text">
+                      Vui lòng cập nhật đầy đủ thông tin cá nhân!
+                    </span>
+                    <Link to="/profile" className="update-link">
+                      Cập nhật ngay
+                    </Link>
+                  </div>
+                )}
               </div>
             )}
 
@@ -445,55 +430,65 @@ useEffect(() => {
                 <div className="vaccine-cards">
                   {selectedVaccineType === "single"
                     ? vaccineList.map((vaccine) => (
-                      <div
-                        key={vaccine._id}
-                        className={`vaccine-card ${selectedVaccineId === vaccine._id ? "selected" : ""
+                        <div
+                          key={vaccine._id}
+                          className={`vaccine-card ${
+                            selectedVaccineId === vaccine._id ? "selected" : ""
                           }`}
-                        onClick={() => handleVaccineSelect(vaccine)}
-                      >
-                        <Checkbox
-                          checked={selectedVaccineId === vaccine._id}
-                          onChange={(e) => {
-                            e.stopPropagation();
-                            handleVaccineSelect(vaccine);
-                          }}
-                          className="vaccine-checkbox"
-                        />
-                        <div className="vaccine-card-content">
-                          <h3>{vaccine.vaccineName}</h3>
-                          <p className="register-vaccine-description">{vaccine.description}</p>
-                          <p className="vaccine-price">
-                            {importProductsPrice[vaccine._id]?.unitPrice
-                              ? `${importProductsPrice[vaccine._id]?.unitPrice?.toLocaleString()} VNĐ`
-                              : "Chưa có giá"}
-                          </p>
+                          onClick={() => handleVaccineSelect(vaccine)}
+                        >
+                          <Checkbox
+                            checked={selectedVaccineId === vaccine._id}
+                            onChange={(e) => {
+                              e.stopPropagation();
+                              handleVaccineSelect(vaccine);
+                            }}
+                            className="vaccine-checkbox"
+                          />
+                          <div className="vaccine-card-content">
+                            <h3>{vaccine.vaccineName}</h3>
+                            <p className="register-vaccine-description">
+                              {vaccine.description}
+                            </p>
+                            <p className="vaccine-price">
+                              {importProductsPrice[vaccine._id]?.unitPrice
+                                ? `${importProductsPrice[
+                                    vaccine._id
+                                  ]?.unitPrice?.toLocaleString()} VNĐ`
+                                : "Chưa có giá"}
+                            </p>
+                          </div>
                         </div>
-                      </div>
-                    ))
+                      ))
                     : vaccinePackages.map((pack) => (
-                      <div
-                        key={pack._id}
-                        className={`vaccine-card ${selectedVaccineId === pack._id ? "selected" : ""
+                        <div
+                          key={pack._id}
+                          className={`vaccine-card ${
+                            selectedVaccineId === pack._id ? "selected" : ""
                           }`}
-                        onClick={() => handleVaccineSelect(pack)}
-                      >
-                        <Checkbox
-                          checked={selectedVaccineId === pack._id}
-                          onChange={(e) => {
-                            e.stopPropagation();
-                            handleVaccineSelect(pack);
-                          }}
-                          className="vaccine-checkbox"
-                        />
-                        <div className="vaccine-card-content">
-                          <h3>{pack.packageName}</h3>
-                          <p className="register-vaccine-description">{pack.description}</p>
-                          <p className="vaccine-price">
-                            {pack.price ? `${pack.price.toLocaleString()} VNĐ` : "Chưa có giá"}
-                          </p>
+                          onClick={() => handleVaccineSelect(pack)}
+                        >
+                          <Checkbox
+                            checked={selectedVaccineId === pack._id}
+                            onChange={(e) => {
+                              e.stopPropagation();
+                              handleVaccineSelect(pack);
+                            }}
+                            className="vaccine-checkbox"
+                          />
+                          <div className="vaccine-card-content">
+                            <h3>{pack.packageName}</h3>
+                            <p className="register-vaccine-description">
+                              {pack.description}
+                            </p>
+                            <p className="vaccine-price">
+                              {pack.price
+                                ? `${pack.price.toLocaleString()} VNĐ`
+                                : "Chưa có giá"}
+                            </p>
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                      ))}
                 </div>
               </Form.Item>
 
