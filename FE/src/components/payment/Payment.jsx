@@ -2,167 +2,366 @@ import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import './Payment.css';
 import axiosInstance from '../../service/api';
-import { Spin, Button, Modal } from 'antd';
+import { Button, Modal, Radio, Input, Space, Divider, Spin } from 'antd';
 import { toast } from 'react-toastify';
-import HeaderLayouts from '../layouts/header';
 
-const Payment = () => {
+const PaymentPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [paymentData, setPaymentData] = useState(null);
   const [paymentUrl, setPaymentUrl] = useState('');
+  const [cancelModalVisible, setCancelModalVisible] = useState(false);
+  const [cancelReason, setCancelReason] = useState('');
+  const [otherReason, setOtherReason] = useState('');
+  const [processingPayment, setProcessingPayment] = useState(false);
   
   useEffect(() => {
-    if (!location.state?.paymentData) {
+    document.title = "Xác nhận thanh toán";
+    
+    // Get data directly from registerInjection
+    if (!location.state?.invoiceData) {
       setError('Không có thông tin thanh toán');
+      setLoading(false);
       return;
     }
     
-    setPaymentData(location.state.paymentData);
-    processPayment(location.state.paymentData);
+    const invoiceData = location.state.invoiceData;
+    
+    // Prepare payment data from invoice data
+    const data = {
+      cusId: invoiceData.cusId,
+      vaccineId: invoiceData.vaccineId,
+      vaccinePackageId: invoiceData.type === 'aptGoi' ? invoiceData.vaccineId : undefined,
+      childId: invoiceData.appointmentData?.childInfo ? 'new' : undefined, // If has childInfo, we're creating a new child
+      price: invoiceData.price,
+      type: invoiceData.type, // aptLe or aptGoi
+      date: invoiceData.appointmentData?.date,
+      time: invoiceData.appointmentData?.time,
+      childInfo: invoiceData.appointmentData?.childInfo
+    };
+    
+    setPaymentData({
+      ...data,
+      vaccineName: invoiceData.vaccineName,
+      customerName: invoiceData.customerName,
+      appointmentData: invoiceData.appointmentData
+    });
+    
+    setLoading(false);
   }, [location.state]);
   
-  const processPayment = async (data) => {
-    setLoading(true);
+  const processPayment = async () => {
+    setProcessingPayment(true);
     try {
-      // Lưu thông tin thanh toán vào localStorage trước khi chuyển hướng
+      if (!paymentData) {
+        throw new Error('Không có dữ liệu thanh toán');
+      }
+      
+      // Save payment info to localStorage before redirecting
       localStorage.setItem('pendingPayment', JSON.stringify({
-        cusId: data.cusId,
-        vaccineId: data.vaccineId,
-        date: data.date,
-        type: data.type, // aptLe hoặc aptGoi
-        time: data.time,
-        price: data.price
+        cusId: paymentData.cusId,
+        vaccineId: paymentData.vaccineId,
+        date: paymentData.date,
+        time: paymentData.time,
+        type: paymentData.type, // aptLe or aptGoi
+        price: paymentData.price,
+        customerName: paymentData.customerName,
+        vaccineName: paymentData.vaccineName
       }));
       
-      // Gửi dữ liệu theo định dạng mới đến API
-      const response = await axiosInstance.post('/zalopay/payment', data);
+      // Make API request to create payment
+      const response = await axiosInstance.post('/zalopay/payment', paymentData);
       
       if (response.data && response.data.order_url) {
         setPaymentUrl(response.data.order_url);
-        // Tự động chuyển hướng đến trang thanh toán ZaloPay
+        // Store additional payment info for tracking
+        localStorage.setItem('zalopayTransactionInfo', JSON.stringify({
+          app_trans_id: response.data.app_trans_id,
+          zp_trans_token: response.data.zp_trans_token
+        }));
+        
+        // Redirect to ZaloPay payment page
         window.location.href = response.data.order_url;
       } else {
-        setError('Không thể tạo đường dẫn thanh toán');
+        throw new Error('Không thể tạo đường dẫn thanh toán');
       }
     } catch (error) {
       console.error('Payment error:', error);
-      setError(error.response?.data || 'Lỗi xử lý thanh toán');
+      setError(error.response?.data?.message || error.message || 'Lỗi xử lý thanh toán');
       toast.error('Không thể xử lý thanh toán. Vui lòng thử lại sau.');
-    } finally {
-      setLoading(false);
+      setProcessingPayment(false);
     }
   };
   
   const handleCancel = () => {
-    Modal.confirm({
-      title: 'Hủy thanh toán',
-      content: 'Bạn có chắc chắn muốn hủy thanh toán này không?',
-      okText: 'Có, hủy thanh toán',
-      cancelText: 'Không, tiếp tục',
-      onOk: () => {
-        localStorage.removeItem('pendingPayment');
-        navigate('/homepage');
-      }
-    });
+    setCancelModalVisible(true);
   };
+  
+  const handleCancelConfirm = () => {
+    // Get the final reason (either selected or custom)
+    const finalReason = cancelReason === 'other' ? otherReason : cancelReason;
+    
+    // Log the cancellation reason for analytics or future improvements
+    console.log('Cancellation reason:', finalReason);
+    
+    // Clear payment data from localStorage
+    localStorage.removeItem('pendingPayment');
+    localStorage.removeItem('zalopayTransactionInfo');
+    
+    // Show a thank you message
+    toast.info('Cảm ơn bạn đã chia sẻ lý do hủy thanh toán', {
+      position: 'top-right',
+      autoClose: 3000
+    });
+    
+    // Navigate back to homepage
+    navigate('/registerinjection');
+  };
+  
+  const formatDate = (dateString) => {
+    if (!dateString) return '';
+    return dateString;
+  };
+  
+  // Predefined list of common cancellation reasons
+  const cancelReasons = [
+    { value: 'change_payment', label: 'Tôi muốn thay đổi phương thức thanh toán' },
+    { value: 'change_vaccine', label: 'Tôi muốn thay đổi loại vaccine' },
+    { value: 'change_date', label: 'Tôi muốn thay đổi ngày tiêm' },
+    { value: 'price_issue', label: 'Giá tiền không như tôi mong đợi' },
+    { value: 'reconsider', label: 'Tôi cần thêm thời gian để cân nhắc' },
+    { value: 'other', label: 'Lý do khác' }
+  ];
   
   if (loading) {
     return (
-      <>
-        <HeaderLayouts />
-        <div className="payment-container">
-          <h2>Đang xử lý thanh toán</h2>
-          <div style={{ textAlign: 'center', padding: '2rem' }}>
-            <Spin size="large" />
-            <p style={{ marginTop: '1rem' }}>Vui lòng đợi trong giây lát...</p>
-          </div>
-        </div>
-      </>
+      <div className="invoice-container loading">
+        <Spin size="large" />
+        <p>Đang tải thông tin thanh toán...</p>
+      </div>
     );
   }
   
   if (error) {
     return (
-      <>
-        <HeaderLayouts />
-        <div className="payment-container error">
-          <h2>Lỗi thanh toán</h2>
-          <p>{error}</p>
-          <div className="payment-actions">
-            <Button type="primary" onClick={() => navigate('/registerinjection')}>
-              Quay lại đăng ký
-            </Button>
+      <div className="invoice-container">
+        <div className="invoice-card">
+          <div className="invoice-header">
+            <h1>Lỗi Thanh Toán</h1>
+            <p>Đã xảy ra lỗi khi xử lý thanh toán của bạn</p>
+          </div>
+          <div className="invoice-content">
+            <p className="error-message">{error}</p>
+            <div className="invoice-actions">
+              <Button 
+                className="cancel-btn" 
+                onClick={() => navigate('/registerinjection')}
+              >
+                Quay Lại Đăng Ký
+              </Button>
+            </div>
           </div>
         </div>
-      </>
+      </div>
     );
   }
   
   if (!paymentData) {
     return (
-      <>
-        <HeaderLayouts />
-        <div className="payment-container">
-          <h2>Không có thông tin thanh toán</h2>
-          <div className="payment-actions">
-            <Button type="primary" onClick={() => navigate('/registerinjection')}>
-              Quay lại đăng ký
-            </Button>
+      <div className="invoice-container">
+        <div className="invoice-card">
+          <div className="invoice-header">
+            <h1>Không Có Thông Tin Thanh Toán</h1>
+            <p>Không tìm thấy thông tin đăng ký tiêm chủng</p>
+          </div>
+          <div className="invoice-content">
+            <div className="invoice-actions">
+              <Button 
+                className="cancel-btn" 
+                onClick={() => navigate('/registerinjection')}
+              >
+                Quay Lại Đăng Ký
+              </Button>
+            </div>
           </div>
         </div>
-      </>
+      </div>
     );
   }
   
   return (
     <>
-      <HeaderLayouts />
-      <div className="payment-container">
-        <h2>Xác nhận thanh toán</h2>
-        
-        <div className="payment-details">
-          <h3>Chi tiết đơn hàng</h3>
-          <div className="detail-row">
-            <span>Loại:</span>
-            <span>{paymentData.type === 'aptLe' ? 'Vaccine Lẻ' : 'Gói Vaccine'}</span>
+      <div className="invoice-container">
+        <div className="invoice-card">
+          <div className="invoice-header">
+            <h1>Xác Nhận Thanh Toán</h1>
+            <p>Vui lòng kiểm tra thông tin đăng ký tiêm chủng của bạn</p>
           </div>
-          <div className="detail-row">
-            <span>Ngày tiêm:</span>
-            <span>{paymentData.date}</span>
+
+          <div className="invoice-content">
+            <div className="invoice-section">
+              <h2>Thông Tin Cá Nhân</h2>
+              <div className="invoice-detail-row">
+                <span className="label">Tên khách hàng:</span>
+                <span className="value">{paymentData.customerName}</span>
+              </div>
+              
+              {paymentData.appointmentData?.childInfo && (
+                <>
+                  <Divider className="section-divider" />
+                  <h3>Thông Tin Trẻ Em</h3>
+                  <div className="invoice-detail-row">
+                    <span className="label">Tên trẻ:</span>
+                    <span className="value">{paymentData.appointmentData.childInfo.name}</span>
+                  </div>
+                  <div className="invoice-detail-row">
+                    <span className="label">Ngày sinh:</span>
+                    <span className="value">{paymentData.appointmentData.childInfo.birthday}</span>
+                  </div>
+                  <div className="invoice-detail-row">
+                    <span className="label">Giới tính:</span>
+                    <span className="value">
+                      {paymentData.appointmentData.childInfo.gender === 'male' ? 'Nam' : 'Nữ'}
+                    </span>
+                  </div>
+                  {paymentData.appointmentData.childInfo.healthNote && (
+                    <div className="invoice-detail-row">
+                      <span className="label">Ghi chú sức khỏe:</span>
+                      <span className="value">{paymentData.appointmentData.childInfo.healthNote}</span>
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+
+            <Divider className="section-divider" />
+
+            <div className="invoice-section">
+              <h2>Thông Tin Vaccine</h2>
+              <div className="invoice-detail-row">
+                <span className="label">Loại:</span>
+                <span className="value">
+                  {paymentData.type === 'aptLe' ? 'Vaccine Lẻ' : 'Gói Vaccine'}
+                </span>
+              </div>
+              <div className="invoice-detail-row">
+                <span className="label">Tên vaccine:</span>
+                <span className="value">{paymentData.vaccineName}</span>
+              </div>
+              <div className="invoice-detail-row highlight">
+                <span className="label">Đơn giá:</span>
+                <span className="value">{paymentData.price?.toLocaleString('vi-VN')} VNĐ</span>
+              </div>
+            </div>
+
+            <Divider className="section-divider" />
+
+            <div className="invoice-section">
+              <h2>Thông Tin Lịch Hẹn</h2>
+              <div className="invoice-detail-row">
+                <span className="label">Ngày tiêm:</span>
+                <span className="value">{formatDate(paymentData.appointmentData?.date)}</span>
+              </div>
+              <div className="invoice-detail-row">
+                <span className="label">Thời gian:</span>
+                <span className="value">{paymentData.appointmentData?.time || "Chưa xác định"}</span>
+              </div>
+              <div className="invoice-detail-row">
+                <span className="label">Ngày đăng ký:</span>
+                <span className="value">{formatDate(paymentData.appointmentData?.createAt)}</span>
+              </div>
+            </div>
+
+            <div className="invoice-total">
+              <span className="total-label">Tổng thanh toán:</span>
+              <span className="total-value">{paymentData.price?.toLocaleString('vi-VN')} VNĐ</span>
+            </div>
+            
+            <div className="payment-method-info">
+              <h3>Phương thức thanh toán</h3>
+              <div className="payment-method-zalopay">
+                <img src="/images/zalo-pay-logo.png" alt="ZaloPay" className="zalopay-logo" />
+                <p>Bạn sẽ được chuyển đến cổng thanh toán ZaloPay để hoàn tất giao dịch</p>
+              </div>
+            </div>
           </div>
-          <div className="detail-row">
-            <span>Số tiền:</span>
-            <span>{Number(paymentData.price).toLocaleString('vi-VN')} VND</span>
+
+          <div className="invoice-actions">
+            <Button 
+              className="cancel-btn" 
+              onClick={handleCancel}
+              disabled={processingPayment}
+            >
+              Quay Lại
+            </Button>
+            <Button 
+              className="confirm-btn"
+              type="primary" 
+              onClick={processPayment}
+              loading={processingPayment}
+            >
+              Tiến Hành Thanh Toán
+            </Button>
           </div>
-        </div>
-        
-        {paymentUrl && (
-          <div className="payment-url">
-            <p>Nếu bạn không được chuyển hướng tự động, vui lòng bấm vào đường dẫn dưới đây:</p>
-            <a href={paymentUrl} target="_blank" rel="noopener noreferrer">
-              Thanh toán qua ZaloPay
-            </a>
-          </div>
-        )}
-        
-        <div className="payment-actions">
-          <Button className="cancel-btn" onClick={handleCancel}>
-            Hủy
-          </Button>
-          <Button 
-            className="confirm-btn" 
-            disabled={!paymentUrl}
-            onClick={() => window.location.href = paymentUrl}
-          >
-            Xác nhận thanh toán
-          </Button>
         </div>
       </div>
+      
+      {/* Cancel Payment Modal */}
+      <Modal
+        title="Hủy thanh toán"
+        open={cancelModalVisible}
+        onCancel={() => setCancelModalVisible(false)}
+        footer={[
+          <Button key="back" onClick={() => setCancelModalVisible(false)}>
+            Quay lại
+          </Button>,
+          <Button 
+            key="submit" 
+            type="primary" 
+            danger
+            onClick={handleCancelConfirm}
+            disabled={!cancelReason || (cancelReason === 'other' && !otherReason)}
+          >
+            Xác nhận hủy
+          </Button>,
+        ]}
+      >
+        <div className="cancel-reason-container">
+          <p>Vui lòng cho chúng tôi biết lý do bạn muốn hủy thanh toán này:</p>
+          
+          <Radio.Group
+            onChange={(e) => setCancelReason(e.target.value)}
+            value={cancelReason}
+            className="cancel-reason-group"
+          >
+            <Space direction="vertical">
+              {cancelReasons.map(reason => (
+                <Radio key={reason.value} value={reason.value}>
+                  {reason.label}
+                </Radio>
+              ))}
+            </Space>
+          </Radio.Group>
+          
+          {cancelReason === 'other' && (
+            <Input.TextArea
+              placeholder="Vui lòng nhập lý do của bạn..."
+              rows={3}
+              value={otherReason}
+              onChange={(e) => setOtherReason(e.target.value)}
+              className="other-reason-input"
+            />
+          )}
+          
+          <p className="cancel-note">
+            Phản hồi của bạn giúp chúng tôi cải thiện dịch vụ. Cảm ơn bạn đã dành thời gian chia sẻ!
+          </p>
+        </div>
+      </Modal>
     </>
   );
 };
 
-export default Payment;
+export default PaymentPage;

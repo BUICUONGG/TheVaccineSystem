@@ -35,14 +35,14 @@ const VaccinePriceList = () => {
         }),
         axiosInstance.get("/vaccineimport/getfullData", {
           headers: { Authorization: `Bearer ${token}` },
-        }), 
+        }),
       ]);
 
       const priceMap = {};
       importResponse.data.forEach(importData => {
         importData.vaccines.forEach(vaccine => {
-          if (!priceMap[vaccine.vaccineId] || 
-              new Date(importData.importDate) > new Date(priceMap[vaccine.vaccineId].importDate)) {
+          if (!priceMap[vaccine.vaccineId] ||
+            new Date(importData.importDate) > new Date(priceMap[vaccine.vaccineId].importDate)) {
             priceMap[vaccine.vaccineId] = {
               unitPrice: vaccine.unitPrice,
               importDate: importData.importDate
@@ -116,12 +116,27 @@ const VaccinePriceList = () => {
       );
     }
 
+    filtered = filtered.filter((product) => {
+      const productPrice = selectedCategory === "Single"
+        ? importProductsPrice[product._id]?.unitPrice
+        : product.price;
+
+      if (priceRange[0] === 0 && priceRange[1] === 0) {
+        return !productPrice;
+      }
+
+      if (productPrice) {
+        return productPrice >= priceRange[0] && productPrice <= priceRange[1];
+      }
+      return false;
+    });
+
     return filtered;
   };
 
   const handleMoreInfo = (productId) => {
     localStorage.setItem('vaccineId', productId);
-    
+
     navigate(`/vaccineDetail/${productId}`);
   };
 
@@ -155,16 +170,20 @@ const VaccinePriceList = () => {
               </div>
 
               <div className="sidebar-section">
-                <h4>Khoảng giá</h4>
-                <Slider
-                  range
-                  min={0}
-                  max={1000000}
-                  step={50000}
-                  value={priceRange}
-                  onChange={handlePriceChange}
-                  tipFormatter={(value) => `${value.toLocaleString()}đ`}
-                />
+                <h4>Trạng thái giá</h4>
+                <Radio.Group
+                  value={priceRange[0] === 0 && priceRange[1] === 0 ? "noPrice" : "hasPrice"}
+                  onChange={(e) => {
+                    if (e.target.value === "noPrice") {
+                      setPriceRange([0, 0]); // Hiển thị sản phẩm chưa có giá
+                    } else {
+                      setPriceRange([0, 10000000]); // Reset về khoảng giá mặc định
+                    }
+                  }}
+                >
+                  <Radio value="hasPrice">Có giá</Radio>
+                  <Radio value="noPrice">Chưa có giá</Radio>
+                </Radio.Group>
               </div>
 
               <div className="sidebar-section">

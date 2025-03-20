@@ -21,10 +21,10 @@ const InvoiceConfirmation = () => {
 
   const handleProceedToPayment = () => {
     setLoading(true);
-    // Chuyển đến trang thanh toán với dữ liệu paymentData
+    // Chuyển đến trang thanh toán với dữ liệu invoice
     navigate('/payment', { 
       state: { 
-        paymentData: invoiceData.paymentData // Sử dụng dữ liệu thanh toán đã được chuẩn bị
+        invoiceData: invoiceData 
       } 
     });
   };
@@ -119,11 +119,11 @@ const InvoiceConfirmation = () => {
               <h2>Thông Tin Lịch Hẹn</h2>
               <div className="invoice-detail-row">
                 <span className="label">Ngày tiêm:</span>
-                <span className="value">{formatDate(invoiceData.date)}</span>
+                <span className="value">{formatDate(invoiceData.appointmentData?.date)}</span>
               </div>
               <div className="invoice-detail-row">
                 <span className="label">Thời gian:</span>
-                <span className="value">{invoiceData.time || "Chưa xác định"}</span>
+                <span className="value">{invoiceData.appointmentData?.time || "Chưa xác định"}</span>
               </div>
               <div className="invoice-detail-row">
                 <span className="label">Ngày đăng ký:</span>

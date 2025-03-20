@@ -167,7 +167,7 @@ const RegisterInjection = () => {
 
   const onFinish = async (values) => {
     try {
-      const accesstoken = localStorage.getItem("accesstoken");
+      // const accesstoken = localStorage.getItem("accesstoken");
       const cusId = localStorage.getItem("cusId");
 
       if (!selectedVaccineId) {
@@ -245,8 +245,8 @@ const RegisterInjection = () => {
         }
       }
 
-      // Chuyển hướng đến trang xác nhận hóa đơn trước khi thanh toán
-      navigate("/invoice-confirmation", { state: { invoiceData } });
+      // Chuyển hướng trực tiếp đến trang thanh toán thay vì qua trang xác nhận hóa đơn
+      navigate("/payment", { state: { invoiceData } });
     } catch (error) {
       console.error("Registration error:", error);
       toast.error(
