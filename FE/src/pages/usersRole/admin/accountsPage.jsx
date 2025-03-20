@@ -24,8 +24,8 @@ const AccountsPage = () => {
     setFilteredUsers(filtered);
   }, [userList, searchText]);
 
-  const handleSearch = (value) => {
-    setSearchText(value);
+  const handleSearch = (e) => {
+    setSearchText(e.target.value);
   };
 
   const fetchUsers = async () => {
@@ -178,15 +178,14 @@ const AccountsPage = () => {
       <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "16px", }}>
         <h2>Quản lý tài khoản</h2>
       </div>
-        <div className="search-container">
-        <Search
+      <div className="search-container">
+        <Input
+          prefix={<SearchOutlined />}
           placeholder="Tìm kiếm theo tên đăng nhập"
-          enterButton={<SearchOutlined />}
-          size="large"
-          onSearch={handleSearch}
-          onChange={(e) => setSearchText(e.target.value)}
           value={searchText}
+          onChange={handleSearch}
           className="search-input"
+          allowClear
         />
       </div>
       <Table

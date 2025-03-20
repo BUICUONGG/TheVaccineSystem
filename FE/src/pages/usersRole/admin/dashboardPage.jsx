@@ -11,6 +11,7 @@ import {
   Tag,
   Progress,
   Tooltip,
+  Modal,
 } from "antd";
 import {
   UserOutlined,
@@ -26,14 +27,19 @@ import {
 } from "@ant-design/icons";
 import { Pie, Column } from "@ant-design/plots";
 import axiosInstance from "../../../service/api";
+import { useNavigate } from "react-router-dom";
 
 const DashboardPage = () => {
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [userRoleModalVisible, setUserRoleModalVisible] = useState(false);
+  const [contentModalVisible, setContentModalVisible] = useState(false);
   const [stats, setStats] = useState({
     userList: [],
     totalVaccines: 0,
     totalBlogs: 0,
+    totalNews: 0,
     totalCustomers: 0,
     totalAppointments: 0,
     totalFeedback: 0,
@@ -54,6 +60,12 @@ const DashboardPage = () => {
       oneStars: 0,
     },
     monthlyAppointments: [],
+    revenueStats: {
+      totalRevenue: 0,
+      completedRevenue: 0,
+      pendingRevenue: 0,
+      monthlyRevenue: []
+    }
   });
 
   useEffect(() => {
@@ -83,6 +95,7 @@ const DashboardPage = () => {
           usersResponse,
           vaccinesResponse,
           blogsResponse,
+          newsResponse,
           appointmentsLeResponse,
           appointmentsGoiResponse,
           feedbackResponse,
@@ -110,7 +123,7 @@ const DashboardPage = () => {
               return { data: [] };
             }),
           axiosInstance
-            .get("/blogs/showBlog", {
+            .get("/blog/showBlog", {
               headers: { Authorization: `Bearer ${accesstoken}` },
             })
             .catch((err) => {
@@ -119,6 +132,17 @@ const DashboardPage = () => {
                 err.response?.data || err.message
               );
               return { data: [] };
+            }),
+          axiosInstance
+            .get("/news/getAllNews", {
+              headers: { Authorization: `Bearer ${accesstoken}` },
+            })
+            .catch((err) => {
+              console.error(
+                "Error fetching news:",
+                err.response?.data || err.message
+              );
+              return { data: { result: [] } };
             }),
           axiosInstance
             .get("/appointmentLe/getdetailallaptle", {
@@ -250,14 +274,26 @@ const DashboardPage = () => {
         // Calculate monthly appointment data
         const monthlyAppointments = calculateMonthlyData(allAppointments);
 
+        // Calculate revenue statistics
+        const revenueStats = calculateRevenueStats(allAppointments);
+
+        // Process news data
+        let newsCount = 0;
+        if (newsResponse && newsResponse.data && newsResponse.data.result) {
+          newsCount = newsResponse.data.result.length;
+        }
+
         setStats({
           userList: sortedUsers,
           totalVaccines: Array.isArray(vaccinesResponse.data)
             ? vaccinesResponse.data.length
             : 0,
-          totalBlogs: Array.isArray(blogsResponse.data)
-            ? blogsResponse.data.length
+          totalBlogs: blogsResponse.data && blogsResponse.data.total
+            ? blogsResponse.data.total
             : 0,
+          totalNews: newsResponse.data && newsResponse.data.total
+            ? newsResponse.data.total
+            : (newsResponse.data && newsResponse.data.result ? newsResponse.data.result.length : 0),
           totalCustomers,
           totalAppointments,
           totalFeedback,
@@ -266,6 +302,7 @@ const DashboardPage = () => {
           appointmentStats,
           feedbackStats,
           monthlyAppointments,
+          revenueStats,
         });
 
         console.log("Dashboard data successfully processed and set");
@@ -326,6 +363,82 @@ const DashboardPage = () => {
     });
 
     return monthlyData;
+  };
+
+  // Calculate revenue statistics
+  const calculateRevenueStats = (appointments) => {
+    const months = [
+      "Jan", "Feb", "Mar", "Apr", "May", "Jun", 
+      "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+    ];
+    const currentYear = new Date().getFullYear();
+    
+    // Initialize monthly revenue data
+    const monthlyRevenue = months.map(month => ({
+      month,
+      revenue: 0,
+      completedRevenue: 0,
+      pendingRevenue: 0
+    }));
+    
+    // Initialize total revenue counters
+    let totalRevenue = 0;
+    let completedRevenue = 0;
+    let pendingRevenue = 0;
+    
+    // Process each appointment for revenue calculation
+    appointments.forEach(appointment => {
+      const price = appointment.price || 0;
+      
+      // Add to total revenue statistics
+      totalRevenue += price;
+      
+      if (appointment.status === "completed") {
+        completedRevenue += price;
+      } else if (appointment.status === "pending" || appointment.status === "approve") {
+        pendingRevenue += price;
+      }
+      
+      // Add to monthly revenue data
+      const date = new Date(appointment.date || appointment.createAt || appointment.createdAt);
+      if (date.getFullYear() === currentYear) {
+        const monthIndex = date.getMonth();
+        monthlyRevenue[monthIndex].revenue += price;
+        
+        if (appointment.status === "completed") {
+          monthlyRevenue[monthIndex].completedRevenue += price;
+        } else if (appointment.status === "pending" || appointment.status === "approve") {
+          monthlyRevenue[monthIndex].pendingRevenue += price;
+        }
+      }
+    });
+    
+    return {
+      totalRevenue,
+      completedRevenue,
+      pendingRevenue,
+      monthlyRevenue
+    };
+  };
+
+  // Function to show user role modal
+  const showUserRoleModal = () => {
+    setUserRoleModalVisible(true);
+  };
+
+  // Close user role modal
+  const closeUserRoleModal = () => {
+    setUserRoleModalVisible(false);
+  };
+
+  // Function to show content modal
+  const showContentModal = () => {
+    setContentModalVisible(true);
+  };
+
+  // Function to close content modal
+  const closeContentModal = () => {
+    setContentModalVisible(false);
   };
 
   // Tính toán số lượng người dùng theo role
@@ -504,6 +617,79 @@ const DashboardPage = () => {
     color: ["#52c41a", "#91d5ff", "#faad14", "#ff7a45", "#f5222d"],
   };
 
+  // Function to navigate to accounts page
+  const navigateToAccounts = () => {
+    navigate("/admin/accounts");
+  };
+
+  // Transform data for revenue column chart
+  const revenueColumnData = [];
+  if (stats.revenueStats?.monthlyRevenue) {
+    stats.revenueStats.monthlyRevenue.forEach(item => {
+      revenueColumnData.push(
+        { month: item.month, value: item.completedRevenue, type: "Đã thanh toán" },
+        { month: item.month, value: item.pendingRevenue, type: "Chờ thanh toán" }
+      );
+    });
+  }
+
+  const revenueColumnConfig = {
+    data: revenueColumnData,
+    isGroup: true,
+    xField: 'month',
+    yField: 'value',
+    seriesField: 'type',
+    columnStyle: {
+      radius: [20, 20, 0, 0],
+    },
+    color: ['#52c41a', '#faad14'],
+    label: {
+      position: 'middle',
+      layout: [
+        { type: 'interval-adjust-position' },
+        { type: 'interval-hide-overlap' },
+        { type: 'adjust-color' }
+      ]
+    },
+    yAxis: {
+      label: {
+        formatter: (v) => `${(v / 1000000).toFixed(1)}M`
+      }
+    },
+    tooltip: {
+      formatter: (datum) => {
+        return { name: datum.type, value: datum.value.toLocaleString('vi-VN') + ' VNĐ' };
+      }
+    }
+  };
+
+  // Revenue table columns
+  const revenueColumns = [
+    {
+      title: 'Tháng',
+      dataIndex: 'month',
+      key: 'month',
+    },
+    {
+      title: 'Đã thanh toán',
+      key: 'completedRevenue',
+      render: (_, record) => `${record.completedRevenue.toLocaleString('vi-VN')} VNĐ`,
+      sorter: (a, b) => a.completedRevenue - b.completedRevenue,
+    },
+    {
+      title: 'Chờ thanh toán',
+      key: 'pendingRevenue',
+      render: (_, record) => `${record.pendingRevenue.toLocaleString('vi-VN')} VNĐ`,
+      sorter: (a, b) => a.pendingRevenue - b.pendingRevenue,
+    },
+    {
+      title: 'Tổng doanh thu',
+      key: 'revenue',
+      render: (_, record) => `${record.revenue.toLocaleString('vi-VN')} VNĐ`,
+      sorter: (a, b) => a.revenue - b.revenue,
+    },
+  ];
+
   if (loading) {
     return (
       <div style={{ padding: "24px", textAlign: "center" }}>
@@ -553,7 +739,11 @@ const DashboardPage = () => {
       {/* Stats Cards */}
       <Row gutter={[16, 16]}>
         <Col xs={24} sm={8} lg={4}>
-          <Card>
+          <Card
+            hoverable
+            onClick={showUserRoleModal}
+            style={{ cursor: "pointer" }}
+          >
             <Statistic
               title="Tổng người dùng"
               value={stats.userList.length}
@@ -562,12 +752,71 @@ const DashboardPage = () => {
           </Card>
         </Col>
 
+        {/* User Role Distribution Modal */}
+        <Modal
+          title="Phân bố người dùng theo vai trò"
+          open={userRoleModalVisible}
+          onCancel={closeUserRoleModal}
+          footer={[
+            <Button key="close" onClick={closeUserRoleModal}>
+              Đóng
+            </Button>
+          ]}
+          width={600}
+        >
+          <div style={{ marginBottom: "20px" }}>
+            <Table
+              dataSource={Object.entries(roleCount).map(([role, count], index) => ({
+                key: index,
+                role: role.charAt(0).toUpperCase() + role.slice(1),
+                count,
+                percentage: Math.round((count / stats.userList.length) * 100) + "%"
+              }))}
+              columns={[
+                {
+                  title: "Vai trò",
+                  dataIndex: "role",
+                  key: "role",
+                  render: (role) => (
+                    <Tag
+                      color={
+                        role === "Admin" ? "#ff4d4f" :
+                        role === "Staff" ? "#1890ff" : "#52c41a"
+                      }
+                    >
+                      {role}
+                    </Tag>
+                  )
+                },
+                {
+                  title: "Số lượng",
+                  dataIndex: "count",
+                  key: "count",
+                },
+                {
+                  title: "Tỷ lệ",
+                  dataIndex: "percentage",
+                  key: "percentage",
+                }
+              ]}
+              pagination={false}
+            />
+          </div>
+          <div style={{ height: "300px" }}>
+            <Pie {...pieConfig} />
+          </div>
+        </Modal>
+
         <Col xs={24} sm={8} lg={4}>
-          <Card>
+          <Card
+            hoverable
+            onClick={showContentModal}
+            style={{ cursor: "pointer" }}
+          >
             <Statistic
-              title="Khách hàng"
-              value={stats.totalCustomers}
-              prefix={<UserOutlined style={{ color: "#52c41a" }} />}
+              title="Nội dung"
+              value={stats.totalBlogs + stats.totalNews}
+              prefix={<FileTextOutlined style={{ color: "#faad14" }} />}
             />
           </Card>
         </Col>
@@ -578,16 +827,6 @@ const DashboardPage = () => {
               title="Vaccine"
               value={stats.totalVaccines}
               prefix={<ExperimentOutlined style={{ color: "#722ed1" }} />}
-            />
-          </Card>
-        </Col>
-
-        <Col xs={24} sm={8} lg={4}>
-          <Card>
-            <Statistic
-              title="Bài viết"
-              value={stats.totalBlogs}
-              prefix={<FileTextOutlined style={{ color: "#faad14" }} />}
             />
           </Card>
         </Col>
@@ -617,14 +856,12 @@ const DashboardPage = () => {
       <Row gutter={[16, 16]} style={{ marginTop: "16px" }}>
         <Col xs={24} md={6}>
           <Card>
-            <Statistic
-              title="Tổng lịch hẹn chờ duyệt"
-              value={stats.appointmentStats.pending}
-              valueStyle={{ color: "#faad14" }}
-              prefix={<ClockCircleOutlined />}
-              suffix={<small>/{stats.totalAppointments}</small>}
+          <Statistic
+              title="Lịch hẹn"
+              value={stats.totalAppointments}
+              prefix={<CalendarOutlined style={{ color: "#13c2c2" }} />}
             />
-            <Progress
+            {/* <Progress
               percent={
                 Math.round(
                   (stats.appointmentStats.pending / stats.totalAppointments) *
@@ -634,7 +871,7 @@ const DashboardPage = () => {
               strokeColor="#faad14"
               showInfo={false}
               status="active"
-            />
+            /> */}
           </Card>
         </Col>
         <Col xs={24} md={6}>
@@ -703,16 +940,45 @@ const DashboardPage = () => {
         </Col>
       </Row>
 
-      {/* Charts */}
-      <Row gutter={[16, 16]} style={{ marginTop: "24px" }}>
-        <Col xs={24} lg={12}>
-          <Card title="Phân bố người dùng">
-            <div style={{ height: "300px" }}>
-              <Pie {...pieConfig} />
-            </div>
+      {/* Revenue Statistics */}
+      <Row gutter={[16, 16]} style={{ marginTop: "16px" }}>
+        <Col xs={24} md={12}>
+          <Card>
+            <Statistic
+              title="Tổng doanh thu"
+              value={stats.revenueStats.totalRevenue}
+              valueStyle={{ color: "#1890ff" }}
+              suffix="VNĐ"
+              formatter={(value) => value.toLocaleString('vi-VN')}
+            />
           </Card>
         </Col>
+        <Col xs={24} md={12}>
+          <Card>
+            <Statistic
+              title="Doanh thu đã thanh toán"
+              value={stats.revenueStats.completedRevenue}
+              valueStyle={{ color: "#52c41a" }}
+              suffix="VNĐ"
+              formatter={(value) => value.toLocaleString('vi-VN')}
+            />
+          </Card>
+        </Col>
+        {/* <Col xs={24} md={8}>
+          <Card>
+            <Statistic
+              title="Doanh thu chờ xử lý"
+              value={stats.revenueStats.pendingRevenue}
+              valueStyle={{ color: "#faad14" }}
+              suffix="VNĐ"
+              formatter={(value) => value.toLocaleString('vi-VN')}
+            />
+          </Card>
+        </Col> */}
+      </Row>
 
+      {/* Charts */}
+      <Row gutter={[16, 16]} style={{ marginTop: "24px" }}>
         <Col xs={24} lg={12}>
           <Card title="Lịch hẹn theo tháng">
             <div style={{ height: "300px" }}>
@@ -770,6 +1036,106 @@ const DashboardPage = () => {
           </Card>
         </Col>
       </Row>
+
+      {/* Revenue Chart & Table */}
+      <Row gutter={[16, 16]} style={{ marginTop: "24px" }}>
+        <Col xs={24} lg={12}>
+          <Card title="Doanh thu theo tháng">
+            <div style={{ height: "300px" }}>
+              <Column {...revenueColumnConfig} />
+            </div>
+          </Card>
+        </Col>
+        <Col xs={24} lg={12}>
+          <Card title="Bảng doanh thu hàng tháng">
+            <Table
+              dataSource={stats.revenueStats.monthlyRevenue.filter(item => item.revenue > 0)}
+              columns={revenueColumns}
+              pagination={false}
+              size="small"
+              rowKey="month"
+            />
+          </Card>
+        </Col>
+      </Row>
+
+      {/* Content Distribution Modal */}
+      <Modal
+        title="Chi tiết nội dung"
+        open={contentModalVisible}
+        onCancel={closeContentModal}
+        footer={[
+          <Button key="close" onClick={closeContentModal}>
+            Đóng
+          </Button>
+        ]}
+        width={600}
+      >
+        <div style={{ marginBottom: "20px" }}>
+          <h3>Tổng số: {stats.totalBlogs + stats.totalNews}</h3>
+          <Table
+            dataSource={[
+              {
+                key: '1',
+                type: 'Bài viết (Blog)',
+                count: stats.totalBlogs,
+                percentage: Math.round((stats.totalBlogs / (stats.totalBlogs + stats.totalNews)) * 100) + "%"
+              },
+              {
+                key: '2',
+                type: 'Tin tức (News)',
+                count: stats.totalNews,
+                percentage: Math.round((stats.totalNews / (stats.totalBlogs + stats.totalNews)) * 100) + "%"
+              }
+            ]}
+            columns={[
+              {
+                title: "Loại nội dung",
+                dataIndex: "type",
+                key: "type",
+                render: (type) => (
+                  <Tag
+                    color={
+                      type.includes("Blog") ? "#faad14" : "#1890ff"
+                    }
+                  >
+                    {type}
+                  </Tag>
+                )
+              },
+              {
+                title: "Số lượng",
+                dataIndex: "count",
+                key: "count",
+              },
+              {
+                title: "Tỷ lệ",
+                dataIndex: "percentage",
+                key: "percentage",
+              }
+            ]}
+            pagination={false}
+          />
+        </div>
+        <div style={{ height: "300px" }}>
+          <Pie
+            data={[
+              { type: "Bài viết", value: stats.totalBlogs },
+              { type: "Tin tức", value: stats.totalNews }
+            ]}
+            angleField="value"
+            colorField="type"
+            radius={0.8}
+            label={{
+              type: "outer",
+              content: "{name}: {percentage}",
+            }}
+            interactions={[{ type: "element-active" }]}
+            legend={{ position: "bottom" }}
+            color={["#faad14", "#1890ff"]}
+          />
+        </div>
+      </Modal>
     </div>
   );
 };

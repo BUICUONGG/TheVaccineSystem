@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Table, Input, Button, Modal, Form, Popconfirm, Select, Tag, Rate, Typography, Space, Tooltip, Divider, Badge, Card } from "antd";
-import { EditOutlined, DeleteOutlined, PlusOutlined, FilterOutlined, EyeOutlined, ClockCircleOutlined, LikeOutlined, CommentOutlined, InfoCircleOutlined, StarOutlined, UndoOutlined } from "@ant-design/icons";
+import { EditOutlined, DeleteOutlined, PlusOutlined, FilterOutlined, EyeOutlined, ClockCircleOutlined, LikeOutlined, CommentOutlined, InfoCircleOutlined, StarOutlined, UndoOutlined, SearchOutlined } from "@ant-design/icons";
 import axiosInstance from "../../../service/api";
 
 const { Search } = Input;
@@ -52,8 +52,8 @@ const BlogManagement = () => {
     }
   }, [blogs, searchText]);
 
-  const handleSearch = (value) => {
-    setSearchText(value);
+  const handleSearch = (e) => {
+    setSearchText(e.target.value);
   };
 
   const handleCategoryFilter = (value) => {
@@ -393,11 +393,13 @@ const BlogManagement = () => {
         flexWrap: "wrap",
         gap: "10px"
       }}>
-        <Search
+        <Input
+          prefix={<SearchOutlined />}
           placeholder="Tìm kiếm theo tiêu đề hoặc nội dung"
-          enterButton
-          onSearch={handleSearch}
+          value={searchText}
+          onChange={handleSearch}
           style={{ width: 300 }}
+          allowClear
         />
         
         <Button onClick={fetchBlogs} type="default">

@@ -23,7 +23,8 @@ import {
   EyeOutlined, 
   UploadOutlined,
   UndoOutlined,
-  FilterOutlined
+  FilterOutlined,
+  SearchOutlined
 } from "@ant-design/icons";
 import moment from 'moment'; 
 import axiosInstance from "../../../service/api";
@@ -87,8 +88,8 @@ const NewsManagement = () => {
         setFilteredNews(result);
     }, [news, searchText, showFeaturedOnly]);
 
-    const handleSearch = (value) => {
-        setSearchText(value);
+    const handleSearch = (e) => {
+        setSearchText(e.target.value);
     };
 
     const toggleFeaturedFilter = () => {
@@ -474,11 +475,13 @@ const NewsManagement = () => {
                 gap: "10px"
             }}>
                 <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-                    <Search
+                    <Input
+                        prefix={<SearchOutlined />}
                         placeholder="Tìm kiếm theo tiêu đề hoặc nội dung"
-                        enterButton
-                        onSearch={handleSearch}
+                        value={searchText}
+                        onChange={handleSearch}
                         style={{ width: 300 }}
+                        allowClear
                     />
                     
                     <Button

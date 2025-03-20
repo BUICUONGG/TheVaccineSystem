@@ -1,6 +1,25 @@
 import { useState, useEffect } from "react";
-import { Table, Input, Button, Modal, Form, Popconfirm } from "antd";
-import { EditOutlined, DeleteOutlined, PlusOutlined } from "@ant-design/icons";
+import { 
+  Table, 
+  Input, 
+  Button, 
+  Modal, 
+  Form, 
+  Popconfirm, 
+  Tabs, 
+  Tag, 
+  Space,
+  Tooltip,
+  Badge
+} from "antd";
+import { 
+  EditOutlined, 
+  DeleteOutlined, 
+  PlusOutlined, 
+  ExperimentOutlined,
+  InboxOutlined,
+  ApartmentOutlined,
+} from "@ant-design/icons";
 // import axios from "axios";
 import axiosInstance from "../../../service/api.js";
 // import { useNavigate } from "react-router-dom";
@@ -9,54 +28,133 @@ const { Search } = Input;
 
 const VaccinesPage = () => {
   // const navigate = useNavigate();
-  const [vaccineList, setVaccineList] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [inventoryList, setInventoryList] = useState([]);
+  const [importList, setImportList] = useState([]);
+  const [packageList, setPackageList] = useState([]);
+  const [loading, setLoading] = useState({
+    inventory: false,
+    imports: false,
+    packages: false
+  });
   const [searchText, setSearchText] = useState("");
-  const [filteredVaccines, setFilteredVaccines] = useState([]);
+  const [filteredInventory, setFilteredInventory] = useState([]);
+  const [filteredImports, setFilteredImports] = useState([]);
+  const [filteredPackages, setFilteredPackages] = useState([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
   const [editingVaccine, setEditingVaccine] = useState(null);
   const [form] = Form.useForm();
   const [editForm] = Form.useForm();
+  const [activeTab, setActiveTab] = useState("inventory");
 
   useEffect(() => {
-    fetchVaccines();
+    fetchAllData();
   }, []);
 
   useEffect(() => {
-    const filtered = vaccineList.filter((vaccine) =>
-      vaccine.vaccineName.toLowerCase().includes(searchText.toLowerCase())
+    const filteredInv = inventoryList.filter((vaccine) =>
+      vaccine.vaccineName?.toLowerCase().includes(searchText.toLowerCase()) ||
+      vaccine.manufacturer?.toLowerCase().includes(searchText.toLowerCase())
     );
-    setFilteredVaccines(filtered);
-  }, [vaccineList, searchText]);
+    setFilteredInventory(filteredInv);
+    
+    const filteredImp = importList.filter((imp) =>
+      imp.batchNumber?.toLowerCase().includes(searchText.toLowerCase()) ||
+      imp.supplier?.toLowerCase().includes(searchText.toLowerCase())
+    );
+    setFilteredImports(filteredImp);
+    
+    const filteredPkg = packageList.filter((pkg) =>
+      pkg.packageName?.toLowerCase().includes(searchText.toLowerCase()) ||
+      pkg.category?.toLowerCase().includes(searchText.toLowerCase())
+    );
+    setFilteredPackages(filteredPkg);
+  }, [inventoryList, importList, packageList, searchText]);
 
   const handleSearch = (value) => {
     setSearchText(value);
   };
 
-  const fetchVaccines = async () => {
-    const accesstoken = localStorage.getItem("accessToken");
+  const fetchAllData = async () => {
+    const accesstoken = localStorage.getItem("accesstoken");
+    if (!accesstoken) {
+      Modal.error({ content: "Không có quyền truy cập. Vui lòng đăng nhập lại." });
+      return;
+    }
+    
+    await Promise.all([
+      fetchInventory(accesstoken),
+      fetchImports(accesstoken),
+      fetchPackages(accesstoken)
+    ]);
+  };
+
+  const fetchInventory = async (accesstoken) => {
     try {
-      setLoading(true);
+      setLoading(prev => ({...prev, inventory: true}));
       const response = await axiosInstance.get("/vaccine/showInfo", {
         headers: {
-          // "Content-Type": "application/json",
           Authorization: `Bearer ${accesstoken}`,
         },
       });
-      setVaccineList(response.data);
-      setFilteredVaccines(response.data);
-      setLoading(false);
+      
+      setInventoryList(response.data || []);
+      setFilteredInventory(response.data || []);
     } catch (error) {
       console.error("Error fetching vaccines:", error);
       Modal.error({
         content: "Không thể tải danh sách vaccine",
       });
+    } finally {
+      setLoading(prev => ({...prev, inventory: false}));
+    }
+  };
+
+  const fetchImports = async (accesstoken) => {
+    try {
+      setLoading(prev => ({...prev, imports: true}));
+      const response = await axiosInstance.get("/vaccineImport/showInfo", {
+        headers: {
+          Authorization: `Bearer ${accesstoken}`,
+        },
+      });
+      
+      setImportList(response.data || []);
+      setFilteredImports(response.data || []);
+    } catch (error) {
+      console.error("Error fetching vaccine imports:", error);
+      Modal.error({
+        content: "Không thể tải danh sách nhập vaccine",
+      });
+    } finally {
+      setLoading(prev => ({...prev, imports: false}));
+    }
+  };
+
+  const fetchPackages = async (accesstoken) => {
+    try {
+      setLoading(prev => ({...prev, packages: true}));
+      const response = await axiosInstance.get("/vaccinePackage/showInfo", {
+        headers: {
+          Authorization: `Bearer ${accesstoken}`,
+        },
+      });
+      
+      setPackageList(response.data || []);
+      setFilteredPackages(response.data || []);
+    } catch (error) {
+      console.error("Error fetching vaccine packages:", error);
+      Modal.error({
+        content: "Không thể tải danh sách gói vaccine",
+      });
+    } finally {
+      setLoading(prev => ({...prev, packages: false}));
     }
   };
 
   const handleCreate = async (values) => {
     try {
+      const accesstoken = localStorage.getItem("accesstoken");
       await axiosInstance.post(
         "/vaccine/addVaccine",
         {
@@ -65,7 +163,7 @@ const VaccinesPage = () => {
         },
         {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("accesstoken")}`,
+            Authorization: `Bearer ${accesstoken}`,
           },
         }
       );
@@ -76,7 +174,7 @@ const VaccinesPage = () => {
 
       setIsModalVisible(false);
       form.resetFields();
-      fetchVaccines();
+      fetchInventory(accesstoken);
     } catch (error) {
       console.error("Error creating vaccine:", error);
       Modal.error({
@@ -91,21 +189,13 @@ const VaccinesPage = () => {
         throw new Error("Không tìm thấy ID vaccine");
       }
 
-      // Chuyển đổi price thành số
-      const price = Number(values.price);
-      
-      // Kiểm tra giá trị price
-      if (isNaN(price) || price < 0) {
-        throw new Error("Giá không hợp lệ hoặc âm");
-      }
-
+      const accesstoken = localStorage.getItem("accesstoken");
       // Validate data before sending
       const updatedData = {
         vaccineName: values.vaccineName?.trim(),
         description: values.description?.trim(),
         manufacturer: values.manufacturer?.trim(),
         imageUrl: values.imageUrl?.trim(),
-        price: price, // Đảm bảo là số
       };
 
       await axiosInstance.post(
@@ -113,7 +203,7 @@ const VaccinesPage = () => {
         updatedData,
         {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("accesstoken")}`,
+            Authorization: `Bearer ${accesstoken}`,
           },
         }
       );
@@ -123,7 +213,7 @@ const VaccinesPage = () => {
       });
       setIsEditModalVisible(false);
       editForm.resetFields();
-      fetchVaccines();
+      fetchInventory(accesstoken);
     } catch (error) {
       console.error("Error updating vaccine:", error);
       Modal.error({
@@ -134,12 +224,13 @@ const VaccinesPage = () => {
 
   const handleDelete = async (vaccineId) => {
     try {
+      const accesstoken = localStorage.getItem("accesstoken");
       await axiosInstance.post(
         `/vaccine/delete/${vaccineId}`,
         {},
         {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem("accesstoken")}`,
+            Authorization: `Bearer ${accesstoken}`,
           },
         }
       );
@@ -148,7 +239,7 @@ const VaccinesPage = () => {
         content: "Xóa vaccine thành công!",
       });
 
-      fetchVaccines();
+      fetchInventory(accesstoken);
     } catch (error) {
       console.error("Error deleting vaccine:", error);
       Modal.error({
@@ -157,7 +248,7 @@ const VaccinesPage = () => {
     }
   };
 
-  const columns = [
+  const inventoryColumns = [
     {
       title: "STT",
       key: "stt",
@@ -168,6 +259,7 @@ const VaccinesPage = () => {
       title: "Tên Vaccine",
       dataIndex: "vaccineName",
       key: "vaccineName",
+      sorter: (a, b) => a.vaccineName.localeCompare(b.vaccineName),
     },
     {
       title: "Mô tả",
@@ -181,21 +273,10 @@ const VaccinesPage = () => {
       key: "manufacturer",
     },
     {
-      title: "Giá",
-      key: "price",
-      render: (_, record) => {
-        if (record.vaccineImports && 
-            record.vaccineImports.length > 0 && 
-            record.vaccineImports[0].price) {
-          return `${record.vaccineImports[0].price.toLocaleString()} VNĐ`;
-        }
-        return "Chưa có giá";
-      },
-      sorter: (a, b) => {
-        const priceA = a.vaccineImports && a.vaccineImports.length > 0 && a.vaccineImports[0].price ? a.vaccineImports[0].price : 0;
-        const priceB = b.vaccineImports && b.vaccineImports.length > 0 && b.vaccineImports[0].price ? b.vaccineImports[0].price : 0;
-        return priceA - priceB;
-      },
+      title: "Danh mục",
+      dataIndex: "category",
+      key: "category",
+      render: (category) => category ? <Tag color="blue">{category}</Tag> : <Tag color="default">Chưa phân loại</Tag>
     },
     {
       title: "Hình ảnh",
@@ -213,13 +294,34 @@ const VaccinesPage = () => {
         ),
     },
     {
+      title: "Thông tin y tế",
+      key: "information",
+      render: (_, record) => {
+        const info = record.information && record.information.length > 0 ? record.information[0] : null;
+        if (!info) return <Tag color="orange">Chưa có thông tin</Tag>;
+        
+        return (
+          <Tooltip title={
+            <div>
+              <div><strong>Phòng bệnh:</strong> {info.preventedDiseases || "N/A"}</div>
+              <div><strong>Đối tượng:</strong> {info.eligibleGroups || "N/A"}</div>
+              <div><strong>Đường dùng:</strong> {info.administrationRoute || "N/A"}</div>
+            </div>
+          }>
+            <Button size="small">Xem thêm</Button>
+          </Tooltip>
+        );
+      }
+    },
+    {
       title: "Thao tác",
       key: "actions",
       width: 120,
       render: (_, record) => (
-        <span>
+        <Space>
           <Button
-            type="link"
+            type="primary"
+            size="small"
             icon={<EditOutlined />}
             onClick={() => showEditModal(record)}
           />
@@ -231,9 +333,128 @@ const VaccinesPage = () => {
             cancelText="Không"
             okType="danger"
           >
-            <Button type="link" danger icon={<DeleteOutlined />} />
+            <Button type="primary" danger size="small" icon={<DeleteOutlined />} />
           </Popconfirm>
-        </span>
+        </Space>
+      ),
+    },
+  ];
+
+  const importColumns = [
+    {
+      title: "STT",
+      key: "stt",
+      render: (_, record, index) => index + 1,
+      width: 60,
+    },
+    {
+      title: "Mã lô",
+      dataIndex: "batchNumber",
+      key: "batchNumber",
+    },
+    {
+      title: "Nhà cung cấp",
+      dataIndex: "supplier",
+      key: "supplier",
+    },
+    {
+      title: "Ngày nhập",
+      dataIndex: "importDate",
+      key: "importDate",
+      sorter: (a, b) => new Date(a.importDate) - new Date(b.importDate),
+    },
+    {
+      title: "Số loại vaccine",
+      key: "vaccineCount",
+      render: (_, record) => record.vaccines?.length || 0,
+      sorter: (a, b) => (a.vaccines?.length || 0) - (b.vaccines?.length || 0),
+    },
+    {
+      title: "Tổng giá trị",
+      dataIndex: "totalPrice",
+      key: "totalPrice",
+      render: (price) => `${price?.toLocaleString() || 0} VNĐ`,
+      sorter: (a, b) => (a.totalPrice || 0) - (b.totalPrice || 0),
+    },
+    {
+      title: "Chi tiết",
+      key: "details",
+      render: (_, record) => (
+        <Button 
+          type="link" 
+          onClick={() => showImportDetailModal(record)}
+        >
+          Xem chi tiết
+        </Button>
+      ),
+    },
+  ];
+
+  const packageColumns = [
+    {
+      title: "STT",
+      key: "stt",
+      render: (_, record, index) => index + 1,
+      width: 60,
+    },
+    {
+      title: "Tên gói",
+      dataIndex: "packageName",
+      key: "packageName",
+      sorter: (a, b) => a.packageName.localeCompare(b.packageName),
+    },
+    {
+      title: "Mô tả",
+      dataIndex: "description",
+      key: "description",
+      ellipsis: true,
+    },
+    {
+      title: "Danh mục",
+      dataIndex: "category",
+      key: "category",
+      render: (category) => (
+        <Tag color="purple">{category || "Chưa phân loại"}</Tag>
+      ),
+    },
+    {
+      title: "Số loại vaccine",
+      key: "vaccineCount",
+      render: (_, record) => record.vaccines?.length || 0,
+    },
+    {
+      title: "Số mũi tiêm",
+      key: "scheduleCount",
+      render: (_, record) => record.schedule?.length || 0,
+    },
+    {
+      title: "Giá gói",
+      dataIndex: "price",
+      key: "price",
+      render: (price) => `${price?.toLocaleString() || 0} VNĐ`,
+      sorter: (a, b) => (a.price || 0) - (b.price || 0),
+    },
+    {
+      title: "Trạng thái",
+      dataIndex: "status",
+      key: "status",
+      render: (status) => (
+        <Badge 
+          status={status === "active" ? "success" : "default"}
+          text={status === "active" ? "Đang hoạt động" : "Không hoạt động"}
+        />
+      ),
+    },
+    {
+      title: "Chi tiết",
+      key: "details",
+      render: (_, record) => (
+        <Button 
+          type="link" 
+          onClick={() => showPackageDetailModal(record)}
+        >
+          Xem chi tiết
+        </Button>
       ),
     },
   ];
@@ -246,21 +467,190 @@ const VaccinesPage = () => {
       return;
     }
 
-    // Lấy giá từ vaccineImports và đảm bảo là số
-    let price = 0;
-    if (vaccine.vaccineImports && vaccine.vaccineImports.length > 0) {
-      price = Number(vaccine.vaccineImports[0].price);
-    }
-
     setEditingVaccine(vaccine);
     editForm.setFieldsValue({
       vaccineName: vaccine.vaccineName,
       description: vaccine.description,
       manufacturer: vaccine.manufacturer,
       imageUrl: vaccine.imageUrl,
-      price: price, // Đảm bảo là số
+      category: vaccine.category,
     });
     setIsEditModalVisible(true);
+  };
+
+  const showImportDetailModal = (importDetail) => {
+    Modal.info({
+      title: `Chi tiết lô nhập ${importDetail.batchNumber}`,
+      width: 700,
+      content: (
+        <div>
+          <p><strong>Nhà cung cấp:</strong> {importDetail.supplier}</p>
+          <p><strong>Ngày nhập:</strong> {importDetail.importDate}</p>
+          <p><strong>Tổng giá trị:</strong> {importDetail.totalPrice?.toLocaleString()} VNĐ</p>
+          <Table
+            dataSource={importDetail.vaccines}
+            columns={[
+              {
+                title: "Vaccine",
+                dataIndex: "vaccineId",
+                key: "vaccineId",
+                render: (vaccineId) => {
+                  const vaccine = inventoryList.find(v => v._id === vaccineId);
+                  return vaccine?.vaccineName || "N/A";
+                }
+              },
+              {
+                title: "Số lượng",
+                dataIndex: "quantity",
+                key: "quantity",
+              },
+              {
+                title: "Hạn sử dụng",
+                dataIndex: "expiryDate",
+                key: "expiryDate",
+              },
+              {
+                title: "Đơn giá",
+                dataIndex: "unitPrice",
+                key: "unitPrice",
+                render: (price) => `${price?.toLocaleString() || 0} VNĐ`,
+              }
+            ]}
+            pagination={false}
+            rowKey={(record, index) => `vaccine-${index}`}
+          />
+        </div>
+      ),
+    });
+  };
+
+  const showPackageDetailModal = (packageDetail) => {
+    Modal.info({
+      title: `Chi tiết gói vaccine ${packageDetail.packageName}`,
+      width: 700,
+      content: (
+        <div>
+          <p><strong>Mô tả:</strong> {packageDetail.description}</p>
+          <p><strong>Danh mục:</strong> {packageDetail.category}</p>
+          <p><strong>Giá:</strong> {packageDetail.price?.toLocaleString()} VNĐ</p>
+          <p><strong>Trạng thái:</strong> {packageDetail.status === "active" ? "Đang hoạt động" : "Không hoạt động"}</p>
+          
+          <h3>Danh sách vaccine trong gói</h3>
+          <Table
+            dataSource={packageDetail.vaccines}
+            columns={[
+              {
+                title: "Vaccine",
+                dataIndex: "vaccineId",
+                key: "vaccineId",
+                render: (vaccineId) => {
+                  const vaccine = inventoryList.find(v => v._id === vaccineId);
+                  return vaccine?.vaccineName || "N/A";
+                }
+              },
+              {
+                title: "Số liều",
+                dataIndex: "quantity",
+                key: "quantity",
+              }
+            ]}
+            pagination={false}
+            rowKey={(record, index) => `package-vaccine-${index}`}
+          />
+          
+          <h3>Lịch tiêm</h3>
+          <Table
+            dataSource={packageDetail.schedule.map((day, index) => ({ 
+              key: index,
+              day,
+              mui: index + 1
+            }))}
+            columns={[
+              {
+                title: "Mũi số",
+                dataIndex: "mui",
+                key: "mui",
+              },
+              {
+                title: "Cách mũi đầu (ngày)",
+                dataIndex: "day",
+                key: "day",
+                render: (day, record, index) => index === 0 ? "Mũi đầu tiên" : `${day} ngày`
+              }
+            ]}
+            pagination={false}
+          />
+        </div>
+      ),
+    });
+  };
+
+  const getTabs = () => {
+    return [
+      {
+        key: "inventory",
+        label: (
+          <span>
+            <ExperimentOutlined /> Kho Vaccine
+          </span>
+        ),
+        children: (
+          <Table
+            dataSource={filteredInventory}
+            columns={inventoryColumns}
+            loading={loading.inventory}
+            rowKey="_id"
+            pagination={{
+              pageSize: 10,
+              showSizeChanger: true,
+              showTotal: (total) => `Tổng ${total} vaccine`,
+            }}
+          />
+        ),
+      },
+      {
+        key: "imports",
+        label: (
+          <span>
+            <InboxOutlined /> Nhập Vaccine
+          </span>
+        ),
+        children: (
+          <Table
+            dataSource={filteredImports}
+            columns={importColumns}
+            loading={loading.imports}
+            rowKey="_id"
+            pagination={{
+              pageSize: 10,
+              showSizeChanger: true,
+              showTotal: (total) => `Tổng ${total} lô nhập`,
+            }}
+          />
+        ),
+      },
+      {
+        key: "packages",
+        label: (
+          <span>
+            <ApartmentOutlined /> Gói Vaccine
+          </span>
+        ),
+        children: (
+          <Table
+            dataSource={filteredPackages}
+            columns={packageColumns}
+            loading={loading.packages}
+            rowKey="_id"
+            pagination={{
+              pageSize: 10,
+              showSizeChanger: true,
+              showTotal: (total) => `Tổng ${total} gói vaccine`,
+            }}
+          />
+        ),
+      },
+    ];
   };
 
   return (
@@ -285,24 +675,66 @@ const VaccinesPage = () => {
         </Button>
       </div>
 
+      <div style={{ marginBottom: 16 }}>
       <Search
-        placeholder="Tìm kiếm theo tên vaccine"
+          placeholder="Tìm kiếm"
         enterButton
         onSearch={handleSearch}
-        style={{ width: 300, marginBottom: 16 }}
+          onChange={(e) => setSearchText(e.target.value)}
+          style={{ width: 300 }}
+        />
+      </div>
+
+      <Tabs 
+        defaultActiveKey="inventory" 
+        items={getTabs()}
+        onChange={(key) => setActiveTab(key)}
       />
 
-      <Table
-        dataSource={filteredVaccines}
-        columns={columns}
-        loading={loading}
-        rowKey="_id"
-        pagination={{
-          pageSize: 10,
-          showSizeChanger: true,
-          showTotal: (total) => `Tổng ${total} vaccine`,
-        }}
-      />
+      <Modal
+        title="Thêm Vaccine Mới"
+        open={isModalVisible}
+        onCancel={() => setIsModalVisible(false)}
+        footer={null}
+      >
+        <Form form={form} onFinish={handleCreate} layout="vertical">
+          <Form.Item
+            name="vaccineName"
+            label="Tên Vaccine"
+            rules={[{ required: true, message: "Vui lòng nhập tên vaccine!" }]}
+          >
+            <Input maxLength={200} />
+          </Form.Item>
+
+          <Form.Item name="description" label="Mô tả">
+            <Input.TextArea rows={4} maxLength={1000} />
+          </Form.Item>
+
+          <Form.Item
+            name="manufacturer"
+            label="Nhà sản xuất"
+            rules={[
+              { required: true, message: "Vui lòng nhập tên nhà sản xuất!" },
+            ]}
+          >
+            <Input maxLength={200} />
+          </Form.Item>
+
+          <Form.Item name="category" label="Danh mục">
+            <Input />
+          </Form.Item>
+
+          <Form.Item name="imageUrl" label="URL hình ảnh">
+            <Input />
+          </Form.Item>
+
+          <Form.Item className="text-right">
+            <Button type="primary" htmlType="submit">
+              Thêm mới
+            </Button>
+          </Form.Item>
+        </Form>
+      </Modal>
 
       <Modal
         title="Chỉnh sửa Vaccine"
@@ -346,29 +778,12 @@ const VaccinesPage = () => {
             <Input maxLength={200} />
           </Form.Item>
 
-          <Form.Item name="imageUrl" label="URL hình ảnh">
+          <Form.Item name="category" label="Danh mục">
             <Input />
           </Form.Item>
 
-          <Form.Item
-            name="price"
-            label="Giá (VNĐ)"
-            rules={[
-              { required: true, message: "Vui lòng nhập giá!" },
-            ]}
-          >
-            <Input 
-              type="number" 
-              min={0} 
-              step={1000}
-              onChange={(e) => {
-                // Đảm bảo giá trị là số dương
-                const value = e.target.value;
-                if (value < 0) {
-                  editForm.setFieldsValue({ price: 0 });
-                }
-              }}
-            />
+          <Form.Item name="imageUrl" label="URL hình ảnh">
+            <Input />
           </Form.Item>
 
           <Form.Item>
@@ -376,58 +791,6 @@ const VaccinesPage = () => {
               Cập nhật
             </Button>
             <Button onClick={() => setIsEditModalVisible(false)}>Hủy</Button>
-          </Form.Item>
-        </Form>
-      </Modal>
-
-      <Modal
-        title="Thêm Vaccine Mới"
-        open={isModalVisible}
-        onCancel={() => setIsModalVisible(false)}
-        footer={null}
-      >
-        <Form form={form} onFinish={handleCreate} layout="vertical">
-          <Form.Item
-            name="vaccineName"
-            label="Tên Vaccine"
-            rules={[{ required: true, message: "Vui lòng nhập tên vaccine!" }]}
-          >
-            <Input maxLength={200} />
-          </Form.Item>
-
-          <Form.Item name="description" label="Mô tả">
-            <Input.TextArea rows={4} maxLength={1000} />
-          </Form.Item>
-
-          <Form.Item
-            name="manufacturer"
-            label="Nhà sản xuất"
-            rules={[
-              { required: true, message: "Vui lòng nhập tên nhà sản xuất!" },
-            ]}
-          >
-            <Input maxLength={200} />
-          </Form.Item>
-
-          <Form.Item name="imageUrl" label="URL hình ảnh">
-            <Input />
-          </Form.Item>
-
-          <Form.Item
-            name="price"
-            label="Giá (VNĐ)"
-            rules={[
-              { required: true, message: "Vui lòng nhập giá!" },
-              { type: 'number', min: 0, message: "Giá không được âm!" }
-            ]}
-          >
-            <Input type="number" min={0} />
-          </Form.Item>
-
-          <Form.Item className="text-right">
-            <Button type="primary" htmlType="submit">
-              Thêm mới
-            </Button>
           </Form.Item>
         </Form>
       </Modal>

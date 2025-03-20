@@ -294,5 +294,55 @@
 }
 
 .ant-modal-footer {
-  border-top: 1px solid #eaeaea;
+  border-top: 1px solid #f0f0f0;
+  padding: 10px 16px;
+}
+
+/* Tabs styling */
+.appointment-management .ant-tabs {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  padding: 16px;
+  margin-bottom: 24px;
+}
+
+.appointment-management .ant-tabs-nav {
+  margin-bottom: 16px;
+}
+
+.appointment-management .ant-tabs-tab {
+  font-weight: 600;
+  font-size: 16px;
+  padding: 8px 16px;
+}
+
+.appointment-management .ant-tabs-tab.ant-tabs-tab-active .ant-tabs-tab-btn {
+  color: #1890ff;
+}
+
+.appointment-management .ant-tabs-ink-bar {
+  background-color: #1890ff;
+  height: 3px;
+}
+
+.appointment-management .ant-tabs-content-holder {
+  background-color: transparent;
+  border: none;
+}
+
+.appointment-management .ant-tabs-content {
+  padding: 0;
+}
+
+.dose-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.dose-progress-summary {
+  display: flex;
+  align-items: center;
 } 

@@ -130,23 +130,24 @@ const FeedbackManagement = () => {
     }
   };
 
-  const handleSearch = (value) => {
-    setSearchText(value);
-    
-    if (!value) {
+  useEffect(() => {
+    if (!searchText) {
       setFilteredFeedbacks(feedbacks);
       return;
     }
     
     const filtered = feedbacks.filter(
       feedback => 
-        (feedback.customerName && feedback.customerName.toLowerCase().includes(value.toLowerCase())) ||
-        (feedback.customerEmail && feedback.customerEmail.toLowerCase().includes(value.toLowerCase())) ||
-        (feedback.customerPhone && feedback.customerPhone.toLowerCase().includes(value.toLowerCase())) ||
-        (feedback.comment && feedback.comment.toLowerCase().includes(value.toLowerCase()))
+        (feedback.customerName && feedback.customerName.toLowerCase().includes(searchText.toLowerCase())) |
+        (feedback.customerPhone && feedback.customerPhone.toLowerCase().includes(searchText.toLowerCase())) ||
+        (feedback.comment && feedback.comment.toLowerCase().includes(searchText.toLowerCase()))
     );
     
     setFilteredFeedbacks(filtered);
+  }, [feedbacks, searchText]);
+
+  const handleSearch = (e) => {
+    setSearchText(e.target.value);
   };
 
   useEffect(() => {
@@ -159,7 +160,7 @@ const FeedbackManagement = () => {
       dataIndex: 'customerName',
       key: 'customerName',
       render: (text, record) => (
-        <Tooltip title={`Email: ${record.customerEmail || 'N/A'}, SĐT: ${record.customerPhone || 'N/A'}`}>
+        <Tooltip title={`SĐT: ${record.customerPhone || 'N/A'}`}>
           <span><UserOutlined /> {text || "Chưa cập nhật"}</span>
         </Tooltip>
       ),
@@ -175,10 +176,19 @@ const FeedbackManagement = () => {
       title: 'Bình luận',
       dataIndex: 'comment',
       key: 'comment',
-      render: (text) => text || <Tag color="default">Không có bình luận</Tag>,
-      ellipsis: {
-        showTitle: false,
-      },
+      render: (text) => text ? (
+        <div style={{ 
+          wordWrap: 'break-word', 
+          wordBreak: 'break-word',
+          whiteSpace: 'pre-wrap',
+          maxWidth: '300px'
+        }}>
+          {text}
+        </div>
+      ) : (
+        <Tag color="default">Không có bình luận</Tag>
+      ),
+      width: 350,
     },
     {
       title: 'Ngày tạo',
@@ -217,7 +227,7 @@ const FeedbackManagement = () => {
       <div className="stats-container">
         <Row gutter={[16, 16]}>
           <Col xs={24} sm={12} md={8} lg={6}>
-            <Card className="stat-card">
+            <Card className="stat-card" style={{ height: '100%' }}>
               <Statistic 
                 title="Tổng số đánh giá" 
                 value={stats.total} 
@@ -226,7 +236,7 @@ const FeedbackManagement = () => {
             </Card>
           </Col>
           <Col xs={24} sm={12} md={8} lg={6}>
-            <Card className="stat-card rating-card">
+            <Card className="stat-card rating-card" style={{ height: '100%' }}>
               <Statistic 
                 title="Đánh giá trung bình" 
                 value={stats.averageRating} 
@@ -237,7 +247,7 @@ const FeedbackManagement = () => {
             </Card>
           </Col>
           <Col xs={24} sm={12} md={8} lg={6}>
-            <Card className="stat-card">
+            <Card className="stat-card" style={{ height: '100%' }}>
               <Statistic 
                 title="Đánh giá 5 sao" 
                 value={stats.fiveStars} 
@@ -249,7 +259,7 @@ const FeedbackManagement = () => {
             </Card>
           </Col>
           <Col xs={24} sm={12} md={8} lg={6}>
-            <Card className="stat-card">
+            <Card className="stat-card" style={{ height: '100%' }}>
               <Statistic 
                 title="Đánh giá gần đây" 
                 value={feedbacks.length > 0 ? new Date(feedbacks[0].createAt).toLocaleDateString('vi-VN') : 'N/A'} 
@@ -261,14 +271,13 @@ const FeedbackManagement = () => {
       </div>
       
       <div className="search-container">
-        <Search
+        <Input
+          prefix={<SearchOutlined />}
           placeholder="Tìm kiếm theo tên khách hàng, email, số điện thoại hoặc nội dung bình luận"
-          enterButton={<SearchOutlined />}
-          size="large"
-          onSearch={handleSearch}
-          onChange={(e) => setSearchText(e.target.value)}
           value={searchText}
+          onChange={handleSearch}
           className="search-input"
+          allowClear
         />
       </div>
       
@@ -279,7 +288,7 @@ const FeedbackManagement = () => {
         loading={loading}
         pagination={{
           pageSize: 10,
-          showSizeChanger: true,
+          showSizeChanger: false,
           pageSizeOptions: ['10', '20', '50'],
           showTotal: (total, range) => `${range[0]}-${range[1]} của ${total} đánh giá`,
         }}

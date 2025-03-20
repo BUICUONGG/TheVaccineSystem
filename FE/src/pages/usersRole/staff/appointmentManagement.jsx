@@ -93,11 +93,15 @@ const buttonStyles = `
 const AppointmentManagement = () => {
   const [loading, setLoading] = useState(false);
   const [appointmentsGoi, setAppointmentsGoi] = useState([]);
+  const [appointmentsLe, setAppointmentsLe] = useState([]);
   const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [searchText, setSearchText] = useState("");
   const [activeTab, setActiveTab] = useState("1");
   const [detailLoading, setDetailLoading] = useState(false);
+  const [autoCheckEnabled, setAutoCheckEnabled] = useState(true);
+  const [filteredAppointmentsGoi, setFilteredAppointmentsGoi] = useState([]);
+  const [filteredAppointmentsLe, setFilteredAppointmentsLe] = useState([]);
 
   // Thêm style vào component
   useEffect(() => {
@@ -126,6 +130,14 @@ const AppointmentManagement = () => {
         }
       );
 
+      // Fetch appointments lẻ - sử dụng API chi tiết
+      const responseLe = await axiosInstance.get(
+        "/appointmentLe/getdetailallaptle",
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+
       // Console log to debug
       console.log("Appointment data:", {
         firstRecord: responseGoi.data?.[0],
@@ -135,6 +147,7 @@ const AppointmentManagement = () => {
 
       // Không cần fetch thêm thông tin nếu API đã trả về đầy đủ
       setAppointmentsGoi(responseGoi.data || []);
+      setAppointmentsLe(responseLe.data || []);
     } catch (error) {
       console.error("Error fetching appointments:", error);
       message.error("Không thể tải danh sách lịch hẹn");
@@ -172,8 +185,7 @@ const AppointmentManagement = () => {
       case "incomplete":
         return "Đã hủy";
       case "Pending":
-      case "pending":
-        return "Chưa tiêm";
+        return "Đang chờ";
       case "Paid":
         return "Đã thanh toán";
       case "approve":
@@ -197,7 +209,9 @@ const AppointmentManagement = () => {
   const handleStatusChange = async (id, status, isPackage) => {
     try {
       const token = localStorage.getItem("accesstoken");
-      const endpoint = `/appointmentGoi/update/${id}`;
+      const endpoint = isPackage 
+        ? `/appointmentGoi/update/${id}`
+        : `/appointmentLe/update/${id}`;
 
       await axiosInstance.post(
         endpoint,
@@ -344,7 +358,7 @@ const AppointmentManagement = () => {
     }
   };
 
-  const showAppointmentDetails = async (record) => {
+  const showAppointmentDetails = async (record, isPackage = true) => {
     try {
       // Kiểm tra nếu đơn đã bị hủy thì không hiển thị chi tiết
       if (record.status === "incomplete") {
@@ -356,7 +370,7 @@ const AppointmentManagement = () => {
       setIsModalVisible(true);
 
       // Đánh dấu loại lịch hẹn
-      record.isPackage = true;
+      record.isPackage = isPackage;
 
       // Không cần fetch thêm thông tin nếu API đã trả về đầy đủ
       setSelectedAppointment(record);
@@ -428,11 +442,12 @@ const AppointmentManagement = () => {
       defaultSortOrder: "descend",
     },
     {
-      title: "Ngày tạo",
-      dataIndex: "createAt",
-      key: "createAt",
-      width: 110,
-      render: (createAt) => createAt || "N/A",
+      title: "Giá tiền",
+      dataIndex: "price",
+      key: "price",
+      width: 130,
+      render: (price) => price ? price.toLocaleString("vi-VN") + " VNĐ" : "N/A",
+      sorter: (a, b) => (a.price || 0) - (b.price || 0),
     },
     {
       title: "Số mũi tiêm",
@@ -508,52 +523,313 @@ const AppointmentManagement = () => {
     },
   ];
 
-  const filteredAppointmentsGoi = appointmentsGoi.filter(
-    (apt) =>
-      apt._id?.toLowerCase().includes(searchText.toLowerCase()) ||
-      (
-        apt.customer?.customerName ||
-        apt.customerDetails?.customerName ||
-        apt.cusId?.customerName ||
-        apt.cusId?.name ||
-        ""
-      )
-        ?.toLowerCase()
-        .includes(searchText.toLowerCase()) ||
-      (
-        apt.package?.packageName ||
-        apt.vaccinePakage?.packageName ||
-        apt.packageDetails?.packageName ||
-        apt.vaccinePakageId?.packageName ||
-        apt.vaccinePakageId?.name ||
-        ""
-      )
-        ?.toLowerCase()
-        .includes(searchText.toLowerCase()) ||
-      apt.date?.toLowerCase().includes(searchText.toLowerCase()) ||
-      apt.status?.toLowerCase().includes(searchText.toLowerCase()) ||
-      apt.price?.toString().includes(searchText.toLowerCase()) ||
-      apt.time?.toLowerCase().includes(searchText.toLowerCase()) ||
-      apt.createdAt?.toLowerCase().includes(searchText.toLowerCase()) ||
-      apt.createAt?.toLowerCase().includes(searchText.toLowerCase()) ||
-      apt.note?.toLowerCase().includes(searchText.toLowerCase()) ||
-      apt.app_trans_id?.toLowerCase().includes(searchText.toLowerCase())
-  );
+  const columnsLe = [
+    {
+      title: "STT",
+      key: "stt",
+      render: (_, record, index) => index + 1,
+      width: 50,
+    },
+    {
+      title: "Khách hàng",
+      dataIndex: "cusId",
+      key: "cusId",
+      width: 150,
+      render: (cusId, record) => {
+        // Try to get customer name from all possible sources
+        const customerName =
+          record.customer?.customerName ||
+          record.customerDetails?.customerName ||
+          cusId?.customerName ||
+          cusId?.name ||
+          (typeof cusId === "string" ? cusId : "N/A");
+
+        return customerName;
+      },
+    },
+    {
+      title: "Vaccine",
+      dataIndex: "vaccineId",
+      key: "vaccineId",
+      width: 150,
+      render: (vaccineId, record) => {
+        // Try to get vaccine name from all possible sources
+        const vaccineName =
+          record.vaccine?.vaccineName ||
+          record.vaccineDetails?.vaccineName ||
+          vaccineId?.vaccineName ||
+          vaccineId?.name ||
+          (typeof vaccineId === "string" ? vaccineId : "N/A");
+
+        return vaccineName;
+      },
+    },
+    {
+      title: "Ngày hẹn",
+      dataIndex: "date",
+      key: "date",
+      width: 110,
+      sorter: (a, b) => {
+        // Hàm chuyển đổi chuỗi ngày thành đối tượng Date
+        const parseDate = (dateStr) => {
+          // Thử các định dạng khác nhau
+          const formats = [
+            "DD/MM/YYYY",
+            "YYYY-MM-DD",
+            "MM/DD/YYYY",
+            "DD-MM-YYYY",
+          ];
+
+          for (const format of formats) {
+            const date = moment(dateStr, format, true);
+            if (date.isValid()) {
+              return date;
+            }
+          }
+
+          // Nếu không khớp với bất kỳ định dạng nào, thử chuyển đổi trực tiếp
+          return moment(new Date(dateStr));
+        };
+
+        const dateA = parseDate(a.date);
+        const dateB = parseDate(b.date);
+
+        return dateA - dateB;
+      },
+      sortDirections: ["ascend", "descend"],
+      defaultSortOrder: "descend",
+    },
+    {
+      title: "Giá tiền",
+      dataIndex: "price",
+      key: "price",
+      width: 130,
+      render: (price) => price ? price.toLocaleString("vi-VN") + " VNĐ" : "N/A",
+      sorter: (a, b) => (a.price || 0) - (b.price || 0),
+    },
+    {
+      title: "Trạng thái",
+      dataIndex: "status",
+      key: "status",
+      width: 110,
+      filters: [
+        { text: "Hoàn thành", value: "completed" },
+        { text: "Đang chờ", value: "pending" },
+        { text: "Đã hủy", value: "incomplete" },
+        { text: "Đã duyệt", value: "approve" },
+      ],
+      onFilter: (value, record) => record.status === value,
+      render: (status) => (
+        <Tag color={getStatusColor(status)}>{getStatusText(status)}</Tag>
+      ),
+    },
+    {
+      title: "Thao tác",
+      key: "actions",
+      width: 200,
+      render: (_, record) => (
+        <div className="action-buttons">
+          {record.status === "pending" && (
+            <>
+              <Button
+                type="primary"
+                className="approve-button"
+                onClick={() => handleStatusChange(record._id, "approve", false)}
+              >
+                Duyệt đơn
+              </Button>
+              <Button
+                danger
+                className="cancel-button"
+                onClick={() => handleStatusChange(record._id, "incomplete", false)}
+              >
+                Hủy đơn
+              </Button>
+            </>
+          )}
+          {record.status === "approve" && (
+            <Button
+              type="primary"
+              className="complete-button"
+              onClick={() => handleStatusChange(record._id, "completed", false)}
+            >
+              Hoàn thành
+            </Button>
+          )}
+          <Button
+            type="primary"
+            icon={<MenuOutlined />}
+            onClick={() => showAppointmentDetails(record, false)}
+            disabled={record.status === "incomplete"}
+            style={{ marginLeft: '8px' }}
+          />
+        </div>
+      ),
+    },
+  ];
+
+  // Add useEffect hook for real-time filtering
+  useEffect(() => {
+    if (!searchText || searchText.trim() === '') {
+      setFilteredAppointmentsGoi(appointmentsGoi);
+      setFilteredAppointmentsLe(appointmentsLe);
+      return;
+    }
+    
+    const filteredGoi = appointmentsGoi.filter(
+      (apt) =>
+        apt._id?.toLowerCase().includes(searchText.toLowerCase()) ||
+        (
+          apt.customer?.customerName ||
+          apt.customerDetails?.customerName ||
+          apt.cusId?.customerName ||
+          apt.cusId?.name ||
+          ""
+        )
+          ?.toLowerCase()
+          .includes(searchText.toLowerCase()) ||
+        (
+          apt.package?.packageName ||
+          apt.vaccinePakage?.packageName ||
+          apt.packageDetails?.packageName ||
+          apt.vaccinePakageId?.packageName ||
+          apt.vaccinePakageId?.name ||
+          ""
+        )
+          ?.toLowerCase()
+          .includes(searchText.toLowerCase()) ||
+        apt.date?.toLowerCase().includes(searchText.toLowerCase()) ||
+        apt.status?.toLowerCase().includes(searchText.toLowerCase()) ||
+        apt.price?.toString().includes(searchText.toLowerCase()) ||
+        apt.time?.toLowerCase().includes(searchText.toLowerCase()) ||
+        apt.createdAt?.toLowerCase().includes(searchText.toLowerCase()) ||
+        apt.createAt?.toLowerCase().includes(searchText.toLowerCase()) ||
+        apt.note?.toLowerCase().includes(searchText.toLowerCase()) ||
+        apt.app_trans_id?.toLowerCase().includes(searchText.toLowerCase())
+    );
+
+    const filteredLe = appointmentsLe.filter(
+      (apt) =>
+        apt._id?.toLowerCase().includes(searchText.toLowerCase()) ||
+        (
+          apt.customer?.customerName ||
+          apt.customerDetails?.customerName ||
+          apt.cusId?.customerName ||
+          apt.cusId?.name ||
+          ""
+        )
+          ?.toLowerCase()
+          .includes(searchText.toLowerCase()) ||
+        (
+          apt.vaccine?.vaccineName ||
+          apt.vaccineDetails?.vaccineName ||
+          apt.vaccineId?.vaccineName ||
+          apt.vaccineId?.name ||
+          ""
+        )
+          ?.toLowerCase()
+          .includes(searchText.toLowerCase()) ||
+        apt.date?.toLowerCase().includes(searchText.toLowerCase()) ||
+        apt.status?.toLowerCase().includes(searchText.toLowerCase()) ||
+        apt.price?.toString().includes(searchText.toLowerCase()) ||
+        apt.time?.toLowerCase().includes(searchText.toLowerCase()) ||
+        apt.createdAt?.toLowerCase().includes(searchText.toLowerCase()) ||
+        apt.note?.toLowerCase().includes(searchText.toLowerCase())
+    );
+    
+    setFilteredAppointmentsGoi(filteredGoi);
+    setFilteredAppointmentsLe(filteredLe);
+  }, [appointmentsGoi, appointmentsLe, searchText]);
+
+  const handleSearch = (e) => {
+    setSearchText(e.target.value);
+  };
+
+  // Hàm kiểm tra và cập nhật trạng thái cho các đơn hẹn quá hạn
+  const checkExpiredAppointments = async () => {
+    try {
+      const token = localStorage.getItem("accesstoken");
+      const today = moment().startOf('day');
+      let updateCounter = 0;
+      
+      // Kiểm tra đơn hẹn gói quá hạn
+      for (const apt of appointmentsGoi) {
+        if (apt.status === "pending") {
+          const appointmentDate = moment(apt.date, ["DD/MM/YYYY", "YYYY-MM-DD", "MM/DD/YYYY", "DD-MM-YYYY"]);
+          
+          if (appointmentDate.isValid() && appointmentDate.isBefore(today)) {
+            await axiosInstance.post(
+              `/appointmentGoi/update/${apt._id}`,
+              { status: "incomplete" },
+              { headers: { Authorization: `Bearer ${token}` } }
+            );
+            updateCounter++;
+          }
+        }
+      }
+      
+      // Kiểm tra đơn hẹn lẻ quá hạn
+      for (const apt of appointmentsLe) {
+        if (apt.status === "pending") {
+          const appointmentDate = moment(apt.date, ["DD/MM/YYYY", "YYYY-MM-DD", "MM/DD/YYYY", "DD-MM-YYYY"]);
+          
+          if (appointmentDate.isValid() && appointmentDate.isBefore(today)) {
+            await axiosInstance.post(
+              `/appointmentLe/update/${apt._id}`,
+              { status: "incomplete" },
+              { headers: { Authorization: `Bearer ${token}` } }
+            );
+            updateCounter++;
+          }
+        }
+      }
+      
+      if (updateCounter > 0) {
+        message.info(`Đã tự động hủy ${updateCounter} đơn hẹn quá hạn`);
+        fetchAppointments(); // Cập nhật lại danh sách sau khi thay đổi
+      }
+    } catch (error) {
+      console.error("Error checking expired appointments:", error);
+    }
+  };
+
+  // Chạy kiểm tra khi component được tải và mỗi khi danh sách lịch hẹn thay đổi
+  useEffect(() => {
+    if (autoCheckEnabled && (appointmentsGoi.length > 0 || appointmentsLe.length > 0)) {
+      checkExpiredAppointments();
+    }
+  }, [appointmentsGoi, appointmentsLe, autoCheckEnabled]);
 
   return (
     <div className="appointment-management">
-      <h1>Quản lý lịch hẹn gói</h1>
+      <h1>Quản lý lịch hẹn</h1>
 
       <div className="search-container">
         <Input
           placeholder="Tìm kiếm lịch hẹn..."
           prefix={<SearchOutlined />}
           value={searchText}
-          onChange={(e) => setSearchText(e.target.value)}
+          onChange={handleSearch}
           className="search-input"
+          allowClear
         />
+        <Button 
+          type={autoCheckEnabled ? "primary" : "default"}
+          onClick={() => setAutoCheckEnabled(!autoCheckEnabled)}
+          style={{ marginLeft: '16px' }}
+        >
+          {autoCheckEnabled ? "Tắt tự động hủy" : "Bật tự động hủy"}
+        </Button>
+        <Button 
+          onClick={checkExpiredAppointments} 
+          style={{ marginLeft: '8px' }}
+        >
+          Kiểm tra đơn quá hạn
+        </Button>
       </div>
 
+      <Tabs defaultActiveKey="1" onChange={(key) => setActiveTab(key)}>
+        <TabPane tab="Lịch hẹn gói" key="1">
           <Table
             columns={columnsGoi}
             dataSource={filteredAppointmentsGoi}
@@ -561,9 +837,20 @@ const AppointmentManagement = () => {
             loading={loading}
             pagination={{ pageSize: 10 }}
           />
+        </TabPane>
+        <TabPane tab="Lịch hẹn lẻ" key="2">
+          <Table
+            columns={columnsLe}
+            dataSource={filteredAppointmentsLe}
+            rowKey="_id"
+            loading={loading}
+            pagination={{ pageSize: 10 }}
+          />
+        </TabPane>
+      </Tabs>
 
       <Modal
-        title="Chi tiết lịch hẹn gói"
+        title={selectedAppointment?.isPackage ? "Chi tiết lịch hẹn gói" : "Chi tiết lịch hẹn lẻ"}
         visible={isModalVisible}
         onCancel={() => setIsModalVisible(false)}
         footer={[
@@ -578,13 +865,13 @@ const AppointmentManagement = () => {
           <div className="appointment-details">
             <div className="detail-section">
               <Title level={4}>Thông tin cơ bản</Title>
-            <div className="detail-row">
+              <div className="detail-row">
                 <span className="detail-label">Mã đơn:</span>
-              <span className="detail-value">{selectedAppointment._id}</span>
-            </div>
-            <div className="detail-row">
-              <span className="detail-label">Khách hàng:</span>
-              <span className="detail-value">
+                <span className="detail-value">{selectedAppointment._id}</span>
+              </div>
+              <div className="detail-row">
+                <span className="detail-label">Khách hàng:</span>
+                <span className="detail-value">
                   {selectedAppointment.customer?.customerName ||
                     selectedAppointment.customerDetails?.customerName ||
                     selectedAppointment.cusId?.customerName ||
@@ -592,64 +879,88 @@ const AppointmentManagement = () => {
                     (typeof selectedAppointment.cusId === "string"
                       ? selectedAppointment.cusId
                       : "N/A")}
-              </span>
-            </div>
-            <div className="detail-row">
-              <span className="detail-label">Số điện thoại:</span>
-              <span className="detail-value">
+                </span>
+              </div>
+              <div className="detail-row">
+                <span className="detail-label">Số điện thoại:</span>
+                <span className="detail-value">
                   {selectedAppointment.customer?.phone ||
                     selectedAppointment.customerDetails?.phone ||
                     selectedAppointment.cusId?.phone ||
                     "N/A"}
-              </span>
-            </div>
-            <div className="detail-row">
-              <span className="detail-label">Địa chỉ:</span>
-              <span className="detail-value">
+                </span>
+              </div>
+              <div className="detail-row">
+                <span className="detail-label">Địa chỉ:</span>
+                <span className="detail-value">
                   {selectedAppointment.customer?.address ||
                     selectedAppointment.customerDetails?.address ||
                     selectedAppointment.cusId?.address ||
                     "N/A"}
-              </span>
-            </div>
+                </span>
+              </div>
               <div className="detail-row">
                 <span className="detail-label">Trẻ em:</span>
                 <span className="detail-value">
                   {selectedAppointment.childId ? 
                     (selectedAppointment.childId.childName ||
-                     selectedAppointment.child?.childName ||
-                     selectedAppointment.childId.toString()) : "Không có"}
+                      selectedAppointment.child?.childName ||
+                      selectedAppointment.childId.toString()) : "Không có"}
                 </span>
               </div>
-            <div className="detail-row">
-                <span className="detail-label">Gói vaccine:</span>
-              <span className="detail-value">
-                  {selectedAppointment.package?.packageName ||
-                    selectedAppointment.vaccinePakage?.packageName ||
-                    selectedAppointment.packageDetails?.packageName ||
-                    selectedAppointment.vaccinePackageId?.packageName ||
-                    selectedAppointment.vaccinePakageId?.name ||
-                    (selectedAppointment.vaccinePackageId
-                      ? selectedAppointment.vaccinePackageId.toString()
-                      : "N/A")}
-              </span>
-            </div>
-            <div className="detail-row">
-              <span className="detail-label">Ngày hẹn:</span>
-              <span className="detail-value">{selectedAppointment.date}</span>
-            </div>
+              
+              {selectedAppointment.isPackage ? (
+                <div className="detail-row">
+                  <span className="detail-label">Gói vaccine:</span>
+                  <span className="detail-value">
+                    {selectedAppointment.package?.packageName ||
+                      selectedAppointment.vaccinePakage?.packageName ||
+                      selectedAppointment.packageDetails?.packageName ||
+                      selectedAppointment.vaccinePackageId?.packageName ||
+                      selectedAppointment.vaccinePakageId?.name ||
+                      (selectedAppointment.vaccinePackageId
+                        ? selectedAppointment.vaccinePackageId.toString()
+                        : "N/A")}
+                  </span>
+                </div>
+              ) : (
+                <div className="detail-row">
+                  <span className="detail-label">Vaccine:</span>
+                  <span className="detail-value">
+                    {selectedAppointment.vaccine?.vaccineName ||
+                      selectedAppointment.vaccineDetails?.vaccineName ||
+                      selectedAppointment.vaccineId?.vaccineName ||
+                      selectedAppointment.vaccineId?.name ||
+                      (typeof selectedAppointment.vaccineId === "string"
+                        ? selectedAppointment.vaccineId
+                        : "N/A")}
+                  </span>
+                </div>
+              )}
+              
+              {!selectedAppointment.isPackage && (
+                <div className="detail-row">
+                  <span className="detail-label">Lô vaccine:</span>
+                  <span className="detail-value">
+                    {selectedAppointment.batch?.importCode ||
+                      selectedAppointment.batchDetails?.importCode ||
+                      selectedAppointment.batchId?.importCode ||
+                      selectedAppointment.batchId?.toString() ||
+                      "N/A"}
+                  </span>
+                </div>
+              )}
+
+              <div className="detail-row">
+                <span className="detail-label">Ngày hẹn:</span>
+                <span className="detail-value">{selectedAppointment.date}</span>
+              </div>
               <div className="detail-row">
                 <span className="detail-label">Thời gian:</span>
                 <span className="detail-value">{selectedAppointment.time || "Chưa xác định"}</span>
               </div>
-            <div className="detail-row">
-              <span className="detail-label">Ngày tạo:</span>
-              <span className="detail-value">
-                  {selectedAppointment.createdAt || selectedAppointment.createAt || "N/A"}
-                </span>
-              </div>
-              <div className="detail-row">
-                <span className="detail-label">Giá tiền gói:</span>
+              <div className="detail-row highlight-info">
+                <span className="detail-label">Giá tiền:</span>
                 <span className="detail-value">
                   {selectedAppointment.price
                     ? selectedAppointment.price.toLocaleString("vi-VN") + " VNĐ"
@@ -657,18 +968,24 @@ const AppointmentManagement = () => {
                 </span>
               </div>
               <div className="detail-row">
+                <span className="detail-label">Ngày tạo:</span>
+                <span className="detail-value">
+                  {selectedAppointment.createdAt || selectedAppointment.createAt || "N/A"}
+                </span>
+              </div>
+              <div className="detail-row">
                 <span className="detail-label">Ghi chú:</span>
                 <span className="detail-value">
                   {selectedAppointment.note || "Không có ghi chú"}
-              </span>
-            </div>
-            <div className="detail-row">
-              <span className="detail-label">Trạng thái:</span>
-              <span className="detail-value">
-                <Tag color={getStatusColor(selectedAppointment.status)}>
-                  {getStatusText(selectedAppointment.status)}
-                </Tag>
-              </span>
+                </span>
+              </div>
+              <div className="detail-row">
+                <span className="detail-label">Trạng thái:</span>
+                <span className="detail-value">
+                  <Tag color={getStatusColor(selectedAppointment.status)}>
+                    {getStatusText(selectedAppointment.status)}
+                  </Tag>
+                </span>
               </div>
               {selectedAppointment.app_trans_id && (
                 <div className="detail-row">
@@ -678,10 +995,47 @@ const AppointmentManagement = () => {
                   </span>
                 </div>
               )}
+
+              {!selectedAppointment.isPackage && selectedAppointment.status !== "completed" && (
+                <div className="detail-row" style={{ marginTop: "20px" }}>
+                  <span className="detail-label">Thao tác:</span>
+                  <span className="detail-value">
+                    <div className="action-buttons">
+                      {selectedAppointment.status === "Pending" && (
+                        <>
+                          <Button
+                            type="primary"
+                            className="approve-button"
+                            onClick={() => handleStatusChange(selectedAppointment._id, "approve", false)}
+                          >
+                            Duyệt đơn
+                          </Button>
+                          <Button
+                            danger
+                            className="cancel-button"
+                            onClick={() => handleStatusChange(selectedAppointment._id, "incomplete", false)}
+                          >
+                            Hủy đơn
+                          </Button>
+                        </>
+                      )}
+                      {selectedAppointment.status === "approve" && (
+                        <Button
+                          type="primary"
+                          className="complete-button"
+                          onClick={() => handleStatusChange(selectedAppointment._id, "completed", false)}
+                        >
+                          Hoàn thành
+                        </Button>
+                      )}
+                    </div>
+                  </span>
+                </div>
+              )}
             </div>
 
-            {/* Hiển thị lịch tiêm cho từng mũi */}
-            {selectedAppointment.doseSchedule &&
+            {/* Hiển thị lịch tiêm cho từng mũi - chỉ cho lịch hẹn gói */}
+            {selectedAppointment.isPackage && selectedAppointment.doseSchedule &&
               selectedAppointment.doseSchedule.length > 0 && (
                 <div className="dose-schedule-section">
                   <div className="dose-header">
@@ -768,7 +1122,7 @@ const AppointmentManagement = () => {
                               onClick={() => {
                                 const newStatus =
                                   item.status === "completed"
-                                    ? "pending"
+                                    ? "Pending"
                                     : "completed";
                                 console.log(
                                   `Toggling status for dose ${item.doseNumber} from ${item.status} to ${newStatus}`

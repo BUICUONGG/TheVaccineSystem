@@ -44,25 +44,25 @@ const HomePage = () => {
 
   const banners = [
     {
-      image: "/images/banner1.png",
+      image: "/images/banner/banner1.png",
       title: "Đăng Ký Tiêm Chủng",
       description: "Bảo vệ sức khỏe cho bạn và gia đình",
       link: "/registerinjection",
       buttonText: "Đăng Ký Tiêm",
     },
     {
-      image: "/images/banner2.jpg",
+      image: "/images/banner/banner2.jpg",
       title: "Blog Sức Khỏe",
       description: "Cập nhật thông tin y tế mới nhất",
       link: "/blogs",
       buttonText: "Xem Blog",
     },
     {
-      image: "/images/banner3.png",
-      title: "Tư Vấn Y Tế",
-      description: "Đội ngũ bác sĩ chuyên nghiệp",
-      link: "/advise",
-      buttonText: "Tư Vấn Ngay",
+      image: "/images/banner/banner3.jpg",
+      title: "Tin Tức",
+      description: "Cập nhập tin tức mới nhất",
+      link: "/news",
+      buttonText: "Xem thêm",
     },
   ];
 
@@ -519,7 +519,7 @@ const HomePage = () => {
         </div>
       </div>
 
-      <div className="vaccine-info">
+      {/* <div className="vaccine-info">
         <h2>THÔNG TIN VACCINE</h2>
         <div className="home-vaccine-types">
           <div className="home-vaccine-card">
@@ -540,9 +540,8 @@ const HomePage = () => {
             </a>
           </div>
         </div>
-      </div>
+      </div> */}
 
-      {/* Vaccine Carousel Section - Phiên bản 1: Carousel dạng thẻ với hiệu ứng 3D (3 thẻ) */}
       <div className="vaccine-carousel-section-v1">
         <h2>VACCINE NỔI BẬT</h2>
         <div className="vaccine-carousel-container-v1">
