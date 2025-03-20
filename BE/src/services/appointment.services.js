@@ -482,6 +482,80 @@ class AppointmentService {
       throw new Error(error.message);
     }
   }
+
+  async updateDose(id, doseNumber, status) {
+    try {
+      // Tìm lịch hẹn gói theo ID
+      const appointment = await connectToDatabase.appointmentGois.findOne({
+        _id: new ObjectId(id)
+      });
+
+      if (!appointment) {
+        throw new Error("Không tìm thấy lịch hẹn");
+      }
+
+      // Kiểm tra doseNumber có hợp lệ không
+      if (!appointment.doseSchedule || !appointment.doseSchedule.length) {
+        throw new Error("Lịch tiêm không có mũi nào");
+      }
+
+      const doseIndex = appointment.doseSchedule.findIndex(
+        dose => dose.doseNumber === parseInt(doseNumber)
+      );
+
+      if (doseIndex === -1) {
+        throw new Error(`Không tìm thấy mũi tiêm số ${doseNumber}`);
+      }
+
+      // Cập nhật trạng thái của mũi tiêm
+      const updateQuery = {
+        [`doseSchedule.${doseIndex}.status`]: status
+      };
+
+      const result = await connectToDatabase.appointmentGois.findOneAndUpdate(
+        { _id: new ObjectId(id) },
+        { $set: updateQuery },
+        { returnDocument: "after" }
+      );
+
+      if (!result) {
+        throw new Error("Không thể cập nhật trạng thái mũi tiêm");
+      }
+
+      // Kiểm tra nếu tất cả các mũi đã hoàn thành, cập nhật trạng thái của cả lịch hẹn
+      const allDosesCompleted = result.doseSchedule.every(
+        dose => dose.status === "completed"
+      );
+
+      if (allDosesCompleted && result.status !== "completed") {
+        await this.updateAptGoi(id, { status: "completed" });
+        
+        // Tạo thông báo
+        await notiService.createNoti({
+          cusId: result.cusId,
+          apt: result._id,
+          aptModel: "AppointmentGoi",
+          message: `Tất cả các mũi tiêm của bạn đã hoàn thành. Lịch hẹn đã được cập nhật thành Hoàn thành.`,
+          createdAt: new Date().toLocaleDateString("vi-VN"),
+        });
+      } else {
+        // Tạo thông báo
+        const doseStatus = status === "completed" ? "đã tiêm" : "chưa tiêm";
+        await notiService.createNoti({
+          cusId: result.cusId,
+          apt: result._id,
+          aptModel: "AppointmentGoi",
+          message: `Mũi tiêm số ${doseNumber} đã được cập nhật thành ${doseStatus}.`,
+          createdAt: new Date().toLocaleDateString("vi-VN"),
+        });
+      }
+
+      return result;
+    } catch (error) {
+      console.error("Error in updateDose:", error);
+      throw new Error(error.message);
+    }
+  }
 }
 const appointmentService = new AppointmentService();
 export default appointmentService;
