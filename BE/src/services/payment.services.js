@@ -22,7 +22,6 @@ class PaymentService {
       const embed_data = {
         redirecturl: "http://localhost:5173/",
       };
-
       // Chuyển đổi các giá trị sang ObjectId nếu cần
       const transformedPaymentData = {
         ...paymentData,

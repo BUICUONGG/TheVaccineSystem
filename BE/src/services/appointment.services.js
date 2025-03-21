@@ -4,6 +4,7 @@ import AppointmentLe from "../model/appointmentSchemaLe.js";
 import Child from "../model/childSchema.js";
 import AppointmentGoi from "../model/appointmentSchemaGoi.js";
 import notiService from "./noti.services.js";
+import childService from "./child.services.js";
 
 class AppointmentService {
   // Kiểm tra tồn kho của vaccine
@@ -66,7 +67,7 @@ class AppointmentService {
 
   async createChildIfNotExists(cusId, childInfo) {
     const newChild = new Child({
-      cusId,
+      cusId: new ObjectId(cusId),
       childName: childInfo.name || "",
       birthday: childInfo.birthday || "",
       healthNote: childInfo.healthNote || "",
@@ -82,13 +83,9 @@ class AppointmentService {
       const { cusId, childId, childInfo, vaccineId, date, time, status, note } =
         data;
       let finalChildId = childId ? new ObjectId(childId) : null;
-
       //  Nếu không có childId và có childInfo => Tạo mới hồ sơ trẻ
       if (!finalChildId && childInfo && Object.keys(childInfo).length > 0) {
-        finalChildId = await this.createChildIfNotExists(
-          new ObjectId(cusId),
-          childInfo
-        );
+        finalChildId = await childService.create(childInfo);
       }
       // Kiểm tra tồn kho vaccine
       const totalStock = await this.checkVaccineStock(new ObjectId(vaccineId));
@@ -487,7 +484,7 @@ class AppointmentService {
     try {
       // Tìm lịch hẹn gói theo ID
       const appointment = await connectToDatabase.appointmentGois.findOne({
-        _id: new ObjectId(id)
+        _id: new ObjectId(id),
       });
 
       if (!appointment) {
@@ -500,7 +497,7 @@ class AppointmentService {
       }
 
       const doseIndex = appointment.doseSchedule.findIndex(
-        dose => dose.doseNumber === parseInt(doseNumber)
+        (dose) => dose.doseNumber === parseInt(doseNumber)
       );
 
       if (doseIndex === -1) {
@@ -509,7 +506,7 @@ class AppointmentService {
 
       // Cập nhật trạng thái của mũi tiêm
       const updateQuery = {
-        [`doseSchedule.${doseIndex}.status`]: status
+        [`doseSchedule.${doseIndex}.status`]: status,
       };
 
       const result = await connectToDatabase.appointmentGois.findOneAndUpdate(
@@ -524,12 +521,12 @@ class AppointmentService {
 
       // Kiểm tra nếu tất cả các mũi đã hoàn thành, cập nhật trạng thái của cả lịch hẹn
       const allDosesCompleted = result.doseSchedule.every(
-        dose => dose.status === "completed"
+        (dose) => dose.status === "completed"
       );
 
       if (allDosesCompleted && result.status !== "completed") {
         await this.updateAptGoi(id, { status: "completed" });
-        
+
         // Tạo thông báo
         await notiService.createNoti({
           cusId: result.cusId,
