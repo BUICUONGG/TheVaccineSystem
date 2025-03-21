@@ -46,7 +46,9 @@ const ProfileHistory = () => {
       }));
 
       const allAppointments = [...aptLes, ...aptGois];
+      console.log("Đơn in hết ra đây: " ,allAppointments);
       setAppointments(allAppointments);
+      
     } catch (error) {
       console.error("Lỗi khi lấy dữ liệu:", error);
       toast.error('Không thể tải lịch sử đặt lịch');
@@ -107,16 +109,7 @@ const ProfileHistory = () => {
 
   const getFilteredAppointments = (tabKey) => {
     // Sắp xếp tất cả các đơn theo ngày đăng ký (sớm nhất lên đầu)
-    let filtered = [...appointments].sort((a, b) => {
-      // Chuyển đổi định dạng ngày từ DD/MM/YYYY sang Date object
-      const [dayA, monthA, yearA] = a.createdAt.split('/');
-      const [dayB, monthB, yearB] = b.createdAt.split('/');
-      
-      const dateA = new Date(yearA, monthA - 1, dayA);
-      const dateB = new Date(yearB, monthB - 1, dayB);
-      
-      return dateB - dateA; // Sắp xếp để ngày sớm hơn hiển thị trước
-    });
+    let filtered = [...appointments];
     
     // Lọc theo tab
     if (tabKey === 'pending') {
@@ -206,7 +199,7 @@ const ProfileHistory = () => {
             <Descriptions.Item label="Mô tả vaccine">{appointment.vaccine?.description}</Descriptions.Item>
           </>
         )}
-        <Descriptions.Item label="Ngày đăng ký">{appointment.createdAt}</Descriptions.Item>
+        {/* <Descriptions.Item label="Ngày đăng ký">{appointment.createdAt}</Descriptions.Item> */}
         <Descriptions.Item label="Ngày tiêm">{appointment.date}</Descriptions.Item>
         <Descriptions.Item label="Trạng thái">
           <Tag color={getStatusColor(appointment.status)}>
@@ -222,24 +215,24 @@ const ProfileHistory = () => {
   };
 
   const columns = [
-    {
-      title: 'Ngày đăng ký',
-      dataIndex: 'createdAt',
-      key: 'createdAt',
-      width: '15%',
-      sorter: (a, b) => {
-        // Chuyển đổi định dạng ngày từ DD/MM/YYYY sang Date object
-        const [dayA, monthA, yearA] = a.createdAt.split('/');
-        const [dayB, monthB, yearB] = b.createdAt.split('/');
+    // {
+    //   title: 'Ngày đăng ký',
+    //   dataIndex: 'createdAt',
+    //   key: 'createdAt',
+    //   width: '15%',
+    //   sorter: (a, b) => {
+    //     // Chuyển đổi định dạng ngày từ DD/MM/YYYY sang Date object
+    //     const [dayA, monthA, yearA] = a.createdAt.split('/');
+    //     const [dayB, monthB, yearB] = b.createdAt.split('/');
         
-        const dateA = new Date(yearA, monthA - 1, dayA);
-        const dateB = new Date(yearB, monthB - 1, dayB);
+    //     const dateA = new Date(yearA, monthA - 1, dayA);
+    //     const dateB = new Date(yearB, monthB - 1, dayB);
         
-        return dateB - dateA; // Sắp xếp để ngày sớm hơn hiển thị trước
-      },
-      defaultSortOrder: 'ascend',
-      sortDirections: ['ascend', 'descend'],
-    },
+    //     return dateB - dateA; // Sắp xếp để ngày sớm hơn hiển thị trước
+    //   },
+    //   defaultSortOrder: 'ascend',
+    //   sortDirections: ['ascend', 'descend'],
+    // },
     {
       title: 'Người tiêm',
       key: 'name',
