@@ -28,7 +28,7 @@ import Profile from "./pages/homepage/profile/Profile";
 import ProfileAccount from "./pages/homepage/profile/components/ProfileAccount";
 import FeedbackManagement from "./pages/usersRole/admin/FeedbackManagement";
 import StaffsPage from "./pages/usersRole/admin/staffsPage";
-import PaymentPage from "./components/Payment/Payment";
+import PaymentPage from "./components/payment/Payment";
 // import PaymentSuccess from "./components/Payment/PaymentSuccess";
 import VaccineDetail from "./pages/homepage/vaccineShop/vaccineDetail";
 
