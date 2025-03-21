@@ -198,6 +198,7 @@ const RegisterInjection = () => {
         status: "pending",
         ...(isChildRegistration && {
           childInfo: {
+            cusId: cusId,
             ...values.childInfo,
             birthday: values.childInfo.birthday.format("DD/MM/YYYY"),
           },
