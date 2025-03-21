@@ -36,6 +36,7 @@ const DashboardPage = () => {
   const [error, setError] = useState(null);
   const [userRoleModalVisible, setUserRoleModalVisible] = useState(false);
   const [contentModalVisible, setContentModalVisible] = useState(false);
+  const [appointmentTypeModalVisible, setAppointmentTypeModalVisible] = useState(false);
   const [stats, setStats] = useState({
     userList: [],
     totalVaccines: 0,
@@ -68,6 +69,10 @@ const DashboardPage = () => {
       monthlyRevenue: []
     }
   });
+
+  // Add new state for detailed appointment data
+  const [appointmentsGoi, setAppointmentsGoi] = useState([]);
+  const [appointmentsLe, setAppointmentsLe] = useState([]);
 
   useEffect(() => {
     fetchData();
@@ -202,6 +207,7 @@ const DashboardPage = () => {
             ? appointmentsLeResponse.data
             : [];
           console.log(`Processed ${appointmentsLe.length} lẻ appointments`);
+          setAppointmentsLe(appointmentsLe);
         }
 
         let appointmentsGoi = [];
@@ -210,6 +216,7 @@ const DashboardPage = () => {
             ? appointmentsGoiResponse.data
             : [];
           console.log(`Processed ${appointmentsGoi.length} gói appointments`);
+          setAppointmentsGoi(appointmentsGoi);
         }
 
         const allAppointments = [...appointmentsLe, ...appointmentsGoi];
@@ -440,6 +447,59 @@ const DashboardPage = () => {
   // Function to close content modal
   const closeContentModal = () => {
     setContentModalVisible(false);
+  };
+
+  // Function to show appointment type modal
+  const showAppointmentTypeModal = () => {
+    setAppointmentTypeModalVisible(true);
+  };
+
+  // Close appointment type modal
+  const closeAppointmentTypeModal = () => {
+    setAppointmentTypeModalVisible(false);
+  };
+
+  // Update the appointment statistics to include types count
+  const calculateAppointmentTypeStats = () => {
+    // Since we fetched them directly from API, we already have the correct counts
+    const appointmentsGoiCount = appointmentsGoi.length;
+    const appointmentsLeCount = appointmentsLe.length;
+    
+    return {
+      appointmentsLe: appointmentsLeCount,
+      appointmentsGoi: appointmentsGoiCount,
+      total: appointmentsGoiCount + appointmentsLeCount
+    };
+  };
+
+  // Calculate appointment type statistics
+  const appointmentTypeStats = calculateAppointmentTypeStats();
+
+  // Create pie chart data for appointment types
+  const appointmentTypePieData = [
+    { type: "Gói", value: appointmentTypeStats.appointmentsGoi },
+    { type: "Lẻ", value: appointmentTypeStats.appointmentsLe },
+  ];
+
+  // Configure pie chart for appointment types
+  const appointmentTypePieConfig = {
+    data: appointmentTypePieData,
+    angleField: "value",
+    colorField: "type",
+    radius: 0.8,
+    label: {
+      type: "outer",
+      content: "{name}: {percentage}",
+    },
+    interactions: [
+      {
+        type: "element-active",
+      },
+    ],
+    legend: {
+      position: "bottom",
+    },
+    color: ["#1890ff", "#52c41a"],
   };
 
   // Tính toán số lượng người dùng theo role
@@ -778,7 +838,11 @@ const DashboardPage = () => {
       {/* Appointment Status Cards */}
       <Row gutter={[16, 16]} className="stats-row appointment-status-cards">
         <Col xs={24} md={8}>
-          <Card className="stat-card">
+          <Card 
+            hoverable
+            onClick={showAppointmentTypeModal}
+            className="stat-card clickable-card"
+          >
             <Statistic
               title="Lịch hẹn"
               value={stats.totalAppointments}
@@ -1015,6 +1079,83 @@ const DashboardPage = () => {
             legend={{ position: "bottom" }}
             color={["#faad14", "#1890ff"]}
           />
+        </div>
+      </Modal>
+
+      {/* Appointment Type Distribution Modal */}
+      <Modal
+        title="Chi tiết lịch hẹn"
+        open={appointmentTypeModalVisible}
+        onCancel={closeAppointmentTypeModal}
+        footer={[
+          <Button key="close" onClick={closeAppointmentTypeModal}>
+            Đóng
+          </Button>
+        ]}
+        width={700}
+      >
+        <div style={{ marginBottom: "20px" }}>
+          <h3>Tổng số: {stats.totalAppointments} lịch hẹn</h3>
+          
+          <Table
+            dataSource={[
+              {
+                key: '1',
+                type: 'Lịch hẹn gói',
+                count: appointmentsGoi.length,
+                pending: appointmentsGoi.filter(a => a.status === "pending").length,
+                approved: appointmentsGoi.filter(a => a.status === "approve").length,
+                completed: appointmentsGoi.filter(a => a.status === "completed").length,
+                incomplete: appointmentsGoi.filter(a => a.status === "incomplete").length,
+                percentage: appointmentsGoi.length > 0 
+                  ? Math.round((appointmentsGoi.length / stats.totalAppointments) * 100) + "%" 
+                  : "0%"
+              },
+              {
+                key: '2',
+                type: 'Lịch hẹn lẻ',
+                count: appointmentsLe.length,
+                pending: appointmentsLe.filter(a => a.status === "pending").length,
+                approved: appointmentsLe.filter(a => a.status === "approve").length,
+                completed: appointmentsLe.filter(a => a.status === "completed").length,
+                incomplete: appointmentsLe.filter(a => a.status === "incomplete").length,
+                percentage: appointmentsLe.length > 0 
+                  ? Math.round((appointmentsLe.length / stats.totalAppointments) * 100) + "%" 
+                  : "0%"
+              }
+            ]}
+            columns={[
+              {
+                title: "Loại lịch hẹn",
+                dataIndex: "type",
+                key: "type",
+                render: (type) => (
+                  <Tag
+                    color={
+                      type.includes("gói") ? "#1890ff" : "#52c41a"
+                    }
+                  >
+                    {type}
+                  </Tag>
+                )
+              },
+              {
+                title: "Số lượng",
+                dataIndex: "count",
+                key: "count",
+                sorter: (a, b) => a.count - b.count,
+              },
+              {
+                title: "Tỷ lệ",
+                dataIndex: "percentage",
+                key: "percentage",
+              }
+            ]}
+            pagination={false}
+          />
+        </div>
+        <div className="modal-chart">
+          <Pie {...appointmentTypePieConfig} />
         </div>
       </Modal>
     </div>
