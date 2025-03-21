@@ -658,21 +658,10 @@ const HomePage = () => {
                         : blog.blogContent}
                     </p>
                     <div className="blog-meta">
-                      <span className="blog-author">Tác giả: {blog.author}</span>
-                      <span className="blog-date">Ngày: {new Date(blog.createDate).toLocaleDateString()}</span>
+                      <span className="blog-author"><strong>Tác giả:</strong> {blog.author}</span>
                     </div>
                     <div className="blog-actions">
-                      <span
-                        className={`like-button ${likedBlogStates[blog._id] ? 'liked' : ''}`}
-                        onClick={() => toggleLike(blog._id)}
-                      >
-                        {likedBlogStates[blog._id] ? <HeartFilled /> : <HeartOutlined />}
-                      </span>
-                      <span className="comment-icon"><CommentOutlined /></span>
-                      <span className="share-icon"><ShareAltOutlined /></span>
-                      <span className="views-count">
-                        <EyeOutlined /> 1000
-                      </span>
+                      <span className="blog-date"><strong>Ngày:</strong> {new Date(blog.createDate).toLocaleDateString()}</span>
                     </div>
                   </div>
                 </div>
@@ -788,19 +777,10 @@ const HomePage = () => {
                 <i className="fab fa-facebook"></i>
               </a>
               <a href="#">
-                <i className="fab fa-twitter"></i>
-              </a>
-              <a href="#">
                 <i className="fab fa-instagram"></i>
               </a>
               <a href="#">
-                <i className="fab fa-youtube"></i>
-              </a>
-              <a href="#">
-                <i className="fab fa-tiktok"></i>
-              </a>
-              <a href="#">
-                <i className="fab fa-linkedin"></i>
+                <i className="fab fa-github"></i>
               </a>
             </div>
           </div>

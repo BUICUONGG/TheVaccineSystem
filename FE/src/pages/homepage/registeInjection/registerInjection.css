@@ -809,6 +809,26 @@ Header Framework styles
   align-items: flex-start;
   gap: 16px;
   min-height: 200px;
+  cursor: pointer;
+}
+
+.vaccine-card.no-price {
+  opacity: 0.7;
+  cursor: not-allowed;
+  background-color: #f5f5f5;
+}
+
+.vaccine-card.no-price:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+.vaccine-card.no-price .vaccine-checkbox {
+  display: none;
+}
+
+.vaccine-card.no-price .vaccine-price {
+  color: #ff4d4f;
 }
 
 /* Checkbox */
