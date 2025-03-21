@@ -28,6 +28,7 @@ import {
 import { Pie, Column } from "@ant-design/plots";
 import axiosInstance from "../../../service/api";
 import { useNavigate } from "react-router-dom";
+import "./dashboardPage.css";
 
 const DashboardPage = () => {
   const navigate = useNavigate();
@@ -504,23 +505,23 @@ const DashboardPage = () => {
 
   // Recent appointments columns
   const appointmentColumns = [
-    {
-      title: "Khách hàng",
-      key: "customer",
-      render: (_, record) => {
-        const customerName =
-          record.customer?.customerName ||
-          record.customerDetails?.customerName ||
-          record.cusId?.customerName ||
-          record.cusId?.name ||
-          "N/A";
-        return customerName;
-      },
-    },
+    // {
+    //   title: "Khách hàng",
+    //   key: "customer",
+    //   render: (_, record) => {
+    //     const customerName =
+    //       record.customer?.customerName ||
+    //       record.customerDetails?.customerName ||
+    //       record.cusId?.customerName ||
+    //       record.cusId?.name ||
+    //       "N/A";
+    //     return customerName;
+    //   },
+    // },
     {
       title: "Loại",
       key: "type",
-      render: (_, record) => (record.vaccineId ? "Lẻ" : "Gói"),
+      render: (_, record) => (record.vaccineId ? "Gói" : "Lẻ"),
     },
     {
       title: "Ngày hẹn",
@@ -628,7 +629,6 @@ const DashboardPage = () => {
     stats.revenueStats.monthlyRevenue.forEach(item => {
       revenueColumnData.push(
         { month: item.month, value: item.completedRevenue, type: "Đã thanh toán" },
-        { month: item.month, value: item.pendingRevenue, type: "Chờ thanh toán" }
       );
     });
   }
@@ -677,12 +677,6 @@ const DashboardPage = () => {
       sorter: (a, b) => a.completedRevenue - b.completedRevenue,
     },
     {
-      title: 'Chờ thanh toán',
-      key: 'pendingRevenue',
-      render: (_, record) => `${record.pendingRevenue.toLocaleString('vi-VN')} VNĐ`,
-      sorter: (a, b) => a.pendingRevenue - b.pendingRevenue,
-    },
-    {
       title: 'Tổng doanh thu',
       key: 'revenue',
       render: (_, record) => `${record.revenue.toLocaleString('vi-VN')} VNĐ`,
@@ -692,7 +686,7 @@ const DashboardPage = () => {
 
   if (loading) {
     return (
-      <div style={{ padding: "24px", textAlign: "center" }}>
+      <div className="loading-container">
         <Spin size="large" />
         <p>Đang tải dữ liệu thống kê...</p>
       </div>
@@ -701,7 +695,7 @@ const DashboardPage = () => {
 
   if (error) {
     return (
-      <div style={{ padding: "24px" }}>
+      <div className="error-container">
         <Alert
           message="Lỗi"
           description={error}
@@ -722,14 +716,8 @@ const DashboardPage = () => {
   }
 
   return (
-    <div style={{ padding: "24px" }}>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          marginBottom: "24px",
-        }}
-      >
+    <div className="dashboard-container">
+      <div className="dashboard-header">
         <h2>Tổng quan hệ thống</h2>
         <Button type="primary" icon={<ReloadOutlined />} onClick={fetchData}>
           Làm mới dữ liệu
@@ -738,11 +726,11 @@ const DashboardPage = () => {
 
       {/* Stats Cards */}
       <Row gutter={[16, 16]}>
-        <Col xs={24} sm={8} lg={4}>
+        <Col xs={24} sm={12} lg={6}>
           <Card
             hoverable
             onClick={showUserRoleModal}
-            style={{ cursor: "pointer" }}
+            className="stat-card clickable-card"
           >
             <Statistic
               title="Tổng người dùng"
@@ -752,66 +740,11 @@ const DashboardPage = () => {
           </Card>
         </Col>
 
-        {/* User Role Distribution Modal */}
-        <Modal
-          title="Phân bố người dùng theo vai trò"
-          open={userRoleModalVisible}
-          onCancel={closeUserRoleModal}
-          footer={[
-            <Button key="close" onClick={closeUserRoleModal}>
-              Đóng
-            </Button>
-          ]}
-          width={600}
-        >
-          <div style={{ marginBottom: "20px" }}>
-            <Table
-              dataSource={Object.entries(roleCount).map(([role, count], index) => ({
-                key: index,
-                role: role.charAt(0).toUpperCase() + role.slice(1),
-                count,
-                percentage: Math.round((count / stats.userList.length) * 100) + "%"
-              }))}
-              columns={[
-                {
-                  title: "Vai trò",
-                  dataIndex: "role",
-                  key: "role",
-                  render: (role) => (
-                    <Tag
-                      color={
-                        role === "Admin" ? "#ff4d4f" :
-                        role === "Staff" ? "#1890ff" : "#52c41a"
-                      }
-                    >
-                      {role}
-                    </Tag>
-                  )
-                },
-                {
-                  title: "Số lượng",
-                  dataIndex: "count",
-                  key: "count",
-                },
-                {
-                  title: "Tỷ lệ",
-                  dataIndex: "percentage",
-                  key: "percentage",
-                }
-              ]}
-              pagination={false}
-            />
-          </div>
-          <div style={{ height: "300px" }}>
-            <Pie {...pieConfig} />
-          </div>
-        </Modal>
-
-        <Col xs={24} sm={8} lg={4}>
+        <Col xs={24} sm={12} lg={6}>
           <Card
             hoverable
             onClick={showContentModal}
-            style={{ cursor: "pointer" }}
+            className="stat-card clickable-card"
           >
             <Statistic
               title="Nội dung"
@@ -821,8 +754,8 @@ const DashboardPage = () => {
           </Card>
         </Col>
 
-        <Col xs={24} sm={8} lg={4}>
-          <Card>
+        <Col xs={24} sm={12} lg={6}>
+          <Card className="stat-card">
             <Statistic
               title="Vaccine"
               value={stats.totalVaccines}
@@ -831,18 +764,8 @@ const DashboardPage = () => {
           </Card>
         </Col>
 
-        <Col xs={24} sm={8} lg={4}>
-          <Card>
-            <Statistic
-              title="Lịch hẹn"
-              value={stats.totalAppointments}
-              prefix={<CalendarOutlined style={{ color: "#13c2c2" }} />}
-            />
-          </Card>
-        </Col>
-
-        <Col xs={24} sm={8} lg={4}>
-          <Card>
+        <Col xs={24} sm={12} lg={6}>
+          <Card className="stat-card">
             <Statistic
               title="Đánh giá"
               value={stats.totalFeedback}
@@ -853,50 +776,18 @@ const DashboardPage = () => {
       </Row>
 
       {/* Appointment Status Cards */}
-      <Row gutter={[16, 16]} style={{ marginTop: "16px" }}>
-        <Col xs={24} md={6}>
-          <Card>
-          <Statistic
+      <Row gutter={[16, 16]} className="stats-row appointment-status-cards">
+        <Col xs={24} md={8}>
+          <Card className="stat-card">
+            <Statistic
               title="Lịch hẹn"
               value={stats.totalAppointments}
               prefix={<CalendarOutlined style={{ color: "#13c2c2" }} />}
             />
-            {/* <Progress
-              percent={
-                Math.round(
-                  (stats.appointmentStats.pending / stats.totalAppointments) *
-                    100
-                ) || 0
-              }
-              strokeColor="#faad14"
-              showInfo={false}
-              status="active"
-            /> */}
           </Card>
         </Col>
-        <Col xs={24} md={6}>
-          <Card>
-            <Statistic
-              title="Lịch hẹn đã duyệt"
-              value={stats.appointmentStats.approved}
-              valueStyle={{ color: "#1890ff" }}
-              prefix={<CheckCircleOutlined />}
-              suffix={<small>/{stats.totalAppointments}</small>}
-            />
-            <Progress
-              percent={
-                Math.round(
-                  (stats.appointmentStats.approved / stats.totalAppointments) *
-                    100
-                ) || 0
-              }
-              strokeColor="#1890ff"
-              showInfo={false}
-            />
-          </Card>
-        </Col>
-        <Col xs={24} md={6}>
-          <Card>
+        <Col xs={24} md={8}>
+          <Card className="stat-card">
             <Statistic
               title="Đơn Tiêm thành công"
               value={stats.appointmentStats.completed}
@@ -916,8 +807,8 @@ const DashboardPage = () => {
             />
           </Card>
         </Col>
-        <Col xs={24} md={6}>
-          <Card>
+        <Col xs={24} md={8}>
+          <Card className="stat-card">
             <Statistic
               title="Đơn bị hủy"
               value={stats.appointmentStats.incomplete}
@@ -941,9 +832,9 @@ const DashboardPage = () => {
       </Row>
 
       {/* Revenue Statistics */}
-      <Row gutter={[16, 16]} style={{ marginTop: "16px" }}>
+      <Row gutter={[16, 16]} className="stats-row">
         <Col xs={24} md={12}>
-          <Card>
+          <Card className="stat-card revenue-card">
             <Statistic
               title="Tổng doanh thu"
               value={stats.revenueStats.totalRevenue}
@@ -954,9 +845,9 @@ const DashboardPage = () => {
           </Card>
         </Col>
         <Col xs={24} md={12}>
-          <Card>
+          <Card className="stat-card completed-revenue-card">
             <Statistic
-              title="Doanh thu đã thanh toán"
+              title="Doanh thu sau tiêm"
               value={stats.revenueStats.completedRevenue}
               valueStyle={{ color: "#52c41a" }}
               suffix="VNĐ"
@@ -964,32 +855,21 @@ const DashboardPage = () => {
             />
           </Card>
         </Col>
-        {/* <Col xs={24} md={8}>
-          <Card>
-            <Statistic
-              title="Doanh thu chờ xử lý"
-              value={stats.revenueStats.pendingRevenue}
-              valueStyle={{ color: "#faad14" }}
-              suffix="VNĐ"
-              formatter={(value) => value.toLocaleString('vi-VN')}
-            />
-          </Card>
-        </Col> */}
       </Row>
 
-      {/* Charts */}
-      <Row gutter={[16, 16]} style={{ marginTop: "24px" }}>
+      {/* Charts
+      <Row gutter={[16, 16]} className="stats-row">
         <Col xs={24} lg={12}>
-          <Card title="Lịch hẹn theo tháng">
-            <div style={{ height: "300px" }}>
+          <Card title="Lịch hẹn theo tháng" className="dashboard-card">
+            <div className="chart-container">
               <Column {...columnConfig} />
             </div>
           </Card>
         </Col>
-      </Row>
+      </Row> */}
 
       {/* Feedback and Appointments */}
-      <Row gutter={[16, 16]} style={{ marginTop: "24px" }}>
+      <Row gutter={[16, 16]} className="stats-row">
         <Col xs={24} lg={12}>
           <Card
             title={
@@ -1002,15 +882,16 @@ const DashboardPage = () => {
                 </Tooltip>
               </div>
             }
+            className="dashboard-card"
           >
-            <div style={{ height: "300px" }}>
+            <div className="chart-container">
               <Pie {...feedbackPieConfig} />
             </div>
           </Card>
         </Col>
 
         <Col xs={24} lg={12}>
-          <Card title="Lịch hẹn gần đây">
+          <Card title="Lịch hẹn gần đây" className="dashboard-card table-card">
             <Table
               dataSource={stats.recentAppointments}
               columns={appointmentColumns}
@@ -1023,9 +904,9 @@ const DashboardPage = () => {
       </Row>
 
       {/* Recent Vaccines */}
-      <Row gutter={[16, 16]} style={{ marginTop: "24px" }}>
+      <Row gutter={[16, 16]} className="stats-row">
         <Col xs={24}>
-          <Card title="Vaccine mới nhất">
+          <Card title="Vaccine mới nhất" className="dashboard-card table-card">
             <Table
               dataSource={stats.recentVaccines}
               columns={vaccineColumns}
@@ -1038,16 +919,16 @@ const DashboardPage = () => {
       </Row>
 
       {/* Revenue Chart & Table */}
-      <Row gutter={[16, 16]} style={{ marginTop: "24px" }}>
+      <Row gutter={[16, 16]} className="stats-row">
         <Col xs={24} lg={12}>
-          <Card title="Doanh thu theo tháng">
-            <div style={{ height: "300px" }}>
+          <Card title="Doanh thu theo tháng" className="dashboard-card">
+            <div className="chart-container">
               <Column {...revenueColumnConfig} />
             </div>
           </Card>
         </Col>
         <Col xs={24} lg={12}>
-          <Card title="Bảng doanh thu hàng tháng">
+          <Card title="Bảng doanh thu hàng tháng" className="dashboard-card table-card">
             <Table
               dataSource={stats.revenueStats.monthlyRevenue.filter(item => item.revenue > 0)}
               columns={revenueColumns}
@@ -1117,7 +998,7 @@ const DashboardPage = () => {
             pagination={false}
           />
         </div>
-        <div style={{ height: "300px" }}>
+        <div className="modal-chart">
           <Pie
             data={[
               { type: "Bài viết", value: stats.totalBlogs },

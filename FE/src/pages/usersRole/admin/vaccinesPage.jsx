@@ -608,48 +608,48 @@ const VaccinesPage = () => {
           />
         ),
       },
-      {
-        key: "imports",
-        label: (
-          <span>
-            <InboxOutlined /> Nhập Vaccine
-          </span>
-        ),
-        children: (
-          <Table
-            dataSource={filteredImports}
-            columns={importColumns}
-            loading={loading.imports}
-            rowKey="_id"
-            pagination={{
-              pageSize: 10,
-              showSizeChanger: true,
-              showTotal: (total) => `Tổng ${total} lô nhập`,
-            }}
-          />
-        ),
-      },
-      {
-        key: "packages",
-        label: (
-          <span>
-            <ApartmentOutlined /> Gói Vaccine
-          </span>
-        ),
-        children: (
-          <Table
-            dataSource={filteredPackages}
-            columns={packageColumns}
-            loading={loading.packages}
-            rowKey="_id"
-            pagination={{
-              pageSize: 10,
-              showSizeChanger: true,
-              showTotal: (total) => `Tổng ${total} gói vaccine`,
-            }}
-          />
-        ),
-      },
+      // {
+      //   key: "imports",
+      //   label: (
+      //     <span>
+      //       <InboxOutlined /> Nhập Vaccine
+      //     </span>
+      //   ),
+      //   children: (
+      //     <Table
+      //       dataSource={filteredImports}
+      //       columns={importColumns}
+      //       loading={loading.imports}
+      //       rowKey="_id"
+      //       pagination={{
+      //         pageSize: 10,
+      //         showSizeChanger: true,
+      //         showTotal: (total) => `Tổng ${total} lô nhập`,
+      //       }}
+      //     />
+      //   ),
+      // },
+      // {
+      //   key: "packages",
+      //   label: (
+      //     <span>
+      //       <ApartmentOutlined /> Gói Vaccine
+      //     </span>
+      //   ),
+      //   children: (
+      //     <Table
+      //       dataSource={filteredPackages}
+      //       columns={packageColumns}
+      //       loading={loading.packages}
+      //       rowKey="_id"
+      //       pagination={{
+      //         pageSize: 10,
+      //         showSizeChanger: true,
+      //         showTotal: (total) => `Tổng ${total} gói vaccine`,
+      //       }}
+      //     />
+      //   ),
+      // },
     ];
   };
 
