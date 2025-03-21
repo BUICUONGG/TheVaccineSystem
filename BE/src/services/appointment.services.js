@@ -365,15 +365,12 @@ class AppointmentService {
       } = data;
       let finalChildId = childId ? new ObjectId(childId) : null;
 
-      // 🔹 Nếu không có childId nhưng có thông tin trẻ, tạo mới hồ sơ trẻ
+      // Nếu không có childId nhưng có thông tin trẻ, tạo mới hồ sơ trẻ
       if (!finalChildId && childInfo) {
-        finalChildId = await this.createChildIfNotExists(
-          new ObjectId(cusId),
-          childInfo
-        );
+        finalChildId = await childService.create(childInfo);
       }
 
-      // 🔹 Lấy thông tin gói vaccine
+      // Lấy thông tin gói vaccine
       const vaccinePackage = await connectToDatabase.vaccinepackages.findOne({
         _id: new ObjectId(vaccinePackageId),
       });
