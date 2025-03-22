@@ -32,22 +32,33 @@ const PaymentPage = () => {
     // Prepare payment data from invoice data
     const data = {
       cusId: invoiceData.cusId,
-      vaccineId: invoiceData.vaccineId,
+      vaccineId:
+        invoiceData.type === "aptLe" ? invoiceData.vaccineId : undefined,
       vaccinePackageId:
-        invoiceData.type === "aptGoi" ? invoiceData.vaccineId : undefined,
-      childId: invoiceData.appointmentData?.childInfo ? "new" : undefined, // If has childInfo, we're creating a new child
+        invoiceData.type === "aptGoi"
+          ? invoiceData.vaccinePackageId
+          : undefined,
+      childId: invoiceData.childInfo ? "new" : undefined, // If has childInfo, we're creating a new child
       price: invoiceData.price,
       type: invoiceData.type, // aptLe or aptGoi
-      date: invoiceData.appointmentData?.date,
-      time: invoiceData.appointmentData?.time,
-      childInfo: invoiceData.appointmentData?.childInfo,
+      date: invoiceData.date,
+      time: invoiceData.time,
+      childInfo: invoiceData.childInfo,
+      note: invoiceData.note || "",
     };
 
     setPaymentData({
       ...data,
       vaccineName: invoiceData.vaccineName,
       customerName: invoiceData.customerName,
-      appointmentData: invoiceData.appointmentData,
+      // Lưu thông tin ngày và thời gian vào appointmentData cho việc hiển thị
+      appointmentData: {
+        date: invoiceData.date,
+        time: invoiceData.time,
+        childInfo: invoiceData.childInfo,
+        createAt:
+          invoiceData.createdAt || new Date().toLocaleDateString("vi-VN"),
+      },
     });
 
     setLoading(false);
@@ -66,6 +77,7 @@ const PaymentPage = () => {
         JSON.stringify({
           cusId: paymentData.cusId,
           vaccineId: paymentData.vaccineId,
+          vaccinePackageId: paymentData.vaccinePackageId,
           date: paymentData.date,
           time: paymentData.time,
           type: paymentData.type, // aptLe or aptGoi
@@ -354,20 +366,22 @@ const PaymentPage = () => {
         open={cancelModalVisible}
         onCancel={() => setCancelModalVisible(false)}
         footer={[
-          <Button key="back" onClick={() => setCancelModalVisible(false)}>
-            Quay lại
-          </Button>,
-          <Button
-            key="submit"
-            type="primary"
-            danger
-            onClick={handleCancelConfirm}
-            disabled={
-              !cancelReason || (cancelReason === "other" && !otherReason)
-            }
-          >
-            Xác nhận hủy
-          </Button>,
+          <div key="footer" className="modal-footer-buttons">
+            <Button key="back" onClick={() => setCancelModalVisible(false)}>
+              Quay lại
+            </Button>
+            <Button
+              key="submit"
+              type="primary"
+              danger
+              onClick={handleCancelConfirm}
+              disabled={
+                !cancelReason || (cancelReason === "other" && !otherReason)
+              }
+            >
+              Xác nhận hủy
+            </Button>
+          </div>,
         ]}
       >
         <div className="cancel-reason-container">

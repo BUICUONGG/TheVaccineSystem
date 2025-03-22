@@ -226,6 +226,19 @@
   border-top: 1px dashed #f0f0f0;
 }
 
+/* Modal Footer Buttons */
+.modal-footer-buttons {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  gap: 10px;
+}
+
+.modal-footer-buttons button {
+  flex: 1;
+  height: 40px;
+}
+
 @media (max-width: 768px) {
   .invoice-container {
     padding: 1rem;
@@ -274,5 +287,15 @@
   
   .cancel-reason-container {
     padding: 0;
+  }
+  
+  /* Responsive Modal Footer Buttons */
+  .modal-footer-buttons {
+    flex-direction: column;
+  }
+  
+  .modal-footer-buttons button {
+    width: 100%;
+    margin-top: 10px;
   }
 }
