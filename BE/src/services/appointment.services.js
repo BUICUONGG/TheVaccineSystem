@@ -366,7 +366,7 @@ class AppointmentService {
       let finalChildId = childId ? new ObjectId(childId) : null;
 
       // Nếu không có childId nhưng có thông tin trẻ, tạo mới hồ sơ trẻ
-      if (!finalChildId && childInfo) {
+      if (!finalChildId && childInfo && Object.keys(childInfo).length > 0) {
         finalChildId = await childService.create(childInfo);
       }
 

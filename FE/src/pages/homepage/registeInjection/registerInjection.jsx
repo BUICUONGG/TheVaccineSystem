@@ -206,7 +206,6 @@ const RegisterInjection = () => {
         childId: "",
         customerName: parentInfo?.customerName || "Khách hàng",
         date: selectedDate,
-        // startDate: selectedDate,
         time: time,
         status: "pending",
       };
@@ -214,7 +213,7 @@ const RegisterInjection = () => {
       // Thêm thông tin trẻ em nếu là đăng ký cho trẻ
       if (isChildRegistration && values.childInfo) {
         invoiceData.childInfo = {
-          customerId: values.childInfo.cusId,
+          // customerId: values.childInfo.customerId,
           name: values.childInfo.name,
           birthday: values.childInfo.birthday.format("DD/MM/YYYY"),
           gender: values.childInfo.gender,
@@ -240,7 +239,7 @@ const RegisterInjection = () => {
         );
         invoiceData = {
           ...invoiceData,
-          vaccineId: selectedPackage._id,
+          vaccinePackageId: selectedPackage._id,
           vaccineName: selectedPackage.packageName,
           price: selectedPackage.price || 0,
           type: "aptGoi",

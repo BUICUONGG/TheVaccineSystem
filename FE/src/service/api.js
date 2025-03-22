@@ -1,7 +1,6 @@
 import axios from "axios";
 
-const API_URL = "http://localhost:8080";
-
+const API_URL = "https://thevaccinesystem-swp.onrender.com";
 const axiosInstance = axios.create({
   baseURL: API_URL,
   headers: {
@@ -39,7 +38,11 @@ axiosInstance.interceptors.response.use(
     const originalRequest = error.config;
 
     // Only attempt to refresh token if we're not on the login page and there was a previous token
-    if (error.response?.status === 401 && !originalRequest._retry && localStorage.getItem("accesstoken")) {
+    if (
+      error.response?.status === 401 &&
+      !originalRequest._retry &&
+      localStorage.getItem("accesstoken")
+    ) {
       originalRequest._retry = true;
       console.log("Token expired, trying to refresh...");
 
