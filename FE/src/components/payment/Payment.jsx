@@ -17,10 +17,56 @@ const PaymentPage = () => {
   const [otherReason, setOtherReason] = useState("");
   const [processingPayment, setProcessingPayment] = useState(false);
 
+  // useEffect(() => {
+  //   document.title = "Xác nhận thanh toán";
+
+  //   // Get data directly from registerInjection
+  //   if (!location.state?.invoiceData) {
+  //     setError("Không có thông tin thanh toán");
+  //     setLoading(false);
+  //     return;
+  //   }
+
+  //   const invoiceData = location.state.invoiceData;
+
+  //   // Prepare payment data from invoice data
+  //   const data = {
+  //     cusId: invoiceData.cusId,
+  //     vaccineId:
+  //       invoiceData.type === "aptLe" ? invoiceData.vaccineId : undefined,
+  //     vaccinePackageId:
+  //       invoiceData.type === "aptGoi"
+  //         ? invoiceData.vaccinePackageId
+  //         : undefined,
+  //     childId: invoiceData.childInfo ? "new" : undefined, // If has childInfo, we're creating a new child
+  //     price: invoiceData.price,
+  //     type: invoiceData.type, // aptLe or aptGoi
+  //     date: invoiceData.date,
+  //     time: invoiceData.time,
+  //     childInfo: invoiceData.childInfo,
+  //     note: invoiceData.note || "",
+  //   };
+
+  //   setPaymentData({
+  //     ...data,
+  //     vaccineName: invoiceData.vaccineName,
+  //     customerName: invoiceData.customerName,
+  //     // Lưu thông tin ngày và thời gian vào appointmentData cho việc hiển thị
+  //     appointmentData: {
+  //       date: invoiceData.date,
+  //       time: invoiceData.time,
+  //       childInfo: invoiceData.childInfo,
+  //       createAt:
+  //         invoiceData.createdAt || new Date().toLocaleDateString("vi-VN"),
+  //     },
+  //   });
+
+  //   setLoading(false);
+  // }, [location.state]);
+
   useEffect(() => {
     document.title = "Xác nhận thanh toán";
 
-    // Get data directly from registerInjection
     if (!location.state?.invoiceData) {
       setError("Không có thông tin thanh toán");
       setLoading(false);
@@ -32,34 +78,45 @@ const PaymentPage = () => {
     // Prepare payment data from invoice data
     const data = {
       cusId: invoiceData.cusId,
-      vaccineId:
-        invoiceData.type === "aptLe" ? invoiceData.vaccineId : undefined,
-      vaccinePackageId:
-        invoiceData.type === "aptGoi"
-          ? invoiceData.vaccinePackageId
-          : undefined,
-      childId: invoiceData.childInfo ? "new" : undefined, // If has childInfo, we're creating a new child
+      childId: "", // Để trống theo yêu cầu API
       price: invoiceData.price,
-      type: invoiceData.type, // aptLe or aptGoi
+      type: invoiceData.type,
       date: invoiceData.date,
       time: invoiceData.time,
-      childInfo: invoiceData.childInfo,
-      note: invoiceData.note || "",
+      status: "pending",
+      note: `Lịch tiêm ${invoiceData.type === "aptLe" ? "vaccine" : "gói"} ${invoiceData.vaccineName}`
     };
+
+    // Thêm thông tin trẻ nếu đăng ký cho trẻ
+    if (invoiceData.childInfo) {
+      data.childInfo = {
+        name: invoiceData.childInfo.name,
+        birthday: invoiceData.childInfo.birthday,
+        gender: invoiceData.childInfo.gender,
+        healthNote: invoiceData.childInfo.healthNote || ""
+      };
+    }
+
+    // Thêm vaccineId hoặc vaccinePackageId tùy theo type
+    if (invoiceData.type === "aptLe") {
+      data.vaccineId = invoiceData.vaccineId;
+    } else if (invoiceData.type === "aptGoi") {
+      data.vaccinePackageId = invoiceData.vaccinePackageId;
+    }
 
     setPaymentData({
       ...data,
-      vaccineName: invoiceData.vaccineName,
       customerName: invoiceData.customerName,
-      // Lưu thông tin ngày và thời gian vào appointmentData cho việc hiển thị
+      vaccineName: invoiceData.vaccineName,
       appointmentData: {
         date: invoiceData.date,
         time: invoiceData.time,
         childInfo: invoiceData.childInfo,
-        createAt:
-          invoiceData.createdAt || new Date().toLocaleDateString("vi-VN"),
-      },
+        createAt: invoiceData.createdAt || new Date().toLocaleDateString("vi-VN"),
+      }
     });
+
+    console.log("Payment Data:", data); // Để debug
 
     setLoading(false);
   }, [location.state]);

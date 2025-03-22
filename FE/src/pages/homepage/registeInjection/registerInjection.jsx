@@ -203,27 +203,22 @@ const RegisterInjection = () => {
       // Tạo dữ liệu cơ bản cho đơn đăng ký
       let invoiceData = {
         cusId: cusId,
+        childId: "",
         customerName: parentInfo?.customerName || "Khách hàng",
-        date: selectedDate,
+        date: selectedDate,   
         time: time,
         status: "pending",
-        note: "",
-        createdAt: new Date().toLocaleDateString("vi-VN"),
       };
 
       // Thêm thông tin trẻ em nếu là đăng ký cho trẻ
-      // Cấu trúc dữ liệu childInfo phải chính xác theo mẫu backend
       if (isChildRegistration && values.childInfo) {
-        // Format childInfo đúng theo yêu cầu của childService.create()
         invoiceData.childInfo = {
-          cusId: cusId, // Quan trọng: phải có cusId của người giám hộ
-          childName: values.childInfo.name, // Đổi từ name thành childName
+          // customerId: values.childInfo.cusId,
+          name: values.childInfo.name,
           birthday: values.childInfo.birthday.format("DD/MM/YYYY"),
           gender: values.childInfo.gender,
           healthNote: values.childInfo.healthNote || "",
         };
-      } else {
-        invoiceData.childId = null;
       }
 
       // Thêm thông tin vaccine
@@ -251,41 +246,42 @@ const RegisterInjection = () => {
         };
       }
 
+      // if (selectedVaccineType === "single") {
+      //   const selectedVaccine = vaccineList.find(v => v._id === selectedVaccineId);
+      //   if (!selectedVaccine) {
+      //     throw new Error("Không tìm thấy vaccine");
+      //   }
+      //   invoiceData = {
+      //     ...invoiceData,
+      //     vaccineId: selectedVaccine._id,
+      //     price: importProductsPrice[selectedVaccineId]?.unitPrice || 0,
+      //     type: "aptLe",
+      //     note: `Đăng ký tiêm ${selectedVaccine.vaccineName}`
+      //   };
+      // } else {
+      //   // Xử lý gói vaccine
+      //   const selectedPackage = vaccinePackages.find(p => p._id === selectedVaccineId);
+      //   if (!selectedPackage) {
+      //     toast.error("Không tìm thấy gói vaccine");
+      //     return;
+      //   }
+      
+      //   invoiceData = {
+      //     ...invoiceData,
+      //     vaccinePackageId: selectedPackage._id, // Thêm vaccinePackageId
+      //     price: selectedPackage.price || 0,
+      //     type: "aptGoi",
+      //     note: `Đăng ký tiêm gói ${selectedPackage.packageName}`,
+      //     childInfo: isChildRegistration ? {
+      //       name: values.childInfo.name,
+      //       birthday: values.childInfo.birthday.format("DD/MM/YYYY"),
+      //       gender: values.childInfo.gender,
+      //       healthNote: values.childInfo.healthNote || ""
+      //     } : null
+      //   };
+      // }
+
       console.log("Dữ liệu gửi đi:", invoiceData);
-
-      // Chỉ sử dụng cho debug, nên xóa sau khi sửa xong
-      if (isChildRegistration && selectedVaccineType === "package") {
-        // Log ra thông tin chi tiết về payload
-        console.log(
-          "DEBUG - Payload chi tiết cho đăng ký trẻ em với gói vaccine:",
-          {
-            childInfoFormat: invoiceData.childInfo,
-            vaccinePackageId: invoiceData.vaccinePackageId,
-            cusId: cusId,
-            date: selectedDate,
-          }
-        );
-
-        // Tùy chọn: bạn có thể thử tự tạo child trước
-        try {
-          const createChildResponse = await axiosInstance.post(
-            "/child/create",
-            invoiceData.childInfo,
-            { headers: { Authorization: `Bearer ${accesstoken}` } }
-          );
-          console.log("Tạo child trước khi đăng ký:", createChildResponse.data);
-          // Nếu tạo thành công, sử dụng childId được trả về
-          if (createChildResponse.data && createChildResponse.data._id) {
-            invoiceData.childId = createChildResponse.data._id;
-            delete invoiceData.childInfo; // Xóa childInfo vì đã có childId
-          }
-        } catch (childError) {
-          console.error(
-            "Lỗi khi tạo child:",
-            childError.response?.data || childError.message
-          );
-        }
-      }
 
       // Chuyển đến trang thanh toán
       navigate("/payment", {

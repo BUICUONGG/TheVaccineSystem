@@ -10,6 +10,8 @@ import { validateAccessToken } from "../middlewares/user.middleware.js";
 
 const childRoutes = Router();
 
+
+
 //PATH:vô đây lấy api nè
 // mặc định:      http://localhost:8080/child/.......
 
