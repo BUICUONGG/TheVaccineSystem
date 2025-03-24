@@ -23,7 +23,7 @@ class ChildService {
       }
       const result = await connectToDatabase.childs.insertOne(childData);
       if (!result) throw new Error("Không tạo được child");
-      return { _id: result.insertedId, ...childData };
+      return { ...childData };
     } catch (error) {
       console.error("Create child error:", error.message);
       throw new Error(error.message);

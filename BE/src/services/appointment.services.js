@@ -80,13 +80,13 @@ class AppointmentService {
   // Tạo lịch hẹn lẻ
   async createAptLe(data) {
     try {
-      const { cusId, childId, childInfo, vaccineId, date, time, status, note } =
-        data;
+      const { cusId, childId, childInfo, vaccineId, date, time, note } = data;
       let finalChildId = childId ? new ObjectId(childId) : null;
       //  Nếu không có childId và có childInfo => Tạo mới hồ sơ trẻ
       if (!finalChildId && childInfo && Object.keys(childInfo).length > 0) {
         finalChildId = await childService.create(childInfo);
       }
+
       // Kiểm tra tồn kho vaccine
       const totalStock = await this.checkVaccineStock(new ObjectId(vaccineId));
       if (totalStock <= 0) {
@@ -353,23 +353,14 @@ class AppointmentService {
 
   async createAptGoi(data) {
     try {
-      const {
-        cusId,
-        childId,
-        childInfo,
-        vaccinePackageId,
-        date,
-        time,
-        note,
-        status,
-      } = data;
+      const { cusId, childId, childInfo, vaccinePackageId, date, time, note } =
+        data;
       let finalChildId = childId ? new ObjectId(childId) : null;
 
       // Nếu không có childId nhưng có thông tin trẻ, tạo mới hồ sơ trẻ
       if (!finalChildId && childInfo && Object.keys(childInfo).length > 0) {
         finalChildId = await childService.create(childInfo);
       }
-
       // Lấy thông tin gói vaccine
       const vaccinePackage = await connectToDatabase.vaccinepackages.findOne({
         _id: new ObjectId(vaccinePackageId),
@@ -434,7 +425,6 @@ class AppointmentService {
         createdAt: new Date().toLocaleDateString("vi-VN"),
         time,
         note: note || "",
-        status: status || "pending",
       };
 
       const result = await connectToDatabase.appointmentGois.insertOne(aptGoi);

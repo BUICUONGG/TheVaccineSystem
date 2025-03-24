@@ -26,8 +26,12 @@ class PaymentService {
       const transformedPaymentData = {
         ...paymentData,
         cusId: new ObjectId(paymentData.cusId),
-        vaccineId: new ObjectId(paymentData.vaccineId),
-        vaccinePackageId: new ObjectId(paymentData.vaccinePackageId),
+        vaccineId: paymentData.vaccineId
+          ? new ObjectId(paymentData.vaccineId)
+          : null,
+        vaccinePackageId: paymentData.vaccinePackageId
+          ? new ObjectId(paymentData.vaccinePackageId)
+          : null,
         childId: paymentData.childId ? new ObjectId(paymentData.childId) : null,
         batchId: paymentData.batchId ? new ObjectId(paymentData.batchId) : null,
       };
