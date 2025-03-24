@@ -57,7 +57,7 @@ class PaymentService {
 
       const result = await axios.post(config.endpoint, null, { params: order });
       const status = "Pending";
-
+      console.log(transformedPaymentData);
       if (paymentData.type === "aptLe") {
         const aptLe = await appointmentService.createAptLe(
           transformedPaymentData
