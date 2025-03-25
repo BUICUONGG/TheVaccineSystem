@@ -84,16 +84,19 @@ const PaymentPage = () => {
       date: invoiceData.date,
       time: invoiceData.time,
       status: "pending",
-      note: `Lịch tiêm ${invoiceData.type === "aptLe" ? "vaccine" : "gói"} ${invoiceData.vaccineName}`
+      note: `Lịch tiêm ${invoiceData.type === "aptLe" ? "vaccine" : "gói"} ${
+        invoiceData.vaccineName
+      }`,
     };
 
     // Thêm thông tin trẻ nếu đăng ký cho trẻ
     if (invoiceData.childInfo) {
       data.childInfo = {
+        customerId: invoiceData.childInfo.cusId,
         name: invoiceData.childInfo.name,
         birthday: invoiceData.childInfo.birthday,
         gender: invoiceData.childInfo.gender,
-        healthNote: invoiceData.childInfo.healthNote || ""
+        healthNote: invoiceData.childInfo.healthNote || "",
       };
     }
 
@@ -112,8 +115,9 @@ const PaymentPage = () => {
         date: invoiceData.date,
         time: invoiceData.time,
         childInfo: invoiceData.childInfo,
-        createAt: invoiceData.createdAt || new Date().toLocaleDateString("vi-VN"),
-      }
+        createAt:
+          invoiceData.createdAt || new Date().toLocaleDateString("vi-VN"),
+      },
     });
 
     console.log("Payment Data:", data); // Để debug

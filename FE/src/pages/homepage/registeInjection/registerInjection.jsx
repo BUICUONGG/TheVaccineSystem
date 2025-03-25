@@ -205,7 +205,7 @@ const RegisterInjection = () => {
         cusId: cusId,
         childId: "",
         customerName: parentInfo?.customerName || "Khách hàng",
-        date: selectedDate,   
+        date: selectedDate,
         time: time,
         status: "pending",
       };
@@ -265,7 +265,7 @@ const RegisterInjection = () => {
       //     toast.error("Không tìm thấy gói vaccine");
       //     return;
       //   }
-      
+
       //   invoiceData = {
       //     ...invoiceData,
       //     vaccinePackageId: selectedPackage._id, // Thêm vaccinePackageId
