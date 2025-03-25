@@ -141,24 +141,23 @@ nav ul li button:hover {
 .banner-slider {
   display: flex;
   transition: transform 0.5s ease;
+  height: 600px;
 }
 
 .swiper-slide {
   position: relative;
   width: 100%;
+  height: 100%;
   flex-shrink: 0;
   display: flex;
   justify-content: center;
   align-items: center;
-
 }
 
 .banner-overlay {
   position: absolute;
-  top: 0;
-  left: 0;
   width: 100%;
-  height: 500px;
+  height: 100%;
   background-color: rgba(0, 0, 0, 0.3);
   z-index: 1;
   border-bottom-left-radius: 50% 10%;
@@ -167,7 +166,7 @@ nav ul li button:hover {
 
 .banner-image {
   width: 100%;
-  height: 500px;
+  height: 100%;
   object-fit: cover;
   border-bottom-left-radius: 50% 10%;
   border-bottom-right-radius: 50% 10%;
@@ -178,7 +177,8 @@ nav ul li button:hover {
   text-align: center;
   color: white;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-  width: 100%;
+  width: 80%;
+  max-width: 600px;
   padding: 0 20px;
   opacity: 0;
   transform: translateX(100px);
@@ -919,7 +919,7 @@ nav ul li button:hover {
 /* Banner Cards */
 .banner-cards {
   position: absolute;
-  bottom: -120px;
+  bottom: -80px;
   left: 50%;
   transform: translateX(-50%);
   display: flex;
@@ -935,7 +935,7 @@ nav ul li button:hover {
   background-color: white;
   border-radius: 10px;
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-  padding: 25px;
+  padding: 28px;
   text-align: center;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
@@ -984,7 +984,7 @@ nav ul li button:hover {
   padding: 60px 20px;
   background-color: #f8f9fa;
   text-align: center;
-  margin-top: 80px;
+  margin-top: 150px;
 }
 
 .vaccine-carousel-section h2 {
