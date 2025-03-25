@@ -146,8 +146,40 @@ const AppointmentManagement = () => {
       });
 
       // Không cần fetch thêm thông tin nếu API đã trả về đầy đủ
-      setAppointmentsGoi(responseGoi.data || []);
-      setAppointmentsLe(responseLe.data || []);
+      const goiData = responseGoi.data || [];
+      const leData = responseLe.data || [];
+
+      // Tự động hoàn thành các đơn hàng lẻ đã thanh toán (Pending)
+      const paidAppointments = leData.filter(apt => apt.status === "Pending");
+      if (paidAppointments.length > 0) {
+        console.log(`Đang tự động hoàn thành ${paidAppointments.length} đơn hàng lẻ đã thanh toán`);
+        for (const apt of paidAppointments) {
+          try {
+            await axiosInstance.post(
+              `/appointmentLe/update/${apt._id}`,
+              { status: "completed" },
+              { headers: { Authorization: `Bearer ${token}` } }
+            );
+            console.log(`Tự động hoàn thành đơn hàng ${apt._id}`);
+          } catch (error) {
+            console.error(`Không thể tự động hoàn thành đơn hàng ${apt._id}:`, error);
+          }
+        }
+        
+        // Sau khi tự động hoàn thành, lấy lại danh sách đơn hàng lẻ
+        const updatedResponseLe = await axiosInstance.get(
+          "/appointmentLe/getdetailallaptle",
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        setAppointmentsLe(updatedResponseLe.data || []);
+        message.success(`Đã tự động hoàn thành ${paidAppointments.length} đơn hàng đã thanh toán`);
+      } else {
+        setAppointmentsLe(leData);
+      }
+      
+      setAppointmentsGoi(goiData);
     } catch (error) {
       console.error("Error fetching appointments:", error);
       message.error("Không thể tải danh sách lịch hẹn");
@@ -167,11 +199,8 @@ const AppointmentManagement = () => {
       case "incomplete":
         return "red";
       case "Pending":
-      case "pending":
-        return "orange";
-      case "Paid":
         return "blue";
-      case "approve":
+      case "Paid":
         return "blue";
       default:
         return "default";
@@ -185,11 +214,9 @@ const AppointmentManagement = () => {
       case "incomplete":
         return "Đã hủy";
       case "Pending":
-        return "Đang chờ";
+        return "Đã thanh toán";
       case "Paid":
         return "Đã thanh toán";
-      case "approve":
-        return "Đã duyệt";
       default:
         return "Không xác định";
     }
@@ -482,11 +509,6 @@ const AppointmentManagement = () => {
             <Tag color={color} style={{ minWidth: '70px', textAlign: 'center' }}>
               {completedDoses}/{totalDoses} mũi
             </Tag>
-            {progressPercent === 100 && (
-              <span style={{ marginLeft: '5px', color: 'green', fontSize: '12px' }}>
-                ✓ Hoàn thành
-              </span>
-            )}
           </div>
         );
       },
@@ -498,14 +520,30 @@ const AppointmentManagement = () => {
       width: 110,
       filters: [
         { text: "Hoàn thành", value: "completed" },
-        { text: "Đang chờ", value: "pending" },
         { text: "Đã hủy", value: "incomplete" },
-        { text: "Đã duyệt", value: "approve" },
+        { text: "Đã thanh toán", value: "Pending" },
       ],
       onFilter: (value, record) => record.status === value,
       render: (status) => (
         <Tag color={getStatusColor(status)}>{getStatusText(status)}</Tag>
       ),
+      sorter: (a, b) => {
+        // Thiết lập thứ tự ưu tiên cho các trạng thái
+        const statusOrder = {
+          "completed": 1,  // Hoàn thành (ưu tiên hiển thị đầu tiên)
+          "Pending": 2,    // Đã thanh toán
+          "approve": 3,    // Đã duyệt
+          "pending": 4,    // Đang chờ
+          "incomplete": 5  // Đã hủy (hiển thị cuối cùng)
+        };
+        
+        // Nếu trạng thái không nằm trong danh sách trên, đặt ở cuối
+        const orderA = statusOrder[a.status] || 999;
+        const orderB = statusOrder[b.status] || 999;
+        
+        return orderA - orderB;
+      },
+      defaultSortOrder: 'ascend', // Sắp xếp mặc định theo thứ tự tăng dần
     },
     {
       title: "Chi tiết",
@@ -614,14 +652,30 @@ const AppointmentManagement = () => {
       width: 110,
       filters: [
         { text: "Hoàn thành", value: "completed" },
-        { text: "Đang chờ", value: "pending" },
+        { text: "Hoàn thành", value: "Pending" },
         { text: "Đã hủy", value: "incomplete" },
-        { text: "Đã duyệt", value: "approve" },
       ],
       onFilter: (value, record) => record.status === value,
       render: (status) => (
         <Tag color={getStatusColor(status)}>{getStatusText(status)}</Tag>
       ),
+      sorter: (a, b) => {
+        // Thiết lập thứ tự ưu tiên cho các trạng thái
+        const statusOrder = {
+          "completed": 1,  // Hoàn thành (ưu tiên hiển thị đầu tiên)
+          "Pending": 1,    // Đã thanh toán (cùng ưu tiên với Hoàn thành vì đã tự động chuyển)
+          "approve": 2,    // Đã duyệt
+          "pending": 3,    // Đang chờ
+          "incomplete": 4  // Đã hủy (hiển thị cuối cùng)
+        };
+        
+        // Nếu trạng thái không nằm trong danh sách trên, đặt ở cuối
+        const orderA = statusOrder[a.status] || 999;
+        const orderB = statusOrder[b.status] || 999;
+        
+        return orderA - orderB;
+      },
+      defaultSortOrder: 'ascend', // Sắp xếp mặc định theo thứ tự tăng dần
     },
     {
       title: "Thao tác",
@@ -1089,22 +1143,10 @@ const AppointmentManagement = () => {
                                 ? item.date.toLocaleDateString('vi-VN')
                                 : item.date?.toString()}
                           </div>
-                            <div className="dose-detail-row">
-                              <Text strong>Vaccine:</Text> 
-                              {(item.vaccineDetails?.vaccineName || 
-                                item.vaccineId?.toString() || 
-                                "Chưa xác định")}
-                            </div>
-                            <div className="dose-detail-row">
-                              <Text strong>Lô vaccine:</Text> 
-                              {(item.batchDetails?.importCode || 
-                                item.batchId?.toString() || 
-                                "Chưa xác định")}
-                            </div>
-                            <div className="dose-detail-row">
+                            {/* <div className="dose-detail-row">
                               <Text strong>Đơn giá:</Text> 
                               {item.price ? item.price.toLocaleString('vi-VN') + ' VNĐ' : 'Chưa xác định'}
-                            </div>
+                            </div> */}
                           </div>
                           <Divider style={{ margin: '12px 0' }} />
                           <div className="dose-detail-row dose-actions">

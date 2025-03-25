@@ -135,23 +135,6 @@ const NewsList = () => {
         <Title level={2} className="news-title">TIN TỨC</Title>
       </div>
 
-      <div className="category-filter">
-        <Space wrap>
-          {Object.entries(categoryMap).map(([key, value]) => (
-            <Button
-              key={key}
-              type={selectedCategory === key ? 'primary' : 'default'}
-              onClick={() => setSelectedCategory(key)}
-              icon={<FilterOutlined />}
-            >
-              {value}
-            </Button>
-          ))}
-        </Space>
-      </div>
-
-      <Divider />
-
       {loading ? (
         <div className="loading-container">
           <Spin size="large" />
@@ -221,6 +204,21 @@ const NewsList = () => {
               </div>
             </div>
           )}
+
+          <div className="category-filter">
+            <Space wrap>
+              {Object.entries(categoryMap).map(([key, value]) => (
+                <Button
+                  key={key}
+                  type={selectedCategory === key ? 'primary' : 'default'}
+                  onClick={() => setSelectedCategory(key)}
+                  icon={<FilterOutlined />}
+                >
+                  {value}
+                </Button>
+              ))}
+            </Space>
+          </div>
 
           <Divider orientation="left">Tin Tức Mới Nhất</Divider>
 
