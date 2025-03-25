@@ -8,8 +8,8 @@
     position: relative;
     width: 100%;
     height: 100vh;
-    background: #005bea;
-    background: linear-gradient(135deg, #0077cc, #00a8ff);
+    background: url('/images/loginBanner.jpg') center center;
+    background-size: cover;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -50,8 +50,9 @@
 
 /* Main login container */
 .login-container {
-    width: 1000px;
-    height: 600px;
+    width: 650px;
+    height: auto;
+    min-height: 500px;
     position: relative;
     z-index: 1;
     display: flex;
@@ -62,27 +63,15 @@
     animation: containerGlow 4s ease-in-out infinite alternate;
 }
 
-/* Left side - Image container */
+/* Ẩn phần image container */
 .login-image-container {
-    width: 50%;
-    background: url('/images/loginBanner.jpg') center center;
-    background-size: cover;
-    position: relative;
+    display: none;
 }
 
-.login-image-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(45deg, rgba(0, 82, 154, 0.7), rgba(0, 150, 255, 0.4));
-}
-
-/* Right side - Form container */
+/* Right side - Form container - Sửa thành chiếm toàn bộ */
 .login-form-container {
-    width: 50%;
-    padding: 40px;
+    width: 100%;
+    padding: 60px;
     background: rgba(255, 255, 255, 0.95);
     display: flex;
     flex-direction: column;
@@ -239,39 +228,35 @@
     top: 20px;
     left: 20px;
     z-index: 2;
-    padding: 10px 20px;
-    background: rgba(255, 255, 255, 0.2);
+    padding: 12px 24px;
+    background: rgba(0, 77, 155, 0.8);
     border-radius: 8px;
     color: white;
     text-decoration: none;
-    font-weight: 500;
+    font-weight: 600;
     backdrop-filter: blur(5px);
     transition: all 0.3s ease;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
 }
 
 .login-back-home:hover {
-    background: white;
-    color: #0077cc;
+    background: #005bea;
+    color: white;
     transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
 }
 
-/* Responsive design */
+/* Responsive design - Cập nhật lại */
 @media (max-width: 1024px) {
     .login-container {
         width: 90%;
+        max-width: 650px;
         height: auto;
-        flex-direction: column;
     }
 
-    .login-image-container,
     .login-form-container {
         width: 100%;
-    }
-
-    .login-image-container {
-        height: 200px;
+        padding: 40px;
     }
 }
 
@@ -281,7 +266,7 @@
     }
 
     .login-form-container {
-        padding: 20px;
+        padding: 30px;
     }
 
     .login-button-group {
