@@ -17,53 +17,6 @@ const PaymentPage = () => {
   const [otherReason, setOtherReason] = useState("");
   const [processingPayment, setProcessingPayment] = useState(false);
 
-  // useEffect(() => {
-  //   document.title = "Xác nhận thanh toán";
-
-  //   // Get data directly from registerInjection
-  //   if (!location.state?.invoiceData) {
-  //     setError("Không có thông tin thanh toán");
-  //     setLoading(false);
-  //     return;
-  //   }
-
-  //   const invoiceData = location.state.invoiceData;
-
-  //   // Prepare payment data from invoice data
-  //   const data = {
-  //     cusId: invoiceData.cusId,
-  //     vaccineId:
-  //       invoiceData.type === "aptLe" ? invoiceData.vaccineId : undefined,
-  //     vaccinePackageId:
-  //       invoiceData.type === "aptGoi"
-  //         ? invoiceData.vaccinePackageId
-  //         : undefined,
-  //     childId: invoiceData.childInfo ? "new" : undefined, // If has childInfo, we're creating a new child
-  //     price: invoiceData.price,
-  //     type: invoiceData.type, // aptLe or aptGoi
-  //     date: invoiceData.date,
-  //     time: invoiceData.time,
-  //     childInfo: invoiceData.childInfo,
-  //     note: invoiceData.note || "",
-  //   };
-
-  //   setPaymentData({
-  //     ...data,
-  //     vaccineName: invoiceData.vaccineName,
-  //     customerName: invoiceData.customerName,
-  //     // Lưu thông tin ngày và thời gian vào appointmentData cho việc hiển thị
-  //     appointmentData: {
-  //       date: invoiceData.date,
-  //       time: invoiceData.time,
-  //       childInfo: invoiceData.childInfo,
-  //       createAt:
-  //         invoiceData.createdAt || new Date().toLocaleDateString("vi-VN"),
-  //     },
-  //   });
-
-  //   setLoading(false);
-  // }, [location.state]);
-
   useEffect(() => {
     document.title = "Xác nhận thanh toán";
 

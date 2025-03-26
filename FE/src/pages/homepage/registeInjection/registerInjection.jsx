@@ -81,7 +81,7 @@ const RegisterInjection = () => {
             if (
               !priceMap[vaccine.vaccineId] ||
               new Date(importData.importDate) >
-                new Date(priceMap[vaccine.vaccineId].importDate)
+              new Date(priceMap[vaccine.vaccineId].importDate)
             ) {
               priceMap[vaccine.vaccineId] = {
                 unitPrice: vaccine.unitPrice,
@@ -246,41 +246,6 @@ const RegisterInjection = () => {
         };
       }
 
-      // if (selectedVaccineType === "single") {
-      //   const selectedVaccine = vaccineList.find(v => v._id === selectedVaccineId);
-      //   if (!selectedVaccine) {
-      //     throw new Error("Không tìm thấy vaccine");
-      //   }
-      //   invoiceData = {
-      //     ...invoiceData,
-      //     vaccineId: selectedVaccine._id,
-      //     price: importProductsPrice[selectedVaccineId]?.unitPrice || 0,
-      //     type: "aptLe",
-      //     note: `Đăng ký tiêm ${selectedVaccine.vaccineName}`
-      //   };
-      // } else {
-      //   // Xử lý gói vaccine
-      //   const selectedPackage = vaccinePackages.find(p => p._id === selectedVaccineId);
-      //   if (!selectedPackage) {
-      //     toast.error("Không tìm thấy gói vaccine");
-      //     return;
-      //   }
-
-      //   invoiceData = {
-      //     ...invoiceData,
-      //     vaccinePackageId: selectedPackage._id, // Thêm vaccinePackageId
-      //     price: selectedPackage.price || 0,
-      //     type: "aptGoi",
-      //     note: `Đăng ký tiêm gói ${selectedPackage.packageName}`,
-      //     childInfo: isChildRegistration ? {
-      //       name: values.childInfo.name,
-      //       birthday: values.childInfo.birthday.format("DD/MM/YYYY"),
-      //       gender: values.childInfo.gender,
-      //       healthNote: values.childInfo.healthNote || ""
-      //     } : null
-      //   };
-      // }
-
       console.log("Dữ liệu gửi đi:", invoiceData);
 
       // Chuyển đến trang thanh toán
@@ -301,6 +266,11 @@ const RegisterInjection = () => {
   // Sửa lại hàm disabledDate
   const disabledDate = (current) => {
     return current && current < dayjs().startOf("day");
+  };
+
+  const disabledBirthDate = (current) => {
+    // Không cho chọn ngày trong tương lai
+    return current && current > dayjs().endOf('day');
   };
 
   const footerRef = useRef(null);
@@ -359,12 +329,25 @@ const RegisterInjection = () => {
                     label="Ngày sinh"
                     rules={[
                       { required: true, message: "Vui lòng chọn ngày sinh!" },
+                      {
+                        validator: (_, value) => {
+                          if (!value) {
+                            return Promise.resolve();
+                          }
+                          if (value.isAfter(dayjs())) {
+                            return Promise.reject("Không thể chọn ngày sinh trong tương lai");
+                          }
+                          return Promise.resolve();
+                        },
+                      },
                     ]}
                   >
                     <DatePicker
                       format="DD/MM/YYYY"
                       placeholder="Chọn ngày sinh"
                       className="date-picker"
+                      disabledDate={disabledBirthDate}
+                      showToday={false}
                     />
                   </Form.Item>
 
@@ -428,15 +411,15 @@ const RegisterInjection = () => {
                 {(!parentInfo?.customerName ||
                   !parentInfo?.phone ||
                   !parentInfo?.address) && (
-                  <div className="update-info-notice">
-                    <span className="notice-text">
-                      Vui lòng cập nhật đầy đủ thông tin cá nhân!
-                    </span>
-                    <Link to="/profile" className="update-link">
-                      Cập nhật ngay
-                    </Link>
-                  </div>
-                )}
+                    <div className="update-info-notice">
+                      <span className="notice-text">
+                        Vui lòng cập nhật đầy đủ thông tin cá nhân!
+                      </span>
+                      <Link to="/profile" className="update-link">
+                        Cập nhật ngay
+                      </Link>
+                    </div>
+                  )}
               </div>
             )}
 
@@ -456,101 +439,78 @@ const RegisterInjection = () => {
               </Form.Item>
 
               <Form.Item
-                name={
-                  selectedVaccineType === "single"
-                    ? "vaccineId"
-                    : "vaccinePackageId"
-                }
+                name={selectedVaccineType === "single" ? "vaccineId" : "vaccinePackageId"}
                 label="Chọn Vaccine"
                 rules={[{ required: true, message: "Vui lòng chọn vaccine!" }]}
               >
                 <div className="vaccine-cards">
-                  {selectedVaccineType === "single"
-                    ? vaccineList.map((vaccine) => {
-                        const hasPrice =
-                          !!importProductsPrice[vaccine._id]?.unitPrice;
-                        return (
-                          <div
-                            key={vaccine._id}
-                            className={`vaccine-card ${
-                              selectedVaccineId === vaccine._id
-                                ? "selected"
-                                : ""
-                            } ${!hasPrice ? "no-price" : ""}`}
-                            onClick={() =>
-                              hasPrice && handleVaccineSelect(vaccine)
-                            }
-                          >
-                            {hasPrice && (
-                              <Checkbox
-                                checked={selectedVaccineId === vaccine._id}
-                                onChange={(e) => {
-                                  e.stopPropagation();
-                                  handleVaccineSelect(vaccine);
-                                }}
-                                className="vaccine-checkbox"
-                              />
-                            )}
-                            <div className="vaccine-card-content">
-                              <h3>{vaccine.vaccineName}</h3>
-                              <p className="register-vaccine-description">
-                                {vaccine.description}
-                              </p>
-                              <p
-                                className={`vaccine-price ${
-                                  !hasPrice ? "unavailable" : ""
-                                }`}
-                              >
-                                {hasPrice
-                                  ? `${importProductsPrice[
-                                      vaccine._id
-                                    ].unitPrice.toLocaleString()} VNĐ`
-                                  : "Chưa có giá"}
-                              </p>
-                            </div>
+                  {!selectedVaccineType ? (
+                    <div className="no-vaccine-selected">
+                      <p>Vui lòng chọn loại vaccine bên trên</p>
+                    </div>
+                  ) : selectedVaccineType === "single" ? (
+                    vaccineList.map((vaccine) => {
+                      const hasPrice = !!importProductsPrice[vaccine._id]?.unitPrice;
+                      return (
+                        <div
+                          key={vaccine._id}
+                          className={`vaccine-card ${selectedVaccineId === vaccine._id ? "selected" : ""} ${!hasPrice ? "no-price" : ""}`}
+                          onClick={() => hasPrice && handleVaccineSelect(vaccine)}
+                        >
+                          {hasPrice && (
+                            <Checkbox
+                              checked={selectedVaccineId === vaccine._id}
+                              onChange={(e) => {
+                                e.stopPropagation();
+                                handleVaccineSelect(vaccine);
+                              }}
+                              className="vaccine-checkbox"
+                            />
+                          )}
+                          <div className="vaccine-card-content">
+                            <h3>{vaccine.vaccineName}</h3>
+                            <p className="register-vaccine-description">
+                              {vaccine.description}
+                            </p>
+                            <p className={`vaccine-price ${!hasPrice ? "unavailable" : ""}`}>
+                              {hasPrice ? `${importProductsPrice[vaccine._id].unitPrice.toLocaleString()} VNĐ` : "Chưa có giá"}
+                            </p>
                           </div>
-                        );
-                      })
-                    : vaccinePackages.map((pack) => {
-                        const hasPrice = !!pack.price;
-                        return (
-                          <div
-                            key={pack._id}
-                            className={`vaccine-card ${
-                              selectedVaccineId === pack._id ? "selected" : ""
-                            } ${!hasPrice ? "no-price" : ""}`}
-                            onClick={() =>
-                              hasPrice && handleVaccineSelect(pack)
-                            }
-                          >
-                            {hasPrice && (
-                              <Checkbox
-                                checked={selectedVaccineId === pack._id}
-                                onChange={(e) => {
-                                  e.stopPropagation();
-                                  handleVaccineSelect(pack);
-                                }}
-                                className="vaccine-checkbox"
-                              />
-                            )}
-                            <div className="vaccine-card-content">
-                              <h3>{pack.packageName}</h3>
-                              <p className="register-vaccine-description">
-                                {pack.description}
-                              </p>
-                              <p
-                                className={`vaccine-price ${
-                                  !hasPrice ? "unavailable" : ""
-                                }`}
-                              >
-                                {hasPrice
-                                  ? `${pack.price.toLocaleString()} VNĐ`
-                                  : "Chưa có giá"}
-                              </p>
-                            </div>
+                        </div>
+                      );
+                    })
+                  ) : (
+                    vaccinePackages.map((pack) => {
+                      const hasPrice = !!pack.price;
+                      return (
+                        <div
+                          key={pack._id}
+                          className={`vaccine-card ${selectedVaccineId === pack._id ? "selected" : ""} ${!hasPrice ? "no-price" : ""}`}
+                          onClick={() => hasPrice && handleVaccineSelect(pack)}
+                        >
+                          {hasPrice && (
+                            <Checkbox
+                              checked={selectedVaccineId === pack._id}
+                              onChange={(e) => {
+                                e.stopPropagation();
+                                handleVaccineSelect(pack);
+                              }}
+                              className="vaccine-checkbox"
+                            />
+                          )}
+                          <div className="vaccine-card-content">
+                            <h3>{pack.packageName}</h3>
+                            <p className="register-vaccine-description">
+                              {pack.description}
+                            </p>
+                            <p className={`vaccine-price ${!hasPrice ? "unavailable" : ""}`}>
+                              {hasPrice ? `${pack.price.toLocaleString()} VNĐ` : "Chưa có giá"}
+                            </p>
                           </div>
-                        );
-                      })}
+                        </div>
+                      );
+                    })
+                  )}
                 </div>
               </Form.Item>
 
