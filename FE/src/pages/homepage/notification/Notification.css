@@ -110,8 +110,14 @@
 /* Style cho nội dung thông báo */
 .notification-content {
   display: flex;
-  flex-direction: column;
-  gap: 2px;
+  align-items: flex-start;
+  width: 100%;
+}
+
+.notification-icon {
+  margin-right: 8px;
+  font-size: 16px;
+  flex-shrink: 0;
 }
 
 .notification-content .ant-typography {
@@ -170,4 +176,54 @@
 .ant-list-items {
   display: flex;
   flex-direction: column-reverse;
+}
+
+/* Style cho các loại thông báo */
+.notification-type-payment {
+  border-left: 4px solid #52c41a !important;
+}
+
+.notification-type-payment.unread {
+  background-color: rgba(82, 196, 26, 0.1) !important;
+}
+
+.notification-type-status {
+  border-left: 4px solid #1890ff !important;
+}
+
+.notification-type-status.unread {
+  background-color: rgba(24, 144, 255, 0.1) !important;
+}
+
+.notification-type-update {
+  border-left: 4px solid #faad14 !important;
+}
+
+.notification-type-update.unread {
+  background-color: rgba(250, 173, 20, 0.1) !important;
+}
+
+.notification-type-system {
+  border-left: 4px solid #8c8c8c !important;
+}
+
+.notification-type-system.unread {
+  background-color: rgba(140, 140, 140, 0.1) !important;
+}
+
+/* Hiệu ứng hover cho từng loại thông báo */
+.notification-type-payment:hover {
+  background-color: rgba(82, 196, 26, 0.15) !important;
+}
+
+.notification-type-status:hover {
+  background-color: rgba(24, 144, 255, 0.15) !important;
+}
+
+.notification-type-update:hover {
+  background-color: rgba(250, 173, 20, 0.15) !important;
+}
+
+.notification-type-system:hover {
+  background-color: rgba(140, 140, 140, 0.15) !important;
 }

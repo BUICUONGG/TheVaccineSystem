@@ -122,6 +122,58 @@ const AppointmentManagement = () => {
       setLoading(true);
       const token = localStorage.getItem("accesstoken");
 
+      // Helper function to populate customer details for appointment data
+      const populateCustomerData = async (appointments) => {
+        // Skip if no appointments
+        if (!appointments || appointments.length === 0) return appointments;
+        
+        // Identify which customer IDs need to be fetched
+        const customerIdsToFetch = new Set();
+        appointments.forEach(apt => {
+          if (typeof apt.cusId === 'string' && !apt.customer && !apt.customerDetails) {
+            customerIdsToFetch.add(apt.cusId);
+          }
+        });
+        
+        // If no customer IDs need fetching, return as is
+        if (customerIdsToFetch.size === 0) return appointments;
+        
+        try {
+          console.log(`Fetching details for ${customerIdsToFetch.size} customers...`);
+          const customerMap = {};
+          
+          // Fetch customer details
+          for (const customerId of customerIdsToFetch) {
+            try {
+              const customerResponse = await axiosInstance.get(
+                `/customer/getCustomerById/${customerId}`,
+                { headers: { Authorization: `Bearer ${token}` } }
+              );
+              
+              if (customerResponse.data) {
+                customerMap[customerId] = customerResponse.data;
+              }
+            } catch (error) {
+              console.error(`Error fetching customer ${customerId}:`, error);
+            }
+          }
+          
+          // Update appointment data with customer details
+          return appointments.map(apt => {
+            if (typeof apt.cusId === 'string' && customerMap[apt.cusId]) {
+              return {
+                ...apt,
+                customerDetails: customerMap[apt.cusId]
+              };
+            }
+            return apt;
+          });
+        } catch (error) {
+          console.error("Error populating customer data:", error);
+          return appointments;
+        }
+      };
+
       // Fetch appointments gói - sử dụng API chi tiết
       const responseGoi = await axiosInstance.get(
         "/appointmentGoi/showDetailAptGoi",
@@ -138,16 +190,37 @@ const AppointmentManagement = () => {
         }
       );
 
-      // Console log to debug
-      console.log("Appointment data:", {
-        firstRecord: responseGoi.data?.[0],
-        createAtExists: responseGoi.data?.[0]?.createAt ? true : false,
-        createdAtExists: responseGoi.data?.[0]?.createdAt ? true : false,
-      });
+      // Debug log để xem cấu trúc dữ liệu của lịch hẹn lẻ
+      if (responseLe.data && responseLe.data.length > 0) {
+        const sampleLe = responseLe.data[0];
+        console.log("Cấu trúc dữ liệu lịch hẹn lẻ:", {
+          id: sampleLe._id,
+          cusId: sampleLe.cusId,
+          cusIdType: typeof sampleLe.cusId,
+          hasCustomer: !!sampleLe.customer,
+          hasCustomerDetails: !!sampleLe.customerDetails,
+          fullData: sampleLe
+        });
+      }
+      
+      // Debug log để xem cấu trúc dữ liệu của lịch hẹn gói
+      if (responseGoi.data && responseGoi.data.length > 0) {
+        const sampleGoi = responseGoi.data[0];
+        console.log("Cấu trúc dữ liệu lịch hẹn gói:", {
+          id: sampleGoi._id,
+          cusId: sampleGoi.cusId,
+          cusIdType: typeof sampleGoi.cusId,
+          hasCustomer: !!sampleGoi.customer,
+          hasCustomerDetails: !!sampleGoi.customerDetails,
+          fullData: sampleGoi
+        });
+      }
 
       // Không cần fetch thêm thông tin nếu API đã trả về đầy đủ
       const goiData = responseGoi.data || [];
-      const leData = responseLe.data || [];
+      
+      // Populate customer data for le appointments
+      let leData = await populateCustomerData(responseLe.data || []);
 
       // Tự động hoàn thành các đơn hàng lẻ đã thanh toán (Pending)
       const paidAppointments = leData.filter(apt => apt.status === "Pending");
@@ -173,7 +246,10 @@ const AppointmentManagement = () => {
             headers: { Authorization: `Bearer ${token}` },
           }
         );
-        setAppointmentsLe(updatedResponseLe.data || []);
+        
+        // Populate customer data for the updated appointments
+        const updatedLeData = await populateCustomerData(updatedResponseLe.data || []);
+        setAppointmentsLe(updatedLeData);
         message.success(`Đã tự động hoàn thành ${paidAppointments.length} đơn hàng đã thanh toán`);
       } else {
         setAppointmentsLe(leData);
@@ -574,15 +650,40 @@ const AppointmentManagement = () => {
       key: "cusId",
       width: 150,
       render: (cusId, record) => {
-        // Try to get customer name from all possible sources
-        const customerName =
-          record.customer?.customerName ||
-          record.customerDetails?.customerName ||
-          cusId?.customerName ||
-          cusId?.name ||
-          (typeof cusId === "string" ? cusId : "N/A");
+        // Debug thông tin
+        if (typeof cusId === "string" && !record.customer && !record.customerDetails) {
+          console.log(`Appointment ${record._id} cusId:`, cusId);
+        }
+        
+        // Kiểm tra nếu cusId là ObjectId
+        let customerString = "";
+        if (cusId) {
+          // Nếu cusId là object và có customerName
+          if (cusId.customerName) {
+            customerString = cusId.customerName;
+          } 
+          // Nếu customer object tồn tại
+          else if (record.customer && record.customer.customerName) {
+            customerString = record.customer.customerName;
+          }
+          // Nếu customerDetails tồn tại
+          else if (record.customerDetails && record.customerDetails.customerName) {
+            customerString = record.customerDetails.customerName;
+          }
+          // Nếu là string, kiểm tra xem có phải là ObjectId không
+          else if (typeof cusId === "string") {
+            // Hiển thị ID rút gọn
+            customerString = "ID: " + cusId.substring(0, 8) + "...";
+          }
+          // Mặc định
+          else {
+            customerString = "Không xác định";
+          }
+        } else {
+          customerString = "N/A";
+        }
 
-        return customerName;
+        return <span title={typeof cusId === "string" ? cusId : ""}>{customerString}</span>;
       },
     },
     {

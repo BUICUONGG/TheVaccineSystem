@@ -85,8 +85,26 @@ const NotificationIcon = ({ cusId: propsCusId }) => {
             createdAt: noti.createdAt || new Date().toISOString() // Lấy thời gian tạo thông báo
           }));
           
+          // Loại bỏ thông báo trùng lặp về cập nhật trạng thái
+          const uniqueNotifications = simplifiedNotifications.reduce((acc, current) => {
+            // Nếu thông báo là về cập nhật trạng thái
+            if (current.message.includes("Lịch hẹn của bạn đã cập nhật trạng thái")) {
+              // Kiểm tra xem đã có thông báo tương tự trong mảng kết quả chưa
+              const exists = acc.some(item => 
+                item.message.includes("Lịch hẹn của bạn đã cập nhật trạng thái") && 
+                item.message.includes(current.message.split(":")[1]?.trim())
+              );
+              
+              // Nếu đã có thông báo tương tự, không thêm vào mảng kết quả
+              if (exists) return acc;
+            }
+            
+            // Thêm thông báo vào mảng kết quả nếu chưa có thông báo tương tự
+            return [...acc, current];
+          }, []);
+          
           // Sắp xếp thông báo theo thời gian tạo (mới nhất lên đầu)
-          const sortedNotifications = simplifiedNotifications.sort((a, b) => 
+          const sortedNotifications = uniqueNotifications.sort((a, b) => 
             new Date(b.createdAt) - new Date(a.createdAt)
           );
           
@@ -262,18 +280,66 @@ const NotificationIcon = ({ cusId: propsCusId }) => {
       <List
         className="notification-list"
         loading={loading}
-        dataSource={notifications}
+        dataSource={
+          // Lọc bỏ thông báo "đang ở trạng thái Pending" nếu có thông báo thanh toán thành công
+          notifications.filter(noti => {
+            // Kiểm tra có phải thông báo Pending
+            const isPendingNotification = 
+              noti.message.includes("đang ở trạng thái Pending") || 
+              noti.message.includes("đang trong trạng thái Pending") || 
+              noti.message.includes("Lịch hẹn gói của bạn vào lúc");
+            
+            // Kiểm tra có thông báo thanh toán thành công
+            const hasPaymentSuccess = notifications.some(item => 
+              item.message.includes("THANH TOÁN THÀNH CÔNG") || 
+              item.message.includes("thanh toán thành công")
+            );
+            
+            // Loại bỏ thông báo Pending nếu có thông báo thanh toán thành công
+            return !(isPendingNotification && hasPaymentSuccess);
+          })
+        }
         locale={{ emptyText: <Empty description="Không có thông báo nào" /> }}
-        renderItem={(item) => (
-          <List.Item 
-            className={`notification-item ${item.read ? 'read' : 'unread'}`}
-            onClick={() => handleNotificationClick(item.id)}
-          >
-            <div className="notification-content">
-              <Typography.Text strong={!item.read}>{item.message}</Typography.Text>
-            </div>
-          </List.Item>
-        )}
+        renderItem={(item) => {
+          // Xác định loại thông báo
+          let notificationType = "default";
+          let icon = null;
+          
+          if (item.message.includes("THANH TOÁN THÀNH CÔNG")) {
+            notificationType = "payment";
+            icon = "✅";
+          } else if (item.message.includes("cập nhật trạng thái")) {
+            notificationType = "status";
+            
+            if (item.message.includes("completed")) {
+              icon = "✅"; // Check mark for completed status
+            } else if (item.message.includes("pending")) {
+              icon = "⏳"; // Hourglass for pending status
+            } else if (item.message.includes("approve")) {
+              icon = "👍"; // Thumbs up for approve status
+            } else {
+              icon = "🔔"; // Default bell icon
+            }
+          } else if (item.message.includes("đã được cập nhật")) {
+            notificationType = "update";
+            icon = "🔄";
+          } else if (item.id === 'default' || item.id === 'error') {
+            notificationType = "system";
+            icon = "ℹ️";
+          }
+          
+          return (
+            <List.Item 
+              className={`notification-item ${item.read ? 'read' : 'unread'} notification-type-${notificationType}`}
+              onClick={() => handleNotificationClick(item.id)}
+            >
+              <div className="notification-content">
+                {icon && <span className="notification-icon">{icon}</span>}
+                <Typography.Text strong={!item.read}>{item.message}</Typography.Text>
+              </div>
+            </List.Item>
+          );
+        }}
       />
     </div>
   );
