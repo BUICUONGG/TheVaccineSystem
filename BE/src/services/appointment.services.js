@@ -543,8 +543,13 @@ class AppointmentService {
 
   async searchAptGoiById(id) {
     try {
+      const result = await connectToDatabase.appointmentGois.findOne({
+        _id: new ObjectId(id),
+      });
+      if (!result) throw new Error("Khong tim thay hoa don nay");
+      return result;
     } catch (error) {
-      console.log(error.message);
+      throw new Error(error.message);
     }
   }
 }
