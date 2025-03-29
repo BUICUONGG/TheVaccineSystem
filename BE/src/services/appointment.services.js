@@ -540,6 +540,13 @@ class AppointmentService {
       throw new Error(error.message);
     }
   }
+
+  async searchAptGoiById(id) {
+    try {
+    } catch (error) {
+      console.log(error.message);
+    }
+  }
 }
 const appointmentService = new AppointmentService();
 export default appointmentService;
