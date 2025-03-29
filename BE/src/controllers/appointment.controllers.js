@@ -47,7 +47,8 @@ export const getAppointmentsController = async (req, res) => {
     const appointments = await appointmentService.listAptLe();
     res.status(200).json(appointments);
   } catch (error) {
-    res.status(500).json(error.message);
+    console.error("Error in getAppointmentsController:", error);
+    res.status(500).json({ message: error.message || "Lỗi khi lấy danh sách lịch hẹn lẻ" });
   }
 };
 

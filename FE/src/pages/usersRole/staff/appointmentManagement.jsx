@@ -122,6 +122,58 @@ const AppointmentManagement = () => {
       setLoading(true);
       const token = localStorage.getItem("accesstoken");
 
+      // Helper function to populate customer details for appointment data
+      const populateCustomerData = async (appointments) => {
+        // Skip if no appointments
+        if (!appointments || appointments.length === 0) return appointments;
+        
+        // Identify which customer IDs need to be fetched
+        const customerIdsToFetch = new Set();
+        appointments.forEach(apt => {
+          if (typeof apt.cusId === 'string' && !apt.customer && !apt.customerDetails) {
+            customerIdsToFetch.add(apt.cusId);
+          }
+        });
+        
+        // If no customer IDs need fetching, return as is
+        if (customerIdsToFetch.size === 0) return appointments;
+        
+        try {
+          console.log(`Fetching details for ${customerIdsToFetch.size} customers...`);
+          const customerMap = {};
+          
+          // Fetch customer details
+          for (const customerId of customerIdsToFetch) {
+            try {
+              const customerResponse = await axiosInstance.get(
+                `/customer/getCustomerById/${customerId}`,
+                { headers: { Authorization: `Bearer ${token}` } }
+              );
+              
+              if (customerResponse.data) {
+                customerMap[customerId] = customerResponse.data;
+              }
+            } catch (error) {
+              console.error(`Error fetching customer ${customerId}:`, error);
+            }
+          }
+          
+          // Update appointment data with customer details
+          return appointments.map(apt => {
+            if (typeof apt.cusId === 'string' && customerMap[apt.cusId]) {
+              return {
+                ...apt,
+                customerDetails: customerMap[apt.cusId]
+              };
+            }
+            return apt;
+          });
+        } catch (error) {
+          console.error("Error populating customer data:", error);
+          return appointments;
+        }
+      };
+
       // Fetch appointments gói - sử dụng API chi tiết
       const responseGoi = await axiosInstance.get(
         "/appointmentGoi/showDetailAptGoi",
@@ -138,16 +190,72 @@ const AppointmentManagement = () => {
         }
       );
 
-      // Console log to debug
-      console.log("Appointment data:", {
-        firstRecord: responseGoi.data?.[0],
-        createAtExists: responseGoi.data?.[0]?.createAt ? true : false,
-        createdAtExists: responseGoi.data?.[0]?.createdAt ? true : false,
-      });
+      // Debug log để xem cấu trúc dữ liệu của lịch hẹn lẻ
+      if (responseLe.data && responseLe.data.length > 0) {
+        const sampleLe = responseLe.data[0];
+        console.log("Cấu trúc dữ liệu lịch hẹn lẻ:", {
+          id: sampleLe._id,
+          cusId: sampleLe.cusId,
+          cusIdType: typeof sampleLe.cusId,
+          hasCustomer: !!sampleLe.customer,
+          hasCustomerDetails: !!sampleLe.customerDetails,
+          fullData: sampleLe
+        });
+      }
+      
+      // Debug log để xem cấu trúc dữ liệu của lịch hẹn gói
+      if (responseGoi.data && responseGoi.data.length > 0) {
+        const sampleGoi = responseGoi.data[0];
+        console.log("Cấu trúc dữ liệu lịch hẹn gói:", {
+          id: sampleGoi._id,
+          cusId: sampleGoi.cusId,
+          cusIdType: typeof sampleGoi.cusId,
+          hasCustomer: !!sampleGoi.customer,
+          hasCustomerDetails: !!sampleGoi.customerDetails,
+          fullData: sampleGoi
+        });
+      }
 
       // Không cần fetch thêm thông tin nếu API đã trả về đầy đủ
-      setAppointmentsGoi(responseGoi.data || []);
-      setAppointmentsLe(responseLe.data || []);
+      const goiData = responseGoi.data || [];
+      
+      // Populate customer data for le appointments
+      let leData = await populateCustomerData(responseLe.data || []);
+
+      // Tự động hoàn thành các đơn hàng lẻ đã thanh toán (Pending)
+      const paidAppointments = leData.filter(apt => apt.status === "Pending");
+      if (paidAppointments.length > 0) {
+        console.log(`Đang tự động hoàn thành ${paidAppointments.length} đơn hàng lẻ đã thanh toán`);
+        for (const apt of paidAppointments) {
+          try {
+            await axiosInstance.post(
+              `/appointmentLe/update/${apt._id}`,
+              { status: "completed" },
+              { headers: { Authorization: `Bearer ${token}` } }
+            );
+            console.log(`Tự động hoàn thành đơn hàng ${apt._id}`);
+          } catch (error) {
+            console.error(`Không thể tự động hoàn thành đơn hàng ${apt._id}:`, error);
+          }
+        }
+        
+        // Sau khi tự động hoàn thành, lấy lại danh sách đơn hàng lẻ
+        const updatedResponseLe = await axiosInstance.get(
+          "/appointmentLe/getdetailallaptle",
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
+        
+        // Populate customer data for the updated appointments
+        const updatedLeData = await populateCustomerData(updatedResponseLe.data || []);
+        setAppointmentsLe(updatedLeData);
+        message.success(`Đã tự động hoàn thành ${paidAppointments.length} đơn hàng đã thanh toán`);
+      } else {
+        setAppointmentsLe(leData);
+      }
+      
+      setAppointmentsGoi(goiData);
     } catch (error) {
       console.error("Error fetching appointments:", error);
       message.error("Không thể tải danh sách lịch hẹn");
@@ -167,11 +275,8 @@ const AppointmentManagement = () => {
       case "incomplete":
         return "red";
       case "Pending":
-      case "pending":
-        return "orange";
-      case "Paid":
         return "blue";
-      case "approve":
+      case "Paid":
         return "blue";
       default:
         return "default";
@@ -185,11 +290,9 @@ const AppointmentManagement = () => {
       case "incomplete":
         return "Đã hủy";
       case "Pending":
-        return "Đang chờ";
+        return "Đã thanh toán";
       case "Paid":
         return "Đã thanh toán";
-      case "approve":
-        return "Đã duyệt";
       default:
         return "Không xác định";
     }
@@ -482,11 +585,6 @@ const AppointmentManagement = () => {
             <Tag color={color} style={{ minWidth: '70px', textAlign: 'center' }}>
               {completedDoses}/{totalDoses} mũi
             </Tag>
-            {progressPercent === 100 && (
-              <span style={{ marginLeft: '5px', color: 'green', fontSize: '12px' }}>
-                ✓ Hoàn thành
-              </span>
-            )}
           </div>
         );
       },
@@ -498,14 +596,30 @@ const AppointmentManagement = () => {
       width: 110,
       filters: [
         { text: "Hoàn thành", value: "completed" },
-        { text: "Đang chờ", value: "pending" },
         { text: "Đã hủy", value: "incomplete" },
-        { text: "Đã duyệt", value: "approve" },
+        { text: "Đã thanh toán", value: "Pending" },
       ],
       onFilter: (value, record) => record.status === value,
       render: (status) => (
         <Tag color={getStatusColor(status)}>{getStatusText(status)}</Tag>
       ),
+      sorter: (a, b) => {
+        // Thiết lập thứ tự ưu tiên cho các trạng thái
+        const statusOrder = {
+          "completed": 1,  // Hoàn thành (ưu tiên hiển thị đầu tiên)
+          "Pending": 2,    // Đã thanh toán
+          "approve": 3,    // Đã duyệt
+          "pending": 4,    // Đang chờ
+          "incomplete": 5  // Đã hủy (hiển thị cuối cùng)
+        };
+        
+        // Nếu trạng thái không nằm trong danh sách trên, đặt ở cuối
+        const orderA = statusOrder[a.status] || 999;
+        const orderB = statusOrder[b.status] || 999;
+        
+        return orderA - orderB;
+      },
+      defaultSortOrder: 'ascend', // Sắp xếp mặc định theo thứ tự tăng dần
     },
     {
       title: "Chi tiết",
@@ -536,15 +650,40 @@ const AppointmentManagement = () => {
       key: "cusId",
       width: 150,
       render: (cusId, record) => {
-        // Try to get customer name from all possible sources
-        const customerName =
-          record.customer?.customerName ||
-          record.customerDetails?.customerName ||
-          cusId?.customerName ||
-          cusId?.name ||
-          (typeof cusId === "string" ? cusId : "N/A");
+        // Debug thông tin
+        if (typeof cusId === "string" && !record.customer && !record.customerDetails) {
+          console.log(`Appointment ${record._id} cusId:`, cusId);
+        }
+        
+        // Kiểm tra nếu cusId là ObjectId
+        let customerString = "";
+        if (cusId) {
+          // Nếu cusId là object và có customerName
+          if (cusId.customerName) {
+            customerString = cusId.customerName;
+          } 
+          // Nếu customer object tồn tại
+          else if (record.customer && record.customer.customerName) {
+            customerString = record.customer.customerName;
+          }
+          // Nếu customerDetails tồn tại
+          else if (record.customerDetails && record.customerDetails.customerName) {
+            customerString = record.customerDetails.customerName;
+          }
+          // Nếu là string, kiểm tra xem có phải là ObjectId không
+          else if (typeof cusId === "string") {
+            // Hiển thị ID rút gọn
+            customerString = "ID: " + cusId.substring(0, 8) + "...";
+          }
+          // Mặc định
+          else {
+            customerString = "Không xác định";
+          }
+        } else {
+          customerString = "N/A";
+        }
 
-        return customerName;
+        return <span title={typeof cusId === "string" ? cusId : ""}>{customerString}</span>;
       },
     },
     {
@@ -614,14 +753,30 @@ const AppointmentManagement = () => {
       width: 110,
       filters: [
         { text: "Hoàn thành", value: "completed" },
-        { text: "Đang chờ", value: "pending" },
+        { text: "Hoàn thành", value: "Pending" },
         { text: "Đã hủy", value: "incomplete" },
-        { text: "Đã duyệt", value: "approve" },
       ],
       onFilter: (value, record) => record.status === value,
       render: (status) => (
         <Tag color={getStatusColor(status)}>{getStatusText(status)}</Tag>
       ),
+      sorter: (a, b) => {
+        // Thiết lập thứ tự ưu tiên cho các trạng thái
+        const statusOrder = {
+          "completed": 1,  // Hoàn thành (ưu tiên hiển thị đầu tiên)
+          "Pending": 1,    // Đã thanh toán (cùng ưu tiên với Hoàn thành vì đã tự động chuyển)
+          "approve": 2,    // Đã duyệt
+          "pending": 3,    // Đang chờ
+          "incomplete": 4  // Đã hủy (hiển thị cuối cùng)
+        };
+        
+        // Nếu trạng thái không nằm trong danh sách trên, đặt ở cuối
+        const orderA = statusOrder[a.status] || 999;
+        const orderB = statusOrder[b.status] || 999;
+        
+        return orderA - orderB;
+      },
+      defaultSortOrder: 'ascend', // Sắp xếp mặc định theo thứ tự tăng dần
     },
     {
       title: "Thao tác",
@@ -1089,22 +1244,10 @@ const AppointmentManagement = () => {
                                 ? item.date.toLocaleDateString('vi-VN')
                                 : item.date?.toString()}
                           </div>
-                            <div className="dose-detail-row">
-                              <Text strong>Vaccine:</Text> 
-                              {(item.vaccineDetails?.vaccineName || 
-                                item.vaccineId?.toString() || 
-                                "Chưa xác định")}
-                            </div>
-                            <div className="dose-detail-row">
-                              <Text strong>Lô vaccine:</Text> 
-                              {(item.batchDetails?.importCode || 
-                                item.batchId?.toString() || 
-                                "Chưa xác định")}
-                            </div>
-                            <div className="dose-detail-row">
+                            {/* <div className="dose-detail-row">
                               <Text strong>Đơn giá:</Text> 
                               {item.price ? item.price.toLocaleString('vi-VN') + ' VNĐ' : 'Chưa xác định'}
-                            </div>
+                            </div> */}
                           </div>
                           <Divider style={{ margin: '12px 0' }} />
                           <div className="dose-detail-row dose-actions">

@@ -30,6 +30,10 @@ class ConnectDatabaseService {
   //   return this.db.collection(String("vaccines"));
   // }
 
+  get vaccines() {
+    return this.db.collection(String("vaccines"));
+  }
+
   get appointmentLes() {
     return this.db.collection(String("appointmentsLes"));
   }

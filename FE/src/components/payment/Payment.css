@@ -168,15 +168,41 @@
   border-radius: 8px;
 }
 
+.zalopay-logo-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+
 .zalopay-logo {
   height: 50px;
-  margin-bottom: 1rem;
+}
+
+.zalopay-image {
+  width: 100%;
+  margin-bottom: 1.5rem;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.zalopay-illustration {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+  border-radius: 8px;
+  transition: transform 0.3s ease;
+}
+
+.zalopay-illustration:hover {
+  transform: scale(1.02);
 }
 
 .payment-method-zalopay p {
   color: #666;
   text-align: center;
   margin: 0;
+  font-size: 0.95rem;
 }
 
 /* Error message */

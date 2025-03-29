@@ -111,16 +111,21 @@ const RegistrationForm = () => {
         toast.success("Đăng ký thành công!");
         navigate("/login");
       } else {
-        // Xử lý lỗi từ server
-        toast.error(data.message || "Đăng ký thất bại!");
+        // Xử lý error từ backend
+        setErrors({
+          ...errors,
+          username: data || "Đăng ký thất bại!"
+        });
+        toast.error(data || "Đăng ký thất bại!");
+
       }
     } catch (error) {
+      console.error("Registration error:", error);
       toast.error("Lỗi kết nối: " + error.message);
     } finally {
       setLoading(false);
     }
   };
-
   const handleLoginButton = () => {
     navigate("/login");
   };
@@ -152,7 +157,7 @@ const RegistrationForm = () => {
               />
               {errors.username && <div className="regis-error">{errors.username}</div>}
             </div>
-            
+
             <div className="regis-input-group">
               <FiMail className="regis-input-icon" />
               <input
@@ -165,7 +170,7 @@ const RegistrationForm = () => {
               />
               {errors.email && <div className="regis-error">{errors.email}</div>}
             </div>
-            
+
             <div className="regis-input-group">
               <FiLock className="regis-input-icon" />
               <input
@@ -185,7 +190,7 @@ const RegistrationForm = () => {
               </button>
               {errors.password && <div className="regis-error">{errors.password}</div>}
             </div>
-            
+
             <div className="regis-input-group">
               <FiLock className="regis-input-icon" />
               <input
@@ -205,7 +210,7 @@ const RegistrationForm = () => {
               </button>
               {errors.confirmPassword && <div className="regis-error">{errors.confirmPassword}</div>}
             </div>
-            
+
             <div className="regis-button-group">
               <button
                 type="button"

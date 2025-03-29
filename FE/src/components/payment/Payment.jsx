@@ -17,53 +17,6 @@ const PaymentPage = () => {
   const [otherReason, setOtherReason] = useState("");
   const [processingPayment, setProcessingPayment] = useState(false);
 
-  // useEffect(() => {
-  //   document.title = "Xác nhận thanh toán";
-
-  //   // Get data directly from registerInjection
-  //   if (!location.state?.invoiceData) {
-  //     setError("Không có thông tin thanh toán");
-  //     setLoading(false);
-  //     return;
-  //   }
-
-  //   const invoiceData = location.state.invoiceData;
-
-  //   // Prepare payment data from invoice data
-  //   const data = {
-  //     cusId: invoiceData.cusId,
-  //     vaccineId:
-  //       invoiceData.type === "aptLe" ? invoiceData.vaccineId : undefined,
-  //     vaccinePackageId:
-  //       invoiceData.type === "aptGoi"
-  //         ? invoiceData.vaccinePackageId
-  //         : undefined,
-  //     childId: invoiceData.childInfo ? "new" : undefined, // If has childInfo, we're creating a new child
-  //     price: invoiceData.price,
-  //     type: invoiceData.type, // aptLe or aptGoi
-  //     date: invoiceData.date,
-  //     time: invoiceData.time,
-  //     childInfo: invoiceData.childInfo,
-  //     note: invoiceData.note || "",
-  //   };
-
-  //   setPaymentData({
-  //     ...data,
-  //     vaccineName: invoiceData.vaccineName,
-  //     customerName: invoiceData.customerName,
-  //     // Lưu thông tin ngày và thời gian vào appointmentData cho việc hiển thị
-  //     appointmentData: {
-  //       date: invoiceData.date,
-  //       time: invoiceData.time,
-  //       childInfo: invoiceData.childInfo,
-  //       createAt:
-  //         invoiceData.createdAt || new Date().toLocaleDateString("vi-VN"),
-  //     },
-  //   });
-
-  //   setLoading(false);
-  // }, [location.state]);
-
   useEffect(() => {
     document.title = "Xác nhận thanh toán";
 
@@ -147,6 +100,30 @@ const PaymentPage = () => {
           vaccineName: paymentData.vaccineName,
         })
       );
+
+      // Tạo thông báo cho người dùng
+      try {
+        const accesstoken = localStorage.getItem("accesstoken");
+        if (accesstoken) {
+          // Tạo nội dung thông báo dựa vào loại vaccine
+          const notificationMessage = paymentData.type === "aptGoi"
+            ? `✅ THANH TOÁN THÀNH CÔNG: Bạn đã thanh toán gói vaccine "${paymentData.vaccineName}". Vui lòng đến trung tâm vào ngày ${paymentData.date} để tiêm chủng.`
+            : `✅ THANH TOÁN THÀNH CÔNG: Bạn đã thanh toán vaccine "${paymentData.vaccineName}". Vui lòng đến trung tâm vào ngày ${paymentData.date} để tiêm chủng.`;
+
+          // Gọi API tạo thông báo
+          await axiosInstance.post("/noti/createNoti", {
+            cusId: paymentData.cusId,
+            message: notificationMessage
+          }, {
+            headers: { Authorization: `Bearer ${accesstoken}` }
+          });
+          
+          console.log("Đã tạo thông báo thanh toán thành công");
+        }
+      } catch (notificationError) {
+        console.error("Lỗi tạo thông báo:", notificationError);
+        // Không throw error ở đây để không ảnh hưởng đến luồng thanh toán
+      }
 
       // Make API request to create payment
       const response = await axiosInstance.post(
@@ -388,11 +365,20 @@ const PaymentPage = () => {
             <div className="payment-method-info">
               <h3>Phương thức thanh toán</h3>
               <div className="payment-method-zalopay">
-                <img
-                  src="/images/zalo-pay-logo.png"
-                  alt="ZaloPay"
-                  className="zalopay-logo"
-                />
+                <div className="zalopay-logo-container">
+                  <img
+                    src="/images/zalo-pay-logo.png"
+                    alt="ZaloPay"
+                    className="zalopay-logo"
+                  />
+                </div>
+                <div className="zalopay-image">
+                  <img 
+                    src="/images/zalopay.jpg" 
+                    alt="ZaloPay Payment" 
+                    className="zalopay-illustration" 
+                  />
+                </div>
                 <p>
                   Bạn sẽ được chuyển đến cổng thanh toán ZaloPay để hoàn tất
                   giao dịch

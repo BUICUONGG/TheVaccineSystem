@@ -135,14 +135,14 @@ const LoginPage = () => {
               </button>
             </div>
             <div className="login-input-group login-options">
-              <div className="login-remember">
+              {/* <div className="login-remember">
                 <input
                   type="checkbox"
                   checked={rememberMe}
                   onChange={(e) => setRememberMe(e.target.checked)}
                 />
                 <label>Nhớ mật khẩu</label>
-              </div>
+              </div> */}
               <Link to="/forgot-password" className="login-forgot">
                 Quên mật khẩu?
               </Link>

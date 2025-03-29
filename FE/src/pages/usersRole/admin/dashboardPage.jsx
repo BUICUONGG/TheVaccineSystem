@@ -678,6 +678,19 @@ const DashboardPage = () => {
     color: ["#52c41a", "#91d5ff", "#faad14", "#ff7a45", "#f5222d"],
   };
 
+  // State và hàm xử lý cho modal đánh giá
+  const [feedbackModalVisible, setFeedbackModalVisible] = useState(false);
+  
+  // Hiển thị modal đánh giá
+  const showFeedbackModal = () => {
+    setFeedbackModalVisible(true);
+  };
+  
+  // Đóng modal đánh giá 
+  const closeFeedbackModal = () => {
+    setFeedbackModalVisible(false);
+  };
+
   // Function to navigate to accounts page
   const navigateToAccounts = () => {
     navigate("/admin/accounts");
@@ -946,7 +959,9 @@ const DashboardPage = () => {
                 </Tooltip>
               </div>
             }
-            className="dashboard-card"
+            className="dashboard-card clickable-card"
+            hoverable
+            onClick={showFeedbackModal}
           >
             <div className="chart-container">
               <Pie {...feedbackPieConfig} />
@@ -1003,6 +1018,62 @@ const DashboardPage = () => {
           </Card>
         </Col>
       </Row>
+
+      {/* User Role Distribution Modal */}
+      <Modal
+        title="Phân bố người dùng theo vai trò"
+        open={userRoleModalVisible}
+        onCancel={closeUserRoleModal}
+        footer={[
+          <Button key="close" onClick={closeUserRoleModal}>
+            Đóng
+          </Button>
+        ]}
+        width={600}
+      >
+        <div style={{ marginBottom: "20px" }}>
+          <h3>Tổng số: {stats.userList.length} người dùng</h3>
+          <Table
+            dataSource={Object.entries(roleCount).map(([role, count]) => ({
+              key: role,
+              role: role.charAt(0).toUpperCase() + role.slice(1),
+              count: count,
+              percentage: Math.round((count / stats.userList.length) * 100) + "%"
+            }))}
+            columns={[
+              {
+                title: "Vai trò",
+                dataIndex: "role",
+                key: "role",
+                render: (role) => (
+                  <Tag color={
+                    role === "Admin" ? "#f5222d" :
+                    role === "Staff" ? "#1890ff" :
+                    role === "Customer" ? "#52c41a" : "#d9d9d9"
+                  }>
+                    {role}
+                  </Tag>
+                )
+              },
+              {
+                title: "Số lượng",
+                dataIndex: "count",
+                key: "count",
+                sorter: (a, b) => a.count - b.count
+              },
+              {
+                title: "Tỷ lệ",
+                dataIndex: "percentage",
+                key: "percentage"
+              }
+            ]}
+            pagination={false}
+          />
+        </div>
+        <div className="modal-chart">
+          <Pie {...pieConfig} />
+        </div>
+      </Modal>
 
       {/* Content Distribution Modal */}
       <Modal
@@ -1156,6 +1227,105 @@ const DashboardPage = () => {
         </div>
         <div className="modal-chart">
           <Pie {...appointmentTypePieConfig} />
+        </div>
+      </Modal>
+
+      {/* Feedback Details Modal */}
+      <Modal
+        title="Chi tiết đánh giá khách hàng"
+        open={feedbackModalVisible}
+        onCancel={closeFeedbackModal}
+        footer={[
+          <Button key="close" onClick={closeFeedbackModal}>
+            Đóng
+          </Button>
+        ]}
+        width={600}
+      >
+        <div style={{ marginBottom: "20px" }}>
+          <h3>Tổng số: {stats.totalFeedback} đánh giá</h3>
+          <div style={{ marginBottom: "15px" }}>
+            <Tag color="#722ed1" style={{ fontSize: "16px", padding: "5px 10px" }}>
+              <StarOutlined /> Điểm trung bình: {stats.feedbackStats.averageRating}/5
+            </Tag>
+          </div>
+          
+          <Table
+            dataSource={[
+              {
+                key: '1',
+                rating: '5 sao',
+                count: stats.feedbackStats.fiveStars,
+                percentage: stats.totalFeedback > 0 
+                  ? Math.round((stats.feedbackStats.fiveStars / stats.totalFeedback) * 100) + "%" 
+                  : "0%"
+              },
+              {
+                key: '2',
+                rating: '4 sao',
+                count: stats.feedbackStats.fourStars,
+                percentage: stats.totalFeedback > 0 
+                  ? Math.round((stats.feedbackStats.fourStars / stats.totalFeedback) * 100) + "%" 
+                  : "0%"
+              },
+              {
+                key: '3',
+                rating: '3 sao',
+                count: stats.feedbackStats.threeStars,
+                percentage: stats.totalFeedback > 0 
+                  ? Math.round((stats.feedbackStats.threeStars / stats.totalFeedback) * 100) + "%" 
+                  : "0%"
+              },
+              {
+                key: '4',
+                rating: '2 sao',
+                count: stats.feedbackStats.twoStars,
+                percentage: stats.totalFeedback > 0 
+                  ? Math.round((stats.feedbackStats.twoStars / stats.totalFeedback) * 100) + "%" 
+                  : "0%"
+              },
+              {
+                key: '5',
+                rating: '1 sao',
+                count: stats.feedbackStats.oneStars,
+                percentage: stats.totalFeedback > 0 
+                  ? Math.round((stats.feedbackStats.oneStars / stats.totalFeedback) * 100) + "%" 
+                  : "0%"
+              }
+            ]}
+            columns={[
+              {
+                title: "Xếp hạng",
+                dataIndex: "rating",
+                key: "rating",
+                render: (rating) => {
+                  let color = "#d9d9d9";
+                  if (rating.includes("5")) color = "#52c41a";
+                  else if (rating.includes("4")) color = "#91d5ff";
+                  else if (rating.includes("3")) color = "#faad14";
+                  else if (rating.includes("2")) color = "#ff7a45";
+                  else if (rating.includes("1")) color = "#f5222d";
+                  
+                  return <Tag color={color}>{rating}</Tag>;
+                }
+              },
+              {
+                title: "Số lượng",
+                dataIndex: "count",
+                key: "count",
+                sorter: (a, b) => a.count - b.count,
+              },
+              {
+                title: "Tỷ lệ",
+                dataIndex: "percentage",
+                key: "percentage",
+              }
+            ]}
+            pagination={false}
+          />
+        </div>
+        <div className="modal-chart">
+          <Pie {...feedbackPieConfig} />
         </div>
       </Modal>
     </div>
