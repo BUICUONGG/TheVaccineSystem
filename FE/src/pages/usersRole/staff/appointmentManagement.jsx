@@ -12,83 +12,20 @@ import {
   Card,
   Typography,
   Divider,
+  Space,
 } from "antd";
 import {
   SearchOutlined,
   CheckCircleFilled,
   MenuOutlined,
+  EditOutlined,
+  CheckCircleOutlined,
 } from "@ant-design/icons";
 import moment from "moment";
 import axiosInstance from "../../../service/api";
 import "./appointmentManagement.css";
 const { TabPane } = Tabs;
 const { Title, Text } = Typography;
-
-// Thêm style cho nút duyệt và hủy đơn
-const buttonStyles = `
-  .approve-button {
-    background-color: #1976d2 !important;
-    border-color: #1976d2 !important;
-    margin-right: 8px;
-    transition: all 0.3s ease;
-    box-shadow: 0 3px 1px -2px rgba(0,0,0,0.2), 0 2px 2px 0 rgba(0,0,0,0.14), 0 1px 5px 0 rgba(0,0,0,0.12);
-  }
-  
-  .approve-button:hover:not(:disabled) {
-    background-color: #1565c0 !important;
-    border-color: #1565c0 !important;
-    box-shadow: 0 2px 4px -1px rgba(0,0,0,0.2), 0 4px 5px 0 rgba(0,0,0,0.14), 0 1px 10px 0 rgba(0,0,0,0.12);
-  }
-  
-  .approve-button:disabled {
-    opacity: 0.7;
-    cursor: not-allowed;
-  }
-
-  .complete-button {
-    background-color: #52c41a ;
-    border-color: #52c41a ;
-    margin-right: 8px;
-    transition: all 0.3s ease;
-    box-shadow: 0 3px 1px -2px rgba(0,0,0,0.2), 0 2px 2px 0 rgba(0,0,0,0.14), 0 1px 5px 0 rgba(0,0,0,0.12);
-  }
-  
-  .complete-button:hover:not(:disabled) {
-    background-color: #389e0d ;
-    border-color: #389e0d ;
-    box-shadow: 0 2px 4px -1px rgba(0,0,0,0.2), 0 4px 5px 0 rgba(0,0,0,0.14), 0 1px 10px 0 rgba(0,0,0,0.12);
-  }
-  
-  .complete-button:disabled {
-    opacity: 0.7;
-    cursor: not-allowed;
-  }
-
-  .cancel-button {
-    background-color: #f44336 ;
-    border-color: #f44336 ;
-    color: white ;
-    transition: all 0.3s ease;
-    box-shadow: 0 3px 1px -2px rgba(0,0,0,0.2), 0 2px 2px 0 rgba(0,0,0,0.14), 0 1px 5px 0 rgba(0,0,0,0.12);
-  }
-  
-  .cancel-button:hover:not(:disabled) {
-    background-color: #d32f2f ;
-    border-color: #d32f2f !;
-    box-shadow: 0 2px 4px -1px rgba(0,0,0,0.2), 0 4px 5px 0 rgba(0,0,0,0.14), 0 1px 10px 0 rgba(0,0,0,0.12);
-  }
-  
-  .cancel-button:disabled {
-    opacity: 0.7;
-    cursor: not-allowed;
-  }
-
-  .action-buttons {
-    display: flex;
-    justify-content: flex-start;
-    align-items: center;
-  }
-`;
 
 const AppointmentManagement = () => {
   const [loading, setLoading] = useState(false);
@@ -102,20 +39,6 @@ const AppointmentManagement = () => {
   const [autoCheckEnabled, setAutoCheckEnabled] = useState(true);
   const [filteredAppointmentsGoi, setFilteredAppointmentsGoi] = useState([]);
   const [filteredAppointmentsLe, setFilteredAppointmentsLe] = useState([]);
-
-  // Thêm style vào component
-  useEffect(() => {
-    // Tạo style element
-    const styleElement = document.createElement('style');
-    styleElement.type = 'text/css';
-    styleElement.innerHTML = buttonStyles;
-    document.head.appendChild(styleElement);
-
-    // Cleanup khi component unmount
-    return () => {
-      document.head.removeChild(styleElement);
-    };
-  }, []);
 
   const fetchAppointments = async () => {
     try {
@@ -174,6 +97,179 @@ const AppointmentManagement = () => {
         }
       };
 
+      // Helper function to populate vaccine details for appointment data
+      const populateVaccineData = async (appointments) => {
+        // Skip if no appointments
+        if (!appointments || appointments.length === 0) return appointments;
+        
+        // Identify which vaccine IDs need to be fetched
+        const vaccineIdsToFetch = new Set();
+        appointments.forEach(apt => {
+          if (apt.vaccineId && typeof apt.vaccineId === 'string' && !apt.vaccine && !apt.vaccineDetails) {
+            vaccineIdsToFetch.add(apt.vaccineId);
+          }
+        });
+        
+        // If no vaccine IDs need fetching, return as is
+        if (vaccineIdsToFetch.size === 0) return appointments;
+        
+        try {
+          console.log(`Fetching details for ${vaccineIdsToFetch.size} vaccines...`);
+          const vaccineMap = {};
+          
+          // Fetch vaccine details
+          for (const vaccineId of vaccineIdsToFetch) {
+            try {
+              // Thử nhiều endpoint khác nhau để tìm thông tin vaccine
+              let foundVaccine = false;
+              
+              // Thử endpoint 1: /vaccines/detail
+              try {
+                const vaccineResponse = await axiosInstance.get(
+                  `/vaccines/detail/${vaccineId}`,
+                  { headers: { Authorization: `Bearer ${token}` } }
+                );
+                
+                if (vaccineResponse.data) {
+                  vaccineMap[vaccineId] = vaccineResponse.data;
+                  foundVaccine = true;
+                  console.log(`Found vaccine ${vaccineId} at /vaccines/detail`);
+                }
+              } catch (err1) {
+                console.log(`No vaccine at /vaccines/detail/${vaccineId}`);
+              }
+              
+              // Thử endpoint 2: /vaccinceInventorys
+              if (!foundVaccine) {
+                try {
+                  const vaccineResponse = await axiosInstance.get(
+                    `/vaccine/inventory/${vaccineId}`,
+                    { headers: { Authorization: `Bearer ${token}` } }
+                  );
+                  
+                  if (vaccineResponse.data) {
+                    vaccineMap[vaccineId] = vaccineResponse.data;
+                    foundVaccine = true;
+                    console.log(`Found vaccine ${vaccineId} at /vaccine/inventory`);
+                  }
+                } catch (err2) {
+                  console.log(`No vaccine at /vaccine/inventory/${vaccineId}`);
+                }
+              }
+              
+              // Thử endpoint 3: vaccine by id direct
+              if (!foundVaccine) {
+                try {
+                  const vaccineResponse = await axiosInstance.get(
+                    `/vaccine/${vaccineId}`,
+                    { headers: { Authorization: `Bearer ${token}` } }
+                  );
+                  
+                  if (vaccineResponse.data) {
+                    vaccineMap[vaccineId] = vaccineResponse.data;
+                    foundVaccine = true;
+                    console.log(`Found vaccine ${vaccineId} at direct /vaccine endpoint`);
+                  }
+                } catch (err3) {
+                  console.log(`No vaccine at direct /vaccine/${vaccineId}`);
+                }
+              }
+              
+              // Nếu không tìm thấy, ghi log
+              if (!foundVaccine) {
+                console.error(`Could not find vaccine with ID ${vaccineId} at any endpoint`);
+              }
+            } catch (error) {
+              console.error(`Error in vaccine fetch loop for ${vaccineId}:`, error);
+            }
+          }
+          
+          // Update appointment data with vaccine details
+          return appointments.map(apt => {
+            // Nếu đã có thông tin về vaccine, không cần cập nhật
+            if (apt.vaccine && apt.vaccine.vaccineName) {
+              return apt;
+            }
+            
+            if (apt.vaccineId && typeof apt.vaccineId === 'string' && vaccineMap[apt.vaccineId]) {
+              return {
+                ...apt,
+                vaccineDetails: vaccineMap[apt.vaccineId]
+              };
+            }
+            
+            // Trích xuất tên vaccine từ note nếu có
+            if (!apt.vaccineDetails && apt.note) {
+              let extractedName = null;
+              
+              if (apt.note.includes("vaccine")) {
+                const match = apt.note.match(/vaccine\s+(.+?)(\s+|$)/i);
+                if (match && match[1]) {
+                  extractedName = match[1];
+                }
+              } else if (apt.note.includes("tiêm")) {
+                const match = apt.note.match(/tiêm\s+(.+?)(\s+|$)/i);
+                if (match && match[1]) {
+                  extractedName = match[1];
+                }
+              }
+              
+              if (extractedName) {
+                return {
+                  ...apt,
+                  vaccineDetails: { vaccineName: extractedName }
+                };
+              }
+            }
+            
+            return apt;
+          });
+        } catch (error) {
+          console.error("Error populating vaccine data:", error);
+          return appointments;
+        }
+      };
+
+      // Helper function to populate vaccine package details
+      const populatePackageData = async (appointments) => {
+        // Skip if no appointments
+        if (!appointments || appointments.length === 0) return appointments;
+        
+        try {
+          // Cập nhật dữ liệu gói vaccine dựa trên note
+          return appointments.map(apt => {
+            // Nếu đã có thông tin về gói, không cần cập nhật
+            if (apt.vaccinePakage && apt.vaccinePakage.packageName) {
+              return apt;
+            }
+            
+            // Trích xuất tên gói từ note nếu có
+            if (apt.note) {
+              let extractedName = null;
+              
+              if (apt.note.includes("gói")) {
+                const match = apt.note.match(/gói\s+(.+?)(\s+|$)/i);
+                if (match && match[1]) {
+                  extractedName = match[1];
+                }
+              } 
+              
+              if (extractedName) {
+                return {
+                  ...apt,
+                  packageDetails: { packageName: extractedName }
+                };
+              }
+            }
+            
+            return apt;
+          });
+        } catch (error) {
+          console.error("Error populating package data:", error);
+          return appointments;
+        }
+      };
+
       // Fetch appointments gói - sử dụng API chi tiết
       const responseGoi = await axiosInstance.get(
         "/appointmentGoi/showDetailAptGoi",
@@ -199,6 +295,8 @@ const AppointmentManagement = () => {
           cusIdType: typeof sampleLe.cusId,
           hasCustomer: !!sampleLe.customer,
           hasCustomerDetails: !!sampleLe.customerDetails,
+          vaccineId: sampleLe.vaccineId,
+          note: sampleLe.note,
           fullData: sampleLe
         });
       }
@@ -212,15 +310,20 @@ const AppointmentManagement = () => {
           cusIdType: typeof sampleGoi.cusId,
           hasCustomer: !!sampleGoi.customer,
           hasCustomerDetails: !!sampleGoi.customerDetails,
+          vaccinePakage: sampleGoi.vaccinePakage,
+          note: sampleGoi.note,
           fullData: sampleGoi
         });
       }
 
       // Không cần fetch thêm thông tin nếu API đã trả về đầy đủ
-      const goiData = responseGoi.data || [];
+      let goiData = responseGoi.data || [];
+      goiData = await populatePackageData(goiData);
       
       // Populate customer data for le appointments
       let leData = await populateCustomerData(responseLe.data || []);
+      // Additionally populate vaccine data
+      leData = await populateVaccineData(leData);
 
       // Tự động hoàn thành các đơn hàng lẻ đã thanh toán (Pending)
       const paidAppointments = leData.filter(apt => apt.status === "Pending");
@@ -248,7 +351,10 @@ const AppointmentManagement = () => {
         );
         
         // Populate customer data for the updated appointments
-        const updatedLeData = await populateCustomerData(updatedResponseLe.data || []);
+        let updatedLeData = await populateCustomerData(updatedResponseLe.data || []);
+        // Additionally populate vaccine data
+        updatedLeData = await populateVaccineData(updatedLeData);
+        
         setAppointmentsLe(updatedLeData);
         message.success(`Đã tự động hoàn thành ${paidAppointments.length} đơn hàng đã thanh toán`);
       } else {
@@ -510,6 +616,52 @@ const AppointmentManagement = () => {
       },
     },
     {
+      title: "Gói Vaccine",
+      dataIndex: "vaccinePakage",
+      key: "vaccinePakage",
+      width: 150,
+      render: (vaccinePakage, record) => {
+        // Log để debug
+        console.log("Rendering package name for:", record._id, {
+          vaccinePakage,
+          fullRecord: record
+        });
+        
+        // Try to get package name from all possible sources
+        let packageName = null;
+        
+        // Ưu tiên thứ tự lấy tên gói
+        if (record.vaccinePakage && record.vaccinePakage.packageName) {
+          packageName = record.vaccinePakage.packageName;
+        } else if (record.package && record.package.packageName) {
+          packageName = record.package.packageName;
+        } else if (record.packageDetails && record.packageDetails.packageName) {
+          packageName = record.packageDetails.packageName;
+        } else if (record.vaccinePakageId && typeof record.vaccinePakageId === "object") {
+          packageName = record.vaccinePakageId.packageName || record.vaccinePakageId.name;
+        } else if (record.vaccinePackageId && typeof record.vaccinePackageId === "object") {
+          packageName = record.vaccinePackageId.packageName || record.vaccinePackageId.name;
+        } else if (record.note && record.note.includes("gói")) {
+          // Cố gắng trích xuất tên từ note (tương tự Payment.jsx)
+          const match = record.note.match(/gói\s+(.+?)(\s+|$)/i);
+          if (match && match[1]) {
+            packageName = match[1];
+          }
+        }
+        
+        // Fallback nếu không tìm thấy tên
+        if (!packageName) {
+          packageName = typeof record.vaccinePakageId === "string" 
+            ? "Gói #" + record.vaccinePakageId.substring(0, 8) + "..." 
+            : (typeof record.vaccinePackageId === "string" 
+                ? "Gói #" + record.vaccinePackageId.substring(0, 8) + "..." 
+                : "N/A");
+        }
+
+        return <span title={packageName}>{packageName}</span>;
+      },
+    },
+    {
       title: "Ngày hẹn",
       dataIndex: "date",
       key: "date",
@@ -545,14 +697,6 @@ const AppointmentManagement = () => {
       defaultSortOrder: "descend",
     },
     {
-      title: "Giá tiền",
-      dataIndex: "price",
-      key: "price",
-      width: 130,
-      render: (price) => price ? price.toLocaleString("vi-VN") + " VNĐ" : "N/A",
-      sorter: (a, b) => (a.price || 0) - (b.price || 0),
-    },
-    {
       title: "Số mũi tiêm",
       dataIndex: "doseSchedule",
       key: "doseCount",
@@ -582,7 +726,7 @@ const AppointmentManagement = () => {
         
         return (
           <div>
-            <Tag color={color} style={{ minWidth: '70px', textAlign: 'center' }}>
+            <Tag color={color} className="progress-tag">
               {completedDoses}/{totalDoses} mũi
             </Tag>
           </div>
@@ -688,19 +832,55 @@ const AppointmentManagement = () => {
     },
     {
       title: "Vaccine",
-      dataIndex: "vaccineId",
-      key: "vaccineId",
-      width: 150,
-      render: (vaccineId, record) => {
-        // Try to get vaccine name from all possible sources
-        const vaccineName =
-          record.vaccine?.vaccineName ||
-          record.vaccineDetails?.vaccineName ||
-          vaccineId?.vaccineName ||
-          vaccineId?.name ||
-          (typeof vaccineId === "string" ? vaccineId : "N/A");
-
-        return vaccineName;
+      dataIndex: "vaccine",
+      key: "vaccine",
+      render: (text, record) => {
+        console.log("Rendering vaccine name:", record);
+        // Kiểm tra nhiều vị trí có thể chứa tên vaccine
+        let vaccineName = null;
+        
+        // Kiểm tra trong vaccine object
+        if (record.vaccine) {
+          if (record.vaccine.vaccineName) vaccineName = record.vaccine.vaccineName;
+          else if (record.vaccine.name) vaccineName = record.vaccine.name;
+        }
+        
+        // Kiểm tra trong vaccineDetails
+        if (!vaccineName && record.vaccineDetails) {
+          if (record.vaccineDetails.vaccineName) vaccineName = record.vaccineDetails.vaccineName;
+          else if (record.vaccineDetails.name) vaccineName = record.vaccineDetails.name;
+        }
+        
+        // Kiểm tra nếu vaccineId là object và có chứa tên
+        if (!vaccineName && record.vaccineId && typeof record.vaccineId === 'object') {
+          if (record.vaccineId.vaccineName) vaccineName = record.vaccineId.vaccineName;
+          else if (record.vaccineId.name) vaccineName = record.vaccineId.name;
+        }
+        
+        // Thử lấy từ note nếu chứa thông tin vaccine
+        if (!vaccineName && record.note) {
+          const noteMatch = record.note.match(/[Vv]accine\s*:?\s*([^,;\.]+)/);
+          if (noteMatch && noteMatch[1]) {
+            vaccineName = noteMatch[1].trim();
+          } else {
+            // Thử lấy từ các cụm từ tiếng Việt
+            const vnMatch = record.note.match(/[Tt]iêm\s*:?\s*([^,;\.]+)/);
+            if (vnMatch && vnMatch[1]) {
+              vaccineName = vnMatch[1].trim();
+            }
+          }
+        }
+        
+        // Fallback nếu không tìm thấy gì
+        if (!vaccineName && record.vaccineId) {
+          if (typeof record.vaccineId === 'string') {
+            vaccineName = record.vaccineId.substring(0, 8) + '...';
+          } else {
+            vaccineName = 'N/A';
+          }
+        }
+        
+        return vaccineName || "N/A";
       },
     },
     {
@@ -757,9 +937,21 @@ const AppointmentManagement = () => {
         { text: "Đã hủy", value: "incomplete" },
       ],
       onFilter: (value, record) => record.status === value,
-      render: (status) => (
-        <Tag color={getStatusColor(status)}>{getStatusText(status)}</Tag>
-      ),
+      render: (status) => {
+        let color =
+          status === "Completed"
+            ? "#87d068"
+            : status === "Pending"
+            ? "#faad14"
+            : status === "Canceled"
+            ? "#f50"
+            : "#2db7f5";
+        return (
+          <Tag color={color}>
+            {status === "Completed" && <CheckCircleFilled />} {status}
+          </Tag>
+        );
+      },
       sorter: (a, b) => {
         // Thiết lập thứ tự ưu tiên cho các trạng thái
         const statusOrder = {
@@ -779,46 +971,27 @@ const AppointmentManagement = () => {
       defaultSortOrder: 'ascend', // Sắp xếp mặc định theo thứ tự tăng dần
     },
     {
-      title: "Thao tác",
-      key: "actions",
-      width: 200,
-      render: (_, record) => (
-        <div className="action-buttons">
-          {record.status === "pending" && (
-            <>
-              <Button
-                type="primary"
-                className="approve-button"
-                onClick={() => handleStatusChange(record._id, "approve", false)}
-              >
-                Duyệt đơn
-              </Button>
-              <Button
-                danger
-                className="cancel-button"
-                onClick={() => handleStatusChange(record._id, "incomplete", false)}
-              >
-                Hủy đơn
-              </Button>
-            </>
-          )}
-          {record.status === "approve" && (
-            <Button
-              type="primary"
+      title: "Hành động",
+      key: "action",
+      render: (text, record) => (
+        <Space size="middle">
+          <Button
+            onClick={() => handleEditLe(record)}
+            className="edit-button"
+            icon={<EditOutlined />}
+          >
+            Chỉnh sửa
+          </Button>
+          {record.status === 'Pending' && (
+            <Button 
+              onClick={() => autoCompleteAppointment(record._id)}
               className="complete-button"
-              onClick={() => handleStatusChange(record._id, "completed", false)}
+              icon={<CheckCircleOutlined />}
             >
-              Hoàn thành
+              Complete
             </Button>
           )}
-          <Button
-            type="primary"
-            icon={<MenuOutlined />}
-            onClick={() => showAppointmentDetails(record, false)}
-            disabled={record.status === "incomplete"}
-            style={{ marginLeft: '8px' }}
-          />
-        </div>
+        </Space>
       ),
     },
   ];
@@ -900,7 +1073,7 @@ const AppointmentManagement = () => {
     setSearchText(e.target.value);
   };
 
-  // Hàm kiểm tra và cập nhật trạng thái cho các đơn hẹn quá hạn
+  // Kiểm tra và cập nhật trạng thái cho các đơn hẹn quá hạn
   const checkExpiredAppointments = async () => {
     try {
       const token = localStorage.getItem("accesstoken");
@@ -955,6 +1128,32 @@ const AppointmentManagement = () => {
     }
   }, [appointmentsGoi, appointmentsLe, autoCheckEnabled]);
 
+  // Hàm để xử lý chỉnh sửa lịch hẹn lẻ
+  const handleEditLe = (record) => {
+    // Hiển thị thông tin chi tiết lịch hẹn lẻ
+    showAppointmentDetails(record, false);
+  };
+
+  // Hàm để tự động hoàn thành lịch hẹn lẻ
+  const autoCompleteAppointment = async (appointmentId) => {
+    try {
+      const response = await axiosInstance.post(`/appointmentLe/autocomplete/${appointmentId}`, {}, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      
+      if (response.status === 200) {
+        message.success('Lịch hẹn đã được hoàn thành và cập nhật vào lịch sử tiêm chủng');
+        // Tải lại dữ liệu sau khi hoàn thành thành công
+        fetchAppointments();
+      }
+    } catch (error) {
+      console.error('Lỗi khi hoàn thành lịch hẹn:', error);
+      message.error('Không thể hoàn thành lịch hẹn. Vui lòng thử lại sau.');
+    }
+  };
+
   return (
     <div className="appointment-management">
       <h1>Quản lý lịch hẹn</h1>
@@ -971,13 +1170,13 @@ const AppointmentManagement = () => {
         <Button 
           type={autoCheckEnabled ? "primary" : "default"}
           onClick={() => setAutoCheckEnabled(!autoCheckEnabled)}
-          style={{ marginLeft: '16px' }}
+          className="auto-check-button"
         >
           {autoCheckEnabled ? "Tắt tự động hủy" : "Bật tự động hủy"}
         </Button>
         <Button 
           onClick={checkExpiredAppointments} 
-          style={{ marginLeft: '8px' }}
+          className="check-expired-button"
         >
           Kiểm tra đơn quá hạn
         </Button>
@@ -1210,10 +1409,10 @@ const AppointmentManagement = () => {
                         
                         return (
                           <>
-                            <Tag color={color} style={{ marginRight: '5px' }}>
+                            <Tag color={color} className="summary-tag">
                               {completedDoses}/{totalDoses}
                             </Tag>
-                            <span style={{ color: color, fontWeight: 'bold' }}>
+                            <span className={`progress-percent progress-percent-${progressPercent === 100 ? 'complete' : progressPercent > 50 ? 'half' : 'start'}`}>
                               {progressPercent}% đã tiêm
                             </span>
                           </>
