@@ -23,6 +23,26 @@
   border-radius: 4px;
 }
 
+/* Button styles in search container */
+.auto-check-button {
+  margin-left: 16px;
+}
+
+.check-expired-button {
+  margin-left: 8px;
+}
+
+/* Button styles for actions */
+.edit-button {
+  background-color: #1677ff;
+  color: white;
+}
+
+.edit-button:hover {
+  background-color: #4096ff;
+  color: white;
+}
+
 /* Table Styles */
 .appointment-management .ant-table-wrapper {
   background-color: white;
@@ -277,6 +297,12 @@
   cursor: not-allowed;
 }
 
+.action-buttons {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+}
+
 /* Modal styles */
 .ant-modal-content {
   border-radius: 8px;
@@ -345,4 +371,32 @@
 .dose-progress-summary {
   display: flex;
   align-items: center;
-} 
+}
+
+/* Progress and Status tags */
+.progress-tag {
+  min-width: 70px;
+  text-align: center;
+}
+
+.summary-tag {
+  margin-right: 5px;
+}
+
+.progress-percent {
+  font-weight: bold;
+}
+
+.progress-percent-complete {
+  color: #52c41a;
+}
+
+.progress-percent-half {
+  color: #1890ff;
+}
+
+.progress-percent-start {
+  color: #faad14;
+}
+
+/* Dose scheduling summary */ 
