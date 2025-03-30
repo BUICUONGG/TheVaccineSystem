@@ -401,10 +401,12 @@ class AppointmentService {
       if (!finalChildId && childInfo && Object.keys(childInfo).length > 0) {
         finalChildId = await childService.create(childInfo);
       }
+
       // Lấy thông tin gói vaccine
       const vaccinePackage = await connectToDatabase.vaccinepackages.findOne({
         _id: new ObjectId(vaccinePackageId),
       });
+
       if (!vaccinePackage) {
         throw new Error("Không tìm thấy gói vaccine.");
       }
@@ -417,7 +419,7 @@ class AppointmentService {
 
       // Gán vaccineId cho từng liều tiêm
       doseSchedule.forEach((dose, index) => {
-        const vaccineData = vaccinePackage.vaccines[index]; // Lấy vaccine theo thứ tự
+        const vaccineData = vaccinePackage.vaccines[index];
         if (vaccineData) {
           dose.vaccineId = vaccineData.vaccineId;
         } else {
@@ -425,19 +427,49 @@ class AppointmentService {
         }
       });
 
-      // Lấy danh sách vaccineId từ lịch tiêm (sau khi gán vaccineId)
+      // Lấy danh sách vaccineId từ lịch tiêm
       const vaccineIds = doseSchedule
         .map((dose) => dose.vaccineId)
         .filter(Boolean);
 
+      let vaccineMap = {};
+
+      // Kiểm tra xem collection vaccineInventory có tồn tại không
+      if (connectToDatabase.vaccinceInventorys && vaccineIds.length > 0) {
+        const vaccinesInfo = await connectToDatabase.vaccinceInventorys
+          .find(
+            { _id: { $in: vaccineIds.map((id) => new ObjectId(id)) } },
+            { projection: { _id: 1, vaccineName: 1 } }
+          )
+          .toArray();
+
+        // Chuyển danh sách vaccine thành Map để tra cứu nhanh
+        vaccineMap = vaccinesInfo.reduce((acc, vax) => {
+          acc[vax._id.toString()] = vax.vaccineName;
+          return acc;
+        }, {});
+      } else {
+        console.warn(
+          "Không thể truy vấn vaccineInventory hoặc không có vaccineId."
+        );
+      }
+
+      // Gán tên vaccine vào doseSchedule
+      doseSchedule.forEach((dose) => {
+        if (dose.vaccineId) {
+          dose.vaccineName =
+            vaccineMap[dose.vaccineId.toString()] || "Không tìm thấy tên";
+        }
+      });
+
       // Lấy thông tin lô vaccine gần hết hạn nhất
       const nearestBatches = await this.getNearestExpiryBatches(vaccineIds);
 
-      let totalPrice = 0; // Tổng giá tiền của gói vaccine
+      let totalPrice = 0;
 
       for (const dose of doseSchedule) {
         if (!dose.vaccineId) {
-          continue; // Bỏ qua nếu không có vaccineId
+          continue;
         }
 
         const vaccineBatchInfo = nearestBatches[dose.vaccineId.toString()];
@@ -450,8 +482,7 @@ class AppointmentService {
 
         dose.batchId = vaccineBatchInfo.batchId;
         dose.price = vaccineBatchInfo.unitPrice;
-
-        totalPrice += vaccineBatchInfo.unitPrice; // Cộng dồn vào tổng giá gói
+        totalPrice += vaccineBatchInfo.unitPrice;
       }
 
       // Tạo lịch hẹn gói

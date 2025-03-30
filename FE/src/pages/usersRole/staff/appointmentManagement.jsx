@@ -1111,11 +1111,7 @@ const AppointmentManagement = () => {
               <div className="detail-row">
                 <span className="detail-label">Trẻ em:</span>
                 <span className="detail-value">
-                  {selectedAppointment.childId
-                    ? selectedAppointment.childId.childName ||
-                      selectedAppointment.child?.childName ||
-                      selectedAppointment.childId.toString()
-                    : "Không có"}
+                  {selectedAppointment?.childId?.name || "Không có"}
                 </span>
               </div>
 
