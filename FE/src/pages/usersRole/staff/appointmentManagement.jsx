@@ -97,7 +97,7 @@ const AppointmentManagement = () => {
   const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [searchText, setSearchText] = useState("");
-  const [activeTab, setActiveTab] = useState("1");
+  const [, setActiveTab] = useState("1");
   const [detailLoading, setDetailLoading] = useState(false);
   const [autoCheckEnabled, setAutoCheckEnabled] = useState(true);
   const [filteredAppointmentsGoi, setFilteredAppointmentsGoi] = useState([]);
@@ -106,8 +106,8 @@ const AppointmentManagement = () => {
   // Thêm style vào component
   useEffect(() => {
     // Tạo style element
-    const styleElement = document.createElement('style');
-    styleElement.type = 'text/css';
+    const styleElement = document.createElement("style");
+    styleElement.type = "text/css";
     styleElement.innerHTML = buttonStyles;
     document.head.appendChild(styleElement);
 
@@ -126,22 +126,28 @@ const AppointmentManagement = () => {
       const populateCustomerData = async (appointments) => {
         // Skip if no appointments
         if (!appointments || appointments.length === 0) return appointments;
-        
+
         // Identify which customer IDs need to be fetched
         const customerIdsToFetch = new Set();
-        appointments.forEach(apt => {
-          if (typeof apt.cusId === 'string' && !apt.customer && !apt.customerDetails) {
+        appointments.forEach((apt) => {
+          if (
+            typeof apt.cusId === "string" &&
+            !apt.customer &&
+            !apt.customerDetails
+          ) {
             customerIdsToFetch.add(apt.cusId);
           }
         });
-        
+
         // If no customer IDs need fetching, return as is
         if (customerIdsToFetch.size === 0) return appointments;
-        
+
         try {
-          console.log(`Fetching details for ${customerIdsToFetch.size} customers...`);
+          console.log(
+            `Fetching details for ${customerIdsToFetch.size} customers...`
+          );
           const customerMap = {};
-          
+
           // Fetch customer details
           for (const customerId of customerIdsToFetch) {
             try {
@@ -149,7 +155,7 @@ const AppointmentManagement = () => {
                 `/customer/getCustomerById/${customerId}`,
                 { headers: { Authorization: `Bearer ${token}` } }
               );
-              
+
               if (customerResponse.data) {
                 customerMap[customerId] = customerResponse.data;
               }
@@ -157,13 +163,13 @@ const AppointmentManagement = () => {
               console.error(`Error fetching customer ${customerId}:`, error);
             }
           }
-          
+
           // Update appointment data with customer details
-          return appointments.map(apt => {
-            if (typeof apt.cusId === 'string' && customerMap[apt.cusId]) {
+          return appointments.map((apt) => {
+            if (typeof apt.cusId === "string" && customerMap[apt.cusId]) {
               return {
                 ...apt,
-                customerDetails: customerMap[apt.cusId]
+                customerDetails: customerMap[apt.cusId],
               };
             }
             return apt;
@@ -199,10 +205,10 @@ const AppointmentManagement = () => {
           cusIdType: typeof sampleLe.cusId,
           hasCustomer: !!sampleLe.customer,
           hasCustomerDetails: !!sampleLe.customerDetails,
-          fullData: sampleLe
+          fullData: sampleLe,
         });
       }
-      
+
       // Debug log để xem cấu trúc dữ liệu của lịch hẹn gói
       if (responseGoi.data && responseGoi.data.length > 0) {
         const sampleGoi = responseGoi.data[0];
@@ -212,20 +218,22 @@ const AppointmentManagement = () => {
           cusIdType: typeof sampleGoi.cusId,
           hasCustomer: !!sampleGoi.customer,
           hasCustomerDetails: !!sampleGoi.customerDetails,
-          fullData: sampleGoi
+          fullData: sampleGoi,
         });
       }
 
       // Không cần fetch thêm thông tin nếu API đã trả về đầy đủ
       const goiData = responseGoi.data || [];
-      
+
       // Populate customer data for le appointments
       let leData = await populateCustomerData(responseLe.data || []);
 
       // Tự động hoàn thành các đơn hàng lẻ đã thanh toán (Pending)
-      const paidAppointments = leData.filter(apt => apt.status === "Pending");
+      const paidAppointments = leData.filter((apt) => apt.status === "Pending");
       if (paidAppointments.length > 0) {
-        console.log(`Đang tự động hoàn thành ${paidAppointments.length} đơn hàng lẻ đã thanh toán`);
+        console.log(
+          `Đang tự động hoàn thành ${paidAppointments.length} đơn hàng lẻ đã thanh toán`
+        );
         for (const apt of paidAppointments) {
           try {
             await axiosInstance.post(
@@ -235,10 +243,13 @@ const AppointmentManagement = () => {
             );
             console.log(`Tự động hoàn thành đơn hàng ${apt._id}`);
           } catch (error) {
-            console.error(`Không thể tự động hoàn thành đơn hàng ${apt._id}:`, error);
+            console.error(
+              `Không thể tự động hoàn thành đơn hàng ${apt._id}:`,
+              error
+            );
           }
         }
-        
+
         // Sau khi tự động hoàn thành, lấy lại danh sách đơn hàng lẻ
         const updatedResponseLe = await axiosInstance.get(
           "/appointmentLe/getdetailallaptle",
@@ -246,15 +257,19 @@ const AppointmentManagement = () => {
             headers: { Authorization: `Bearer ${token}` },
           }
         );
-        
+
         // Populate customer data for the updated appointments
-        const updatedLeData = await populateCustomerData(updatedResponseLe.data || []);
+        const updatedLeData = await populateCustomerData(
+          updatedResponseLe.data || []
+        );
         setAppointmentsLe(updatedLeData);
-        message.success(`Đã tự động hoàn thành ${paidAppointments.length} đơn hàng đã thanh toán`);
+        message.success(
+          `Đã tự động hoàn thành ${paidAppointments.length} đơn hàng đã thanh toán`
+        );
       } else {
         setAppointmentsLe(leData);
       }
-      
+
       setAppointmentsGoi(goiData);
     } catch (error) {
       console.error("Error fetching appointments:", error);
@@ -312,7 +327,7 @@ const AppointmentManagement = () => {
   const handleStatusChange = async (id, status, isPackage) => {
     try {
       const token = localStorage.getItem("accesstoken");
-      const endpoint = isPackage 
+      const endpoint = isPackage
         ? `/appointmentGoi/update/${id}`
         : `/appointmentLe/update/${id}`;
 
@@ -390,7 +405,11 @@ const AppointmentManagement = () => {
       console.log("API response:", response.data);
 
       if (response.data) {
-        message.success(`${completed ? "Đánh dấu đã tiêm" : "Hủy đánh dấu"} mũi ${doseNumber} thành công`);
+        message.success(
+          `${
+            completed ? "Đánh dấu đã tiêm" : "Hủy đánh dấu"
+          } mũi ${doseNumber} thành công`
+        );
 
         // Update the UI immediately
         if (selectedAppointment && selectedAppointment._id === appointmentId) {
@@ -549,7 +568,8 @@ const AppointmentManagement = () => {
       dataIndex: "price",
       key: "price",
       width: 130,
-      render: (price) => price ? price.toLocaleString("vi-VN") + " VNĐ" : "N/A",
+      render: (price) =>
+        price ? price.toLocaleString("vi-VN") + " VNĐ" : "N/A",
       sorter: (a, b) => (a.price || 0) - (b.price || 0),
     },
     {
@@ -566,23 +586,26 @@ const AppointmentManagement = () => {
       width: 120,
       render: (doseSchedule) => {
         if (!doseSchedule || doseSchedule.length === 0) return "N/A";
-        
+
         const completedDoses = doseSchedule.filter(
           (dose) => dose.status === "completed"
         ).length;
-        
+
         const totalDoses = doseSchedule.length;
         const progressPercent = Math.round((completedDoses / totalDoses) * 100);
-        
+
         // Hiển thị tiến độ với màu sắc khác nhau dựa trên phần trăm hoàn thành
         let color = "default";
         if (progressPercent === 100) color = "green";
         else if (progressPercent > 50) color = "blue";
         else if (progressPercent > 0) color = "orange";
-        
+
         return (
           <div>
-            <Tag color={color} style={{ minWidth: '70px', textAlign: 'center' }}>
+            <Tag
+              color={color}
+              style={{ minWidth: "70px", textAlign: "center" }}
+            >
               {completedDoses}/{totalDoses} mũi
             </Tag>
           </div>
@@ -606,26 +629,26 @@ const AppointmentManagement = () => {
       sorter: (a, b) => {
         // Thiết lập thứ tự ưu tiên cho các trạng thái
         const statusOrder = {
-          "completed": 1,  // Hoàn thành (ưu tiên hiển thị đầu tiên)
-          "Pending": 2,    // Đã thanh toán
-          "approve": 3,    // Đã duyệt
-          "pending": 4,    // Đang chờ
-          "incomplete": 5  // Đã hủy (hiển thị cuối cùng)
+          completed: 1, // Hoàn thành (ưu tiên hiển thị đầu tiên)
+          Pending: 2, // Đã thanh toán
+          approve: 3, // Đã duyệt
+          pending: 4, // Đang chờ
+          incomplete: 5, // Đã hủy (hiển thị cuối cùng)
         };
-        
+
         // Nếu trạng thái không nằm trong danh sách trên, đặt ở cuối
         const orderA = statusOrder[a.status] || 999;
         const orderB = statusOrder[b.status] || 999;
-        
+
         return orderA - orderB;
       },
-      defaultSortOrder: 'ascend', // Sắp xếp mặc định theo thứ tự tăng dần
+      defaultSortOrder: "ascend", // Sắp xếp mặc định theo thứ tự tăng dần
     },
     {
       title: "Chi tiết",
       key: "details",
       width: 80,
-      fixed: 'right',
+      fixed: "right",
       render: (_, record) => (
         <Button
           type="primary"
@@ -651,23 +674,30 @@ const AppointmentManagement = () => {
       width: 150,
       render: (cusId, record) => {
         // Debug thông tin
-        if (typeof cusId === "string" && !record.customer && !record.customerDetails) {
+        if (
+          typeof cusId === "string" &&
+          !record.customer &&
+          !record.customerDetails
+        ) {
           console.log(`Appointment ${record._id} cusId:`, cusId);
         }
-        
+
         // Kiểm tra nếu cusId là ObjectId
         let customerString = "";
         if (cusId) {
           // Nếu cusId là object và có customerName
           if (cusId.customerName) {
             customerString = cusId.customerName;
-          } 
+          }
           // Nếu customer object tồn tại
           else if (record.customer && record.customer.customerName) {
             customerString = record.customer.customerName;
           }
           // Nếu customerDetails tồn tại
-          else if (record.customerDetails && record.customerDetails.customerName) {
+          else if (
+            record.customerDetails &&
+            record.customerDetails.customerName
+          ) {
             customerString = record.customerDetails.customerName;
           }
           // Nếu là string, kiểm tra xem có phải là ObjectId không
@@ -683,7 +713,11 @@ const AppointmentManagement = () => {
           customerString = "N/A";
         }
 
-        return <span title={typeof cusId === "string" ? cusId : ""}>{customerString}</span>;
+        return (
+          <span title={typeof cusId === "string" ? cusId : ""}>
+            {customerString}
+          </span>
+        );
       },
     },
     {
@@ -743,7 +777,8 @@ const AppointmentManagement = () => {
       dataIndex: "price",
       key: "price",
       width: 130,
-      render: (price) => price ? price.toLocaleString("vi-VN") + " VNĐ" : "N/A",
+      render: (price) =>
+        price ? price.toLocaleString("vi-VN") + " VNĐ" : "N/A",
       sorter: (a, b) => (a.price || 0) - (b.price || 0),
     },
     {
@@ -763,20 +798,20 @@ const AppointmentManagement = () => {
       sorter: (a, b) => {
         // Thiết lập thứ tự ưu tiên cho các trạng thái
         const statusOrder = {
-          "completed": 1,  // Hoàn thành (ưu tiên hiển thị đầu tiên)
-          "Pending": 1,    // Đã thanh toán (cùng ưu tiên với Hoàn thành vì đã tự động chuyển)
-          "approve": 2,    // Đã duyệt
-          "pending": 3,    // Đang chờ
-          "incomplete": 4  // Đã hủy (hiển thị cuối cùng)
+          completed: 1, // Hoàn thành (ưu tiên hiển thị đầu tiên)
+          Pending: 1, // Đã thanh toán (cùng ưu tiên với Hoàn thành vì đã tự động chuyển)
+          approve: 2, // Đã duyệt
+          pending: 3, // Đang chờ
+          incomplete: 4, // Đã hủy (hiển thị cuối cùng)
         };
-        
+
         // Nếu trạng thái không nằm trong danh sách trên, đặt ở cuối
         const orderA = statusOrder[a.status] || 999;
         const orderB = statusOrder[b.status] || 999;
-        
+
         return orderA - orderB;
       },
-      defaultSortOrder: 'ascend', // Sắp xếp mặc định theo thứ tự tăng dần
+      defaultSortOrder: "ascend", // Sắp xếp mặc định theo thứ tự tăng dần
     },
     {
       title: "Thao tác",
@@ -796,7 +831,9 @@ const AppointmentManagement = () => {
               <Button
                 danger
                 className="cancel-button"
-                onClick={() => handleStatusChange(record._id, "incomplete", false)}
+                onClick={() =>
+                  handleStatusChange(record._id, "incomplete", false)
+                }
               >
                 Hủy đơn
               </Button>
@@ -816,7 +853,7 @@ const AppointmentManagement = () => {
             icon={<MenuOutlined />}
             onClick={() => showAppointmentDetails(record, false)}
             disabled={record.status === "incomplete"}
-            style={{ marginLeft: '8px' }}
+            style={{ marginLeft: "8px" }}
           />
         </div>
       ),
@@ -825,12 +862,12 @@ const AppointmentManagement = () => {
 
   // Add useEffect hook for real-time filtering
   useEffect(() => {
-    if (!searchText || searchText.trim() === '') {
+    if (!searchText || searchText.trim() === "") {
       setFilteredAppointmentsGoi(appointmentsGoi);
       setFilteredAppointmentsLe(appointmentsLe);
       return;
     }
-    
+
     const filteredGoi = appointmentsGoi.filter(
       (apt) =>
         apt._id?.toLowerCase().includes(searchText.toLowerCase()) ||
@@ -891,7 +928,7 @@ const AppointmentManagement = () => {
         apt.createdAt?.toLowerCase().includes(searchText.toLowerCase()) ||
         apt.note?.toLowerCase().includes(searchText.toLowerCase())
     );
-    
+
     setFilteredAppointmentsGoi(filteredGoi);
     setFilteredAppointmentsLe(filteredLe);
   }, [appointmentsGoi, appointmentsLe, searchText]);
@@ -904,14 +941,19 @@ const AppointmentManagement = () => {
   const checkExpiredAppointments = async () => {
     try {
       const token = localStorage.getItem("accesstoken");
-      const today = moment().startOf('day');
+      const today = moment().startOf("day");
       let updateCounter = 0;
-      
+
       // Kiểm tra đơn hẹn gói quá hạn
       for (const apt of appointmentsGoi) {
         if (apt.status === "pending") {
-          const appointmentDate = moment(apt.date, ["DD/MM/YYYY", "YYYY-MM-DD", "MM/DD/YYYY", "DD-MM-YYYY"]);
-          
+          const appointmentDate = moment(apt.date, [
+            "DD/MM/YYYY",
+            "YYYY-MM-DD",
+            "MM/DD/YYYY",
+            "DD-MM-YYYY",
+          ]);
+
           if (appointmentDate.isValid() && appointmentDate.isBefore(today)) {
             await axiosInstance.post(
               `/appointmentGoi/update/${apt._id}`,
@@ -922,12 +964,17 @@ const AppointmentManagement = () => {
           }
         }
       }
-      
+
       // Kiểm tra đơn hẹn lẻ quá hạn
       for (const apt of appointmentsLe) {
         if (apt.status === "pending") {
-          const appointmentDate = moment(apt.date, ["DD/MM/YYYY", "YYYY-MM-DD", "MM/DD/YYYY", "DD-MM-YYYY"]);
-          
+          const appointmentDate = moment(apt.date, [
+            "DD/MM/YYYY",
+            "YYYY-MM-DD",
+            "MM/DD/YYYY",
+            "DD-MM-YYYY",
+          ]);
+
           if (appointmentDate.isValid() && appointmentDate.isBefore(today)) {
             await axiosInstance.post(
               `/appointmentLe/update/${apt._id}`,
@@ -938,7 +985,7 @@ const AppointmentManagement = () => {
           }
         }
       }
-      
+
       if (updateCounter > 0) {
         message.info(`Đã tự động hủy ${updateCounter} đơn hẹn quá hạn`);
         fetchAppointments(); // Cập nhật lại danh sách sau khi thay đổi
@@ -950,7 +997,10 @@ const AppointmentManagement = () => {
 
   // Chạy kiểm tra khi component được tải và mỗi khi danh sách lịch hẹn thay đổi
   useEffect(() => {
-    if (autoCheckEnabled && (appointmentsGoi.length > 0 || appointmentsLe.length > 0)) {
+    if (
+      autoCheckEnabled &&
+      (appointmentsGoi.length > 0 || appointmentsLe.length > 0)
+    ) {
       checkExpiredAppointments();
     }
   }, [appointmentsGoi, appointmentsLe, autoCheckEnabled]);
@@ -968,16 +1018,16 @@ const AppointmentManagement = () => {
           className="search-input"
           allowClear
         />
-        <Button 
+        <Button
           type={autoCheckEnabled ? "primary" : "default"}
           onClick={() => setAutoCheckEnabled(!autoCheckEnabled)}
-          style={{ marginLeft: '16px' }}
+          style={{ marginLeft: "16px" }}
         >
           {autoCheckEnabled ? "Tắt tự động hủy" : "Bật tự động hủy"}
         </Button>
-        <Button 
-          onClick={checkExpiredAppointments} 
-          style={{ marginLeft: '8px' }}
+        <Button
+          onClick={checkExpiredAppointments}
+          style={{ marginLeft: "8px" }}
         >
           Kiểm tra đơn quá hạn
         </Button>
@@ -1005,7 +1055,11 @@ const AppointmentManagement = () => {
       </Tabs>
 
       <Modal
-        title={selectedAppointment?.isPackage ? "Chi tiết lịch hẹn gói" : "Chi tiết lịch hẹn lẻ"}
+        title={
+          selectedAppointment?.isPackage
+            ? "Chi tiết lịch hẹn gói"
+            : "Chi tiết lịch hẹn lẻ"
+        }
         visible={isModalVisible}
         onCancel={() => setIsModalVisible(false)}
         footer={[
@@ -1057,13 +1111,14 @@ const AppointmentManagement = () => {
               <div className="detail-row">
                 <span className="detail-label">Trẻ em:</span>
                 <span className="detail-value">
-                  {selectedAppointment.childId ? 
-                    (selectedAppointment.childId.childName ||
+                  {selectedAppointment.childId
+                    ? selectedAppointment.childId.childName ||
                       selectedAppointment.child?.childName ||
-                      selectedAppointment.childId.toString()) : "Không có"}
+                      selectedAppointment.childId.toString()
+                    : "Không có"}
                 </span>
               </div>
-              
+
               {selectedAppointment.isPackage ? (
                 <div className="detail-row">
                   <span className="detail-label">Gói vaccine:</span>
@@ -1092,7 +1147,7 @@ const AppointmentManagement = () => {
                   </span>
                 </div>
               )}
-              
+
               {!selectedAppointment.isPackage && (
                 <div className="detail-row">
                   <span className="detail-label">Lô vaccine:</span>
@@ -1112,7 +1167,9 @@ const AppointmentManagement = () => {
               </div>
               <div className="detail-row">
                 <span className="detail-label">Thời gian:</span>
-                <span className="detail-value">{selectedAppointment.time || "Chưa xác định"}</span>
+                <span className="detail-value">
+                  {selectedAppointment.time || "Chưa xác định"}
+                </span>
               </div>
               <div className="detail-row highlight-info">
                 <span className="detail-label">Giá tiền:</span>
@@ -1125,7 +1182,7 @@ const AppointmentManagement = () => {
               <div className="detail-row">
                 <span className="detail-label">Ngày tạo:</span>
                 <span className="detail-value">
-                  {selectedAppointment.createdAt || selectedAppointment.createAt || "N/A"}
+                  {selectedAppointment.createdAt || "N/A"}
                 </span>
               </div>
               <div className="detail-row">
@@ -1151,69 +1208,93 @@ const AppointmentManagement = () => {
                 </div>
               )}
 
-              {!selectedAppointment.isPackage && selectedAppointment.status !== "completed" && (
-                <div className="detail-row" style={{ marginTop: "20px" }}>
-                  <span className="detail-label">Thao tác:</span>
-                  <span className="detail-value">
-                    <div className="action-buttons">
-                      {selectedAppointment.status === "Pending" && (
-                        <>
+              {!selectedAppointment.isPackage &&
+                selectedAppointment.status !== "completed" && (
+                  <div className="detail-row" style={{ marginTop: "20px" }}>
+                    <span className="detail-label">Thao tác:</span>
+                    <span className="detail-value">
+                      <div className="action-buttons">
+                        {selectedAppointment.status === "Pending" && (
+                          <>
+                            <Button
+                              type="primary"
+                              className="approve-button"
+                              onClick={() =>
+                                handleStatusChange(
+                                  selectedAppointment._id,
+                                  "approve",
+                                  false
+                                )
+                              }
+                            >
+                              Duyệt đơn
+                            </Button>
+                            <Button
+                              danger
+                              className="cancel-button"
+                              onClick={() =>
+                                handleStatusChange(
+                                  selectedAppointment._id,
+                                  "incomplete",
+                                  false
+                                )
+                              }
+                            >
+                              Hủy đơn
+                            </Button>
+                          </>
+                        )}
+                        {selectedAppointment.status === "approve" && (
                           <Button
                             type="primary"
-                            className="approve-button"
-                            onClick={() => handleStatusChange(selectedAppointment._id, "approve", false)}
+                            className="complete-button"
+                            onClick={() =>
+                              handleStatusChange(
+                                selectedAppointment._id,
+                                "completed",
+                                false
+                              )
+                            }
                           >
-                            Duyệt đơn
+                            Hoàn thành
                           </Button>
-                          <Button
-                            danger
-                            className="cancel-button"
-                            onClick={() => handleStatusChange(selectedAppointment._id, "incomplete", false)}
-                          >
-                            Hủy đơn
-                          </Button>
-                        </>
-                      )}
-                      {selectedAppointment.status === "approve" && (
-                        <Button
-                          type="primary"
-                          className="complete-button"
-                          onClick={() => handleStatusChange(selectedAppointment._id, "completed", false)}
-                        >
-                          Hoàn thành
-                        </Button>
-                      )}
-                    </div>
-                  </span>
-                </div>
-              )}
+                        )}
+                      </div>
+                    </span>
+                  </div>
+                )}
             </div>
 
             {/* Hiển thị lịch tiêm cho từng mũi - chỉ cho lịch hẹn gói */}
-            {selectedAppointment.isPackage && selectedAppointment.doseSchedule &&
+            {selectedAppointment.isPackage &&
+              selectedAppointment.doseSchedule &&
               selectedAppointment.doseSchedule.length > 0 && (
                 <div className="dose-schedule-section">
                   <div className="dose-header">
                     <Title level={4}>Lịch tiêm các mũi</Title>
                     <div className="dose-progress-summary">
                       {(() => {
-                        const totalDoses = selectedAppointment.doseSchedule.length;
-                        const completedDoses = selectedAppointment.doseSchedule.filter(
-                          dose => dose.status === "completed"
-                        ).length;
-                        const progressPercent = Math.round((completedDoses / totalDoses) * 100);
-                        
+                        const totalDoses =
+                          selectedAppointment.doseSchedule.length;
+                        const completedDoses =
+                          selectedAppointment.doseSchedule.filter(
+                            (dose) => dose.status === "completed"
+                          ).length;
+                        const progressPercent = Math.round(
+                          (completedDoses / totalDoses) * 100
+                        );
+
                         let color = "#bfbfbf";
                         if (progressPercent === 100) color = "#52c41a";
                         else if (progressPercent > 50) color = "#1890ff";
                         else if (progressPercent > 0) color = "#faad14";
-                        
+
                         return (
                           <>
-                            <Tag color={color} style={{ marginRight: '5px' }}>
+                            <Tag color={color} style={{ marginRight: "5px" }}>
                               {completedDoses}/{totalDoses}
                             </Tag>
-                            <span style={{ color: color, fontWeight: 'bold' }}>
+                            <span style={{ color: color, fontWeight: "bold" }}>
                               {progressPercent}% đã tiêm
                             </span>
                           </>
@@ -1221,7 +1302,7 @@ const AppointmentManagement = () => {
                       })()}
                     </div>
                   </div>
-                  
+
                   <List
                     grid={{ gutter: 16, column: 1 }}
                     dataSource={selectedAppointment.doseSchedule}
@@ -1238,18 +1319,18 @@ const AppointmentManagement = () => {
                           }
                         >
                           <div className="dose-detail-grid">
-                          <div className="dose-detail-row">
-                              <Text strong>Ngày tiêm:</Text> 
-                              {item.date instanceof Date 
-                                ? item.date.toLocaleDateString('vi-VN')
+                            <div className="dose-detail-row">
+                              <Text strong>Ngày tiêm:</Text>
+                              {item.date instanceof Date
+                                ? item.date.toLocaleDateString("vi-VN")
                                 : item.date?.toString()}
-                          </div>
+                            </div>
                             {/* <div className="dose-detail-row">
                               <Text strong>Đơn giá:</Text> 
                               {item.price ? item.price.toLocaleString('vi-VN') + ' VNĐ' : 'Chưa xác định'}
                             </div> */}
                           </div>
-                          <Divider style={{ margin: '12px 0' }} />
+                          <Divider style={{ margin: "12px 0" }} />
                           <div className="dose-detail-row dose-actions">
                             <Button
                               type={
