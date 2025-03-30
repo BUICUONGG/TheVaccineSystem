@@ -5,6 +5,7 @@ import { HomeOutlined, CalendarOutlined, FilterOutlined, LeftOutlined, RightOutl
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import axiosInstance from '../../service/api';
 import './NewsList.css';
+import HeaderLayouts from '../../components/layouts/header';
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -121,8 +122,11 @@ const NewsList = () => {
     }
   }, [featuredNews.length]);
 
+  const footerRef = useRef(null);
+
   return (
     <div className="news-container">
+      <HeaderLayouts footerRef={footerRef} />
       <div className="news-header">
         <Button
           className="back-home-button"

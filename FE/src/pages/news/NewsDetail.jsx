@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Typography, Spin, Button, Tag, Divider, message } from 'antd';
 import { HomeOutlined, CalendarOutlined, ArrowLeftOutlined } from '@ant-design/icons';
 import axiosInstance from '../../service/api';
 import './NewsDetail.css';
+import HeaderLayouts from '../../components/layouts/header';
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -12,6 +13,7 @@ const NewsDetail = () => {
     const navigate = useNavigate();
     const [news, setNews] = useState(null);
     const [loading, setLoading] = useState(true);
+    const footerRef = useRef(null);
 
     // Category mapping
     const categoryMap = {
@@ -93,8 +95,11 @@ const NewsDetail = () => {
         );
     }
 
+    
+
     return (
         <div className="news-detail-container">
+            <HeaderLayouts footerRef={footerRef} />
             <div className="news-detail-header">
                 <div className="news-detail-navigation">
                     <Button 

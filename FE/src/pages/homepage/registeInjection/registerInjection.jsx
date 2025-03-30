@@ -147,7 +147,66 @@ const RegisterInjection = () => {
     }
   }, [isLoggedIn, form]);
 
+  useEffect(() => {
+    const savedData = localStorage.getItem('vaccineRegistrationData');
+    if (savedData) {
+      try {
+        const parsedData = JSON.parse(savedData);
+
+        // Khôi phục trạng thái đăng ký
+        setIsChildRegistration(parsedData.isChildRegistration);
+        setSelectedVaccineType(parsedData.selectedVaccineType);
+        setSelectedVaccineId(parsedData.selectedVaccineId);
+
+        // Khôi phục form values
+        if (parsedData.formValues) {
+          const formValues = {
+            ...parsedData.formValues,
+            date: parsedData.formValues.date ? dayjs(parsedData.formValues.date) : undefined,
+            childInfo: parsedData.formValues.childInfo ? {
+              ...parsedData.formValues.childInfo,
+              birthday: parsedData.formValues.childInfo.birthday ? dayjs(parsedData.formValues.childInfo.birthday) : undefined
+            } : undefined
+          };
+          form.setFieldsValue(formValues);
+        }
+      } catch (error) {
+        console.error('Error loading saved form data:', error);
+      }
+    }
+  }, [form]);
+
+  useEffect(() => {
+    const savedData = localStorage.getItem('vaccineRegistrationData');
+    if (savedData) {
+      try {
+        const parsedData = JSON.parse(savedData);
+
+        // Khôi phục trạng thái đăng ký
+        setIsChildRegistration(parsedData.isChildRegistration);
+        setSelectedVaccineType(parsedData.selectedVaccineType);
+        setSelectedVaccineId(parsedData.selectedVaccineId);
+
+        // Khôi phục form values
+        if (parsedData.formValues) {
+          const formValues = {
+            ...parsedData.formValues,
+            date: parsedData.formValues.date ? dayjs(parsedData.formValues.date) : undefined,
+            childInfo: parsedData.formValues.childInfo ? {
+              ...parsedData.formValues.childInfo,
+              birthday: parsedData.formValues.childInfo.birthday ? dayjs(parsedData.formValues.childInfo.birthday) : undefined
+            } : undefined
+          };
+          form.setFieldsValue(formValues);
+        }
+      } catch (error) {
+        console.error('Error loading saved form data:', error);
+      }
+    }
+  }, [form]);
+
   const handleVaccineSelect = (vaccine) => {
+    // Kiểm tra giá cho từng loại vaccine
     if (selectedVaccineType === "single") {
       if (!importProductsPrice[vaccine._id]?.unitPrice) {
         toast.warning("Hiện chưa có lô vaccine này để tiêm!", {
@@ -169,6 +228,9 @@ const RegisterInjection = () => {
     // Cập nhật ID vaccine được chọn
     setSelectedVaccineId(vaccine._id);
 
+    // Lấy giá trị hiện tại của form
+    const currentFormValues = form.getFieldsValue();
+
     // Cập nhật form values tùy theo loại vaccine
     if (selectedVaccineType === "single") {
       form.setFieldsValue({
@@ -181,6 +243,12 @@ const RegisterInjection = () => {
         vaccinePackageId: vaccine._id,
       });
     }
+
+    // Lưu dữ liệu vào localStorage
+    saveFormData({
+      ...currentFormValues,
+      [selectedVaccineType === "single" ? "vaccineId" : "vaccinePackageId"]: vaccine._id
+    });
   };
 
   const onFinish = async (values) => {
@@ -246,7 +314,9 @@ const RegisterInjection = () => {
         };
       }
 
-      console.log("Dữ liệu gửi đi:", invoiceData);
+      const clearSavedData = () => {
+        localStorage.removeItem("vaccineRegistrationData");
+      };
 
       // Chuyển đến trang thanh toán
       navigate("/payment", {
@@ -254,6 +324,7 @@ const RegisterInjection = () => {
           invoiceData,
         },
       });
+      clearSavedData();
     } catch (error) {
       console.error("Lỗi đăng ký:", error);
       toast.error("Đăng ký thất bại, vui lòng thử lại sau", {
@@ -271,6 +342,23 @@ const RegisterInjection = () => {
   const disabledBirthDate = (current) => {
     // Không cho chọn ngày trong tương lai
     return current && current > dayjs().endOf('day');
+  };
+
+  const saveFormData = (values) => {
+    const formData = {
+      isChildRegistration,
+      selectedVaccineType,
+      selectedVaccineId,
+      formValues: {
+        ...values,
+        date: values.date ? values.date.format('YYYY-MM-DD') : undefined,
+        childInfo: values.childInfo ? {
+          ...values.childInfo,
+          birthday: values.childInfo.birthday ? values.childInfo.birthday.format('YYYY-MM-DD') : undefined
+        } : undefined
+      }
+    };
+    localStorage.setItem('vaccineRegistrationData', JSON.stringify(formData));
   };
 
   const footerRef = useRef(null);
@@ -308,6 +396,9 @@ const RegisterInjection = () => {
             layout="vertical"
             onFinish={onFinish}
             className="form-registration"
+            onValuesChange={(_, allValues) => {
+              saveFormData(allValues);
+            }}
           >
             {/* Phần thông tin cá nhân đơn giản hóa */}
             {isChildRegistration ? (
@@ -473,7 +564,7 @@ const RegisterInjection = () => {
                               {vaccine.description}
                             </p>
                             <p className={`vaccine-price ${!hasPrice ? "unavailable" : ""}`}>
-                              {hasPrice ? `${importProductsPrice[vaccine._id].unitPrice.toLocaleString()} VNĐ` : "Chưa có giá"}
+                              {hasPrice ? `${importProductsPrice[vaccine._id].unitPrice.toLocaleString()} VNĐ` : "Chưa có hàng"}
                             </p>
                           </div>
                         </div>
