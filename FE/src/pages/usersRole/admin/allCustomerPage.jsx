@@ -1,36 +1,42 @@
 import { useState, useEffect } from "react";
-import { Table, Input, Button, Modal, Form, Select } from "antd";
-import { EditOutlined, SearchOutlined } from "@ant-design/icons";
-import { useNavigate } from "react-router-dom";
+import { Table, Input, Button, Modal, Form, Select, Popconfirm, Tag, Space, Typography, Tooltip } from "antd";
+import { EditOutlined, EyeOutlined, EyeInvisibleOutlined, SearchOutlined, InfoCircleOutlined, ReloadOutlined } from "@ant-design/icons";
 import axiosInstance from "../../../service/api";
 
+const { Search } = Input;
 const { Option } = Select;
+const { Text } = Typography;
 
 const AllCustomerPage = () => {
-  const navigate = useNavigate();
-  const [customerList, setCustomerList] = useState([]);
+  const [customers, setCustomers] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [searchText, setSearchText] = useState("");
   const [filteredCustomers, setFilteredCustomers] = useState([]);
+  const [searchText, setSearchText] = useState("");
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
+  const [isDetailModalVisible, setIsDetailModalVisible] = useState(false);
   const [editingCustomer, setEditingCustomer] = useState(null);
+  const [detailCustomer, setDetailCustomer] = useState(null);
   const [form] = Form.useForm();
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalCustomers, setTotalCustomers] = useState(0);
+  const pageSize = 10;
 
   useEffect(() => {
     fetchCustomers();
   }, []);
 
   useEffect(() => {
-    const filtered = customerList.filter(
-      (customer) =>
-        customer.customerName
-          ?.toLowerCase()
-          .includes(searchText.toLowerCase()) ||
-        customer.username?.toLowerCase().includes(searchText.toLowerCase()) ||
-        customer.phone?.includes(searchText)
-    );
-    setFilteredCustomers(filtered);
-  }, [customerList, searchText]);
+    if (searchText) {
+      const filtered = customers.filter(
+        (item) =>
+          item.customerName?.toLowerCase().includes(searchText.toLowerCase()) ||
+          item.phone?.toLowerCase().includes(searchText.toLowerCase())
+      );
+      setFilteredCustomers(filtered);
+    } else {
+      setFilteredCustomers(customers);
+    }
+  }, [customers, searchText]);
 
   const handleSearch = (e) => {
     setSearchText(e.target.value);
@@ -39,106 +45,128 @@ const AllCustomerPage = () => {
   const fetchCustomers = async () => {
     try {
       setLoading(true);
-      const accesstoken = localStorage.getItem("accesstoken");
       const response = await axiosInstance.get("/customer/getAllCustomer", {
         headers: {
-          Authorization: `Bearer ${accesstoken}`,
+          Authorization: `Bearer ${localStorage.getItem("accesstoken")}`,
         },
       });
-
-      if (response.data.result) {
-        setCustomerList(response.data.result);
-        setFilteredCustomers(response.data.result);
-      }
+      
+      const customersData = response.data.result || [];
+      console.log("Customer data returned:", customersData);
+      setCustomers(customersData);
+      setFilteredCustomers(customersData);
+      setTotalCustomers(customersData.length);
+      setLoading(false);
     } catch (error) {
-      console.error("Error fetching customers:", error);
-      if (error.response?.status === 401) {
-        Modal.error({
-          content: "Unauthorized. Please login again.",
-        });
-        navigate("/login");
-      }
-    } finally {
+      console.error("Failed to fetch customers:", error);
+      Modal.error({
+        content: "Không thể tải danh sách khách hàng",
+      });
       setLoading(false);
     }
   };
 
+  const handleTableChange = (pagination) => {
+    setCurrentPage(pagination.current);
+  };
+
   const handleUpdate = async (values) => {
     try {
-      const accesstoken = localStorage.getItem("accesstoken");
-
-      // Validate data before sending
+      console.log("Customer being edited:", editingCustomer);
+      
       const updatedData = {
         customerName: values.customerName?.trim() || null,
         phone: values.phone?.trim() || null,
+        birthday: values.birthday?.trim() || null,
         address: values.address?.trim() || null,
         gender: values.gender || null,
-        birthday: values.birthday?.trim() || null,
       };
 
       await axiosInstance.post(
-        `/customer/update/${editingCustomer.userId}`,
+        `/customer/update/${editingCustomer._id}`,
         updatedData,
         {
           headers: {
-            Authorization: `Bearer ${accesstoken}`,
+            Authorization: `Bearer ${localStorage.getItem("accesstoken")}`,
           },
         }
       );
 
       Modal.success({
-        content: "Cập nhật thông tin thành công!",
+        content: "Cập nhật thông tin khách hàng thành công!",
       });
       setIsEditModalVisible(false);
       fetchCustomers();
     } catch (error) {
       console.error("Error updating customer:", error);
       Modal.error({
-        content:
-          error.response?.data?.message || "Không thể cập nhật thông tin",
+        content: error.response?.data?.message || "Không thể cập nhật thông tin khách hàng",
       });
     }
   };
 
-  const handleDelete = async (userId) => {
+  const handleHideCustomer = async (customerId) => {
     try {
-      const accesstoken = localStorage.getItem("accesstoken");
-
-      if (!accesstoken) {
-        Modal.error({
-          content: "Bạn cần đăng nhập lại",
-        });
-        return;
-      }
-
+      console.log("Hiding customer with ID:", customerId);
+      
+      // We won't actually delete the customer, just hide it by setting fields to null
       await axiosInstance.post(
-        `/customer/delete/${userId}`,
-        {},
+        `/customer/update/${customerId}`,
+        {
+          customerName: null,
+          phone: null,
+          birthday: null,
+          address: null,
+          gender: null
+        },
         {
           headers: {
-            Authorization: `Bearer ${accesstoken}`,
+            Authorization: `Bearer ${localStorage.getItem("accesstoken")}`,
           },
         }
       );
 
       Modal.success({
-        content: "Xóa khách hàng thành công!",
+        content: "Ẩn thông tin khách hàng thành công!",
       });
 
-      await fetchCustomers(); // Refresh danh sách
+      fetchCustomers();
     } catch (error) {
-      console.error("Error deleting customer:", error);
-      if (error.response?.status === 401) {
-        Modal.error({
-          content: "Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.",
-        });
-        navigate("/login");
-      } else {
-        Modal.error({
-          content: "Không thể xóa thông tin khách hàng",
-        });
-      }
+      console.error("Error hiding customer:", error);
+      Modal.error({
+        content: "Không thể ẩn thông tin khách hàng",
+      });
     }
+  };
+
+  const showDetailModal = (customer) => {
+    setDetailCustomer(customer);
+    setIsDetailModalVisible(true);
+  };
+
+  const showEditModal = (customer) => {
+    setEditingCustomer(customer);
+    form.setFieldsValue({
+      customerName: customer.customerName,
+      phone: customer.phone,
+      birthday: customer.birthday,
+      address: customer.address,
+      gender: customer.gender,
+    });
+    setIsEditModalVisible(true);
+  };
+
+  const getGenderDisplay = (gender) => {
+    const genderMap = {
+      Male: "Nam",
+      Female: "Nữ",
+      Other: "Khác"
+    };
+    return genderMap[gender] || "Chưa cập nhật";
+  };
+
+  const isCustomerHidden = (customer) => {
+    return !customer.customerName && !customer.phone && !customer.birthday && !customer.address && !customer.gender;
   };
 
   const columns = [
@@ -146,7 +174,7 @@ const AllCustomerPage = () => {
       title: "STT",
       key: "stt",
       render: (_, record, index) => index + 1,
-      width: 70,
+      width: 60,
     },
     {
       title: "Tên đăng nhập",
@@ -173,81 +201,157 @@ const AllCustomerPage = () => {
       render: (text) => text || "Chưa cập nhật",
     },
     {
-      title: "Địa chỉ",
-      dataIndex: "address",
-      key: "address",
-      render: (text) => text || "Chưa cập nhật",
-    },
-    {
       title: "Giới tính",
       dataIndex: "gender",
       key: "gender",
       render: (gender) => {
-        const genderMap = {
-          Male: "Nam",
-          Female: "Nữ",
-          Other: "Khác",
-        };
-        return genderMap[gender] || "Chưa cập nhật";
+        let color = 'default';
+        if (gender === 'Male') color = 'blue';
+        if (gender === 'Female') color = 'pink';
+        
+        return (
+          <Tag color={color}>
+            {getGenderDisplay(gender)}
+          </Tag>
+        );
       },
     },
-
     {
-      title: "Thao tác",
-      key: "actions",
+      title: "Trạng thái",
+      key: "status",
+      render: (_, record) => (
+        <Tag color={isCustomerHidden(record) ? "error" : "success"}>
+          {isCustomerHidden(record) ? "Đã ẩn" : "Hoạt động"}
+        </Tag>
+      ),
+    },
+    {
+      title: "Hành động",
+      key: "action",
       width: 200,
       render: (_, record) => (
-        <span>
-          <Button
-            type="primary"
-            icon={<EditOutlined />}
-            style={{ backgroundColor: "#52c41a", marginRight: 8 }}
-            onClick={() => showEditModal(record)}
-          >
-            Cập nhật
-          </Button>
-        </span>
+        <Space>
+          <Tooltip title="Xem chi tiết">
+            <Button
+              icon={<EyeOutlined />}
+              onClick={() => showDetailModal(record)}
+            />
+          </Tooltip>
+          <Tooltip title="Chỉnh sửa">
+            <Button
+              icon={<EditOutlined />}
+              onClick={() => showEditModal(record)}
+            />
+          </Tooltip>
+          {!isCustomerHidden(record) ? (
+            <Tooltip title="Ẩn thông tin">
+              <Popconfirm
+                title="Ẩn thông tin khách hàng?"
+                description="Bạn có chắc chắn muốn ẩn thông tin của khách hàng này?"
+                onConfirm={() => handleHideCustomer(record._id)}
+                okText="Có"
+                cancelText="Không"
+              >
+                <Button danger icon={<EyeInvisibleOutlined />} />
+              </Popconfirm>
+            </Tooltip>
+          ) : (
+            <Tooltip title="Không thể khôi phục">
+              <Button disabled icon={<EyeInvisibleOutlined />} />
+            </Tooltip>
+          )}
+        </Space>
       ),
     },
   ];
 
-  const showEditModal = (customer) => {
-    setEditingCustomer(customer);
-    form.setFieldsValue({
-      customerName: customer.customerName,
-      phone: customer.phone,
-      address: customer.address,
-      gender: customer.gender,
-      birthday: customer.birthday,
-    });
-    setIsEditModalVisible(true);
-  };
-
   return (
     <div style={{ padding: "20px" }}>
-      <h2 style={{marginBottom: "20px"}}>Quản lý khách hàng</h2>
-      <Input
-        prefix={<SearchOutlined />}
-        placeholder="Tìm kiếm theo tên, tên đăng nhập hoặc số điện thoại"
-        allowClear
-        onChange={handleSearch}
-        style={{ width: 400, marginBottom: 16 }}
-      />
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          marginBottom: "16px",
+        }}
+      >
+        <h2>Quản lý Khách hàng</h2>
+      </div>
+
+      <div style={{
+        display: "flex",
+        justifyContent: "space-between",
+        marginBottom: "16px",
+        flexWrap: "wrap",
+        gap: "10px"
+      }}>
+        <Input
+          prefix={<SearchOutlined />}
+          placeholder="Tìm kiếm theo tên hoặc số điện thoại"
+          value={searchText}
+          onChange={handleSearch}
+          style={{ width: 300 }}
+          allowClear
+        />
+        
+        <Button onClick={fetchCustomers} icon={<ReloadOutlined />} type="default">
+          Làm mới dữ liệu
+        </Button>
+      </div>
+
       <Table
         dataSource={filteredCustomers}
         columns={columns}
         loading={loading}
-        rowKey="userId"
+        rowKey="_id"
         pagination={{
-          showTotal: (total) => `Total ${total} customers`,
+          current: currentPage,
+          pageSize: pageSize,
+          total: totalCustomers,
+          showSizeChanger: false,
+          showTotal: (total) => `Tổng ${total} khách hàng`,
         }}
+        onChange={handleTableChange}
+        scroll={{ x: 1200 }}
       />
 
+      {/* Modal Chi tiết khách hàng */}
+      <Modal
+        title="Chi tiết thông tin khách hàng"
+        open={isDetailModalVisible}
+        onCancel={() => setIsDetailModalVisible(false)}
+        footer={[
+          <Button key="back" onClick={() => setIsDetailModalVisible(false)}>
+            Đóng
+          </Button>,
+          <Button key="edit" type="primary" onClick={() => {
+            setIsDetailModalVisible(false);
+            showEditModal(detailCustomer);
+          }}>
+            Chỉnh sửa
+          </Button>
+        ]}
+        width={600}
+      >
+        {detailCustomer && (
+          <div>
+            <p><strong>Tên đăng nhập:</strong> {detailCustomer.username || "Chưa cập nhật"}</p>
+            <p><strong>Họ và tên:</strong> {detailCustomer.customerName || "Chưa cập nhật"}</p>
+            <p><strong>Số điện thoại:</strong> {detailCustomer.phone || "Chưa cập nhật"}</p>
+            <p><strong>Ngày sinh:</strong> {detailCustomer.birthday || "Chưa cập nhật"}</p>
+            <p><strong>Địa chỉ:</strong> {detailCustomer.address || "Chưa cập nhật"}</p>
+            <p><strong>Giới tính:</strong> {getGenderDisplay(detailCustomer.gender)}</p>
+            <p><strong>Trạng thái:</strong> {isCustomerHidden(detailCustomer) ? "Đã ẩn" : "Hoạt động"}</p>
+          </div>
+        )}
+      </Modal>
+
+      {/* Modal Chỉnh sửa khách hàng */}
       <Modal
         title="Chỉnh sửa thông tin khách hàng"
         open={isEditModalVisible}
         onCancel={() => setIsEditModalVisible(false)}
         footer={null}
+        width={600}
       >
         <Form form={form} onFinish={handleUpdate} layout="vertical">
           <Form.Item
@@ -278,8 +382,18 @@ const AllCustomerPage = () => {
             <Input maxLength={10} />
           </Form.Item>
 
-          <Form.Item name="address" label="Địa chỉ">
-            <Input.TextArea maxLength={200} />
+          <Form.Item
+            name="birthday"
+            label="Ngày sinh"
+          >
+            <Input placeholder="YYYY-MM-DD" />
+          </Form.Item>
+
+          <Form.Item
+            name="address"
+            label="Địa chỉ"
+          >
+            <Input.TextArea rows={3} maxLength={300} />
           </Form.Item>
 
           <Form.Item
@@ -294,24 +408,13 @@ const AllCustomerPage = () => {
             </Select>
           </Form.Item>
 
-          <Form.Item
-            name="birthday"
-            label="Ngày sinh"
-            rules={[
-              {
-                pattern: /^(0[1-9]|[12][0-9]|3[01])\/(0[1-9]|1[0-2])\/\d{4}$/,
-                message: "Định dạng ngày sinh không hợp lệ (DD/MM/YYYY)!",
-              },
-            ]}
-          >
-            <Input placeholder="DD/MM/YYYY" />
-          </Form.Item>
-
           <Form.Item>
-            <Button type="primary" htmlType="submit" style={{ marginRight: 8 }}>
-              Cập nhật
-            </Button>
-            <Button onClick={() => setIsEditModalVisible(false)}>Hủy</Button>
+            <Space>
+              <Button type="primary" htmlType="submit">
+                Cập nhật
+              </Button>
+              <Button onClick={() => setIsEditModalVisible(false)}>Hủy</Button>
+            </Space>
           </Form.Item>
         </Form>
       </Modal>

@@ -40,20 +40,6 @@ const AppointmentManagement = () => {
   const [filteredAppointmentsGoi, setFilteredAppointmentsGoi] = useState([]);
   const [filteredAppointmentsLe, setFilteredAppointmentsLe] = useState([]);
 
-  // Thêm style vào component
-  useEffect(() => {
-    // Tạo style element
-    const styleElement = document.createElement("style");
-    styleElement.type = "text/css";
-    styleElement.innerHTML = buttonStyles;
-    document.head.appendChild(styleElement);
-
-    // Cleanup khi component unmount
-    return () => {
-      document.head.removeChild(styleElement);
-    };
-  }, []);
-
   const fetchAppointments = async () => {
     try {
       setLoading(true);
@@ -405,6 +391,8 @@ const AppointmentManagement = () => {
         return "blue";
       case "Paid":
         return "blue";
+      case "approve":
+        return "darkblue";
       default:
         return "default";
     }
@@ -420,6 +408,8 @@ const AppointmentManagement = () => {
         return "Đã thanh toán";
       case "Paid":
         return "Đã thanh toán";
+      case "approve":
+        return "Đã duyệt";
       default:
         return "Không xác định";
     }
@@ -762,7 +752,7 @@ const AppointmentManagement = () => {
           <div>
             <Tag
               color={color}
-              style={{ minWidth: "70px", textAlign: "center" }}
+              className="progress-tag"
             >
               {completedDoses}/{totalDoses} mũi
             </Tag>
@@ -779,6 +769,7 @@ const AppointmentManagement = () => {
         { text: "Hoàn thành", value: "completed" },
         { text: "Đã hủy", value: "incomplete" },
         { text: "Đã thanh toán", value: "Pending" },
+        { text: "Đã duyệt", value: "approve" },
       ],
       onFilter: (value, record) => record.status === value,
       render: (status) => (
@@ -806,14 +797,26 @@ const AppointmentManagement = () => {
       title: "Chi tiết",
       key: "details",
       width: 80,
-      fixed: "right",
       render: (_, record) => (
-        <Button
-          type="primary"
-          icon={<MenuOutlined />}
-          onClick={() => showAppointmentDetails(record)}
-          disabled={record.status === "incomplete"}
-        />
+        <Space size="middle">
+          {record.status === "approve" && (
+            <Button
+              type="primary"
+              className="complete-button"
+              icon={<CheckCircleOutlined />}
+              onClick={() => handleStatusChange(record._id, "completed", true)}
+            >
+              Complete
+            </Button>
+          )}
+          <Button
+            type="primary"
+            icon={<MenuOutlined />}
+            onClick={() => showAppointmentDetails(record)}
+            disabled={record.status === "incomplete"}
+            className="detail-button"
+          />
+        </Space>
       ),
     },
   ];
@@ -982,8 +985,9 @@ const AppointmentManagement = () => {
       width: 110,
       filters: [
         { text: "Hoàn thành", value: "completed" },
-        { text: "Hoàn thành", value: "Pending" },
         { text: "Đã hủy", value: "incomplete" },
+        { text: "Đã thanh toán", value: "Pending" },
+        { text: "Đã duyệt", value: "approve" },
       ],
       onFilter: (value, record) => record.status === value,
       render: (status) => {
@@ -1059,7 +1063,7 @@ const AppointmentManagement = () => {
             icon={<MenuOutlined />}
             onClick={() => showAppointmentDetails(record, false)}
             disabled={record.status === "incomplete"}
-            style={{ marginLeft: "8px" }}
+            className="detail-button"
           />
         </div>
       ),
@@ -1220,6 +1224,7 @@ const AppointmentManagement = () => {
   // Hàm để tự động hoàn thành lịch hẹn lẻ
   const autoCompleteAppointment = async (appointmentId) => {
     try {
+      const token = localStorage.getItem("accesstoken");
       const response = await axiosInstance.post(`/appointmentLe/autocomplete/${appointmentId}`, {}, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -1253,13 +1258,13 @@ const AppointmentManagement = () => {
         <Button
           type={autoCheckEnabled ? "primary" : "default"}
           onClick={() => setAutoCheckEnabled(!autoCheckEnabled)}
-          style={{ marginLeft: "16px" }}
+          className="auto-check-button"
         >
           {autoCheckEnabled ? "Tắt tự động hủy" : "Bật tự động hủy"}
         </Button>
         <Button
           onClick={checkExpiredAppointments}
-          style={{ marginLeft: "8px" }}
+          className="check-expired-button"
         >
           Kiểm tra đơn quá hạn
         </Button>
@@ -1436,6 +1441,7 @@ const AppointmentManagement = () => {
                 </div>
               )}
 
+              {/* Phần thao tác cho lịch hẹn lẻ */}
               {!selectedAppointment.isPackage &&
                 selectedAppointment.status !== "completed" && (
                   <div className="detail-row" style={{ marginTop: "20px" }}>
@@ -1491,12 +1497,51 @@ const AppointmentManagement = () => {
                     </span>
                   </div>
                 )}
+                
+              {/* Phần thao tác cho lịch hẹn gói */}
+              {selectedAppointment.isPackage &&
+                (selectedAppointment.status === "Pending" || selectedAppointment.status === "Paid") && (
+                  <div className="detail-row" style={{ marginTop: "20px" }}>
+                    <span className="detail-label">Thao tác:</span>
+                    <span className="detail-value">
+                      <div className="action-buttons">
+                        <Button
+                          type="primary"
+                          className="approve-button"
+                          onClick={() =>
+                            handleStatusChange(
+                              selectedAppointment._id,
+                              "approve",
+                              true
+                            )
+                          }
+                        >
+                          Duyệt đơn
+                        </Button>
+                        <Button
+                          danger
+                          className="cancel-button"
+                          onClick={() =>
+                            handleStatusChange(
+                              selectedAppointment._id,
+                              "incomplete",
+                              true
+                            )
+                          }
+                        >
+                          Hủy đơn
+                        </Button>
+                      </div>
+                    </span>
+                  </div>
+                )}
             </div>
 
             {/* Hiển thị lịch tiêm cho từng mũi - chỉ cho lịch hẹn gói */}
             {selectedAppointment.isPackage &&
               selectedAppointment.doseSchedule &&
-              selectedAppointment.doseSchedule.length > 0 && (
+              selectedAppointment.doseSchedule.length > 0 && 
+              (selectedAppointment.status === "approve" || selectedAppointment.status === "completed") && (
                 <div className="dose-schedule-section">
                   <div className="dose-header">
                     <Title level={4}>Lịch tiêm các mũi</Title>
@@ -1519,10 +1564,10 @@ const AppointmentManagement = () => {
 
                         return (
                           <>
-                            <Tag color={color} style={{ marginRight: "5px" }}>
+                            <Tag color={color} className="summary-tag">
                               {completedDoses}/{totalDoses}
                             </Tag>
-                            <span style={{ color: color, fontWeight: "bold" }}>
+                            <span className={`progress-percent progress-percent-${progressPercent === 100 ? 'complete' : progressPercent > 50 ? 'half' : 'start'}`}>
                               {progressPercent}% đã tiêm
                             </span>
                           </>
@@ -1558,7 +1603,7 @@ const AppointmentManagement = () => {
                               {item.price ? item.price.toLocaleString('vi-VN') + ' VNĐ' : 'Chưa xác định'}
                             </div> */}
                           </div>
-                          <Divider style={{ margin: "12px 0" }} />
+                          <Divider className="dose-divider" />
                           <div className="dose-detail-row dose-actions">
                             <Button
                               type={
@@ -1600,6 +1645,20 @@ const AppointmentManagement = () => {
                       </List.Item>
                     )}
                   />
+                </div>
+              )}
+
+            {/* Hiển thị thông báo yêu cầu duyệt đơn khi đơn chưa được duyệt */}
+            {selectedAppointment.isPackage &&
+              (selectedAppointment.status === "Pending" || selectedAppointment.status === "Paid") && (
+                <div className="dose-schedule-section">
+                  <div className="approve-notice">
+                    <Title level={4}>Thông báo</Title>
+                    <div className="approve-notice-content">
+                      <p>Vui lòng duyệt đơn hàng trước khi xem lịch tiêm các mũi.</p>
+                      <p>Sau khi duyệt, bạn sẽ thấy chi tiết lịch tiêm các mũi ở đây.</p>
+                    </div>
+                  </div>
                 </div>
               )}
           </div>

@@ -91,13 +91,17 @@ const StaffsPage = () => {
         },
       });
 
-      message.success("Thêm nhân viên thành công!");
+      Modal.success({
+        content: "Thêm nhân viên thành công!",
+      });
       setIsCreateModalVisible(false);
       createForm.resetFields();
       fetchStaffs();
     } catch (error) {
       console.error("Error creating staff:", error);
-      message.error(error.response?.data?.message || "Không thể thêm nhân viên");
+      Modal.error({
+        content: error.response?.data?.message || "Không thể thêm nhân viên",
+      });
     }
   };
 
@@ -108,23 +112,35 @@ const StaffsPage = () => {
       // Validate data before sending
       const updatedData = {
         staffId: editingStaff._id,
-        staffname: values.staffname?.trim(),
-        phone: values.phone?.trim(),
-        gender: values.gender?.toLowerCase(),
+        staffname: values.staffname?.trim() || null,
+        phone: values.phone?.trim() || null,
+        gender: values.gender?.toLowerCase() || null,
       };
 
-      await axiosInstance.post("/staff/updateStaff", updatedData, {
+      console.log("Sending update data:", updatedData);
+
+      const response = await axiosInstance.post("/staff/updateStaff", updatedData, {
         headers: {
           Authorization: `Bearer ${accesstoken}`,
         },
       });
+
+      console.log("Update response:", response.data);
 
       message.success("Cập nhật thông tin nhân viên thành công!");
       setIsEditModalVisible(false);
       fetchStaffs();
     } catch (error) {
       console.error("Error updating staff:", error);
-      message.error(error.response?.data?.message || "Không thể cập nhật thông tin nhân viên");
+      
+      // More detailed error message
+      let errorMsg = "Không thể cập nhật thông tin nhân viên";
+      if (error.response) {
+        console.error("Error response:", error.response);
+        errorMsg = error.response.data?.message || errorMsg;
+      }
+      
+      message.error(errorMsg);
     }
   };
 
@@ -133,13 +149,13 @@ const StaffsPage = () => {
       const accesstoken = localStorage.getItem("accesstoken");
 
       if (!accesstoken) {
-        Modal.error({
-          content: "Bạn cần đăng nhập lại",
-        });
+        message.error("Bạn cần đăng nhập lại");
         return;
       }
 
-      await axiosInstance.post(
+      console.log("Deleting staff with ID:", staffId);
+
+      const response = await axiosInstance.post(
         "/staff/deleteStaff",
         { staffId },
         {
@@ -149,17 +165,24 @@ const StaffsPage = () => {
         }
       );
 
+      console.log("Delete response:", response.data);
+
       message.success("Xóa nhân viên thành công!");
-      await fetchStaffs(); 
+      fetchStaffs();
     } catch (error) {
       console.error("Error deleting staff:", error);
+      
+      // More detailed error message
+      let errorMsg = "Không thể xóa nhân viên";
+      if (error.response) {
+        console.error("Error response:", error.response);
+        errorMsg = error.response.data?.message || errorMsg;
+      }
+      
+      message.error(errorMsg);
+      
       if (error.response?.status === 401) {
-        Modal.error({
-          content: "Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.",
-        });
         navigate("/login");
-      } else {
-        message.error("Không thể xóa nhân viên");
       }
     }
   };
