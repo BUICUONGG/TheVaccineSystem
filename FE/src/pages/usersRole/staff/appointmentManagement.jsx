@@ -83,44 +83,54 @@ const AppointmentManagement = () => {
       const populateVaccineData = async (appointments) => {
         // Skip if no appointments
         if (!appointments || appointments.length === 0) return appointments;
-        
+
         // Identify which vaccine IDs need to be fetched
         const vaccineIdsToFetch = new Set();
-        appointments.forEach(apt => {
-          if (apt.vaccineId && typeof apt.vaccineId === 'string' && !apt.vaccine && !apt.vaccineDetails) {
+        appointments.forEach((apt) => {
+          if (
+            apt.vaccineId &&
+            typeof apt.vaccineId === "string" &&
+            !apt.vaccine &&
+            !apt.vaccineDetails
+          ) {
             vaccineIdsToFetch.add(apt.vaccineId);
           }
         });
-        
+
         // If no vaccine IDs need fetching, return as is
         if (vaccineIdsToFetch.size === 0) return appointments;
-        
+
         try {
-          console.log(`Fetching details for ${vaccineIdsToFetch.size} vaccines...`);
+          console.log(
+            `Fetching details for ${vaccineIdsToFetch.size} vaccines...`
+          );
           const vaccineMap = {};
-          
+
           // Fetch vaccine details
           for (const vaccineId of vaccineIdsToFetch) {
             try {
               // Thử nhiều endpoint khác nhau để tìm thông tin vaccine
               let foundVaccine = false;
-              
+
               // Thử endpoint 1: /vaccines/detail
               try {
                 const vaccineResponse = await axiosInstance.get(
                   `/vaccines/detail/${vaccineId}`,
                   { headers: { Authorization: `Bearer ${token}` } }
                 );
-                
+
                 if (vaccineResponse.data) {
                   vaccineMap[vaccineId] = vaccineResponse.data;
                   foundVaccine = true;
                   console.log(`Found vaccine ${vaccineId} at /vaccines/detail`);
                 }
               } catch (err1) {
-                console.log(`No vaccine at /vaccines/detail/${vaccineId}`, err1);
+                console.log(
+                  `No vaccine at /vaccines/detail/${vaccineId}`,
+                  err1
+                );
               }
-              
+
               // Thử endpoint 2: /vaccinceInventorys
               if (!foundVaccine) {
                 try {
@@ -128,17 +138,22 @@ const AppointmentManagement = () => {
                     `/vaccine/inventory/${vaccineId}`,
                     { headers: { Authorization: `Bearer ${token}` } }
                   );
-                  
+
                   if (vaccineResponse.data) {
                     vaccineMap[vaccineId] = vaccineResponse.data;
                     foundVaccine = true;
-                    console.log(`Found vaccine ${vaccineId} at /vaccine/inventory`);
+                    console.log(
+                      `Found vaccine ${vaccineId} at /vaccine/inventory`
+                    );
                   }
                 } catch (err2) {
-                  console.log(`No vaccine at /vaccine/inventory/${vaccineId}`, err2);
+                  console.log(
+                    `No vaccine at /vaccine/inventory/${vaccineId}`,
+                    err2
+                  );
                 }
               }
-              
+
               // Thử endpoint 3: vaccine by id direct
               if (!foundVaccine) {
                 try {
@@ -146,44 +161,58 @@ const AppointmentManagement = () => {
                     `/vaccine/${vaccineId}`,
                     { headers: { Authorization: `Bearer ${token}` } }
                   );
-                  
+
                   if (vaccineResponse.data) {
                     vaccineMap[vaccineId] = vaccineResponse.data;
                     foundVaccine = true;
-                    console.log(`Found vaccine ${vaccineId} at direct /vaccine endpoint`);
+                    console.log(
+                      `Found vaccine ${vaccineId} at direct /vaccine endpoint`
+                    );
                   }
                 } catch (err3) {
-                  console.log(`No vaccine at direct /vaccine/${vaccineId}`, err3);
+                  console.log(
+                    `No vaccine at direct /vaccine/${vaccineId}`,
+                    err3
+                  );
                 }
               }
-              
+
               // Nếu không tìm thấy, ghi log
               if (!foundVaccine) {
-                console.error(`Could not find vaccine with ID ${vaccineId} at any endpoint`);
+                console.error(
+                  `Could not find vaccine with ID ${vaccineId} at any endpoint`
+                );
               }
             } catch (error) {
-              console.error(`Error in vaccine fetch loop for ${vaccineId}:`, error);
+              console.error(
+                `Error in vaccine fetch loop for ${vaccineId}:`,
+                error
+              );
             }
           }
-          
+
           // Update appointment data with vaccine details
-          return appointments.map(apt => {
+          return appointments.map((apt) => {
             // Nếu đã có thông tin về vaccine, không cần cập nhật
             if (apt.vaccine && apt.vaccine.vaccineName) {
               return apt;
             }
-            
-            if (apt.vaccineId && typeof apt.vaccineId === 'string' && vaccineMap[apt.vaccineId]) {
+
+            if (
+              apt.vaccineId &&
+              typeof apt.vaccineId === "string" &&
+              vaccineMap[apt.vaccineId]
+            ) {
               return {
                 ...apt,
-                vaccineDetails: vaccineMap[apt.vaccineId]
+                vaccineDetails: vaccineMap[apt.vaccineId],
               };
             }
-            
+
             // Trích xuất tên vaccine từ note nếu có
             if (!apt.vaccineDetails && apt.note) {
               let extractedName = null;
-              
+
               if (apt.note.includes("vaccine")) {
                 const match = apt.note.match(/vaccine\s+(.+?)(\s+|$)/i);
                 if (match && match[1]) {
@@ -195,15 +224,15 @@ const AppointmentManagement = () => {
                   extractedName = match[1];
                 }
               }
-              
+
               if (extractedName) {
                 return {
                   ...apt,
-                  vaccineDetails: { vaccineName: extractedName }
+                  vaccineDetails: { vaccineName: extractedName },
                 };
               }
             }
-            
+
             return apt;
           });
         } catch (error) {
@@ -216,34 +245,34 @@ const AppointmentManagement = () => {
       const populatePackageData = async (appointments) => {
         // Skip if no appointments
         if (!appointments || appointments.length === 0) return appointments;
-        
+
         try {
           // Cập nhật dữ liệu gói vaccine dựa trên note
-          return appointments.map(apt => {
+          return appointments.map((apt) => {
             // Nếu đã có thông tin về gói, không cần cập nhật
             if (apt.vaccinePakage && apt.vaccinePakage.packageName) {
               return apt;
             }
-            
+
             // Trích xuất tên gói từ note nếu có
             if (apt.note) {
               let extractedName = null;
-              
+
               if (apt.note.includes("gói")) {
                 const match = apt.note.match(/gói\s+(.+?)(\s+|$)/i);
                 if (match && match[1]) {
                   extractedName = match[1];
                 }
-              } 
-              
+              }
+
               if (extractedName) {
                 return {
                   ...apt,
-                  packageDetails: { packageName: extractedName }
+                  packageDetails: { packageName: extractedName },
                 };
               }
             }
-            
+
             return apt;
           });
         } catch (error) {
@@ -726,10 +755,7 @@ const AppointmentManagement = () => {
 
         return (
           <div>
-            <Tag
-              color={color}
-              className="progress-tag"
-            >
+            <Tag color={color} className="progress-tag">
               {completedDoses}/{totalDoses} mũi
             </Tag>
           </div>
@@ -1399,10 +1425,11 @@ const AppointmentManagement = () => {
                     </span>
                   </div>
                 )}
-                
+
               {/* Phần thao tác cho lịch hẹn gói */}
               {selectedAppointment.isPackage &&
-                (selectedAppointment.status === "Pending" || selectedAppointment.status === "Paid") && (
+                (selectedAppointment.status === "Pending" ||
+                  selectedAppointment.status === "Paid") && (
                   <div className="detail-row" style={{ marginTop: "20px" }}>
                     <span className="detail-label">Thao tác:</span>
                     <span className="detail-value">
@@ -1442,8 +1469,9 @@ const AppointmentManagement = () => {
             {/* Hiển thị lịch tiêm cho từng mũi - chỉ cho lịch hẹn gói */}
             {selectedAppointment.isPackage &&
               selectedAppointment.doseSchedule &&
-              selectedAppointment.doseSchedule.length > 0 && 
-              (selectedAppointment.status === "approve" || selectedAppointment.status === "completed") && (
+              selectedAppointment.doseSchedule.length > 0 &&
+              (selectedAppointment.status === "approve" ||
+                selectedAppointment.status === "completed") && (
                 <div className="dose-schedule-section">
                   <div className="dose-header">
                     <Title level={4}>Lịch tiêm các mũi</Title>
@@ -1469,7 +1497,15 @@ const AppointmentManagement = () => {
                             <Tag color={color} className="summary-tag">
                               {completedDoses}/{totalDoses}
                             </Tag>
-                            <span className={`progress-percent progress-percent-${progressPercent === 100 ? 'complete' : progressPercent > 50 ? 'half' : 'start'}`}>
+                            <span
+                              className={`progress-percent progress-percent-${
+                                progressPercent === 100
+                                  ? "complete"
+                                  : progressPercent > 50
+                                  ? "half"
+                                  : "start"
+                              }`}
+                            >
                               {progressPercent}% đã tiêm
                             </span>
                           </>
@@ -1548,13 +1584,19 @@ const AppointmentManagement = () => {
 
             {/* Hiển thị thông báo yêu cầu duyệt đơn khi đơn chưa được duyệt */}
             {selectedAppointment.isPackage &&
-              (selectedAppointment.status === "Pending" || selectedAppointment.status === "Paid") && (
+              (selectedAppointment.status === "Pending" ||
+                selectedAppointment.status === "Paid") && (
                 <div className="dose-schedule-section">
                   <div className="approve-notice">
                     <Title level={4}>Thông báo</Title>
                     <div className="approve-notice-content">
-                      <p>Vui lòng duyệt đơn hàng trước khi xem lịch tiêm các mũi.</p>
-                      <p>Sau khi duyệt, bạn sẽ thấy chi tiết lịch tiêm các mũi ở đây.</p>
+                      <p>
+                        Vui lòng duyệt đơn hàng trước khi xem lịch tiêm các mũi.
+                      </p>
+                      <p>
+                        Sau khi duyệt, bạn sẽ thấy chi tiết lịch tiêm các mũi ở
+                        đây.
+                      </p>
                     </div>
                   </div>
                 </div>
