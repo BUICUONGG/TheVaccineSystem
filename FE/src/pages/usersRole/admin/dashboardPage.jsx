@@ -1,30 +1,6 @@
 import { useState, useEffect } from "react";
-import {
-  Card,
-  Row,
-  Col,
-  Statistic,
-  Table,
-  Spin,
-  Alert,
-  Button,
-  Tag,
-  Progress,
-  Tooltip,
-  Modal,
-} from "antd";
-import {
-  UserOutlined,
-  ExperimentOutlined,
-  FileTextOutlined,
-  CommentOutlined,
-  CalendarOutlined,
-  StarOutlined,
-  ReloadOutlined,
-  CheckCircleOutlined,
-  ClockCircleOutlined,
-  CloseCircleOutlined,
-} from "@ant-design/icons";
+import { Card, Row, Col, Statistic, Table, Spin, Alert, Button, Tag, Progress, Tooltip, Modal, Divider } from "antd";
+import { UserOutlined, ExperimentOutlined, FileTextOutlined, CommentOutlined, CalendarOutlined, StarOutlined, ReloadOutlined, CheckCircleOutlined, ClockCircleOutlined, CloseCircleOutlined } from "@ant-design/icons";
 import { Pie, Column } from "@ant-design/plots";
 import axiosInstance from "../../../service/api";
 import { useNavigate } from "react-router-dom";
@@ -376,11 +352,11 @@ const DashboardPage = () => {
   // Calculate revenue statistics
   const calculateRevenueStats = (appointments) => {
     const months = [
-      "Jan", "Feb", "Mar", "Apr", "May", "Jun", 
+      "Jan", "Feb", "Mar", "Apr", "May", "Jun",
       "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
     ];
     const currentYear = new Date().getFullYear();
-    
+
     // Initialize monthly revenue data
     const monthlyRevenue = months.map(month => ({
       month,
@@ -388,31 +364,31 @@ const DashboardPage = () => {
       completedRevenue: 0,
       pendingRevenue: 0
     }));
-    
+
     // Initialize total revenue counters
     let totalRevenue = 0;
     let completedRevenue = 0;
     let pendingRevenue = 0;
-    
+
     // Process each appointment for revenue calculation
     appointments.forEach(appointment => {
       const price = appointment.price || 0;
-      
+
       // Add to total revenue statistics
       totalRevenue += price;
-      
+
       if (appointment.status === "completed") {
         completedRevenue += price;
       } else if (appointment.status === "pending" || appointment.status === "approve") {
         pendingRevenue += price;
       }
-      
+
       // Add to monthly revenue data
       const date = new Date(appointment.date || appointment.createAt || appointment.createdAt);
       if (date.getFullYear() === currentYear) {
         const monthIndex = date.getMonth();
         monthlyRevenue[monthIndex].revenue += price;
-        
+
         if (appointment.status === "completed") {
           monthlyRevenue[monthIndex].completedRevenue += price;
         } else if (appointment.status === "pending" || appointment.status === "approve") {
@@ -420,12 +396,43 @@ const DashboardPage = () => {
         }
       }
     });
-    
+
     return {
       totalRevenue,
       completedRevenue,
       pendingRevenue,
       monthlyRevenue
+    };
+  };
+
+  // Calculate revenue by appointment type (Gói vs. Lẻ)
+  const calculateAppointmentTypeRevenue = () => {
+    // Calculate revenue for Gói appointments
+    const goiTotalRevenue = appointmentsGoi.reduce((total, apt) => total + (apt.price || 0), 0);
+    const goiCompletedRevenue = appointmentsGoi
+      .filter(apt => apt.status === "completed")
+      .reduce((total, apt) => total + (apt.price || 0), 0);
+    const goiPendingRevenue = appointmentsGoi
+      .filter(apt => apt.status === "pending" || apt.status === "approve")
+      .reduce((total, apt) => total + (apt.price || 0), 0);
+
+    // Calculate revenue for Lẻ appointments
+    const leTotalRevenue = appointmentsLe.reduce((total, apt) => total + (apt.price || 0), 0);
+    const leCompletedRevenue = appointmentsLe
+      .filter(apt => apt.status === "completed")
+      .reduce((total, apt) => total + (apt.price || 0), 0);
+    const lePendingRevenue = appointmentsLe
+      .filter(apt => apt.status === "pending" || apt.status === "approve")
+      .reduce((total, apt) => total + (apt.price || 0), 0);
+
+    // Return revenue data
+    return {
+      goiTotalRevenue,
+      goiCompletedRevenue,
+      goiPendingRevenue,
+      leTotalRevenue,
+      leCompletedRevenue,
+      lePendingRevenue
     };
   };
 
@@ -464,7 +471,7 @@ const DashboardPage = () => {
     // Since we fetched them directly from API, we already have the correct counts
     const appointmentsGoiCount = appointmentsGoi.length;
     const appointmentsLeCount = appointmentsLe.length;
-    
+
     return {
       appointmentsLe: appointmentsLeCount,
       appointmentsGoi: appointmentsGoiCount,
@@ -633,20 +640,6 @@ const DashboardPage = () => {
       dataIndex: "manufacturer",
       key: "manufacturer",
     },
-    {
-      title: "Giá",
-      key: "price",
-      render: (_, record) => {
-        if (
-          record.vaccineImports &&
-          record.vaccineImports.length > 0 &&
-          record.vaccineImports[0].price
-        ) {
-          return `${record.vaccineImports[0].price.toLocaleString()} VNĐ`;
-        }
-        return "Chưa có giá";
-      },
-    },
   ];
 
   // Feedback rating distribution
@@ -680,20 +673,15 @@ const DashboardPage = () => {
 
   // State và hàm xử lý cho modal đánh giá
   const [feedbackModalVisible, setFeedbackModalVisible] = useState(false);
-  
+
   // Hiển thị modal đánh giá
   const showFeedbackModal = () => {
     setFeedbackModalVisible(true);
   };
-  
+
   // Đóng modal đánh giá 
   const closeFeedbackModal = () => {
     setFeedbackModalVisible(false);
-  };
-
-  // Function to navigate to accounts page
-  const navigateToAccounts = () => {
-    navigate("/admin/accounts");
   };
 
   // Transform data for revenue column chart
@@ -735,6 +723,96 @@ const DashboardPage = () => {
       }
     }
   };
+
+  // Get revenue by appointment type
+  const appointmentTypeRevenue = calculateAppointmentTypeRevenue();
+
+  // Configure column chart for appointment type revenue
+  const appointmentRevenueData = [
+    { type: "Gói", status: "Tổng doanh thu", value: appointmentTypeRevenue.goiTotalRevenue },
+    { type: "Gói", status: "Đã thanh toán", value: appointmentTypeRevenue.goiCompletedRevenue },
+    { type: "Lẻ", status: "Tổng doanh thu", value: appointmentTypeRevenue.leTotalRevenue },
+    { type: "Lẻ", status: "Đã thanh toán", value: appointmentTypeRevenue.leCompletedRevenue },
+  ];
+
+  const appointmentRevenueConfig = {
+    data: appointmentRevenueData,
+    isGroup: true,
+    xField: 'type',
+    yField: 'value',
+    seriesField: 'status',
+    columnStyle: {
+      radius: [20, 20, 0, 0],
+    },
+    color: ['#1890ff', '#52c41a'],
+    label: {
+      position: 'middle',
+      layout: [
+        { type: 'interval-adjust-position' },
+        { type: 'interval-hide-overlap' },
+        { type: 'adjust-color' }
+      ]
+    },
+    yAxis: {
+      label: {
+        formatter: (v) => `${(v / 1000000).toFixed(1)}M`
+      }
+    }
+  };
+
+  // Revenue stats for table display
+  const appointmentRevenueTableData = [
+    {
+      key: '1',
+      type: 'Lịch hẹn gói',
+      totalRevenue: appointmentTypeRevenue.goiTotalRevenue,
+      completedRevenue: appointmentTypeRevenue.goiCompletedRevenue,
+      pendingRevenue: appointmentTypeRevenue.goiPendingRevenue,
+      percentage: stats.revenueStats.totalRevenue > 0
+        ? Math.round((appointmentTypeRevenue.goiTotalRevenue / stats.revenueStats.totalRevenue) * 100) + "%"
+        : "0%"
+    },
+    {
+      key: '2',
+      type: 'Lịch hẹn lẻ',
+      totalRevenue: appointmentTypeRevenue.leTotalRevenue,
+      completedRevenue: appointmentTypeRevenue.leCompletedRevenue,
+      pendingRevenue: appointmentTypeRevenue.lePendingRevenue,
+      percentage: stats.revenueStats.totalRevenue > 0
+        ? Math.round((appointmentTypeRevenue.leTotalRevenue / stats.revenueStats.totalRevenue) * 100) + "%"
+        : "0%"
+    }
+  ];
+
+  const appointmentRevenueColumns = [
+    {
+      title: 'Loại lịch hẹn',
+      dataIndex: 'type',
+      key: 'type',
+      render: (type) => (
+        <Tag color={type.includes('gói') ? '#1890ff' : '#52c41a'}>
+          {type}
+        </Tag>
+      )
+    },
+    {
+      title: 'Tổng doanh thu',
+      key: 'totalRevenue',
+      render: (_, record) => `${record.totalRevenue.toLocaleString('vi-VN')} VNĐ`,
+      sorter: (a, b) => a.totalRevenue - b.totalRevenue,
+    },
+    {
+      title: 'Đã thanh toán',
+      key: 'completedRevenue',
+      render: (_, record) => `${record.completedRevenue.toLocaleString('vi-VN')} VNĐ`,
+      sorter: (a, b) => a.completedRevenue - b.completedRevenue,
+    },
+    {
+      title: 'Tỷ lệ',
+      dataIndex: 'percentage',
+      key: 'percentage',
+    }
+  ];
 
   // Revenue table columns
   const revenueColumns = [
@@ -847,11 +925,11 @@ const DashboardPage = () => {
           </Card>
         </Col>
       </Row>
-
+      <Divider />
       {/* Appointment Status Cards */}
       <Row gutter={[16, 16]} className="stats-row appointment-status-cards">
         <Col xs={24} md={8}>
-          <Card 
+          <Card
             hoverable
             onClick={showAppointmentTypeModal}
             className="stat-card clickable-card"
@@ -866,7 +944,7 @@ const DashboardPage = () => {
         <Col xs={24} md={8}>
           <Card className="stat-card">
             <Statistic
-              title="Đơn Tiêm thành công"
+              title="Đơn Tiêm thành công/Tổng đơn tiêm"
               value={stats.appointmentStats.completed}
               valueStyle={{ color: "#52c41a" }}
               prefix={<CheckCircleOutlined />}
@@ -876,7 +954,7 @@ const DashboardPage = () => {
               percent={
                 Math.round(
                   (stats.appointmentStats.completed / stats.totalAppointments) *
-                    100
+                  100
                 ) || 0
               }
               strokeColor="#52c41a"
@@ -887,7 +965,7 @@ const DashboardPage = () => {
         <Col xs={24} md={8}>
           <Card className="stat-card">
             <Statistic
-              title="Đơn bị hủy"
+              title="Đơn bị hủy/Tổng đơn tiêm"
               value={stats.appointmentStats.incomplete}
               valueStyle={{ color: "#f5222d" }}
               prefix={<CloseCircleOutlined />}
@@ -898,7 +976,7 @@ const DashboardPage = () => {
                 Math.round(
                   (stats.appointmentStats.incomplete /
                     stats.totalAppointments) *
-                    100
+                  100
                 ) || 0
               }
               strokeColor="#f5222d"
@@ -907,13 +985,13 @@ const DashboardPage = () => {
           </Card>
         </Col>
       </Row>
-
+      <Divider />
       {/* Revenue Statistics */}
       <Row gutter={[16, 16]} className="stats-row">
         <Col xs={24} md={12}>
           <Card className="stat-card revenue-card">
             <Statistic
-              title="Tổng doanh thu"
+              title="Tổng doanh thu thanh toán"
               value={stats.revenueStats.totalRevenue}
               valueStyle={{ color: "#1890ff" }}
               suffix="VNĐ"
@@ -934,16 +1012,27 @@ const DashboardPage = () => {
         </Col>
       </Row>
 
-      {/* Charts
+      {/* Revenue Chart & Table */}
       <Row gutter={[16, 16]} className="stats-row">
         <Col xs={24} lg={12}>
-          <Card title="Lịch hẹn theo tháng" className="dashboard-card">
+          <Card title="Doanh thu theo loại lịch hẹn" className="dashboard-card">
             <div className="chart-container">
-              <Column {...columnConfig} />
+              <Column {...appointmentRevenueConfig} />
             </div>
           </Card>
         </Col>
-      </Row> */}
+        <Col xs={24} lg={12}>
+          <Card title="Bảng doanh thu theo loại" className="dashboard-card table-card">
+            <Table
+              dataSource={appointmentRevenueTableData}
+              columns={appointmentRevenueColumns}
+              pagination={false}
+              size="small"
+              rowKey="key"
+            />
+          </Card>
+        </Col>
+      </Row>
 
       {/* Feedback and Appointments */}
       <Row gutter={[16, 16]} className="stats-row">
@@ -997,28 +1086,6 @@ const DashboardPage = () => {
         </Col>
       </Row>
 
-      {/* Revenue Chart & Table */}
-      <Row gutter={[16, 16]} className="stats-row">
-        <Col xs={24} lg={12}>
-          <Card title="Doanh thu theo tháng" className="dashboard-card">
-            <div className="chart-container">
-              <Column {...revenueColumnConfig} />
-            </div>
-          </Card>
-        </Col>
-        <Col xs={24} lg={12}>
-          <Card title="Bảng doanh thu hàng tháng" className="dashboard-card table-card">
-            <Table
-              dataSource={stats.revenueStats.monthlyRevenue.filter(item => item.revenue > 0)}
-              columns={revenueColumns}
-              pagination={false}
-              size="small"
-              rowKey="month"
-            />
-          </Card>
-        </Col>
-      </Row>
-
       {/* User Role Distribution Modal */}
       <Modal
         title="Phân bố người dùng theo vai trò"
@@ -1048,8 +1115,8 @@ const DashboardPage = () => {
                 render: (role) => (
                   <Tag color={
                     role === "Admin" ? "#f5222d" :
-                    role === "Staff" ? "#1890ff" :
-                    role === "Customer" ? "#52c41a" : "#d9d9d9"
+                      role === "Staff" ? "#1890ff" :
+                        role === "Customer" ? "#52c41a" : "#d9d9d9"
                   }>
                     {role}
                   </Tag>
@@ -1167,7 +1234,7 @@ const DashboardPage = () => {
       >
         <div style={{ marginBottom: "20px" }}>
           <h3>Tổng số: {stats.totalAppointments} lịch hẹn</h3>
-          
+
           <Table
             dataSource={[
               {
@@ -1178,8 +1245,8 @@ const DashboardPage = () => {
                 approved: appointmentsGoi.filter(a => a.status === "approve").length,
                 completed: appointmentsGoi.filter(a => a.status === "completed").length,
                 incomplete: appointmentsGoi.filter(a => a.status === "incomplete").length,
-                percentage: appointmentsGoi.length > 0 
-                  ? Math.round((appointmentsGoi.length / stats.totalAppointments) * 100) + "%" 
+                percentage: appointmentsGoi.length > 0
+                  ? Math.round((appointmentsGoi.length / stats.totalAppointments) * 100) + "%"
                   : "0%"
               },
               {
@@ -1190,8 +1257,8 @@ const DashboardPage = () => {
                 approved: appointmentsLe.filter(a => a.status === "approve").length,
                 completed: appointmentsLe.filter(a => a.status === "completed").length,
                 incomplete: appointmentsLe.filter(a => a.status === "incomplete").length,
-                percentage: appointmentsLe.length > 0 
-                  ? Math.round((appointmentsLe.length / stats.totalAppointments) * 100) + "%" 
+                percentage: appointmentsLe.length > 0
+                  ? Math.round((appointmentsLe.length / stats.totalAppointments) * 100) + "%"
                   : "0%"
               }
             ]}
@@ -1249,47 +1316,47 @@ const DashboardPage = () => {
               <StarOutlined /> Điểm trung bình: {stats.feedbackStats.averageRating}/5
             </Tag>
           </div>
-          
+
           <Table
             dataSource={[
               {
                 key: '1',
                 rating: '5 sao',
                 count: stats.feedbackStats.fiveStars,
-                percentage: stats.totalFeedback > 0 
-                  ? Math.round((stats.feedbackStats.fiveStars / stats.totalFeedback) * 100) + "%" 
+                percentage: stats.totalFeedback > 0
+                  ? Math.round((stats.feedbackStats.fiveStars / stats.totalFeedback) * 100) + "%"
                   : "0%"
               },
               {
                 key: '2',
                 rating: '4 sao',
                 count: stats.feedbackStats.fourStars,
-                percentage: stats.totalFeedback > 0 
-                  ? Math.round((stats.feedbackStats.fourStars / stats.totalFeedback) * 100) + "%" 
+                percentage: stats.totalFeedback > 0
+                  ? Math.round((stats.feedbackStats.fourStars / stats.totalFeedback) * 100) + "%"
                   : "0%"
               },
               {
                 key: '3',
                 rating: '3 sao',
                 count: stats.feedbackStats.threeStars,
-                percentage: stats.totalFeedback > 0 
-                  ? Math.round((stats.feedbackStats.threeStars / stats.totalFeedback) * 100) + "%" 
+                percentage: stats.totalFeedback > 0
+                  ? Math.round((stats.feedbackStats.threeStars / stats.totalFeedback) * 100) + "%"
                   : "0%"
               },
               {
                 key: '4',
                 rating: '2 sao',
                 count: stats.feedbackStats.twoStars,
-                percentage: stats.totalFeedback > 0 
-                  ? Math.round((stats.feedbackStats.twoStars / stats.totalFeedback) * 100) + "%" 
+                percentage: stats.totalFeedback > 0
+                  ? Math.round((stats.feedbackStats.twoStars / stats.totalFeedback) * 100) + "%"
                   : "0%"
               },
               {
                 key: '5',
                 rating: '1 sao',
                 count: stats.feedbackStats.oneStars,
-                percentage: stats.totalFeedback > 0 
-                  ? Math.round((stats.feedbackStats.oneStars / stats.totalFeedback) * 100) + "%" 
+                percentage: stats.totalFeedback > 0
+                  ? Math.round((stats.feedbackStats.oneStars / stats.totalFeedback) * 100) + "%"
                   : "0%"
               }
             ]}
@@ -1305,7 +1372,7 @@ const DashboardPage = () => {
                   else if (rating.includes("3")) color = "#faad14";
                   else if (rating.includes("2")) color = "#ff7a45";
                   else if (rating.includes("1")) color = "#f5222d";
-                  
+
                   return <Tag color={color}>{rating}</Tag>;
                 }
               },

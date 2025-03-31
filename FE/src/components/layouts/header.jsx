@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Avatar, Dropdown, Menu, Space } from "antd";
 import { Link, useNavigate } from "react-router-dom";
-import { UserOutlined, LogoutOutlined, DownOutlined, CommentOutlined } from "@ant-design/icons";
+import { UserOutlined, LogoutOutlined, DownOutlined } from "@ant-design/icons";
 import NotificationIcon from "../../pages/homepage/notification/Notification";
 // import "./header.css";
 function HeaderLayouts({ footerRef }) {
@@ -9,7 +9,6 @@ function HeaderLayouts({ footerRef }) {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userRole, setUserRole] = useState("");
   const [username, setUsername] = useState("");
-  const [showFeedbackForm, setShowFeedbackForm] = useState(false);
   const [cusId, setCusId] = useState(null);
   const [navVisible, setNavVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
@@ -76,14 +75,6 @@ function HeaderLayouts({ footerRef }) {
     footerRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  const openFeedbackForm = () => {
-    if (isLoggedIn && userRole === "customer") {
-      setShowFeedbackForm(true);
-    } else {
-      navigate("/login");
-    }
-  };
-
   const getUserMenuItems = () => {
     if (userRole === "admin") {
       return (
@@ -114,9 +105,6 @@ function HeaderLayouts({ footerRef }) {
         <Menu>
           <Menu.Item key="profile" icon={<UserOutlined />}>
             <Link to="/profile">Hồ sơ cá nhân</Link>
-          </Menu.Item>
-          <Menu.Item key="feedback" icon={<CommentOutlined />} onClick={openFeedbackForm}>
-            Đánh giá
           </Menu.Item>
           <Menu.Divider />
           <Menu.Item key="logout" icon={<LogoutOutlined />} onClick={handleLogout}>

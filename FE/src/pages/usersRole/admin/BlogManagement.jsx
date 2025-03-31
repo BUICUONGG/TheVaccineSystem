@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
 import { Table, Input, Button, Modal, Form, Popconfirm, Select, Tag, Rate, Typography, Space, Tooltip, Divider, Badge, Card } from "antd";
-import { EditOutlined, DeleteOutlined, PlusOutlined, FilterOutlined, EyeOutlined, ClockCircleOutlined, LikeOutlined, CommentOutlined, InfoCircleOutlined, StarOutlined, UndoOutlined, SearchOutlined } from "@ant-design/icons";
+import { EditOutlined, DeleteOutlined, PlusOutlined, EyeOutlined, ClockCircleOutlined, LikeOutlined, CommentOutlined, UndoOutlined, SearchOutlined } from "@ant-design/icons";
 import axiosInstance from "../../../service/api";
 
 const { Search } = Input;
 const { Option } = Select;
-const { Text, Paragraph } = Typography;
+const { Text } = Typography;
 
 const BlogManagement = () => {
   const [blogs, setBlogs] = useState([]);
@@ -19,8 +19,6 @@ const BlogManagement = () => {
   const [editingBlog, setEditingBlog] = useState(null);
   const [detailBlog, setDetailBlog] = useState(null);
   const [statsBlog, setStatsBlog] = useState(null);
-  const [categoryFilter, setCategoryFilter] = useState(null);
-  const [statusFilter, setStatusFilter] = useState(null);
   const [form] = Form.useForm();
   const [currentPage, setCurrentPage] = useState(1);
   const [totalBlogs, setTotalBlogs] = useState(0);
@@ -56,13 +54,6 @@ const BlogManagement = () => {
     setSearchText(e.target.value);
   };
 
-  const handleCategoryFilter = (value) => {
-    setCategoryFilter(value);
-  };
-
-  const handleStatusFilter = (value) => {
-    setStatusFilter(value);
-  };
 
   const fetchBlogs = async (page = currentPage) => {
     try {

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation, Outlet } from "react-router-dom";
 import { Button } from "antd";
-import { LogoutOutlined, UserOutlined } from "@ant-design/icons";
+import { LogoutOutlined } from "@ant-design/icons";
 import "./adminLayout.css";
 
 const AdminLayout = () => {
@@ -61,7 +61,7 @@ const AdminLayout = () => {
             </Link>
           </li>
           <li className="admin-menu-item">
-            <Link to="/staffLayout/appointments"
+            <Link to="/admin/appointments"
               className={
                 location.pathname === "/admin/appointments" ? "active" : ""
               }

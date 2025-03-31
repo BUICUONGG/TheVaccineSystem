@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Table, Input, Button, Modal, Form, Select, Popconfirm, Tag, Space, Typography, Tooltip } from "antd";
-import { EditOutlined, EyeOutlined, EyeInvisibleOutlined, SearchOutlined, InfoCircleOutlined, ReloadOutlined } from "@ant-design/icons";
+import { EditOutlined, EyeInvisibleOutlined, SearchOutlined, ReloadOutlined } from "@ant-design/icons";
 import axiosInstance from "../../../service/api";
 
 const { Search } = Input;
@@ -108,8 +108,6 @@ const AllCustomerPage = () => {
   const handleHideCustomer = async (customerId) => {
     try {
       console.log("Hiding customer with ID:", customerId);
-      
-      // We won't actually delete the customer, just hide it by setting fields to null
       await axiosInstance.post(
         `/customer/update/${customerId}`,
         {
@@ -231,12 +229,6 @@ const AllCustomerPage = () => {
       width: 200,
       render: (_, record) => (
         <Space>
-          <Tooltip title="Xem chi tiết">
-            <Button
-              icon={<EyeOutlined />}
-              onClick={() => showDetailModal(record)}
-            />
-          </Tooltip>
           <Tooltip title="Chỉnh sửa">
             <Button
               icon={<EditOutlined />}

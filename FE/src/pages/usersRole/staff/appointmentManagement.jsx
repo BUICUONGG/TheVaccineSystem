@@ -1,26 +1,6 @@
 import { useState, useEffect } from "react";
-
-import {
-  Table,
-  Tag,
-  Button,
-  message,
-  Modal,
-  Tabs,
-  Input,
-  List,
-  Card,
-  Typography,
-  Divider,
-  Space,
-} from "antd";
-import {
-  SearchOutlined,
-  CheckCircleFilled,
-  MenuOutlined,
-  EditOutlined,
-  CheckCircleOutlined,
-} from "@ant-design/icons";
+import { Table, Tag, Button, message, Modal, Tabs, Input, List, Card, Typography, Divider, Space} from "antd";
+import { SearchOutlined, CheckCircleFilled, MenuOutlined, EditOutlined, CheckCircleOutlined } from "@ant-design/icons";
 import moment from "moment";
 import axiosInstance from "../../../service/api";
 import "./appointmentManagement.css";
@@ -45,9 +25,7 @@ const AppointmentManagement = () => {
       setLoading(true);
       const token = localStorage.getItem("accesstoken");
 
-      // Helper function to populate customer details for appointment data
       const populateCustomerData = async (appointments) => {
-        // Skip if no appointments
         if (!appointments || appointments.length === 0) return appointments;
 
         // Identify which customer IDs need to be fetched
@@ -62,7 +40,6 @@ const AppointmentManagement = () => {
           }
         });
 
-        // If no customer IDs need fetching, return as is
         if (customerIdsToFetch.size === 0) return appointments;
 
         try {
@@ -71,7 +48,6 @@ const AppointmentManagement = () => {
           );
           const customerMap = {};
 
-          // Fetch customer details
           for (const customerId of customerIdsToFetch) {
             try {
               const customerResponse = await axiosInstance.get(
@@ -630,84 +606,84 @@ const AppointmentManagement = () => {
         return customerName;
       },
     },
-    {
-      title: "Gói Vaccine",
-      dataIndex: "vaccinePakage",
-      key: "vaccinePakage",
-      width: 150,
-      render: (vaccinePakage, record) => {
-        // Log để debug
-        console.log("Rendering package name for:", record._id, {
-          vaccinePakage,
-          fullRecord: record
-        });
+    // {
+    //   title: "Gói Vaccine",
+    //   dataIndex: "vaccinePakage",
+    //   key: "vaccinePakage",
+    //   width: 150,
+    //   render: (vaccinePakage, record) => {
+    //     // Log để debug
+    //     console.log("Rendering package name for:", record._id, {
+    //       vaccinePakage,
+    //       fullRecord: record
+    //     });
         
-        // Try to get package name from all possible sources
-        let packageName = null;
+    //     // Try to get package name from all possible sources
+    //     let packageName = null;
         
-        // Ưu tiên thứ tự lấy tên gói
-        if (record.vaccinePakage && record.vaccinePakage.packageName) {
-          packageName = record.vaccinePakage.packageName;
-        } else if (record.package && record.package.packageName) {
-          packageName = record.package.packageName;
-        } else if (record.packageDetails && record.packageDetails.packageName) {
-          packageName = record.packageDetails.packageName;
-        } else if (record.vaccinePakageId && typeof record.vaccinePakageId === "object") {
-          packageName = record.vaccinePakageId.packageName || record.vaccinePakageId.name;
-        } else if (record.vaccinePackageId && typeof record.vaccinePackageId === "object") {
-          packageName = record.vaccinePackageId.packageName || record.vaccinePackageId.name;
-        } else if (record.note && record.note.includes("gói")) {
-          // Cố gắng trích xuất tên từ note (tương tự Payment.jsx)
-          const match = record.note.match(/gói\s+(.+?)(\s+|$)/i);
-          if (match && match[1]) {
-            packageName = match[1];
-          }
-        }
+    //     // Ưu tiên thứ tự lấy tên gói
+    //     if (record.vaccinePakage && record.vaccinePakage.packageName) {
+    //       packageName = record.vaccinePakage.packageName;
+    //     } else if (record.package && record.package.packageName) {
+    //       packageName = record.package.packageName;
+    //     } else if (record.packageDetails && record.packageDetails.packageName) {
+    //       packageName = record.packageDetails.packageName;
+    //     } else if (record.vaccinePakageId && typeof record.vaccinePakageId === "object") {
+    //       packageName = record.vaccinePakageId.packageName || record.vaccinePakageId.name;
+    //     } else if (record.vaccinePackageId && typeof record.vaccinePackageId === "object") {
+    //       packageName = record.vaccinePackageId.packageName || record.vaccinePackageId.name;
+    //     } else if (record.note && record.note.includes("gói")) {
+    //       // Cố gắng trích xuất tên từ note (tương tự Payment.jsx)
+    //       const match = record.note.match(/gói\s+(.+?)(\s+|$)/i);
+    //       if (match && match[1]) {
+    //         packageName = match[1];
+    //       }
+    //     }
         
-        // Fallback nếu không tìm thấy tên
-        if (!packageName) {
-          packageName = typeof record.vaccinePakageId === "string" 
-            ? "Gói #" + record.vaccinePakageId.substring(0, 8) + "..." 
-            : (typeof record.vaccinePackageId === "string" 
-                ? "Gói #" + record.vaccinePackageId.substring(0, 8) + "..." 
-                : "N/A");
-        }
+    //     // Fallback nếu không tìm thấy tên
+    //     if (!packageName) {
+    //       packageName = typeof record.vaccinePakageId === "string" 
+    //         ? "Gói #" + record.vaccinePakageId.substring(0, 8) + "..." 
+    //         : (typeof record.vaccinePackageId === "string" 
+    //             ? "Gói #" + record.vaccinePackageId.substring(0, 8) + "..." 
+    //             : "N/A");
+    //     }
 
-        return <span title={packageName}>{packageName}</span>;
-      },
-    },
+    //     return <span title={packageName}>{packageName}</span>;
+    //   },
+    // },
     {
       title: "Ngày hẹn",
       dataIndex: "date",
       key: "date",
       width: 110,
-      sorter: (a, b) => {
-        // Hàm chuyển đổi chuỗi ngày thành đối tượng Date
-        const parseDate = (dateStr) => {
-          // Thử các định dạng khác nhau
-          const formats = [
-            "DD/MM/YYYY",
-            "YYYY-MM-DD",
-            "MM/DD/YYYY",
-            "DD-MM-YYYY",
-          ];
+      // sorter: (a, b) => {
+      //   // Hàm chuyển đổi chuỗi ngày thành đối tượng Date
+      //   const parseDate = (dateStr) => {
+      //     // Thử các định dạng khác nhau
+      //     const formats = [
+      //       "DD/MM/YYYY",
+      //       "YYYY-MM-DD",
+      //       "MM/DD/YYYY",
+      //       "DD-MM-YYYY",
+      //     ];
 
-          for (const format of formats) {
-            const date = moment(dateStr, format, true);
-            if (date.isValid()) {
-              return date;
-            }
-          }
+      //     for (const format of formats) {
+      //       const date = moment(dateStr, format, true);
+      //       if (date.isValid()) {
+      //         return date;
+      //       }
+      //     }
 
-          // Nếu không khớp với bất kỳ định dạng nào, thử chuyển đổi trực tiếp
-          return moment(new Date(dateStr));
-        };
+      //     // Nếu không khớp với bất kỳ định dạng nào, thử chuyển đổi trực tiếp
+      //     return moment(new Date(dateStr));
+      //   };
 
-        const dateA = parseDate(a.date);
-        const dateB = parseDate(b.date);
+      //   const dateA = parseDate(a.date);
+      //   const dateB = parseDate(b.date);
 
-        return dateA - dateB;
-      },
+      //   return dateA - dateB;
+      // },
       sortDirections: ["ascend", "descend"],
       defaultSortOrder: "descend",
     },
@@ -775,22 +751,22 @@ const AppointmentManagement = () => {
       render: (status) => (
         <Tag color={getStatusColor(status)}>{getStatusText(status)}</Tag>
       ),
-      sorter: (a, b) => {
-        // Thiết lập thứ tự ưu tiên cho các trạng thái
-        const statusOrder = {
-          completed: 1, // Hoàn thành (ưu tiên hiển thị đầu tiên)
-          Pending: 2, // Đã thanh toán
-          approve: 3, // Đã duyệt
-          pending: 4, // Đang chờ
-          incomplete: 5, // Đã hủy (hiển thị cuối cùng)
-        };
+      // sorter: (a, b) => {
+      //   // Thiết lập thứ tự ưu tiên cho các trạng thái
+      //   const statusOrder = {
+      //     completed: 1, // Hoàn thành (ưu tiên hiển thị đầu tiên)
+      //     Pending: 2, // Đã thanh toán
+      //     approve: 3, // Đã duyệt
+      //     pending: 4, // Đang chờ
+      //     incomplete: 5, // Đã hủy (hiển thị cuối cùng)
+      //   };
 
-        // Nếu trạng thái không nằm trong danh sách trên, đặt ở cuối
-        const orderA = statusOrder[a.status] || 999;
-        const orderB = statusOrder[b.status] || 999;
+      //   // Nếu trạng thái không nằm trong danh sách trên, đặt ở cuối
+      //   const orderA = statusOrder[a.status] || 999;
+      //   const orderB = statusOrder[b.status] || 999;
 
-        return orderA - orderB;
-      },
+      //   return orderA - orderB;
+      // },
       defaultSortOrder: "ascend", // Sắp xếp mặc định theo thứ tự tăng dần
     },
     {
@@ -799,7 +775,7 @@ const AppointmentManagement = () => {
       width: 80,
       render: (_, record) => (
         <Space size="middle">
-          {record.status === "approve" && (
+          {/* {record.status === "approve" && (
             <Button
               type="primary"
               className="complete-button"
@@ -808,7 +784,7 @@ const AppointmentManagement = () => {
             >
               Complete
             </Button>
-          )}
+          )} */}
           <Button
             type="primary"
             icon={<MenuOutlined />}
@@ -881,91 +857,91 @@ const AppointmentManagement = () => {
         );
       },
     },
-    {
-      title: "Vaccine",
-      dataIndex: "vaccine",
-      key: "vaccine",
-      render: (text, record) => {
-        console.log("Rendering vaccine name:", record);
-        // Kiểm tra nhiều vị trí có thể chứa tên vaccine
-        let vaccineName = null;
+    // {
+    //   title: "Vaccine",
+    //   dataIndex: "vaccine",
+    //   key: "vaccine",
+    //   render: (text, record) => {
+    //     console.log("Rendering vaccine name:", record);
+    //     // Kiểm tra nhiều vị trí có thể chứa tên vaccine
+    //     let vaccineName = null;
         
-        // Kiểm tra trong vaccine object
-        if (record.vaccine) {
-          if (record.vaccine.vaccineName) vaccineName = record.vaccine.vaccineName;
-          else if (record.vaccine.name) vaccineName = record.vaccine.name;
-        }
+    //     // Kiểm tra trong vaccine object
+    //     if (record.vaccine) {
+    //       if (record.vaccine.vaccineName) vaccineName = record.vaccine.vaccineName;
+    //       else if (record.vaccine.name) vaccineName = record.vaccine.name;
+    //     }
         
-        // Kiểm tra trong vaccineDetails
-        if (!vaccineName && record.vaccineDetails) {
-          if (record.vaccineDetails.vaccineName) vaccineName = record.vaccineDetails.vaccineName;
-          else if (record.vaccineDetails.name) vaccineName = record.vaccineDetails.name;
-        }
+    //     // Kiểm tra trong vaccineDetails
+    //     if (!vaccineName && record.vaccineDetails) {
+    //       if (record.vaccineDetails.vaccineName) vaccineName = record.vaccineDetails.vaccineName;
+    //       else if (record.vaccineDetails.name) vaccineName = record.vaccineDetails.name;
+    //     }
         
-        // Kiểm tra nếu vaccineId là object và có chứa tên
-        if (!vaccineName && record.vaccineId && typeof record.vaccineId === 'object') {
-          if (record.vaccineId.vaccineName) vaccineName = record.vaccineId.vaccineName;
-          else if (record.vaccineId.name) vaccineName = record.vaccineId.name;
-        }
+    //     // Kiểm tra nếu vaccineId là object và có chứa tên
+    //     if (!vaccineName && record.vaccineId && typeof record.vaccineId === 'object') {
+    //       if (record.vaccineId.vaccineName) vaccineName = record.vaccineId.vaccineName;
+    //       else if (record.vaccineId.name) vaccineName = record.vaccineId.name;
+    //     }
         
-        // Thử lấy từ note nếu chứa thông tin vaccine
-        if (!vaccineName && record.note) {
-          const noteMatch = record.note.match(/[Vv]accine\s*:?\s*([^,;\.]+)/);
-          if (noteMatch && noteMatch[1]) {
-            vaccineName = noteMatch[1].trim();
-          } else {
-            // Thử lấy từ các cụm từ tiếng Việt
-            const vnMatch = record.note.match(/[Tt]iêm\s*:?\s*([^,;\.]+)/);
-            if (vnMatch && vnMatch[1]) {
-              vaccineName = vnMatch[1].trim();
-            }
-          }
-        }
+    //     // Thử lấy từ note nếu chứa thông tin vaccine
+    //     if (!vaccineName && record.note) {
+    //       const noteMatch = record.note.match(/[Vv]accine\s*:?\s*([^,;\.]+)/);
+    //       if (noteMatch && noteMatch[1]) {
+    //         vaccineName = noteMatch[1].trim();
+    //       } else {
+    //         // Thử lấy từ các cụm từ tiếng Việt
+    //         const vnMatch = record.note.match(/[Tt]iêm\s*:?\s*([^,;\.]+)/);
+    //         if (vnMatch && vnMatch[1]) {
+    //           vaccineName = vnMatch[1].trim();
+    //         }
+    //       }
+    //     }
         
-        // Fallback nếu không tìm thấy gì
-        if (!vaccineName && record.vaccineId) {
-          if (typeof record.vaccineId === 'string') {
-            vaccineName = record.vaccineId.substring(0, 8) + '...';
-          } else {
-            vaccineName = 'N/A';
-          }
-        }
+    //     // Fallback nếu không tìm thấy gì
+    //     if (!vaccineName && record.vaccineId) {
+    //       if (typeof record.vaccineId === 'string') {
+    //         vaccineName = record.vaccineId.substring(0, 8) + '...';
+    //       } else {
+    //         vaccineName = 'N/A';
+    //       }
+    //     }
         
-        return vaccineName || "N/A";
-      },
-    },
+    //     return vaccineName || "N/A";
+    //   },
+    // },
     {
       title: "Ngày hẹn",
       dataIndex: "date",
       key: "date",
       width: 110,
-      sorter: (a, b) => {
-        // Hàm chuyển đổi chuỗi ngày thành đối tượng Date
-        const parseDate = (dateStr) => {
-          // Thử các định dạng khác nhau
-          const formats = [
-            "DD/MM/YYYY",
-            "YYYY-MM-DD",
-            "MM/DD/YYYY",
-            "DD-MM-YYYY",
-          ];
+      // sorter: (a, b) => {
+      //   // Hàm chuyển đổi chuỗi ngày thành đối tượng Date
+      //   const parseDate = (dateStr) => {
+      //     // Thử các định dạng khác nhau
+      //     const formats = [
+      //       "DD/MM/YYYY",
+      //       "YYYY-MM-DD",
+      //       "MM/DD/YYYY",
+      //       "DD-MM-YYYY",
+      //     ];
 
-          for (const format of formats) {
-            const date = moment(dateStr, format, true);
-            if (date.isValid()) {
-              return date;
-            }
-          }
+      //     for (const format of formats) {
+      //       const date = moment(dateStr, format, true);
+      //       if (date.isValid()) {
+      //         return date;
+      //       }
+      //     }
 
-          // Nếu không khớp với bất kỳ định dạng nào, thử chuyển đổi trực tiếp
-          return moment(new Date(dateStr));
-        };
+      //     // Nếu không khớp với bất kỳ định dạng nào, thử chuyển đổi trực tiếp
+      //     return moment(new Date(dateStr));
+      //   };
 
-        const dateA = parseDate(a.date);
-        const dateB = parseDate(b.date);
+      //   const dateA = parseDate(a.date);
+      //   const dateB = parseDate(b.date);
 
-        return dateA - dateB;
-      },
+      //   return dateA - dateB;
+      // },
       sortDirections: ["ascend", "descend"],
       defaultSortOrder: "descend",
     },
@@ -990,37 +966,25 @@ const AppointmentManagement = () => {
         { text: "Đã duyệt", value: "approve" },
       ],
       onFilter: (value, record) => record.status === value,
-      render: (status) => {
-        let color =
-          status === "Completed"
-            ? "#87d068"
-            : status === "Pending"
-            ? "#faad14"
-            : status === "Canceled"
-            ? "#f50"
-            : "#2db7f5";
-        return (
-          <Tag color={color}>
-            {status === "Completed" && <CheckCircleFilled />} {status}
-          </Tag>
-        );
-      },
-      sorter: (a, b) => {
-        // Thiết lập thứ tự ưu tiên cho các trạng thái
-        const statusOrder = {
-          completed: 1, // Hoàn thành (ưu tiên hiển thị đầu tiên)
-          Pending: 1, // Đã thanh toán (cùng ưu tiên với Hoàn thành vì đã tự động chuyển)
-          approve: 2, // Đã duyệt
-          pending: 3, // Đang chờ
-          incomplete: 4, // Đã hủy (hiển thị cuối cùng)
-        };
+      render: (status) => (
+        <Tag color={getStatusColor(status)}>{getStatusText(status)}</Tag>
+      ),
+      // sorter: (a, b) => {
+      //   // Thiết lập thứ tự ưu tiên cho các trạng thái
+      //   const statusOrder = {
+      //     completed: 1, // Hoàn thành (ưu tiên hiển thị đầu tiên)
+      //     Pending: 1, // Đã thanh toán (cùng ưu tiên với Hoàn thành vì đã tự động chuyển)
+      //     approve: 2, // Đã duyệt
+      //     pending: 3, // Đang chờ
+      //     incomplete: 4, // Đã hủy (hiển thị cuối cùng)
+      //   };
 
-        // Nếu trạng thái không nằm trong danh sách trên, đặt ở cuối
-        const orderA = statusOrder[a.status] || 999;
-        const orderB = statusOrder[b.status] || 999;
+      //   // Nếu trạng thái không nằm trong danh sách trên, đặt ở cuối
+      //   const orderA = statusOrder[a.status] || 999;
+      //   const orderB = statusOrder[b.status] || 999;
 
-        return orderA - orderB;
-      },
+      //   return orderA - orderB;
+      // },
       defaultSortOrder: "ascend", // Sắp xếp mặc định theo thứ tự tăng dần
     },
     {
@@ -1215,33 +1179,6 @@ const AppointmentManagement = () => {
     }
   }, [appointmentsGoi, appointmentsLe, autoCheckEnabled]);
 
-  // Hàm để xử lý chỉnh sửa lịch hẹn lẻ
-  const handleEditLe = (record) => {
-    // Hiển thị thông tin chi tiết lịch hẹn lẻ
-    showAppointmentDetails(record, false);
-  };
-
-  // Hàm để tự động hoàn thành lịch hẹn lẻ
-  const autoCompleteAppointment = async (appointmentId) => {
-    try {
-      const token = localStorage.getItem("accesstoken");
-      const response = await axiosInstance.post(`/appointmentLe/autocomplete/${appointmentId}`, {}, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      
-      if (response.status === 200) {
-        message.success('Lịch hẹn đã được hoàn thành và cập nhật vào lịch sử tiêm chủng');
-        // Tải lại dữ liệu sau khi hoàn thành thành công
-        fetchAppointments();
-      }
-    } catch (error) {
-      console.error('Lỗi khi hoàn thành lịch hẹn:', error);
-      message.error('Không thể hoàn thành lịch hẹn. Vui lòng thử lại sau.');
-    }
-  };
-
   return (
     <div className="appointment-management">
       <h1>Quản lý lịch hẹn</h1>
@@ -1261,12 +1198,6 @@ const AppointmentManagement = () => {
           className="auto-check-button"
         >
           {autoCheckEnabled ? "Tắt tự động hủy" : "Bật tự động hủy"}
-        </Button>
-        <Button
-          onClick={checkExpiredAppointments}
-          className="check-expired-button"
-        >
-          Kiểm tra đơn quá hạn
         </Button>
       </div>
 
@@ -1351,35 +1282,6 @@ const AppointmentManagement = () => {
                   {selectedAppointment?.childId?.name || "Không có"}
                 </span>
               </div>
-
-              {selectedAppointment.isPackage ? (
-                <div className="detail-row">
-                  <span className="detail-label">Gói vaccine:</span>
-                  <span className="detail-value">
-                    {selectedAppointment.package?.packageName ||
-                      selectedAppointment.vaccinePakage?.packageName ||
-                      selectedAppointment.packageDetails?.packageName ||
-                      selectedAppointment.vaccinePackageId?.packageName ||
-                      selectedAppointment.vaccinePakageId?.name ||
-                      (selectedAppointment.vaccinePackageId
-                        ? selectedAppointment.vaccinePackageId.toString()
-                        : "N/A")}
-                  </span>
-                </div>
-              ) : (
-                <div className="detail-row">
-                  <span className="detail-label">Vaccine:</span>
-                  <span className="detail-value">
-                    {selectedAppointment.vaccine?.vaccineName ||
-                      selectedAppointment.vaccineDetails?.vaccineName ||
-                      selectedAppointment.vaccineId?.vaccineName ||
-                      selectedAppointment.vaccineId?.name ||
-                      (typeof selectedAppointment.vaccineId === "string"
-                        ? selectedAppointment.vaccineId
-                        : "N/A")}
-                  </span>
-                </div>
-              )}
 
               {!selectedAppointment.isPackage && (
                 <div className="detail-row">
@@ -1598,10 +1500,6 @@ const AppointmentManagement = () => {
                                 ? item.date.toLocaleDateString("vi-VN")
                                 : item.date?.toString()}
                             </div>
-                            {/* <div className="dose-detail-row">
-                              <Text strong>Đơn giá:</Text> 
-                              {item.price ? item.price.toLocaleString('vi-VN') + ' VNĐ' : 'Chưa xác định'}
-                            </div> */}
                           </div>
                           <Divider className="dose-divider" />
                           <div className="dose-detail-row dose-actions">

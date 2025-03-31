@@ -6,20 +6,17 @@ const Welcome = () => {
   const navigate = useNavigate();
   const [fadeOut, setFadeOut] = useState(false);
   
-  // Get user role and access token from localStorage
   const userRole = localStorage.getItem("role");
   const accessToken = localStorage.getItem("accesstoken");
 
   useEffect(() => {
-    // Check if there's a valid token
+
     if (!accessToken) {
-      // If no token, clear any remaining localStorage and redirect to login
       localStorage.clear();
       navigate("/login");
       return;
     }
 
-    // Start fade out after 1 second
     const fadeTimer = setTimeout(() => {
       setFadeOut(true);
     }, 1000);

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
-import { FaSyringe, FaBook, FaUserCheck, FaMoneyBillWave, FaBaby, FaChild, FaChevronLeft, FaChevronRight, FaCommentAlt, FaQuoteLeft, FaQuoteRight } from "react-icons/fa";
-import { EyeOutlined, HeartOutlined, HeartFilled, CommentOutlined, ShareAltOutlined, UserOutlined, LogoutOutlined, DownOutlined, StarFilled } from "@ant-design/icons";
-import { Dropdown, Space, Avatar, Menu, Rate, Carousel } from "antd";
+import { FaMoneyBillWave, FaChild, FaChevronLeft, FaChevronRight, FaCommentAlt, FaQuoteLeft, FaQuoteRight } from "react-icons/fa";
+import {  UserOutlined, LogoutOutlined } from "@ant-design/icons";
+import {  Avatar, Menu, Rate, Carousel } from "antd";
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import "./homePage.css";
 import { useNavigate, Link } from "react-router-dom";
@@ -19,18 +19,14 @@ const HomePage = () => {
   const [vaccines, setVaccines] = useState([]);
   const [currentVaccineIndex, setCurrentVaccineIndex] = useState(0);
 
-  const [flippedCardIndex, setFlippedCardIndex] = useState(null);
   const [cusId, setCusId] = useState(null);
   const [showFeedbackForm, setShowFeedbackForm] = useState(false);
   const [username, setUsername] = useState("");
-  // Thêm state cho blog
   const [blogs, setBlogs] = useState([]);
   const [loadingBlogs, setLoadingBlogs] = useState(false);
   const [likedBlogStates, setLikedBlogStates] = useState({});
-  // Thêm state cho news
   const [news, setNews] = useState([]);
   const [loadingNews, setLoadingNews] = useState(false);
-  // Giá trị của unitprice
   const [importProductsPrice, setImportProductsPrice] = useState({});
 
 
@@ -140,7 +136,7 @@ const HomePage = () => {
 
 
   useEffect(() => {
-    // Thêm script cho Chatbase
+    // Script cửa Chatbase
     const script = document.createElement("script");
     script.innerHTML = `
       (function(){
@@ -297,13 +293,6 @@ const HomePage = () => {
   }, []);
 
 
-  const toggleLike = (blogId) => {
-    setLikedBlogStates(prev => ({
-      ...prev,
-      [blogId]: !prev[blogId]
-    }));
-  };
-
   // Thêm useEffect để fetch news
   useEffect(() => {
     fetchNews();
@@ -377,9 +366,6 @@ const HomePage = () => {
         <Menu>
           <Menu.Item key="profile" icon={<UserOutlined />}>
             <Link to="/profile">Hồ sơ cá nhân</Link>
-          </Menu.Item>
-          <Menu.Item key="feedback" icon={<CommentOutlined />} onClick={openFeedbackForm}>
-            Đánh giá
           </Menu.Item>
           <Menu.Divider />
           <Menu.Item key="logout" icon={<LogoutOutlined />} onClick={handleLogout}>

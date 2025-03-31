@@ -79,6 +79,22 @@ const StaffLayout = () => {
               Khách hàng
             </Link>
           </li>
+          <li className="staff-menu-item">
+            <Link
+              to="/staffLayout/blogManagement"
+              className={location.pathname === "/staffLayout/blogManagement" ? "active" : ""}
+            >
+              Cẩm nang
+            </Link>
+          </li>
+          <li className="staff-menu-item">
+            <Link
+              to="/staffLayout/newsManagement"
+              className={location.pathname === "/staffLayout/newsManagement" ? "active" : ""}
+            >
+              Tin tức
+            </Link>
+          </li>
         </ul>
 
         <div className="staff-logout">
