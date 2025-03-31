@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Table, Rate, Card, Statistic, Row, Col, Input, Button, Popconfirm, message, Tag, Tooltip, Modal, Alert } from "antd";
-import { DeleteOutlined, SearchOutlined, UserOutlined, StarOutlined, CommentOutlined, CalendarOutlined, InfoCircleOutlined } from "@ant-design/icons";
+import { DeleteOutlined, SearchOutlined, UserOutlined, StarOutlined, CommentOutlined, CalendarOutlined, InfoCircleOutlined, EditOutlined } from "@ant-design/icons";
 import axiosInstance from "../../../service/api";
 import "./FeedbackManagement.css";
 
@@ -226,11 +226,12 @@ const FeedbackManagement = () => {
       
       <Alert
         message="Chính sách đánh giá"
-        description="Mỗi khách hàng chỉ được gửi một đánh giá. Khi khách hàng đã gửi đánh giá, họ sẽ chỉ có thể xem lại đánh giá đã gửi mà không thể gửi đánh giá mới."
+        description="Mỗi khách hàng chỉ được gửi một đánh giá. Khách hàng có thể xem và chỉnh sửa đánh giá của mình sau khi đã gửi."
         type="info"
         showIcon
         icon={<InfoCircleOutlined />}
         style={{ marginBottom: 24 }}
+        className="policy-alert"
       />
       
       <div className="stats-container">

@@ -55,4 +55,14 @@
 
 .existing-feedback .ant-rate-disabled .ant-rate-star {
   cursor: not-allowed;
+}
+
+/* Edit mode styles */
+.feedback-form .ant-alert-warning {
+  margin-bottom: 20px;
+  border-radius: 4px;
+}
+
+.feedback-actions button {
+  min-width: 100px;
 } 

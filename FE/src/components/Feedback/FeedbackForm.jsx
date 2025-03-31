@@ -11,6 +11,7 @@ const FeedbackForm = ({ isOpen, onClose }) => {
   const [loading, setLoading] = useState(false);
   const [existingFeedback, setExistingFeedback] = useState(null);
   const [checkingFeedback, setCheckingFeedback] = useState(true);
+  const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
     // Reset form when modal opens and check for existing feedback
@@ -76,21 +77,51 @@ const FeedbackForm = ({ isOpen, onClose }) => {
         createAt: new Date().toISOString(),
       };
 
-      // Send feedback to server
-      const response = await axiosInstance.post("/feedback/createFeedback", feedbackData);
+      let response;
+      
+      if (isEditing && existingFeedback) {
+        // Update existing feedback
+        response = await axiosInstance.post(
+          `/feedback/updateFeedbackByid/${existingFeedback._id}`, 
+          { rating, comment }
+        );
+        if (response.status === 200) {
+          message.success("Cập nhật đánh giá thành công!");
+          setExistingFeedback({...existingFeedback, rating, comment});
+          setIsEditing(false);
+        }
+      } else {
+        // Create new feedback
+        response = await axiosInstance.post("/feedback/createFeedback", feedbackData);
+        if (response.status === 200) {
+          message.success("Cảm ơn bạn đã gửi đánh giá!");
+          // Set the new feedback as existing feedback so the user can see it
+          setExistingFeedback(response.data);
+        }
+      }
       
       if (response.status === 200) {
-        message.success("Cảm ơn bạn đã gửi đánh giá!");
-        // Set the new feedback as existing feedback so the user can see it
-        setExistingFeedback(response.data);
         onClose();
       }
     } catch (error) {
-      console.error("Error submitting feedback:", error);
-      message.error(error.response?.data || "Có lỗi xảy ra khi gửi đánh giá. Vui lòng thử lại sau.");
+      console.error("Error with feedback:", error);
+      message.error(error.response?.data || "Có lỗi xảy ra. Vui lòng thử lại sau.");
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleEditClick = () => {
+    setIsEditing(true);
+  };
+
+  const handleCancelEdit = () => {
+    // Reset to original values
+    if (existingFeedback) {
+      setRating(existingFeedback.rating);
+      setComment(existingFeedback.comment || "");
+    }
+    setIsEditing(false);
   };
 
   return (
@@ -106,11 +137,11 @@ const FeedbackForm = ({ isOpen, onClose }) => {
           <Spin size="large" />
           <p style={{ marginTop: 16 }}>Đang kiểm tra...</p>
         </div>
-      ) : existingFeedback ? (
+      ) : existingFeedback && !isEditing ? (
         <div className="feedback-form existing-feedback">
           <Alert
             message="Bạn đã gửi đánh giá trước đó"
-            description="Mỗi khách hàng chỉ được gửi một đánh giá. Dưới đây là đánh giá bạn đã gửi."
+            description="Bạn có thể xem hoặc chỉnh sửa đánh giá đã gửi."
             type="info"
             showIcon
             style={{ marginBottom: 20 }}
@@ -146,10 +177,20 @@ const FeedbackForm = ({ isOpen, onClose }) => {
 
           <div className="feedback-actions">
             <Button onClick={onClose}>Đóng</Button>
+            <Button type="primary" onClick={handleEditClick}>Chỉnh sửa đánh giá</Button>
           </div>
         </div>
       ) : (
         <div className="feedback-form">
+          {existingFeedback && isEditing && (
+            <Alert
+              message="Chỉnh sửa đánh giá"
+              description="Bạn đang chỉnh sửa đánh giá đã gửi trước đó."
+              type="warning"
+              showIcon
+              style={{ marginBottom: 20 }}
+            />
+          )}
           <div className="feedback-rating">
             <h3>Bạn đánh giá dịch vụ của chúng tôi như thế nào?</h3>
             <Rate 
@@ -171,15 +212,31 @@ const FeedbackForm = ({ isOpen, onClose }) => {
           </div>
 
           <div className="feedback-actions">
-            <Button onClick={onClose}>Hủy</Button>
-            <Button 
-              type="primary" 
-              onClick={handleSubmit} 
-              loading={loading}
-              disabled={!rating}
-            >
-              Gửi đánh giá
-            </Button>
+            {isEditing ? (
+              <>
+                <Button onClick={handleCancelEdit}>Hủy</Button>
+                <Button 
+                  type="primary" 
+                  onClick={handleSubmit} 
+                  loading={loading}
+                  disabled={!rating}
+                >
+                  Cập nhật
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button onClick={onClose}>Hủy</Button>
+                <Button 
+                  type="primary" 
+                  onClick={handleSubmit} 
+                  loading={loading}
+                  disabled={!rating}
+                >
+                  Gửi đánh giá
+                </Button>
+              </>
+            )}
           </div>
         </div>
       )}
