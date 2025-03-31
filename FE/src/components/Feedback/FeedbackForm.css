@@ -34,4 +34,25 @@
   font-size: 20px;
   font-weight: 600;
   text-align: center;
+}
+
+.feedback-loading {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+  font-size: 16px;
+  color: #1890ff;
+  text-align: center;
+}
+
+.existing-feedback .feedback-date {
+  margin-top: 10px;
+  color: #6c757d;
+  font-size: 14px;
+}
+
+.existing-feedback .ant-rate-disabled .ant-rate-star {
+  cursor: not-allowed;
 } 
