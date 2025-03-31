@@ -18,21 +18,26 @@ export const getListStaffController = async (req, res) => {
     res.status(500).json(error.message);
   }
 };
+
 export const updateStaffController = async (req, res) => {
   try {
-    const id = req.params.id;
+    const { staffId } = req.body;
     const dataUpdate = req.body;
-    const result = await staffService.updateStaff(id, dataUpdate);
+    const result = await staffService.updateStaff(staffId, dataUpdate);
     res.status(200).json(result);
   } catch (error) {
-    res.status(500).json(error.message);
+    console.error("Error in updateStaffController:", error);
+    res.status(500).json({ message: error.message });
   }
 };
+
 export const deleteStaffController = async (req, res) => {
   try {
-    const result = await staffService.deleteStaff(req.params.id);
+    const { staffId } = req.body;
+    const result = await staffService.deleteStaff(staffId);
     res.status(200).json(result);
   } catch (error) {
-    res.status(500).json(error.message);
+    console.error("Error in deleteStaffController:", error);
+    res.status(500).json({ message: error.message });
   }
 };
