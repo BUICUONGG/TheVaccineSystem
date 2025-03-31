@@ -3,6 +3,7 @@ import {
   createFeedBackController,
   deleteFeedbackController,
   getAllFeedbackController,
+  getFeedbackByCusIdController,
   updatefeedbackController,
 } from "../controllers/feedBack.controllers.js";
 
@@ -11,6 +12,7 @@ const feedbackRoutes = Router();
 // PATH               http://localhost:8080/feedback/.............
 
 feedbackRoutes.get("/getAllFeedback", getAllFeedbackController);
+feedbackRoutes.get("/getFeedbackByCusId/:cusId", getFeedbackByCusIdController);
 feedbackRoutes.post("/createFeedback", createFeedBackController);
 feedbackRoutes.post("/updateFeedbackByid/:id", updatefeedbackController);
 feedbackRoutes.post("/deleteFeedback/:id", deleteFeedbackController);
