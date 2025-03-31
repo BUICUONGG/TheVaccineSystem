@@ -53,17 +53,17 @@ class CustomerService {
       const result = customers.map((customer) => {
         const customerId = customer._id;
         const { userId, ...customerData } = customer;
-        
+
         const username = userMap.get(userId?.toString());
-        
+
         return {
           ...customerData,
           _id: customerId,
           userId: userId,
-          username: username || "Unknown"
+          username: username || "Unknown",
         };
       });
-      
+
       if (!result) throw new Error("Khong thể show được ");
       console.log("getAllCustomer result sample:", result[0]);
       return result;
@@ -76,13 +76,13 @@ class CustomerService {
   async updateCustomer(customerId, updateData) {
     try {
       console.log("Update customer request:", { customerId, updateData });
-      
+
       // Check if customerId is a customer ID or a user ID
       // Try to find a customer directly by _id first
       const customerById = await connectToDatabase.customers.findOne({
-        _id: new ObjectId(customerId)
+        _id: new ObjectId(customerId),
       });
-      
+
       if (customerById) {
         console.log("Found customer by _id");
         const result = await connectToDatabase.customers.findOneAndUpdate(
@@ -130,7 +130,7 @@ class CustomerService {
           _id: aptLe.vaccineId,
         });
         aptLe.child = await connectToDatabase.childs.findOne({
-          _id: aptLe.childId,
+          _id: aptLe.childId._id,
         });
 
         delete aptLe.cusId;
@@ -147,7 +147,7 @@ class CustomerService {
           _id: aptGoi.vaccinePakageId,
         });
         aptGoi.child = await connectToDatabase.childs.findOne({
-          _id: aptGoi.childId,
+          _id: aptGoi.childId._id,
         });
 
         delete aptGoi.cusId;
