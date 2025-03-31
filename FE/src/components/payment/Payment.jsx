@@ -365,13 +365,7 @@ const PaymentPage = () => {
             <div className="payment-method-info">
               <h3>Phương thức thanh toán</h3>
               <div className="payment-method-zalopay">
-                <div className="zalopay-logo-container">
-                  <img
-                    src="/images/zalo-pay-logo.png"
-                    alt="ZaloPay"
-                    className="zalopay-logo"
-                  />
-                </div>
+
                 <div className="zalopay-image">
                   <img 
                     src="/images/zalopay.jpg" 
