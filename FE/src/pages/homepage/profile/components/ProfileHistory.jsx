@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Table, Tag, Input, Modal, Button, Tabs, Descriptions } from "antd";
+import { Table, Tag, Input, Modal, Button, Tabs, Descriptions, Collapse } from "antd";
 import { SearchOutlined, EyeOutlined } from "@ant-design/icons";
 import "./ProfileHistory.css";
 import { toast } from "react-toastify";
@@ -10,6 +10,8 @@ const { TabPane } = Tabs;
 const ProfileHistory = () => {
   const [loading, setLoading] = useState(false);
   const [appointments, setAppointments] = useState([]);
+  const [aptLes, setAptLes] = useState([]);
+  const [aptGois, setAptGois] = useState([]);
   const [searchText, setSearchText] = useState("");
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedAppointment, setSelectedAppointment] = useState(null);
@@ -18,43 +20,90 @@ const ProfileHistory = () => {
   const [sortedInfo, setSortedInfo] = useState({});
 
   useEffect(() => {
-    fetchAppointments();
-    fetchVaccineList();
+    const fetchAllData = async () => {
+      setLoading(true);
+      try {
+        await Promise.all([
+          fetchAptLes(),
+          fetchAptGois(),
+          fetchVaccineList()
+        ]);
+      } catch (error) {
+        console.error("Lỗi khi tải dữ liệu:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAllData();
   }, []);
 
-  const fetchAppointments = async () => {
+  const fetchAptLes = async () => {
     try {
-      setLoading(true);
       const accesstoken = localStorage.getItem("accesstoken");
       const cusId = localStorage.getItem("cusId");
 
-      const response = await axiosInstance.post(
-        `/customer/getAptleAndAptGoiByCusId/${cusId}`,
+      const response = await axiosInstance.get(
+        `/appointmentLe/showInfo`,
         {
-          headers: { Authorization: `Bearer ${accesstoken}` },
+          headers: { Authorization: `Bearer ${accesstoken}` }
         }
       );
 
-      const aptLes = (response.data.aptLes || []).map((apt) => ({
-        ...apt,
-        type: "Tiêm lẻ",
-      }));
+      // Lọc các đơn có cusId trùng với cusId trong localStorage
+      const filteredAptLes = response.data.filter(apt =>
+        apt.customer?._id === cusId || apt.customer === cusId
+      );
 
-      const aptGois = (response.data.aptGois || []).map((apt) => ({
+      console.log("Dữ liệu đơn lẻ sau khi lọc:", filteredAptLes);
+      setAptLes(filteredAptLes.map(apt => ({
         ...apt,
-        type: "Tiêm gói",
-      }));
+        type: "Tiêm lẻ"
+      })));
 
-      const allAppointments = [...aptLes, ...aptGois];
-      console.log("Đơn in hết ra đây: ", allAppointments);
-      setAppointments(allAppointments);
     } catch (error) {
-      console.error("Lỗi khi lấy dữ liệu:", error);
-      toast.error("Không thể tải lịch sử đặt lịch");
-    } finally {
-      setLoading(false);
+      console.error("Lỗi khi lấy đơn lẻ:", error);
+      toast.error("Không thể tải lịch sử đơn lẻ");
     }
   };
+
+  const fetchAptGois = async () => {
+    try {
+      const accesstoken = localStorage.getItem("accesstoken");
+      const cusId = localStorage.getItem("cusId");
+
+      const response = await axiosInstance.get(
+        `/appointmentGoi/showInfo`,
+        {
+          headers: { Authorization: `Bearer ${accesstoken}` }
+        }
+      );
+
+      // Lọc các đơn có cusId trùng với cusId trong localStorage
+      const filteredAptGois = response.data.filter(apt =>
+        // So sánh trực tiếp với cusId
+        apt.cusId === cusId ||
+        // Hoặc kiểm tra nếu cusId nằm trong customer object
+        apt.customer?._id === cusId
+      );
+
+      console.log("Dữ liệu đơn gói sau khi lọc:", filteredAptGois);
+      setAptGois(filteredAptGois.map(apt => ({
+        ...apt,
+        type: "Tiêm gói"
+      })));
+
+    } catch (error) {
+      console.error("Lỗi khi lấy đơn gói:", error);
+      toast.error("Không thể tải lịch sử đơn gói");
+    }
+  };
+
+  useEffect(() => {
+    const allAppointments = [...aptLes, ...aptGois];
+    console.log("Tất cả đơn sau khi gộp:", allAppointments);
+    setAppointments(allAppointments);
+  }, [aptLes, aptGois]);
 
   const fetchVaccineList = async () => {
     try {
@@ -131,98 +180,156 @@ const ProfileHistory = () => {
     return filtered;
   };
 
-  const getParentRelation = (gender) => {
-    return gender?.toLowerCase() === "male" ? "Cha" : "Mẹ";
-  };
-
   const renderModalContent = (appointment) => {
     if (!appointment) return null;
 
+    // Chỉ render cho đơn tiêm lẻ
+    if (!appointment.vaccinePackageId) {
+      return (
+        <Descriptions bordered column={1}>
+          <Descriptions.Item label="Mã đơn">
+            {appointment._id}
+          </Descriptions.Item>
+
+          <Descriptions.Item label="Loại tiêm">
+            <Tag color="#108ee9">Tiêm lẻ</Tag>
+          </Descriptions.Item>
+
+          <Descriptions.Item label="Người tiêm">
+            <Collapse ghost>
+              <Collapse.Panel
+                header={appointment.childId?.name || "Không có thông tin"}
+                key="1"
+              >
+                <Descriptions column={1} size="small">
+                  <Descriptions.Item label="Ngày sinh">
+                    {appointment.childId?.birthday || "Chưa có thông tin"}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Giới tính">
+                    {appointment.childId?.gender === 'male' ? 'Nam' : 'Nữ'}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Ghi chú sức khỏe">
+                    {appointment.childId?.healthNote || "Không có ghi chú"}
+                  </Descriptions.Item>
+                </Descriptions>
+              </Collapse.Panel>
+            </Collapse>
+          </Descriptions.Item>
+
+          <Descriptions.Item label="Tên vaccine">
+            {vaccineList[appointment.vaccineId] || "Chưa có thông tin"}
+          </Descriptions.Item>
+
+          <Descriptions.Item label="Thuộc lô">
+            {appointment.batchId || "Chưa có thông tin"}
+          </Descriptions.Item>
+
+          <Descriptions.Item label="Ngày tiêm">
+            {appointment.date || "Chưa có thông tin"}
+          </Descriptions.Item>
+
+          <Descriptions.Item label="Ngày tạo">
+            {appointment.createdAt || "Chưa có thông tin"}
+          </Descriptions.Item>
+
+          <Descriptions.Item label="Giá tiêm">
+            {appointment.price ? `${appointment.price.toLocaleString('vi-VN')} VNĐ` : "Chưa có thông tin"}
+          </Descriptions.Item>
+
+          <Descriptions.Item label="Ghi chú">
+            {appointment.note || "Không có ghi chú"}
+          </Descriptions.Item>
+
+          <Descriptions.Item label="Trạng thái">
+            <Tag color={getStatusColor(appointment.status)}>
+              {getStatusText(appointment.status)}
+            </Tag>
+          </Descriptions.Item>
+        </Descriptions>
+      );
+    }
+
+    // Tạm thời return null cho đơn tiêm gói
     return (
       <Descriptions bordered column={1}>
-        <Descriptions.Item label="Mã đơn">{appointment._id}</Descriptions.Item>
+        <Descriptions.Item label="Mã đơn">
+          {appointment._id}
+        </Descriptions.Item>
+
         <Descriptions.Item label="Loại tiêm">
-          <Tag color={appointment.type === "Tiêm gói" ? "#87d068" : "#108ee9"}>
-            {appointment.type}
-          </Tag>
+          <Tag color="#87d068">Tiêm gói</Tag>
         </Descriptions.Item>
+
         <Descriptions.Item label="Người tiêm">
-          {!appointment.child || appointment.child === null ? (
-            appointment.customer?.customerName
-          ) : (
-            <div>
-              <div>Trẻ: {appointment.child?.childName}</div>
-              <div>
-                {getParentRelation(appointment.customer?.gender)}:{" "}
-                {appointment.customer?.customerName}
-              </div>
-              <div>Ngày sinh trẻ: {appointment.child?.birthday}</div>
-              {appointment.child?.healthNote && (
-                <div>Ghi chú sức khỏe: {appointment.child.healthNote}</div>
-              )}
-            </div>
-          )}
+          <Collapse ghost>
+            <Collapse.Panel
+              header={appointment.childId?.name || "Không có thông tin"}
+              key="1"
+            >
+              <Descriptions column={1} size="small">
+                <Descriptions.Item label="Ngày sinh">
+                  {appointment.childId?.birthday || "Chưa có thông tin"}
+                </Descriptions.Item>
+                <Descriptions.Item label="Giới tính">
+                  {appointment.childId?.gender === 'male' ? 'Nam' : 'Nữ'}
+                </Descriptions.Item>
+                <Descriptions.Item label="Ghi chú sức khỏe">
+                  {appointment.childId?.healthNote || "Không có ghi chú"}
+                </Descriptions.Item>
+              </Descriptions>
+            </Collapse.Panel>
+          </Collapse>
         </Descriptions.Item>
-        {appointment.type === "Tiêm gói" ? (
-          <>
-            <Descriptions.Item label="Tên gói vaccine">
-              {appointment.vaccine?.packageName}
-            </Descriptions.Item>
-            <Descriptions.Item label="Mô tả gói">
-              {appointment.vaccine?.description}
-            </Descriptions.Item>
-            <Descriptions.Item label="Giá gói">
-              {appointment.vaccine?.price?.toLocaleString("vi-VN")} VNĐ
-            </Descriptions.Item>
-            <Descriptions.Item label="Danh sách vaccine trong gói">
-              {appointment.vaccine?.vaccines.map((vaccine, index) => (
-                <div key={index} className="vaccine-package-item">
-                  <Tag color="#108ee9">Vaccine {index + 1}</Tag>
-                  <div className="vaccine-detail">
-                    <div>
-                      • Tên vaccine:{" "}
-                      {vaccineList[vaccine.vaccineId] || "Chưa có thông tin"}
-                    </div>
-                    <div>• Số liều cần tiêm: {vaccine.quantity}</div>
-                  </div>
-                </div>
-              ))}
-            </Descriptions.Item>
-            <Descriptions.Item label="Lịch tiêm theo gói">
-              {appointment.doseSchedule?.map((dose, index) => (
-                <div key={index} className="dose-schedule-item">
-                  <h4>Mũi {dose.doseNumber}</h4>
-                  <div className="dose-info">
-                    <div>Ngày tiêm: {dose.date}</div>
-                    <div>
-                      Trạng thái:
-                      <Tag color={getStatusColor(dose.status)}>
-                        {getStatusText(dose.status)}
-                      </Tag>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </Descriptions.Item>
-          </>
-        ) : (
-          <>
-            <Descriptions.Item label="Tên vaccine">
-              {appointment.vaccine?.vaccineName}
-            </Descriptions.Item>
-            <Descriptions.Item label="Nhà sản xuất">
-              {appointment.vaccine?.manufacturer}
-            </Descriptions.Item>
-            <Descriptions.Item label="Mô tả vaccine">
-              {appointment.vaccine?.description}
-            </Descriptions.Item>
-          </>
-        )}
-        {/* <Descriptions.Item label="Ngày đăng ký">{appointment.createdAt}</Descriptions.Item> */}
+
+        <Descriptions.Item label="Gói vaccine">
+          {appointment.vaccinePackageId || "Chưa có thông tin"}
+        </Descriptions.Item>
+
         <Descriptions.Item label="Ngày tiêm">
-          {appointment.date}
+          {appointment.date || "Chưa có thông tin"}
         </Descriptions.Item>
-        <Descriptions.Item label="Trạng thái">
+
+        <Descriptions.Item label="Ngày tạo">
+          {appointment.createdAt || "Chưa có thông tin"}
+        </Descriptions.Item>
+
+        <Descriptions.Item label="Chi tiết các mũi tiêm">
+          <Collapse>
+            {appointment.doseSchedule?.map((dose, index) => (
+              <Collapse.Panel
+                key={index}
+                header={`Mũi ${dose.doseNumber}`}
+              >
+                <Descriptions column={1} size="small">
+                  <Descriptions.Item label="Ngày tiêm">
+                    {dose.date || "Chưa có thông tin"}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Tên vaccine">
+                    {dose.vaccineName || "Chưa có thông tin"}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Thuộc lô">
+                    {dose.batchId || "Chưa có thông tin"}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Trạng thái">
+                    <Tag color={getStatusColor(dose.status)}>
+                      {getStatusText(dose.status)}
+                    </Tag>
+                  </Descriptions.Item>
+                </Descriptions>
+              </Collapse.Panel>
+            ))}
+          </Collapse>
+        </Descriptions.Item>
+
+        <Descriptions.Item label="Giá gói vaccine">
+          {appointment.price ? `${appointment.price.toLocaleString('vi-VN')} VNĐ` : "Chưa có thông tin"}
+        </Descriptions.Item>
+
+        <Descriptions.Item label="Ghi chú">
+          {appointment.note || "Không có ghi chú"}
+        </Descriptions.Item>
+
+        <Descriptions.Item label="Trạng thái đơn">
           <Tag color={getStatusColor(appointment.status)}>
             {getStatusText(appointment.status)}
           </Tag>
@@ -236,112 +343,63 @@ const ProfileHistory = () => {
   };
 
   const columns = [
-    // {
-    //   title: 'Ngày đăng ký',
-    //   dataIndex: 'createdAt',
-    //   key: 'createdAt',
-    //   width: '15%',
-    //   sorter: (a, b) => {
-    //     // Chuyển đổi định dạng ngày từ DD/MM/YYYY sang Date object
-    //     const [dayA, monthA, yearA] = a.createdAt.split('/');
-    //     const [dayB, monthB, yearB] = b.createdAt.split('/');
-
-    //     const dateA = new Date(yearA, monthA - 1, dayA);
-    //     const dateB = new Date(yearB, monthB - 1, dayB);
-
-    //     return dateB - dateA; // Sắp xếp để ngày sớm hơn hiển thị trước
-    //   },
-    //   defaultSortOrder: 'ascend',
-    //   sortDirections: ['ascend', 'descend'],
-    // },
+    {
+      title: "Ngày tạo đơn",
+      dataIndex: "createdAt",
+      key: "createdAt",
+      width: "15%",
+      sorter: (a, b) => new Date(a.createdAt) - new Date(b.createdAt),
+      sortOrder: sortedInfo.columnKey === "createdAt" && sortedInfo.order,
+    },
     {
       title: "Người tiêm",
       key: "name",
-      width: "20%",
+      width: "25%",
       render: (_, record) => {
-        const name =
-          !record.child || record.child === null
-            ? record.customer?.customerName
-            : record.child?.childName;
-        return (
-          <div>
-            <div>{name}</div>
-            {record.child && (
-              <small style={{ color: "#666" }}>
-                {getParentRelation(record.customer?.gender)}:{" "}
-                {record.customer?.customerName}
-              </small>
-            )}
-          </div>
-        );
+        const name = record.childId ? record.childId.name : record.customer?.customerName;
+        return <div>{name}</div>;
       },
       sorter: (a, b) => {
-        const nameA = !a.child ? a.customer?.customerName : a.child?.childName;
-        const nameB = !b.child ? b.customer?.customerName : b.child?.childName;
+        const nameA = a.childId ? a.childId.name : a.customer?.customerName;
+        const nameB = b.childId ? b.childId.name : b.customer?.customerName;
         return nameA?.localeCompare(nameB);
       },
-      sortOrder: sortedInfo.columnKey === "name" && sortedInfo.order,
-      filterMode: "tree",
-      filterSearch: true,
-      onFilter: (value, record) => {
-        const name = !record.child
-          ? record.customer?.customerName
-          : record.child?.childName;
-        return name?.toLowerCase().includes(value.toLowerCase());
-      },
-    },
-    {
-      title: "Ngày tiêm",
-      dataIndex: "date",
-      key: "date",
-      width: "15%",
-      sorter: (a, b) => new Date(a.date) - new Date(b.date),
-      sortOrder: sortedInfo.columnKey === "date" && sortedInfo.order,
     },
     {
       title: "Loại tiêm",
       key: "type",
       width: "15%",
       render: (_, record) => (
-        <Tag color={record.type === "Tiêm gói" ? "#87d068" : "#108ee9"}>
-          {record.type}
+        <Tag color={record.vaccinePackageId ? "#87d068" : "#108ee9"}>
+          {record.vaccinePackageId ? "Tiêm gói" : "Tiêm lẻ"}
         </Tag>
       ),
-      filters: [
-        { text: "Tiêm gói", value: "Tiêm gói" },
-        { text: "Tiêm lẻ", value: "Tiêm lẻ" },
-      ],
-      onFilter: (value, record) => record.type === value,
+    },
+    {
+      title: "Ngày tiêm",
+      dataIndex: "date",
+      key: "date",
+      width: "15%",
     },
     {
       title: "Trạng thái",
       key: "status",
       width: "15%",
       render: (_, record) => (
-        <Tag color={getStatusColor(record.status)} className="status-tag">
+        <Tag color={getStatusColor(record.status)}>
           {getStatusText(record.status)}
         </Tag>
       ),
-      ...(activeTab !== "pending" && {
-        filters: [
-          { text: "Hoàn thành", value: "completed" },
-          { text: "Chưa hoàn thành", value: "incomplete" },
-          { text: "Đang chờ", value: "pending" },
-          { text: "Đã duyệt", value: "approve" },
-        ],
-        onFilter: (value, record) => record.status?.toLowerCase() === value,
-      }),
     },
     {
       title: "Thao tác",
       key: "action",
-      width: "10%",
+      width: "15%",
       render: (_, record) => (
         <Button
           type="primary"
           icon={<EyeOutlined />}
           onClick={() => showModal(record)}
-          size="medium"
         >
           Chi tiết
         </Button>

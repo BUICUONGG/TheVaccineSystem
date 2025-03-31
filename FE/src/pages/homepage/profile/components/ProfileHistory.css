@@ -504,3 +504,16 @@
 .appointment-table .ant-table-column-sort {
   background: #e6f7ff;
 }
+
+.ant-collapse-ghost > .ant-collapse-item > .ant-collapse-header {
+  padding: 0;
+  color: rgba(0, 0, 0, 0.85);
+}
+
+.ant-collapse-ghost > .ant-collapse-item > .ant-collapse-content > .ant-collapse-content-box {
+  padding: 8px 0;
+}
+
+.ant-descriptions.ant-descriptions-small .ant-descriptions-item-label {
+  color: rgba(0, 0, 0, 0.45);
+}
