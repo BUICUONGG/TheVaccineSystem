@@ -129,10 +129,11 @@ class CustomerService {
         aptLe.vaccine = await connectToDatabase.vaccinceInventorys.findOne({
           _id: aptLe.vaccineId,
         });
-        aptLe.child = await connectToDatabase.childs.findOne({
-          _id: aptLe.childId._id,
-        });
-
+        if (aptLe.childId) {
+          aptLe.child = await connectToDatabase.childs.findOne({
+            _id: aptLe.childId._id,
+          });
+        }
         delete aptLe.cusId;
         delete aptLe.childId;
         delete aptLe.vaccineId;
@@ -146,10 +147,11 @@ class CustomerService {
         aptGoi.vaccine = await connectToDatabase.vaccinepackages.findOne({
           _id: aptGoi.vaccinePakageId,
         });
-        aptGoi.child = await connectToDatabase.childs.findOne({
-          _id: aptGoi.childId._id,
-        });
-
+        if (aptGoi.childId) {
+          aptGoi.child = await connectToDatabase.childs.findOne({
+            _id: aptGoi.childId._id,
+          });
+        }
         delete aptGoi.cusId;
         delete aptGoi.childId;
         delete aptGoi.vaccinePakageId;
