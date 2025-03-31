@@ -12,13 +12,11 @@ import {
   Card,
   Typography,
   Divider,
-  Space,
 } from "antd";
 import {
   SearchOutlined,
   CheckCircleFilled,
   MenuOutlined,
-  EditOutlined,
   CheckCircleOutlined,
 } from "@ant-design/icons";
 import moment from "moment";
@@ -121,35 +119,42 @@ const AppointmentManagement = () => {
       const populateVaccineData = async (appointments) => {
         // Skip if no appointments
         if (!appointments || appointments.length === 0) return appointments;
-        
+
         // Identify which vaccine IDs need to be fetched
         const vaccineIdsToFetch = new Set();
-        appointments.forEach(apt => {
-          if (apt.vaccineId && typeof apt.vaccineId === 'string' && !apt.vaccine && !apt.vaccineDetails) {
+        appointments.forEach((apt) => {
+          if (
+            apt.vaccineId &&
+            typeof apt.vaccineId === "string" &&
+            !apt.vaccine &&
+            !apt.vaccineDetails
+          ) {
             vaccineIdsToFetch.add(apt.vaccineId);
           }
         });
-        
+
         // If no vaccine IDs need fetching, return as is
         if (vaccineIdsToFetch.size === 0) return appointments;
-        
+
         try {
-          console.log(`Fetching details for ${vaccineIdsToFetch.size} vaccines...`);
+          console.log(
+            `Fetching details for ${vaccineIdsToFetch.size} vaccines...`
+          );
           const vaccineMap = {};
-          
+
           // Fetch vaccine details
           for (const vaccineId of vaccineIdsToFetch) {
             try {
               // Thử nhiều endpoint khác nhau để tìm thông tin vaccine
               let foundVaccine = false;
-              
+
               // Thử endpoint 1: /vaccines/detail
               try {
                 const vaccineResponse = await axiosInstance.get(
                   `/vaccines/detail/${vaccineId}`,
                   { headers: { Authorization: `Bearer ${token}` } }
                 );
-                
+
                 if (vaccineResponse.data) {
                   vaccineMap[vaccineId] = vaccineResponse.data;
                   foundVaccine = true;
@@ -158,7 +163,7 @@ const AppointmentManagement = () => {
               } catch (err1) {
                 console.log(`No vaccine at /vaccines/detail/${vaccineId}`);
               }
-              
+
               // Thử endpoint 2: /vaccinceInventorys
               if (!foundVaccine) {
                 try {
@@ -166,17 +171,19 @@ const AppointmentManagement = () => {
                     `/vaccine/inventory/${vaccineId}`,
                     { headers: { Authorization: `Bearer ${token}` } }
                   );
-                  
+
                   if (vaccineResponse.data) {
                     vaccineMap[vaccineId] = vaccineResponse.data;
                     foundVaccine = true;
-                    console.log(`Found vaccine ${vaccineId} at /vaccine/inventory`);
+                    console.log(
+                      `Found vaccine ${vaccineId} at /vaccine/inventory`
+                    );
                   }
                 } catch (err2) {
                   console.log(`No vaccine at /vaccine/inventory/${vaccineId}`);
                 }
               }
-              
+
               // Thử endpoint 3: vaccine by id direct
               if (!foundVaccine) {
                 try {
@@ -184,44 +191,55 @@ const AppointmentManagement = () => {
                     `/vaccine/${vaccineId}`,
                     { headers: { Authorization: `Bearer ${token}` } }
                   );
-                  
+
                   if (vaccineResponse.data) {
                     vaccineMap[vaccineId] = vaccineResponse.data;
                     foundVaccine = true;
-                    console.log(`Found vaccine ${vaccineId} at direct /vaccine endpoint`);
+                    console.log(
+                      `Found vaccine ${vaccineId} at direct /vaccine endpoint`
+                    );
                   }
                 } catch (err3) {
                   console.log(`No vaccine at direct /vaccine/${vaccineId}`);
                 }
               }
-              
+
               // Nếu không tìm thấy, ghi log
               if (!foundVaccine) {
-                console.error(`Could not find vaccine with ID ${vaccineId} at any endpoint`);
+                console.error(
+                  `Could not find vaccine with ID ${vaccineId} at any endpoint`
+                );
               }
             } catch (error) {
-              console.error(`Error in vaccine fetch loop for ${vaccineId}:`, error);
+              console.error(
+                `Error in vaccine fetch loop for ${vaccineId}:`,
+                error
+              );
             }
           }
-          
+
           // Update appointment data with vaccine details
-          return appointments.map(apt => {
+          return appointments.map((apt) => {
             // Nếu đã có thông tin về vaccine, không cần cập nhật
             if (apt.vaccine && apt.vaccine.vaccineName) {
               return apt;
             }
-            
-            if (apt.vaccineId && typeof apt.vaccineId === 'string' && vaccineMap[apt.vaccineId]) {
+
+            if (
+              apt.vaccineId &&
+              typeof apt.vaccineId === "string" &&
+              vaccineMap[apt.vaccineId]
+            ) {
               return {
                 ...apt,
-                vaccineDetails: vaccineMap[apt.vaccineId]
+                vaccineDetails: vaccineMap[apt.vaccineId],
               };
             }
-            
+
             // Trích xuất tên vaccine từ note nếu có
             if (!apt.vaccineDetails && apt.note) {
               let extractedName = null;
-              
+
               if (apt.note.includes("vaccine")) {
                 const match = apt.note.match(/vaccine\s+(.+?)(\s+|$)/i);
                 if (match && match[1]) {
@@ -233,15 +251,15 @@ const AppointmentManagement = () => {
                   extractedName = match[1];
                 }
               }
-              
+
               if (extractedName) {
                 return {
                   ...apt,
-                  vaccineDetails: { vaccineName: extractedName }
+                  vaccineDetails: { vaccineName: extractedName },
                 };
               }
             }
-            
+
             return apt;
           });
         } catch (error) {
@@ -254,34 +272,34 @@ const AppointmentManagement = () => {
       const populatePackageData = async (appointments) => {
         // Skip if no appointments
         if (!appointments || appointments.length === 0) return appointments;
-        
+
         try {
           // Cập nhật dữ liệu gói vaccine dựa trên note
-          return appointments.map(apt => {
+          return appointments.map((apt) => {
             // Nếu đã có thông tin về gói, không cần cập nhật
             if (apt.vaccinePakage && apt.vaccinePakage.packageName) {
               return apt;
             }
-            
+
             // Trích xuất tên gói từ note nếu có
             if (apt.note) {
               let extractedName = null;
-              
+
               if (apt.note.includes("gói")) {
                 const match = apt.note.match(/gói\s+(.+?)(\s+|$)/i);
                 if (match && match[1]) {
                   extractedName = match[1];
                 }
-              } 
-              
+              }
+
               if (extractedName) {
                 return {
                   ...apt,
-                  packageDetails: { packageName: extractedName }
+                  packageDetails: { packageName: extractedName },
                 };
               }
             }
-            
+
             return apt;
           });
         } catch (error) {
@@ -649,12 +667,12 @@ const AppointmentManagement = () => {
         // Log để debug
         console.log("Rendering package name for:", record._id, {
           vaccinePakage,
-          fullRecord: record
+          fullRecord: record,
         });
-        
+
         // Try to get package name from all possible sources
         let packageName = null;
-        
+
         // Ưu tiên thứ tự lấy tên gói
         if (record.vaccinePakage && record.vaccinePakage.packageName) {
           packageName = record.vaccinePakage.packageName;
@@ -662,10 +680,18 @@ const AppointmentManagement = () => {
           packageName = record.package.packageName;
         } else if (record.packageDetails && record.packageDetails.packageName) {
           packageName = record.packageDetails.packageName;
-        } else if (record.vaccinePakageId && typeof record.vaccinePakageId === "object") {
-          packageName = record.vaccinePakageId.packageName || record.vaccinePakageId.name;
-        } else if (record.vaccinePackageId && typeof record.vaccinePackageId === "object") {
-          packageName = record.vaccinePackageId.packageName || record.vaccinePackageId.name;
+        } else if (
+          record.vaccinePakageId &&
+          typeof record.vaccinePakageId === "object"
+        ) {
+          packageName =
+            record.vaccinePakageId.packageName || record.vaccinePakageId.name;
+        } else if (
+          record.vaccinePackageId &&
+          typeof record.vaccinePackageId === "object"
+        ) {
+          packageName =
+            record.vaccinePackageId.packageName || record.vaccinePackageId.name;
         } else if (record.note && record.note.includes("gói")) {
           // Cố gắng trích xuất tên từ note (tương tự Payment.jsx)
           const match = record.note.match(/gói\s+(.+?)(\s+|$)/i);
@@ -673,14 +699,15 @@ const AppointmentManagement = () => {
             packageName = match[1];
           }
         }
-        
+
         // Fallback nếu không tìm thấy tên
         if (!packageName) {
-          packageName = typeof record.vaccinePakageId === "string" 
-            ? "Gói #" + record.vaccinePakageId.substring(0, 8) + "..." 
-            : (typeof record.vaccinePackageId === "string" 
-                ? "Gói #" + record.vaccinePackageId.substring(0, 8) + "..." 
-                : "N/A");
+          packageName =
+            typeof record.vaccinePakageId === "string"
+              ? "Gói #" + record.vaccinePakageId.substring(0, 8) + "..."
+              : typeof record.vaccinePackageId === "string"
+              ? "Gói #" + record.vaccinePackageId.substring(0, 8) + "..."
+              : "N/A";
         }
 
         return <span title={packageName}>{packageName}</span>;
@@ -886,25 +913,33 @@ const AppointmentManagement = () => {
         console.log("Rendering vaccine name:", record);
         // Kiểm tra nhiều vị trí có thể chứa tên vaccine
         let vaccineName = null;
-        
+
         // Kiểm tra trong vaccine object
         if (record.vaccine) {
-          if (record.vaccine.vaccineName) vaccineName = record.vaccine.vaccineName;
+          if (record.vaccine.vaccineName)
+            vaccineName = record.vaccine.vaccineName;
           else if (record.vaccine.name) vaccineName = record.vaccine.name;
         }
-        
+
         // Kiểm tra trong vaccineDetails
         if (!vaccineName && record.vaccineDetails) {
-          if (record.vaccineDetails.vaccineName) vaccineName = record.vaccineDetails.vaccineName;
-          else if (record.vaccineDetails.name) vaccineName = record.vaccineDetails.name;
+          if (record.vaccineDetails.vaccineName)
+            vaccineName = record.vaccineDetails.vaccineName;
+          else if (record.vaccineDetails.name)
+            vaccineName = record.vaccineDetails.name;
         }
-        
+
         // Kiểm tra nếu vaccineId là object và có chứa tên
-        if (!vaccineName && record.vaccineId && typeof record.vaccineId === 'object') {
-          if (record.vaccineId.vaccineName) vaccineName = record.vaccineId.vaccineName;
+        if (
+          !vaccineName &&
+          record.vaccineId &&
+          typeof record.vaccineId === "object"
+        ) {
+          if (record.vaccineId.vaccineName)
+            vaccineName = record.vaccineId.vaccineName;
           else if (record.vaccineId.name) vaccineName = record.vaccineId.name;
         }
-        
+
         // Thử lấy từ note nếu chứa thông tin vaccine
         if (!vaccineName && record.note) {
           const noteMatch = record.note.match(/[Vv]accine\s*:?\s*([^,;\.]+)/);
@@ -918,16 +953,16 @@ const AppointmentManagement = () => {
             }
           }
         }
-        
+
         // Fallback nếu không tìm thấy gì
         if (!vaccineName && record.vaccineId) {
-          if (typeof record.vaccineId === 'string') {
-            vaccineName = record.vaccineId.substring(0, 8) + '...';
+          if (typeof record.vaccineId === "string") {
+            vaccineName = record.vaccineId.substring(0, 8) + "...";
           } else {
-            vaccineName = 'N/A';
+            vaccineName = "N/A";
           }
         }
-        
+
         return vaccineName || "N/A";
       },
     },
@@ -1220,20 +1255,26 @@ const AppointmentManagement = () => {
   // Hàm để tự động hoàn thành lịch hẹn lẻ
   const autoCompleteAppointment = async (appointmentId) => {
     try {
-      const response = await axiosInstance.post(`/appointmentLe/autocomplete/${appointmentId}`, {}, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      
+      const response = await axiosInstance.post(
+        `/appointmentLe/autocomplete/${appointmentId}`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
       if (response.status === 200) {
-        message.success('Lịch hẹn đã được hoàn thành và cập nhật vào lịch sử tiêm chủng');
+        message.success(
+          "Lịch hẹn đã được hoàn thành và cập nhật vào lịch sử tiêm chủng"
+        );
         // Tải lại dữ liệu sau khi hoàn thành thành công
         fetchAppointments();
       }
     } catch (error) {
-      console.error('Lỗi khi hoàn thành lịch hẹn:', error);
-      message.error('Không thể hoàn thành lịch hẹn. Vui lòng thử lại sau.');
+      console.error("Lỗi khi hoàn thành lịch hẹn:", error);
+      message.error("Không thể hoàn thành lịch hẹn. Vui lòng thử lại sau.");
     }
   };
 
