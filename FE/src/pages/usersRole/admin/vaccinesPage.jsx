@@ -10,7 +10,11 @@ import {
   Tag,
   Space,
   Tooltip,
-  Badge
+  Badge,
+  DatePicker,
+  InputNumber,
+  Card,
+  Select
 } from "antd";
 import {
   EditOutlined,
@@ -41,9 +45,13 @@ const VaccinesPage = () => {
   const [filteredImports, setFilteredImports] = useState([]);
   const [filteredPackages, setFilteredPackages] = useState([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isImportModalVisible, setIsImportModalVisible] = useState(false);
+  const [isPackageModalVisible, setIsPackageModalVisible] = useState(false);
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
   const [editingVaccine, setEditingVaccine] = useState(null);
   const [form] = Form.useForm();
+  const [importForm] = Form.useForm();
+  const [packageForm] = Form.useForm();
   const [editForm] = Form.useForm();
   const [activeTab, setActiveTab] = useState("inventory");
 
@@ -66,7 +74,7 @@ const VaccinesPage = () => {
   }, [importList, packageList, searchText]);
 
   useEffect(() => {
-  
+
     // Lọc lại danh sách khi có cập nhật
     const filteredInv = inventoryList.filter((vaccine) =>
       vaccine.vaccineName?.toLowerCase().includes(searchText.toLowerCase()) ||
@@ -74,7 +82,7 @@ const VaccinesPage = () => {
     );
     setFilteredInventory(filteredInv);
 
-}, [inventoryList, searchText]);
+  }, [inventoryList, searchText]);
 
   const handleSearch = (value) => {
     setSearchText(value);
@@ -196,9 +204,9 @@ const VaccinesPage = () => {
       if (!editingVaccine?._id) {
         throw new Error("Không tìm thấy ID vaccine");
       }
-  
+
       const accesstoken = localStorage.getItem("accesstoken");
-  
+
       const updatedData = {
         vaccineName: values.vaccineName?.trim(),
         description: values.description?.trim(),
@@ -208,7 +216,7 @@ const VaccinesPage = () => {
         information: values.information ? [values.information] : undefined,
         createdAt: editingVaccine.createdAt
       };
-  
+
       const response = await axiosInstance.post(
         `/vaccine/updateVaccine/${editingVaccine._id}`,
         updatedData,
@@ -218,7 +226,7 @@ const VaccinesPage = () => {
           },
         }
       );
-  
+
       if (response.status === 200) {
         // Tạo object vaccine mới
         const updatedVaccine = {
@@ -226,10 +234,10 @@ const VaccinesPage = () => {
           ...updatedData,
           _id: editingVaccine._id
         };
-  
+
         // Cập nhật state và kích hoạt re-render
         setInventoryList(prevList => {
-          const newList = prevList.map(vaccine => 
+          const newList = prevList.map(vaccine =>
             vaccine._id === editingVaccine._id ? updatedVaccine : vaccine
           );
           setFilteredInventory(newList.filter(vaccine =>
@@ -238,11 +246,11 @@ const VaccinesPage = () => {
           ));
           return newList;
         });
-  
+
         Modal.success({
           content: "Cập nhật vaccine thành công!",
         });
-  
+
         setIsEditModalVisible(false);
         editForm.resetFields();
       }
@@ -279,6 +287,152 @@ const VaccinesPage = () => {
       });
     }
   };
+
+  const handleCreateImport = async (values) => {
+    try {
+      const accesstoken = localStorage.getItem("accesstoken");
+      const adminId = localStorage.getItem("userId");
+
+      // Format lại ngày tháng trước khi gửi
+      const formattedData = {
+        batchNumber: values.batchNumber,
+        vaccines: values.vaccines.map(v => ({
+          vaccineId: v.vaccineId,
+          quantity: parseInt(v.quantity),
+          expiryDate: v.expiryDate.format("DD/MM/YYYY"), // Format ngày hết hạn
+          unitPrice: parseFloat(v.unitPrice)
+        })),
+        importDate: values.importDate.format("DD/MM/YYYY"), // Format ngày nhập theo DD/MM/YYYY
+        supplier: values.supplier,
+        importedBy: adminId,
+        totalPrice: values.vaccines.reduce((sum, v) => {
+          return sum + (parseFloat(v.unitPrice) * parseInt(v.quantity));
+        }, 0),
+        createdAt: new Date().toLocaleDateString("en-GB") // Format ngày tạo theo DD/MM/YYYY
+      };
+
+      console.log("Payload gửi đi:", formattedData);
+
+      await axiosInstance.post(
+        "/vaccineimport/createvaccinceimport",
+        formattedData,
+        {
+          headers: {
+            Authorization: `Bearer ${accesstoken}`,
+          },
+        }
+      );
+
+      Modal.success({
+        content: "Thêm lô vaccine thành công!",
+      });
+
+      setIsImportModalVisible(false);
+      importForm.resetFields();
+      await fetchImports(accesstoken);
+    } catch (error) {
+      console.error("Error creating vaccine import:", error);
+      Modal.error({
+        content: error.response?.data?.message || "Không thể thêm lô vaccine",
+      });
+    }
+  };
+
+  const handleDeleteImport = async (importId) => {
+    try {
+      const accesstoken = localStorage.getItem("accesstoken");
+      await axiosInstance.post(
+        `/vaccineimport/deletevaccineimport/${importId}`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${accesstoken}`,
+          },
+        }
+      );
+
+      Modal.success({
+        content: "Xóa lô vaccine thành công!",
+      });
+
+      fetchImports(accesstoken);
+    } catch (error) {
+      console.error("Error deleting vaccine import:", error);
+      Modal.error({
+        content: error.response?.data?.message || "Không thể xóa lô vaccine",
+      });
+    }
+  };
+
+  const handleCreatePackage = async (values) => {
+    try {
+      const accesstoken = localStorage.getItem("accesstoken");
+
+      const formattedData = {
+        packageName: values.packageName,
+        description: values.description,
+        vaccines: values.vaccines.map(v => ({
+          vaccineId: v.vaccineId,
+          quantity: parseInt(v.quantity)
+        })),
+        schedule: values.schedule.map(s => parseInt(s.days)),
+        price: parseFloat(values.price),
+        category: values.category,
+        status: "active",
+        createdAt: new Date().toLocaleDateString("en-GB")
+      };
+
+      await axiosInstance.post(
+        "/vaccinepakage/createVaccinePakage",
+        formattedData,
+        {
+          headers: {
+            Authorization: `Bearer ${accesstoken}`,
+          },
+        }
+      );
+
+      Modal.success({
+        content: "Thêm gói vaccine thành công!",
+      });
+
+      setIsPackageModalVisible(false);
+      packageForm.resetFields();
+      await fetchPackages(accesstoken);
+    } catch (error) {
+      console.error("Error creating vaccine package:", error);
+      Modal.error({
+        content: error.response?.data?.message || "Không thể thêm gói vaccine",
+      });
+    }
+  };
+
+  const handleDeletePackage = async (packageId) => {
+    try {
+      const accesstoken = localStorage.getItem("accesstoken");
+      await axiosInstance.post(
+        `/vaccinepakage/deleteVaccinePakage/${packageId}`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${accesstoken}`,
+          },
+        }
+      );
+  
+      Modal.success({
+        content: "Xóa gói vaccine thành công!",
+      });
+  
+      fetchPackages(accesstoken);
+    } catch (error) {
+      console.error("Error deleting vaccine package:", error);
+      Modal.error({
+        content: error.response?.data?.message || "Không thể xóa gói vaccine",
+      });
+    }
+  };
+
 
   const inventoryColumns = [
     {
@@ -420,6 +574,31 @@ const VaccinesPage = () => {
         </Button>
       ),
     },
+    {
+      title: "Thao tác",
+      key: "actions",
+      width: 120,
+      render: (_, record) => (
+        <Space>
+          <Button
+            type="primary"
+            size="small"
+            icon={<EditOutlined />}
+            onClick={() => showEditModal(record)}
+          />
+          <Popconfirm
+            title="Xóa lô vaccine"
+            description="Bạn có chắc chắn muốn xóa lô vaccine này?"
+            onConfirm={() => handleDeleteImport(record._id)}
+            okText="Có"
+            cancelText="Không"
+            okType="danger"
+          >
+            <Button type="primary" danger size="small" icon={<DeleteOutlined />} />
+          </Popconfirm>
+        </Space>
+      ),
+    }
   ];
 
   const packageColumns = [
@@ -489,11 +668,36 @@ const VaccinesPage = () => {
         </Button>
       ),
     },
+    {
+      title: "Thao tác",
+      key: "actions",
+      width: 120,
+      render: (_, record) => (
+        <Space>
+          <Button
+            type="primary"
+            size="small"
+            icon={<EditOutlined />}
+            onClick={() => showEditModal(record)}
+          />
+          <Popconfirm
+            title="Xóa gói vaccine"
+            description="Bạn có chắc chắn muốn xóa gói vaccine này?"
+            onConfirm={() => handleDeletePackage(record._id)}
+            okText="Có"
+            cancelText="Không"
+            okType="danger"
+          >
+            <Button type="primary" danger size="small" icon={<DeleteOutlined />} />
+          </Popconfirm>
+        </Space>
+      ),
+    }
   ];
 
   const showEditModal = (vaccine) => {
     setEditingVaccine(vaccine);
-    
+
     // Reset form và set giá trị mới
     editForm.resetFields();
     editForm.setFieldsValue({
@@ -504,7 +708,7 @@ const VaccinesPage = () => {
       category: vaccine.category,
       information: vaccine.information?.[0] || {}
     });
-    
+
     setIsEditModalVisible(true);
   };
 
@@ -642,7 +846,7 @@ const VaccinesPage = () => {
         key: "imports",
         label: (
           <span>
-            <InboxOutlined /> Nhập Vaccine
+            <InboxOutlined /> Nhập Lô Vaccine
           </span>
         ),
         children: (
@@ -693,16 +897,38 @@ const VaccinesPage = () => {
         }}
       >
         <h2>Quản lý Vaccine</h2>
-        <Button
-          type="primary"
-          icon={<PlusOutlined />}
-          onClick={() => {
-            form.resetFields();
-            setIsModalVisible(true);
-          }}
-        >
-          Thêm Vaccine Mới
-        </Button>
+        <Space>
+          <Button
+            type="primary"
+            icon={<PlusOutlined />}
+            onClick={() => {
+              form.resetFields();
+              setIsModalVisible(true);
+            }}
+          >
+            Thêm Vaccine Mới
+          </Button>
+          <Button
+            type="primary"
+            icon={<InboxOutlined />}
+            onClick={() => {
+              importForm.resetFields();
+              setIsImportModalVisible(true);
+            }}
+          >
+            Nhập Lô Vaccine
+          </Button>
+          <Button
+            type="primary"
+            icon={<ApartmentOutlined />}
+            onClick={() => {
+              packageForm.resetFields();
+              setIsPackageModalVisible(true);
+            }}
+          >
+            Tạo Gói Vaccine
+          </Button>
+        </Space>
       </div>
 
       <div style={{ marginBottom: 16 }}>
@@ -721,6 +947,7 @@ const VaccinesPage = () => {
         onChange={(key) => setActiveTab(key)}
       />
 
+      {/* Modal Thêm Vaccine Mới */}
       <Modal
         title="Thêm Vaccine Mới"
         open={isModalVisible}
@@ -766,6 +993,286 @@ const VaccinesPage = () => {
         </Form>
       </Modal>
 
+      {/* Modal Nhập Lô Vaccine */}
+      <Modal
+        title="Thêm Lô Vaccine Mới"
+        open={isImportModalVisible}
+        onCancel={() => setIsImportModalVisible(false)}
+        footer={null}
+        width={800}
+      >
+        <Form form={importForm} onFinish={handleCreateImport} layout="vertical">
+          <Form.Item
+            name="batchNumber"
+            label="Mã lô"
+            rules={[{ required: true, message: "Vui lòng nhập mã lô!" }]}
+          >
+            <Input />
+          </Form.Item>
+
+          <Form.List name="vaccines">
+            {(fields, { add, remove }) => (
+              <>
+                {fields.map(({ key, name, ...restField }) => (
+                  <Card
+                    key={key}
+                    title={`Vaccine ${name + 1}`}
+                    extra={<Button danger onClick={() => remove(name)}>Xóa</Button>}
+                    style={{ marginBottom: 16 }}
+                  >
+                    <Form.Item
+                      {...restField}
+                      name={[name, "vaccineId"]}
+                      label="Loại vaccine"
+                      rules={[{ required: true, message: "Vui lòng chọn loại vaccine!" }]}
+                    >
+                      <Select placeholder="Chọn vaccine">
+                        {inventoryList.map(vaccine => (
+                          <Select.Option key={vaccine._id} value={vaccine._id}>
+                            {vaccine.vaccineName}
+                          </Select.Option>
+                        ))}
+                      </Select>
+                    </Form.Item>
+
+                    <Form.Item
+                      {...restField}
+                      name={[name, "quantity"]}
+                      label="Số lượng"
+                      rules={[{ required: true, message: "Vui lòng nhập số lượng!" }]}
+                    >
+                      <InputNumber min={1} style={{ width: '100%' }} />
+                    </Form.Item>
+
+                    <Form.Item
+                      {...restField}
+                      name={[name, "expiryDate"]}
+                      label="Ngày hết hạn"
+                      rules={[{ required: true, message: "Vui lòng chọn ngày hết hạn!" }]}
+                    >
+                      <DatePicker style={{ width: '100%' }} />
+                    </Form.Item>
+
+                    <Form.Item
+                      {...restField}
+                      name={[name, "unitPrice"]}
+                      label="Đơn giá"
+                      rules={[{ required: true, message: "Vui lòng nhập đơn giá!" }]}
+                    >
+                      <InputNumber
+                        min={0}
+                        step={1000}
+                        style={{ width: '100%' }}
+                        formatter={value => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+                        parser={value => value.replace(/\$\s?|(,*)/g, '')}
+                      />
+                    </Form.Item>
+                  </Card>
+                ))}
+                <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined />}>
+                  Thêm vaccine
+                </Button>
+              </>
+            )}
+          </Form.List>
+
+          <Form.Item
+            name="importDate"
+            label="Ngày nhập"
+            rules={[{ required: true, message: "Vui lòng chọn ngày nhập!" }]}
+          >
+            <DatePicker style={{ width: '100%' }} />
+          </Form.Item>
+
+          <Form.Item
+            name="supplier"
+            label="Nhà cung cấp"
+            rules={[{ required: true, message: "Vui lòng nhập nhà cung cấp!" }]}
+          >
+            <Input />
+          </Form.Item>
+
+          <Form.Item className="text-right">
+            <Button type="primary" htmlType="submit">
+              Tạo lô vaccine
+            </Button>
+          </Form.Item>
+        </Form>
+      </Modal>
+
+      <Modal
+        title="Tạo Gói Vaccine Mới"
+        open={isPackageModalVisible}
+        onCancel={() => setIsPackageModalVisible(false)}
+        footer={null}
+        width={800}
+      >
+        <Form form={packageForm} onFinish={handleCreatePackage} layout="vertical">
+          <Form.Item
+            name="packageName"
+            label="Tên gói vaccine"
+            rules={[{ required: true, message: "Vui lòng nhập tên gói vaccine!" }]}
+          >
+            <Input />
+          </Form.Item>
+
+          <Form.Item
+            name="description"
+            label="Mô tả"
+            rules={[{ required: true, message: "Vui lòng nhập mô tả!" }]}
+          >
+            <Input.TextArea rows={4} />
+          </Form.Item>
+
+          <Form.List name="vaccines">
+            {(fields, { add, remove }) => (
+              <>
+                {fields.map(({ key, name, ...restField }) => (
+                  <Card
+                    key={key}
+                    title={`Vaccine ${name + 1}`}
+                    extra={<Button danger onClick={() => remove(name)}>Xóa</Button>}
+                    style={{ marginBottom: 16 }}
+                  >
+                    <Form.Item
+                      {...restField}
+                      name={[name, "vaccineId"]}
+                      label="Loại vaccine"
+                      rules={[{ required: true, message: "Vui lòng chọn loại vaccine!" }]}
+                    >
+                      <Select placeholder="Chọn vaccine">
+                        {inventoryList.map(vaccine => (
+                          <Select.Option key={vaccine._id} value={vaccine._id}>
+                            {vaccine.vaccineName}
+                          </Select.Option>
+                        ))}
+                      </Select>
+                    </Form.Item>
+
+                    <Form.Item
+                      {...restField}
+                      name={[name, "quantity"]}
+                      label="Số mũi tiêm"
+                      rules={[{ required: true, message: "Vui lòng nhập số mũi tiêm!" }]}
+                    >
+                      <InputNumber min={1} style={{ width: '100%' }} />
+                    </Form.Item>
+                  </Card>
+                ))}
+                <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined />}>
+                  Thêm vaccine
+                </Button>
+              </>
+            )}
+          </Form.List>
+
+          <Form.List name="schedule" initialValue={[{ days: 0 }]}>
+            {(fields, { add, remove }) => (
+              <>
+                {fields.map(({ key, name, ...restField }) => (
+                  <Form.Item
+                    {...restField}
+                    key={key}
+                    label={name === 0 ? "Mũi đầu tiên" : `Mũi ${name + 1}`}
+                  >
+                    <Space>
+                      {name === 0 ? (
+                        <Form.Item
+                          {...restField}
+                          name={[name, "days"]}
+                          noStyle
+                        >
+                          <InputNumber
+                            disabled
+                            value={0}
+                            style={{ width: 200 }}
+                          />
+                        </Form.Item>
+                      ) : (
+                        <Form.Item
+                          {...restField}
+                          name={[name, "days"]}
+                          rules={[
+                            {
+                              required: true,
+                              message: "Vui lòng nhập số ngày!"
+                            },
+                            {
+                              type: 'number',
+                              min: 1,
+                              message: "Số ngày phải lớn hơn 0!"
+                            }
+                          ]}
+                          noStyle
+                        >
+                          <InputNumber
+                            placeholder="Số ngày sau mũi đầu"
+                            style={{ width: 200 }}
+                            min={1}
+                          />
+                        </Form.Item>
+                      )}
+                      {name > 0 && (
+                        <Button
+                          type="link"
+                          danger
+                          icon={<DeleteOutlined />}
+                          onClick={() => remove(name)}
+                        />
+                      )}
+                    </Space>
+                    {name > 0 && (
+                      <div style={{ marginTop: 4, fontSize: '12px', color: '#666' }}>
+                        Nhập số ngày cách so với mũi đầu tiên
+                      </div>
+                    )}
+                  </Form.Item>
+                ))}
+                <Form.Item>
+                  <Button
+                    type="dashed"
+                    onClick={() => add()}
+                    block
+                    icon={<PlusOutlined />}
+                  >
+                    Thêm mũi tiêm
+                  </Button>
+                </Form.Item>
+              </>
+            )}
+          </Form.List>
+
+          <Form.Item
+            name="price"
+            label="Giá gói"
+            rules={[{ required: true, message: "Vui lòng nhập giá gói!" }]}
+          >
+            <InputNumber
+              min={0}
+              step={1000}
+              style={{ width: '100%' }}
+              formatter={value => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+              parser={value => value.replace(/\$\s?|(,*)/g, '')}
+            />
+          </Form.Item>
+
+          <Form.Item
+            name="category"
+            label="Danh mục"
+            rules={[{ required: true, message: "Vui lòng nhập danh mục!" }]}
+          >
+            <Input />
+          </Form.Item>
+
+          <Form.Item className="text-right">
+            <Button type="primary" htmlType="submit">
+              Tạo gói vaccine
+            </Button>
+          </Form.Item>
+        </Form>
+      </Modal>
+
+      {/* Modal Chỉnh sửa Vaccine */}
       <Modal
         title="Chỉnh sửa Vaccine"
         open={isEditModalVisible}
@@ -774,12 +1281,11 @@ const VaccinesPage = () => {
           editForm.resetFields();
         }}
         footer={null}
-        width={800} // Tăng kích thước modal
+        width={800}
       >
         <Tabs defaultActiveKey="basic">
           <Tabs.TabPane tab="Thông tin cơ bản" key="basic">
             <Form form={editForm} onFinish={handleUpdate} layout="vertical">
-              {/* Giữ nguyên các Form.Item cũ */}
               <Form.Item
                 name="vaccineName"
                 label="Tên Vaccine"

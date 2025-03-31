@@ -519,29 +519,6 @@ const HomePage = () => {
         </div>
       </div>
 
-      {/* <div className="vaccine-info">
-        <h2>THÔNG TIN VACCINE</h2>
-        <div className="home-vaccine-types">
-          <div className="home-vaccine-card">
-            <img
-              src="/images/vaccineInfo1.webp"
-              alt="Tiêm chủng theo yêu cầu"
-            />
-            <h3>TIÊM CHỦNG THEO YÊU CẦU</h3>
-            <a href="#" className="read-more">
-              XEM THÊM
-            </a>
-          </div>
-          <div className="home-vaccine-card">
-            <img src="/images/vaccineInfo2.jpg" alt="Tiêm chủng trọn gói" />
-            <h3>TIÊM CHỦNG TRỌN GÓI</h3>
-            <a href="#" className="read-more">
-              XEM THÊM
-            </a>
-          </div>
-        </div>
-      </div> */}
-
       <div className="vaccine-carousel-section-v1">
         <h2>VACCINE NỔI BẬT</h2>
         <div className="vaccine-carousel-container-v1">
