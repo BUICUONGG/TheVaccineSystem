@@ -1,6 +1,25 @@
 import { useState, useEffect } from "react";
-import { Table, Tag, Button, message, Modal, Tabs, Input, List, Card, Typography, Divider, Space} from "antd";
-import { SearchOutlined, CheckCircleFilled, MenuOutlined, EditOutlined, CheckCircleOutlined } from "@ant-design/icons";
+
+import {
+  Table,
+  Tag,
+  Button,
+  message,
+  Modal,
+  Tabs,
+  Input,
+  List,
+  Card,
+  Typography,
+  Divider,
+  Space,
+} from "antd";
+import {
+  SearchOutlined,
+  CheckCircleFilled,
+  MenuOutlined,
+  CheckCircleOutlined,
+} from "@ant-design/icons";
 import moment from "moment";
 import axiosInstance from "../../../service/api";
 import "./appointmentManagement.css";
