@@ -10,6 +10,18 @@ export const getOneCusController = async (req, res) => {
   }
 };
 
+export const getCustomerByIdController = async (req, res) => {
+  try {
+    const id = req.params.id;
+    console.log(`Controller received customer ID: ${id}`);
+    const customer = await customerService.getCustomerById(id);
+    return res.json(customer);
+  } catch (error) {
+    console.error("Error in getCustomerByIdController:", error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
 export const getAllCusController = async (req, res) => {
   try {
     const result = await customerService.getAllCustomer();

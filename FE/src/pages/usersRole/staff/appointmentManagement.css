@@ -399,4 +399,41 @@
   color: #faad14;
 }
 
-/* Dose scheduling summary */ 
+/* Dose scheduling summary */
+
+/* Divider styling */
+.dose-divider {
+  margin: 12px 0;
+}
+
+/* Button styling */
+.detail-button {
+  margin-left: 8px;
+}
+
+/* Notice to approve appointment */
+.approve-notice {
+  border: 1px dashed #faad14;
+  background-color: #fffbe6;
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.approve-notice .ant-typography {
+  color: #d46b08;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #ffebb3;
+}
+
+.approve-notice-content {
+  color: #5c3c10;
+}
+
+.approve-notice-content p {
+  margin-bottom: 8px;
+}
+
+.approve-notice-content p:last-child {
+  margin-bottom: 0;
+} 

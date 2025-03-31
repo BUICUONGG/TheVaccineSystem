@@ -2,6 +2,7 @@ import { Router } from "express";
 import {
   getAllCusController,
   getAptleAndAptGoiByCusIdController,
+  getCustomerByIdController,
   getOneCusController,
   updatemeController,
 } from "../controllers/customer.controllers.js";
@@ -19,6 +20,12 @@ customerRoutes.get(
   "/getOneCustomer/:id",
   validateAccessToken,
   getOneCusController
+);
+
+customerRoutes.get(
+  "/getCustomerById/:id",
+  validateAccessToken,
+  getCustomerByIdController
 );
 
 customerRoutes.get("/getAllCustomer", validateAccessToken, getAllCusController);

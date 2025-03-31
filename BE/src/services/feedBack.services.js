@@ -4,6 +4,15 @@ import { ObjectId } from "mongodb";
 class FeedbackService {
   async createFeedback(data) {
     try {
+      // Check if user already has a feedback
+      const existingFeedback = await connectToDatabase.feedbacks.findOne({
+        cusId: new ObjectId(data.cusId)
+      });
+
+      if (existingFeedback) {
+        throw new Error("Bạn đã gửi đánh giá trước đó. Không thể gửi thêm đánh giá mới.");
+      }
+
       const feedback = new Feedback(data);
       await feedback.validate();
       await connectToDatabase.feedbacks.insertOne(feedback);
@@ -20,6 +29,18 @@ class FeedbackService {
       return result;
     } catch (error) {
       console.log("Lỗi dòng 22 feedbackService", error.message);
+      throw new Error(error.message);
+    }
+  }
+
+  async getFeedbackByCusId(cusId) {
+    try {
+      const result = await connectToDatabase.feedbacks.findOne({
+        cusId: new ObjectId(cusId)
+      });
+      return result;
+    } catch (error) {
+      console.log("Lỗi khi lấy feedback theo cusId", error.message);
       throw new Error(error.message);
     }
   }

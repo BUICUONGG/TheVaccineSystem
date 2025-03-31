@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { Table, Rate, Card, Statistic, Row, Col, Input, Button, Popconfirm, message, Tag, Tooltip, Modal } from "antd";
-import { DeleteOutlined, SearchOutlined, UserOutlined, StarOutlined, CommentOutlined, CalendarOutlined } from "@ant-design/icons";
+import { Table, Rate, Card, Statistic, Row, Col, Input, Button, Popconfirm, message, Tag, Tooltip, Modal, Alert } from "antd";
+import { DeleteOutlined, SearchOutlined, UserOutlined, StarOutlined, CommentOutlined, CalendarOutlined, InfoCircleOutlined, EditOutlined } from "@ant-design/icons";
 import axiosInstance from "../../../service/api";
 import "./FeedbackManagement.css";
 
@@ -223,6 +223,16 @@ const FeedbackManagement = () => {
   return (
     <div className="feedback-management">
       <h1 className="page-title">Quản lý đánh giá khách hàng</h1>
+      
+      <Alert
+        message="Chính sách đánh giá"
+        description="Mỗi khách hàng chỉ được gửi một đánh giá. Khách hàng có thể xem và chỉnh sửa đánh giá của mình sau khi đã gửi."
+        type="info"
+        showIcon
+        icon={<InfoCircleOutlined />}
+        style={{ marginBottom: 24 }}
+        className="policy-alert"
+      />
       
       <div className="stats-container">
         <Row gutter={[16, 16]}>

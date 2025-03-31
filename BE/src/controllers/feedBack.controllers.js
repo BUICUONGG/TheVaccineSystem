@@ -19,6 +19,16 @@ export const getAllFeedbackController = async (req, res) => {
   }
 };
 
+export const getFeedbackByCusIdController = async (req, res) => {
+  try {
+    const cusId = req.params.cusId;
+    const result = await feedbackService.getFeedbackByCusId(cusId);
+    res.status(200).json(result);
+  } catch (error) {
+    res.status(500).json(error.message);
+  }
+};
+
 export const updatefeedbackController = async (req, res) => {
   try {
     const id = req.params.id;

@@ -17,6 +17,22 @@ class CustomerService {
     }
   }
 
+  async getCustomerById(id) {
+    try {
+      console.log(`Looking for customer with direct ID: ${id}`);
+      const result = await connectToDatabase.customers.findOne({
+        _id: new ObjectId(id),
+      });
+      if (!result) {
+        throw new Error("Không tìm thấy khách hàng");
+      }
+      return result;
+    } catch (error) {
+      console.error("Error finding customer by ID:", error);
+      throw new Error(error.message);
+    }
+  }
+
   async getAllCustomer() {
     try {
       const customers = await connectToDatabase.customers.find().toArray();
@@ -34,11 +50,22 @@ class CustomerService {
       );
 
       // Chỉ gán username nếu có, không thì giữ nguyên customer
-      const result = customers.map(({ userId, ...customer }) => {
+      const result = customers.map((customer) => {
+        const customerId = customer._id;
+        const { userId, ...customerData } = customer;
+        
         const username = userMap.get(userId?.toString());
-        return username ? { ...customer, username } : customer;
+        
+        return {
+          ...customerData,
+          _id: customerId,
+          userId: userId,
+          username: username || "Unknown"
+        };
       });
+      
       if (!result) throw new Error("Khong thể show được ");
+      console.log("getAllCustomer result sample:", result[0]);
       return result;
     } catch (error) {
       console.log("Lỗi:", error.message);
@@ -48,14 +75,34 @@ class CustomerService {
 
   async updateCustomer(customerId, updateData) {
     try {
-      const result = await connectToDatabase.customers.findOneAndUpdate(
-        { userId: new ObjectId(customerId) },
-        { $set: updateData },
-        { returnDocument: "after" }
-      );
-      return result;
+      console.log("Update customer request:", { customerId, updateData });
+      
+      // Check if customerId is a customer ID or a user ID
+      // Try to find a customer directly by _id first
+      const customerById = await connectToDatabase.customers.findOne({
+        _id: new ObjectId(customerId)
+      });
+      
+      if (customerById) {
+        console.log("Found customer by _id");
+        const result = await connectToDatabase.customers.findOneAndUpdate(
+          { _id: new ObjectId(customerId) },
+          { $set: updateData },
+          { returnDocument: "after" }
+        );
+        return result;
+      } else {
+        // If not found, try to find by userId
+        console.log("Trying to find customer by userId");
+        const result = await connectToDatabase.customers.findOneAndUpdate(
+          { userId: new ObjectId(customerId) },
+          { $set: updateData },
+          { returnDocument: "after" }
+        );
+        return result;
+      }
     } catch (error) {
-      console.log("Khong the update");
+      console.log("Error updating customer:", error.message);
       throw new Error(error.message);
     }
   }
