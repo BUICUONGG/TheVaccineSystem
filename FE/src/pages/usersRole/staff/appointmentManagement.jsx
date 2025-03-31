@@ -156,7 +156,7 @@ const AppointmentManagement = () => {
                   console.log(`Found vaccine ${vaccineId} at /vaccines/detail`);
                 }
               } catch (err1) {
-                console.log(`No vaccine at /vaccines/detail/${vaccineId}`);
+                console.log(`No vaccine at /vaccines/detail/${vaccineId}`, err1);
               }
               
               // Thử endpoint 2: /vaccinceInventorys
@@ -173,7 +173,7 @@ const AppointmentManagement = () => {
                     console.log(`Found vaccine ${vaccineId} at /vaccine/inventory`);
                   }
                 } catch (err2) {
-                  console.log(`No vaccine at /vaccine/inventory/${vaccineId}`);
+                  console.log(`No vaccine at /vaccine/inventory/${vaccineId}`, err2);
                 }
               }
               
@@ -191,7 +191,7 @@ const AppointmentManagement = () => {
                     console.log(`Found vaccine ${vaccineId} at direct /vaccine endpoint`);
                   }
                 } catch (err3) {
-                  console.log(`No vaccine at direct /vaccine/${vaccineId}`);
+                  console.log(`No vaccine at direct /vaccine/${vaccineId}`, err3);
                 }
               }
               

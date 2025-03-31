@@ -71,16 +71,6 @@ const ProfileHistory = () => {
     }
   };
 
-  // const fetchVaccineInfo = async (vaccineId) => {
-  //   try {
-  //     const response = await axiosInstance.get(`/vaccine/get/${vaccineId}`);
-  //     return response.data;
-  //   } catch (error) {
-  //     console.error("Lỗi khi lấy thông tin vaccine:", error);
-  //     return null;
-  //   }
-  // };
-
   const getStatusColor = (status) => {
     switch (status?.toLowerCase()) {
       case "completed":
