@@ -505,15 +505,21 @@
   background: #e6f7ff;
 }
 
-.ant-collapse-ghost > .ant-collapse-item > .ant-collapse-header {
-  padding: 0;
-  color: rgba(0, 0, 0, 0.85);
+.child-info-collapse {
+  margin-top: 8px;
 }
 
-.ant-collapse-ghost > .ant-collapse-item > .ant-collapse-content > .ant-collapse-content-box {
-  padding: 8px 0;
+.child-info-collapse .ant-collapse-header {
+  padding: 4px 0 !important;
+  color: #1890ff !important;
+  font-size: 13px;
 }
 
-.ant-descriptions.ant-descriptions-small .ant-descriptions-item-label {
-  color: rgba(0, 0, 0, 0.45);
+.child-info-collapse .ant-collapse-content-box {
+  padding: 8px 0 !important;
+}
+
+.child-info-collapse .ant-descriptions-item-label {
+  color: rgba(0, 0, 0, 0.65);
+  font-weight: normal;
 }
