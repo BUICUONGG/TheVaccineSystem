@@ -6,29 +6,29 @@ class BlogService {
   // Get all blogs with pagination and filters
   async showData(options = {}) {
     try {
-      let query = {};
+      let matchStage = {};
       
       // Filter by category
       if (options.category) {
-        query.category = options.category;
+        matchStage.category = options.category;
       }
       
       // Filter by tags
       if (options.tags && options.tags.length > 0) {
-        query.tags = { $in: options.tags };
+        matchStage.tags = { $in: options.tags };
       }
       
       // Filter by status
       if (options.status) {
-        query.status = options.status;
+        matchStage.status = options.status;
       } else if (!options.includeDeleted) {
-        query.status = "active";
+        matchStage.status = "active";
       }
       
       // Search by keyword
       if (options.keyword) {
         const keyword = options.keyword;
-        query.$or = [
+        matchStage.$or = [
           { blogTitle: { $regex: keyword, $options: 'i' } },
           { blogContent: { $regex: keyword, $options: 'i' } },
           { author: { $regex: keyword, $options: 'i' } },
@@ -36,28 +36,72 @@ class BlogService {
         ];
       }
       
+      // Build the aggregation pipeline
+      const pipeline = [
+        { $match: matchStage },
+        { $lookup: {
+            from: "users",
+            localField: "comments.userId",
+            foreignField: "_id",
+            as: "commentUsers"
+          }
+        },
+        { $addFields: {
+            comments: {
+              $map: {
+                input: "$comments",
+                as: "comment",
+                in: {
+                  $mergeObjects: [
+                    "$$comment",
+                    {
+                      user: {
+                        $arrayElemAt: [
+                          {
+                            $filter: {
+                              input: "$commentUsers",
+                              as: "user",
+                              cond: { $eq: ["$$user._id", "$$comment.userId"] }
+                            }
+                          },
+                          0
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        { $project: { commentUsers: 0 } }
+      ];
+      
       // Sorting
-      let sort = {};
+      let sortStage = {};
       if (options.sortBy) {
-        sort[options.sortBy] = options.sortOrder === 'asc' ? 1 : -1;
+        sortStage[options.sortBy] = options.sortOrder === 'asc' ? 1 : -1;
       } else {
-        sort = { createDate: -1 };
+        sortStage = { createDate: -1 };
       }
       
+      pipeline.push({ $sort: sortStage });
+      
       // Get total count before pagination
-      const total = await connectToDatabase.blogs.countDocuments(query);
+      const countPipeline = [...pipeline];
+      countPipeline.push({ $count: "total" });
+      const countResult = await connectToDatabase.blogs.aggregate(countPipeline).toArray();
+      const total = countResult.length > 0 ? countResult[0].total : 0;
       
       // Pagination
       const page = options.page || 1;
       const limit = options.limit || 10;
       const skip = (page - 1) * limit;
       
-      const blogs = await connectToDatabase.blogs
-        .find(query)
-        .sort(sort)
-        .skip(skip)
-        .limit(limit)
-        .toArray();
+      pipeline.push({ $skip: skip });
+      pipeline.push({ $limit: limit });
+      
+      const blogs = await connectToDatabase.blogs.aggregate(pipeline).toArray();
       
       return {
         blogs,
@@ -81,10 +125,49 @@ class BlogService {
         throw new Error("Invalid blog ID");
       }
 
-      const blog = await connectToDatabase.blogs.findOne({ 
-        _id: new ObjectId(id),
-        status: "active"
-      });
+      // Use MongoDB aggregation to populate user information for comments
+      const pipeline = [
+        { $match: { _id: new ObjectId(id), status: "active" } },
+        { $lookup: {
+            from: "users",
+            localField: "comments.userId",
+            foreignField: "_id",
+            as: "commentUsers"
+          }
+        },
+        { $addFields: {
+            comments: {
+              $map: {
+                input: "$comments",
+                as: "comment",
+                in: {
+                  $mergeObjects: [
+                    "$$comment",
+                    {
+                      user: {
+                        $arrayElemAt: [
+                          {
+                            $filter: {
+                              input: "$commentUsers",
+                              as: "user",
+                              cond: { $eq: ["$$user._id", "$$comment.userId"] }
+                            }
+                          },
+                          0
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        { $project: { commentUsers: 0 } }
+      ];
+
+      const blogs = await connectToDatabase.blogs.aggregate(pipeline).toArray();
+      const blog = blogs[0];
 
       if (!blog) {
         throw new Error("Blog not found");
@@ -133,21 +216,59 @@ class BlogService {
     try {
       const blog = await this.getBlogById(blogId);
       
-      const query = {
-        _id: { $ne: new ObjectId(blogId) },
-        status: "active",
-        $or: [
-          { category: blog.category },
-          { tags: { $in: blog.tags || [] } }
-        ]
-      };
+      // Use MongoDB aggregation to populate user information for comments
+      const pipeline = [
+        {
+          $match: {
+            _id: { $ne: new ObjectId(blogId) },
+            status: "active",
+            $or: [
+              { category: blog.category },
+              { tags: { $in: blog.tags || [] } }
+            ]
+          }
+        },
+        { $lookup: {
+            from: "users",
+            localField: "comments.userId",
+            foreignField: "_id",
+            as: "commentUsers"
+          }
+        },
+        { $addFields: {
+            comments: {
+              $map: {
+                input: "$comments",
+                as: "comment",
+                in: {
+                  $mergeObjects: [
+                    "$$comment",
+                    {
+                      user: {
+                        $arrayElemAt: [
+                          {
+                            $filter: {
+                              input: "$commentUsers",
+                              as: "user",
+                              cond: { $eq: ["$$user._id", "$$comment.userId"] }
+                            }
+                          },
+                          0
+                        ]
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        },
+        { $project: { commentUsers: 0 } },
+        { $sort: { createDate: -1 } },
+        { $limit: limit }
+      ];
 
-      const relatedBlogs = await connectToDatabase.blogs
-        .find(query)
-        .sort({ createDate: -1 })
-        .limit(limit)
-        .toArray();
-
+      const relatedBlogs = await connectToDatabase.blogs.aggregate(pipeline).toArray();
       return relatedBlogs;
     } catch (error) {
       throw new Error(error.message);
@@ -359,11 +480,22 @@ class BlogService {
         throw new Error("Invalid blog ID");
       }
 
+      // Get user information first
+      const user = await connectToDatabase.users.findOne({ _id: new ObjectId(userId) });
+      if (!user) {
+        throw new Error("User not found");
+      }
+
       const comment = {
         userId: new ObjectId(userId),
         content,
         createdAt: new Date(),
-        status: "active"
+        status: "active",
+        // Include user information directly in the comment
+        user: {
+          _id: user._id,
+          username: user.username || user.fullName || "User"
+        }
       };
 
       const result = await connectToDatabase.blogs.findOneAndUpdate(
