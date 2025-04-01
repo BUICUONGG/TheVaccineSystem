@@ -131,7 +131,7 @@ class PaymentService {
       // Thanh toán thành công, cập nhật database
       const dataJson = JSON.parse(data);
       const { app_trans_id } = dataJson;
-
+      console.log(app_trans_id);
       // Kiểm tra đơn hàng có tồn tại trong `appointmentLes`
       const aptLe = await connectToDatabase.appointmentLes.findOne({
         app_trans_id,
