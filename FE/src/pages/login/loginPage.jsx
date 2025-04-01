@@ -79,10 +79,11 @@ const LoginPage = () => {
         setIsLoading(false);
         toast.success("Đăng nhập thành công!");
         navigate("/welcome");
-      } catch (error) {
+      } catch (error) {        
         setIsLoading(false);
-        console.error("Error details:", error);
-        alert(error.message || "Đăng nhập thất bại!");
+        const errorMessage =
+            error.response?.data || "Đăng nhập thất bại!";
+        toast.error(errorMessage); 
       }
     }
   };

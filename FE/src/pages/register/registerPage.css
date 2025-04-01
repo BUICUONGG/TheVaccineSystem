@@ -1,323 +1,340 @@
 * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
 .regis-min-h-screen {
-    position: relative;
-    width: 100%;
-    height: 100vh;
-    background: url('/images/registerBanner.jpg') center center;
-    background-size: cover;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    overflow: hidden;
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  background: url("/images/registerBanner.jpg") center center;
+  background-size: cover;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
 }
 
 /* Tech medical pattern overlay */
 .regis-min-h-screen::before {
-    content: '';
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    background-image: 
-        linear-gradient(rgba(0, 115, 209, 0.1) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0, 115, 209, 0.1) 1px, transparent 1px);
-    background-size: 20px 20px;
-    animation: regisPatternMove 20s linear infinite;
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background-image: linear-gradient(rgba(0, 115, 209, 0.1) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 115, 209, 0.1) 1px, transparent 1px);
+  background-size: 20px 20px;
+  animation: regisPatternMove 20s linear infinite;
 }
 
 .regis-min-h-screen::after {
-    content: '';
-    position: absolute;
-    width: 200%;
-    height: 200%;
-    background: radial-gradient(circle, rgba(0, 150, 255, 0) 0%, rgba(0, 95, 173, 0.2) 50%, rgba(0, 60, 120, 0.4) 100%);
-    animation: regisPulseEffect 8s ease-in-out infinite alternate;
-    z-index: 0;
+  content: "";
+  position: absolute;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(
+    circle,
+    rgba(0, 150, 255, 0) 0%,
+    rgba(0, 95, 173, 0.2) 50%,
+    rgba(0, 60, 120, 0.4) 100%
+  );
+  animation: regisPulseEffect 8s ease-in-out infinite alternate;
+  z-index: 0;
 }
 
 /* Main registration container */
 .regis-container {
-    width: 650px;
-    height: auto;
-    min-height: 500px;
-    position: relative;
-    z-index: 1;
-    display: flex;
-    border-radius: 20px;
-    overflow: hidden;
-    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3), 
-                0 0 30px rgba(0, 149, 255, 0.5);
-    animation: regisContainerGlow 4s ease-in-out infinite alternate;
+  width: 650px;
+  height: auto;
+  min-height: 500px;
+  position: relative;
+  z-index: 1;
+  display: flex;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3), 0 0 30px rgba(0, 149, 255, 0.5);
+  animation: regisContainerGlow 4s ease-in-out infinite alternate;
 }
 
 /* Ẩn phần image container */
 .regis-image-container {
-    display: none;
+  display: none;
 }
 
 /* Right side - Form container - Sửa thành chiếm toàn bộ */
 .regis-form-container {
-    width: 100%;
-    padding: 60px;
-    background: rgba(255, 255, 255, 0.95);
-    display: flex;
-    flex-direction: column;
-    overflow-y: auto;
-    position: relative;
+  width: 100%;
+  padding: 60px;
+  background: rgba(255, 255, 255, 0.95);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  position: relative;
 }
 
 .regis-form-container::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: radial-gradient(circle, rgba(0, 150, 255, 0.03) 0%, rgba(255, 255, 255, 0) 70%);
-    animation: regisFormPulse 10s ease-in-out infinite;
-    pointer-events: none;
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(
+    circle,
+    rgba(0, 150, 255, 0.03) 0%,
+    rgba(255, 255, 255, 0) 70%
+  );
+  animation: regisFormPulse 10s ease-in-out infinite;
+  pointer-events: none;
 }
 
 /* Form elements styling */
 .regis-form-header {
-    text-align: center;
-    margin-bottom: 20px;
+  text-align: center;
+  margin-bottom: 20px;
 }
 
 .regis-form-header h2 {
-    color: #0077cc;
-    font-size: 28px;
-    margin-bottom: 10px;
-    text-shadow: 0 0 10px rgba(0, 119, 204, 0.1);
+  color: #0077cc;
+  font-size: 28px;
+  margin-bottom: 10px;
+  text-shadow: 0 0 10px rgba(0, 119, 204, 0.1);
 }
 
 .regis-form-header p {
-    color: #718096;
-    font-size: 16px;
+  color: #718096;
+  font-size: 16px;
 }
 
 .regis-input-group {
-    position: relative;
-    margin-bottom: 20px;
+  position: relative;
+  margin-bottom: 20px;
 }
 
 .regis-input {
-    width: 100%;
-    padding: 12px 40px;
-    border: 1px solid #e2e8f0;
-    border-radius: 8px;
-    font-size: 14px;
-    transition: all 0.3s ease;
+  width: 100%;
+  padding: 12px 40px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: all 0.3s ease;
 }
 
 .regis-input:focus {
-    border-color: #0077cc;
-    box-shadow: 0 0 0 3px rgba(0, 119, 204, 0.1);
+  border-color: #0077cc;
+  box-shadow: 0 0 0 3px rgba(0, 119, 204, 0.1);
 }
 
 .regis-input-icon {
-    position: absolute;
-    left: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #0077cc;
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #0077cc;
 }
 
 .regis-password-toggle {
-    position: absolute;
-    right: 12px;
-    top: 50%;
-    transform: translateY(-50%);
-    cursor: pointer;
-    color: #0077cc;
-    background: none;
-    border: none;
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: #0077cc;
+  background: none;
+  border: none;
 }
 
 /* Error message styling */
 .regis-error {
-    color: #e53e3e;
-    font-size: 12px;
-    margin-top: 5px;
+  color: #e53e3e;
+  font-size: 12px;
+  margin-top: 5px;
 }
 
 /* Button styling */
 .regis-button-group {
-    display: flex;
-    gap: 10px;
-    margin-top: 20px;
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
 }
 
 .regis-btn {
-    flex: 1;
-    padding: 12px;
-    border-radius: 8px;
-    border: none;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
+  flex: 1;
+  padding: 12px;
+  border-radius: 8px;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
 }
 
 .regis-btn-primary {
-    background: #0077cc;
-    color: white;
-    position: relative;
-    overflow: hidden;
+  background: #0077cc;
+  color: white;
+  position: relative;
+  overflow: hidden;
 }
 
 .regis-btn-primary::after {
-    content: '';
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-    transform: translateX(-100%);
-    transition: all 0.3s ease;
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  transform: translateX(-100%);
+  transition: all 0.3s ease;
 }
 
 .regis-btn-primary:hover {
-    background: #005bea;
-    box-shadow: 0 5px 15px rgba(0, 119, 204, 0.3);
+  background: #005bea;
+  box-shadow: 0 5px 15px rgba(0, 119, 204, 0.3);
 }
 
 .regis-btn-primary:hover::after {
-    transform: translateX(100%);
-    transition: all 0.7s ease;
+  transform: translateX(100%);
+  transition: all 0.7s ease;
 }
 
 .regis-btn-primary:disabled {
-    background: #7eb7e6;
-    cursor: not-allowed;
+  background: #7eb7e6;
+  cursor: not-allowed;
 }
 
 .regis-btn-secondary {
-    background: #0077cc;
-    color: white;
-    position: relative;
-    overflow: hidden;
+  background: #0077cc;
+  color: white;
+  position: relative;
+  overflow: hidden;
 }
 
 .regis-btn-secondary::after {
-    content: '';
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-    transform: translateX(-100%);
-    transition: all 0.3s ease;
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  transform: translateX(-100%);
+  transition: all 0.3s ease;
 }
 
 .regis-btn-secondary:hover {
-    background: #005bea;
-    box-shadow: 0 5px 15px rgba(0, 119, 204, 0.3);
+  background: #005bea;
+  box-shadow: 0 5px 15px rgba(0, 119, 204, 0.3);
 }
 
 .regis-btn-secondary:hover::after {
-    transform: translateX(100%);
-    transition: all 0.7s ease;
+  transform: translateX(100%);
+  transition: all 0.7s ease;
 }
 
 /* Back home button */
 .regis-back-home {
-    position: absolute;
-    top: 20px;
-    left: 20px;
-    z-index: 2;
-    padding: 12px 24px;
-    background: rgba(0, 77, 155, 0.8);
-    border-radius: 8px;
-    color: white;
-    text-decoration: none;
-    font-weight: 600;
-    backdrop-filter: blur(5px);
-    transition: all 0.3s ease;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  z-index: 2;
+  padding: 12px 24px;
+  background: rgba(0, 77, 155, 0.8);
+  border-radius: 8px;
+  color: white;
+  text-decoration: none;
+  font-weight: 600;
+  backdrop-filter: blur(5px);
+  transition: all 0.3s ease;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
 }
 
 .regis-back-home:hover {
-    background: #005bea;
-    color: white;
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+  background: #005bea;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
 }
 
 /* Responsive design - Cập nhật lại */
 @media (max-width: 1024px) {
-    .regis-container {
-        width: 90%;
-        max-width: 650px;
-        height: auto;
-    }
+  .regis-container {
+    width: 90%;
+    max-width: 650px;
+    height: auto;
+  }
 
-    .regis-form-container {
-        width: 100%;
-        padding: 40px;
-    }
+  .regis-form-container {
+    width: 100%;
+    padding: 40px;
+  }
 }
 
 @media (max-width: 640px) {
-    .regis-container {
-        width: 95%;
-    }
+  .regis-container {
+    width: 95%;
+  }
 
-    .regis-form-container {
-        padding: 30px;
-    }
+  .regis-form-container {
+    padding: 30px;
+  }
 
-    .regis-button-group {
-        flex-direction: column;
-    }
+  .regis-button-group {
+    flex-direction: column;
+  }
 }
 
 /* Animations */
 @keyframes regisPulseEffect {
-    0% {
-        transform: translate(-25%, -25%) rotate(0deg);
-        opacity: 0.7;
-    }
-    50% {
-        opacity: 0.5;
-    }
-    100% {
-        transform: translate(-25%, -25%) rotate(360deg);
-        opacity: 0.7;
-    }
+  0% {
+    transform: translate(-25%, -25%) rotate(0deg);
+    opacity: 0.7;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    transform: translate(-25%, -25%) rotate(360deg);
+    opacity: 0.7;
+  }
 }
 
 @keyframes regisPatternMove {
-    0% {
-        background-position: 0 0;
-    }
-    100% {
-        background-position: 50px 50px;
-    }
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 50px 50px;
+  }
 }
 
 @keyframes regisContainerGlow {
-    0% {
-        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3), 0 0 30px rgba(0, 149, 255, 0.3);
-    }
-    100% {
-        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3), 0 0 50px rgba(0, 149, 255, 0.7);
-    }
+  0% {
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3), 0 0 30px rgba(0, 149, 255, 0.3);
+  }
+  100% {
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3), 0 0 50px rgba(0, 149, 255, 0.7);
+  }
 }
 
 @keyframes regisFormPulse {
-    0% {
-        transform: translate(-50%, -50%) scale(1);
-    }
-    50% {
-        transform: translate(-50%, -50%) scale(1.2);
-    }
-    100% {
-        transform: translate(-50%, -50%) scale(1);
-    }
+  0% {
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.2);
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+  }
 }

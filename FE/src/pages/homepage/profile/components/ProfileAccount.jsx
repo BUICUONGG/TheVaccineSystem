@@ -3,6 +3,7 @@ import { Form, Input, Button, message, Spin } from "antd";
 import { useOutletContext } from "react-router-dom";
 import './ProfileAccount.css'; // Thay đổi import CSS
 import axiosInstance from "../../../../service/api";
+import { toast } from "react-toastify";
 
 const ProfileAccount = () => {
   const { userData, refreshUserData } = useOutletContext();
@@ -45,7 +46,7 @@ const ProfileAccount = () => {
     setIsEditMode(true);
   };
 
-  
+
 
   const handleUpdateInfo = async (values) => {
     try {
@@ -84,22 +85,16 @@ const ProfileAccount = () => {
       const payload = JSON.parse(atob(tokenParts[1]));
       const userId = payload.id;
 
-      await axiosInstance.post(
-        `/user/changePassword/${userId}`,
-        {
-          oldPassword: values.oldPassword,
-          newPassword: values.newPassword,
-        },
-        {
-          headers: { Authorization: `Bearer ${accesstoken}` },
-        }
-      );
+      // Gọi API để cập nhật mật khẩu
+      await axiosInstance.post(`/user/update/${userId}`, {
+        password: values.newPassword, // API chỉ cần trường 'password'
+      });
 
-      message.success('Đổi mật khẩu thành công');
-      form.resetFields(['oldPassword', 'newPassword', 'confirmPassword']);
+      toast.success("Mật khẩu mới cập nhật thành công");
+      form.resetFields(["oldPassword", "newPassword", "confirmPassword"]);
       setShowPasswordChange(false);
     } catch (error) {
-      message.error("Đổi mật khẩu thất bại", error);
+      message.error(error.response?.data?.message || "Thất bại khi đổi mật khẩu");
     } finally {
       setLoading(false);
     }
@@ -127,7 +122,7 @@ const ProfileAccount = () => {
                   { required: true, message: "Vui lòng nhập tên đăng nhập!" },
                 ]}
               >
-                <Input  />
+                <Input />
               </Form.Item>
 
               <Form.Item
@@ -138,20 +133,20 @@ const ProfileAccount = () => {
                   { type: "email", message: "Email không hợp lệ!" },
                 ]}
               >
-                <Input  />
+                <Input />
               </Form.Item>
 
               <Form.Item
                 label="Mật khẩu"
               >
                 <div className="account-password-field">
-                  <Input.Password 
-                    disabled 
-                    value="********" 
+                  <Input.Password
+                    disabled
+                    value="********"
                     style={{ width: 'calc(100% - 120px)' }}
                   />
-                  <Button 
-                    type="link" 
+                  <Button
+                    type="link"
                     onClick={() => setShowPasswordChange(!showPasswordChange)}
                     className="account-change-password-link"
                   >
@@ -174,19 +169,6 @@ const ProfileAccount = () => {
                 <div className="account-section-title">
                   <h2>Đổi mật khẩu</h2>
                 </div>
-
-                <Form.Item
-                  name="oldPassword"
-                  label="Mật khẩu hiện tại"
-                  rules={[
-                    {
-                      required: true,
-                      message: "Vui lòng nhập mật khẩu hiện tại!",
-                    },
-                  ]}
-                >
-                  <Input.Password />
-                </Form.Item>
 
                 <Form.Item
                   name="newPassword"
@@ -218,13 +200,13 @@ const ProfileAccount = () => {
                   <Input.Password />
                 </Form.Item>
 
-                <button
-                  type="button"
+                <Button
+                  type="primary"
                   className="account-update-all-btn"
-                  onClick={handleChangePassword}
+                  onClick={() => form.submit()}
                 >
                   Xác nhận đổi mật khẩu
-                </button>
+                </Button>
               </div>
             )}
           </Form>

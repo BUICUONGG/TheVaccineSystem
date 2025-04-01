@@ -115,15 +115,17 @@ const ProfileHistory = () => {
   const getStatusColor = (status) => {
     switch (status?.toLowerCase()) {
       case "completed":
-        return "#52c41a";  // Xanh lá - đã tiêm xong
+        return "#52c41a";  // Xanh lá - Đã tiêm xong
       case "incomplete":
-        return "#ff4d4f";  // Đỏ - đã hủy
+        return "#ff4d4f";  // Đỏ - Đã hủy
       case "pending":
-        return "#faad14";  // Vàng - chưa thanh toán
+        return "#faad14";  // Vàng - Chưa thanh toán
       case "paid":
-        return "#1890ff";  // Xanh dương - đã thanh toán, chờ tiêm
+        return "#1890ff";  // Xanh dương - Đã thanh toán (chờ tiêm)
+      case "approve":
+        return "purple";  // Màu tím - Đã duyệt
       default:
-        return "default";
+        return "gray"; // Màu mặc định
     }
   };
 
@@ -134,9 +136,11 @@ const ProfileHistory = () => {
       case "incomplete":
         return "ĐÃ HỦY";
       case "pending":
-        return "ĐANG CHỜ";
+        return "CHƯA THANH TOÁN";
       case "paid":
-        return "CHỜ TIÊM";
+        return "ĐÃ THANH TOÁN";
+      case "approve":
+        return "ĐÃ DUYỆT";
       default:
         return "KHÔNG XÁC ĐỊNH";
     }
@@ -148,17 +152,21 @@ const ProfileHistory = () => {
   };
 
   const getFilteredAppointments = (tabKey) => {
-    // Sắp xếp tất cả các đơn theo ngày đăng ký (sớm nhất lên đầu)
     let filtered = [...appointments];
 
-    // Lọc theo tab
     if (tabKey === "pending") {
+
       filtered = filtered.filter(
-        (apt) => apt.status?.toLowerCase() === "pending"
+        (apt) => apt.status?.toLowerCase() === "paid"
+      );
+    } else {
+
+      filtered = filtered.filter(
+        (apt) => apt.status?.toLowerCase() !== "paid"
       );
     }
 
-    // Lọc theo search text
+    // Lọc theo search text nếu có
     if (searchText) {
       const searchLower = searchText.toLowerCase();
       filtered = filtered.filter((apt) => {
@@ -431,7 +439,6 @@ const ProfileHistory = () => {
           className="search-input"
         />
       </div>
-
       <Tabs
         activeKey={activeTab}
         onChange={setActiveTab}
@@ -465,6 +472,7 @@ const ProfileHistory = () => {
             className="history-table"
           />
         </TabPane>
+
         <TabPane
           tab={<span className="tab-label">Các đơn khác</span>}
           key="others"
