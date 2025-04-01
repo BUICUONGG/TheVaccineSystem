@@ -220,12 +220,12 @@ class BlogService {
       const pipeline = [
         {
           $match: {
-            _id: { $ne: new ObjectId(blogId) },
-            status: "active",
-            $or: [
-              { category: blog.category },
-              { tags: { $in: blog.tags || [] } }
-            ]
+        _id: { $ne: new ObjectId(blogId) },
+        status: "active",
+        $or: [
+          { category: blog.category },
+          { tags: { $in: blog.tags || [] } }
+        ]
           }
         },
         { $lookup: {
