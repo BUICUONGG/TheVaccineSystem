@@ -74,11 +74,12 @@ class PaymentService {
             },
           }
         );
+
         await notiService.createNoti({
           cusId: transformedPaymentData.cusId,
           apt: aptLe.insertedId,
           aptModel: "AppointmentLe",
-          message: `Lịch hẹn lẻ của bạn vào lúc ${paymentData.time} đang trong trạng thái ${status}`,
+          message: `Đơn hàng của bạn đã cập nhật trạng thái: ${paymentData.status}`,
           createdAt: new Date().toLocaleDateString("vi-VN"),
         });
       } else {
@@ -104,7 +105,7 @@ class PaymentService {
           cusId: transformedPaymentData.cusId,
           apt: aptGoi._id,
           aptModel: "AppointmentGoi",
-          message: `Lịch hẹn gói của bạn vào lúc ${paymentData.time} đang ở trạng thái ${status}`,
+          message: `Đơn hàng của bạn đã cập nhật trạng thái: ${paymentData.status}`,
           createdAt: new Date().toLocaleDateString("vi-VN"),
         });
       }
