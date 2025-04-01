@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Card, Row, Col, Statistic, Table, Spin, Alert, Button, Tag, Progress, Tooltip, Modal, Divider } from "antd";
+import { Card, Row, Col, Statistic, Table, Spin, Alert, Button, Tag, Progress, Tooltip, Modal, Divider, Rate } from "antd";
 import { UserOutlined, ExperimentOutlined, FileTextOutlined, CommentOutlined, CalendarOutlined, StarOutlined, ReloadOutlined, CheckCircleOutlined, ClockCircleOutlined, CloseCircleOutlined } from "@ant-design/icons";
 import { Pie, Column } from "@ant-design/plots";
 import axiosInstance from "../../../service/api";
@@ -23,11 +23,14 @@ const DashboardPage = () => {
     totalFeedback: 0,
     recentAppointments: [],
     recentVaccines: [],
+    lowRatingFeedbacks: [],
     appointmentStats: {
       pending: 0,
       approved: 0,
       completed: 0,
       incomplete: 0,
+      paid: 0,
+      waitingForShot: 0,
     },
     feedbackStats: {
       averageRating: 0,
@@ -201,12 +204,11 @@ const DashboardPage = () => {
         // Calculate appointment statistics
         const appointmentStats = {
           pending: allAppointments.filter((a) => a.status === "pending").length,
-          approved: allAppointments.filter((a) => a.status === "approve")
-            .length,
-          completed: allAppointments.filter((a) => a.status === "completed")
-            .length,
-          incomplete: allAppointments.filter((a) => a.status === "incomplete")
-            .length,
+          approved: allAppointments.filter((a) => a.status === "approve").length,
+          completed: allAppointments.filter((a) => a.status === "completed").length,
+          incomplete: allAppointments.filter((a) => a.status === "incomplete").length,
+          paid: allAppointments.filter((a) => a.status === "Paid").length,
+          waitingForShot: allAppointments.filter((a) => a.status === "Paid" || a.status === "approve").length,
         };
 
         // Get recent appointments (combine and sort by date)
@@ -237,6 +239,11 @@ const DashboardPage = () => {
         }
 
         const totalFeedback = feedbacks.length;
+
+        // Lấy các đánh giá thấp nhất và sắp xếp theo điểm tăng dần
+        const lowRatingFeedbacks = feedbacks
+          .sort((a, b) => (a.rating || 5) - (b.rating || 5))
+          .slice(0, 5); // Lấy 5 đánh giá thấp nhất
 
         // Calculate feedback statistics
         const ratingSum = feedbacks.reduce(
@@ -283,6 +290,7 @@ const DashboardPage = () => {
           totalFeedback,
           recentAppointments,
           recentVaccines,
+          lowRatingFeedbacks,
           appointmentStats,
           feedbackStats,
           monthlyAppointments,
@@ -617,6 +625,10 @@ const DashboardPage = () => {
             color = "orange";
             text = "Đang chờ";
             break;
+          case "Paid":
+            color = "blue";
+            text = "Đã thanh toán";
+            break;
           case "approve":
             color = "blue";
             text = "Đã duyệt";
@@ -835,6 +847,31 @@ const DashboardPage = () => {
     },
   ];
 
+  // Định nghĩa cấu trúc columns cho bảng đánh giá thấp
+  const lowRatingFeedbackColumns = [
+    {
+      title: "Đánh giá",
+      dataIndex: "rating",
+      key: "rating",
+      render: (rating) => (
+        <Rate disabled defaultValue={rating || 0} />
+      ),
+    },
+    {
+      title: "Bình luận",
+      dataIndex: "comment",
+      key: "comment",
+      render: (comment) => comment || "Không có bình luận",
+      ellipsis: true,
+    },
+    {
+      title: "Ngày",
+      dataIndex: "createAt",
+      key: "createAt",
+      render: (date) => date ? new Date(date).toLocaleDateString("vi-VN") : "N/A",
+    },
+  ];
+
   if (loading) {
     return (
       <div className="loading-container">
@@ -928,7 +965,7 @@ const DashboardPage = () => {
       <Divider />
       {/* Appointment Status Cards */}
       <Row gutter={[16, 16]} className="stats-row appointment-status-cards">
-        <Col xs={24} md={8}>
+        <Col xs={24} md={6}>
           <Card
             hoverable
             onClick={showAppointmentTypeModal}
@@ -941,10 +978,31 @@ const DashboardPage = () => {
             />
           </Card>
         </Col>
-        <Col xs={24} md={8}>
+        <Col xs={24} md={6}>
           <Card className="stat-card">
             <Statistic
-              title="Đơn Tiêm thành công/Tổng đơn tiêm"
+              title="Đang chờ tiêm/Tổng lịch"
+              value={stats.appointmentStats.waitingForShot}
+              valueStyle={{ color: "#1890ff" }}
+              prefix={<ClockCircleOutlined />}
+              suffix={<small>/{stats.totalAppointments}</small>}
+            />
+            <Progress
+              percent={
+                Math.round(
+                  (stats.appointmentStats.waitingForShot / stats.totalAppointments) *
+                  100
+                ) || 0
+              }
+              strokeColor="#1890ff"
+              showInfo={false}
+            />
+          </Card>
+        </Col>
+        <Col xs={24} md={6}>
+          <Card className="stat-card">
+            <Statistic
+              title="Đơn Tiêm thành công/Tổng đơn"
               value={stats.appointmentStats.completed}
               valueStyle={{ color: "#52c41a" }}
               prefix={<CheckCircleOutlined />}
@@ -962,10 +1020,10 @@ const DashboardPage = () => {
             />
           </Card>
         </Col>
-        <Col xs={24} md={8}>
+        <Col xs={24} md={6}>
           <Card className="stat-card">
             <Statistic
-              title="Đơn bị hủy/Tổng đơn tiêm"
+              title="Đơn bị hủy/Tổng đơn"
               value={stats.appointmentStats.incomplete}
               valueStyle={{ color: "#f5222d" }}
               prefix={<CloseCircleOutlined />}
@@ -1002,7 +1060,7 @@ const DashboardPage = () => {
         <Col xs={24} md={12}>
           <Card className="stat-card completed-revenue-card">
             <Statistic
-              title="Doanh thu sau tiêm"
+              title="Doanh thu sau khi tiêm thành công/hoàn thành"
               value={stats.revenueStats.completedRevenue}
               valueStyle={{ color: "#52c41a" }}
               suffix="VNĐ"
@@ -1059,10 +1117,10 @@ const DashboardPage = () => {
         </Col>
 
         <Col xs={24} lg={12}>
-          <Card title="Lịch hẹn gần đây" className="dashboard-card table-card">
+          <Card title="Đánh giá cần chú ý" className="dashboard-card table-card">
             <Table
-              dataSource={stats.recentAppointments}
-              columns={appointmentColumns}
+              dataSource={stats.lowRatingFeedbacks}
+              columns={lowRatingFeedbackColumns}
               rowKey="_id"
               pagination={false}
               size="small"

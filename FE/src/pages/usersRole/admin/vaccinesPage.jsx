@@ -479,26 +479,7 @@ const VaccinesPage = () => {
           "Chưa có hình ảnh"
         ),
     },
-    {
-      title: "Thông tin y tế",
-      key: "information",
-      render: (_, record) => {
-        const info = record.information && record.information.length > 0 ? record.information[0] : null;
-        if (!info) return <Tag color="orange">Chưa có thông tin</Tag>;
-
-        return (
-          <Tooltip title={
-            <div>
-              <div><strong>Phòng bệnh:</strong> {info.preventedDiseases || "N/A"}</div>
-              <div><strong>Đối tượng:</strong> {info.eligibleGroups || "N/A"}</div>
-              <div><strong>Đường dùng:</strong> {info.administrationRoute || "N/A"}</div>
-            </div>
-          }>
-            <Button size="small">Xem thêm</Button>
-          </Tooltip>
-        );
-      }
-    },
+   
     {
       title: "Thao tác",
       key: "actions",
@@ -561,18 +542,6 @@ const VaccinesPage = () => {
       key: "totalPrice",
       render: (price) => `${price?.toLocaleString() || 0} VNĐ`,
       sorter: (a, b) => (a.totalPrice || 0) - (b.totalPrice || 0),
-    },
-    {
-      title: "Chi tiết",
-      key: "details",
-      render: (_, record) => (
-        <Button
-          type="link"
-          onClick={() => showImportDetailModal(record)}
-        >
-          Xem chi tiết
-        </Button>
-      ),
     },
     {
       title: "Thao tác",

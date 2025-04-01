@@ -101,30 +101,6 @@ const PaymentPage = () => {
         })
       );
 
-      // Tạo thông báo cho người dùng
-      try {
-        const accesstoken = localStorage.getItem("accesstoken");
-        if (accesstoken) {
-          // Tạo nội dung thông báo dựa vào loại vaccine
-          const notificationMessage = paymentData.type === "aptGoi"
-            ? `✅ THANH TOÁN THÀNH CÔNG: Bạn đã thanh toán gói vaccine "${paymentData.vaccineName}". Vui lòng đến trung tâm vào ngày ${paymentData.date} để tiêm chủng.`
-            : `✅ THANH TOÁN THÀNH CÔNG: Bạn đã thanh toán vaccine "${paymentData.vaccineName}". Vui lòng đến trung tâm vào ngày ${paymentData.date} để tiêm chủng.`;
-
-          // Gọi API tạo thông báo
-          await axiosInstance.post("/noti/createNoti", {
-            cusId: paymentData.cusId,
-            message: notificationMessage
-          }, {
-            headers: { Authorization: `Bearer ${accesstoken}` }
-          });
-          
-          console.log("Đã tạo thông báo thanh toán thành công");
-        }
-      } catch (notificationError) {
-        console.error("Lỗi tạo thông báo:", notificationError);
-        // Không throw error ở đây để không ảnh hưởng đến luồng thanh toán
-      }
-
       // Make API request to create payment
       const response = await axiosInstance.post(
         "/zalopay/payment",
@@ -167,6 +143,29 @@ const PaymentPage = () => {
 
     // Log the cancellation reason for analytics or future improvements
     console.log("Cancellation reason:", finalReason);
+
+    // Tạo thông báo hủy thanh toán
+    try {
+      const accesstoken = localStorage.getItem("accesstoken");
+      if (accesstoken && paymentData) {
+        // Tạo nội dung thông báo hủy thanh toán
+        const cancelNotificationMessage = paymentData.type === "aptGoi"
+          ? `❌ ❌ HỦY GIAO DỊCH: Bạn đã hủy thanh toán vaccine "${paymentData.vaccineName}".`
+          : `❌ ❌ HỦY GIAO DỊCH: Bạn đã hủy thanh toán vaccine "${paymentData.vaccineName}".`;
+
+        // Gọi API tạo thông báo hủy
+        axiosInstance.post("/noti/createNoti", {
+          cusId: paymentData.cusId,
+          message: cancelNotificationMessage
+        }, {
+          headers: { Authorization: `Bearer ${accesstoken}` }
+        });
+        
+        console.log("Đã tạo thông báo hủy thanh toán");
+      }
+    } catch (notificationError) {
+      console.error("Lỗi tạo thông báo hủy:", notificationError);
+    }
 
     // Clear payment data from localStorage
     localStorage.removeItem("pendingPayment");

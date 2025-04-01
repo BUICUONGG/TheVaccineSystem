@@ -281,7 +281,7 @@ const NotificationIcon = ({ cusId: propsCusId }) => {
         className="notification-list"
         loading={loading}
         dataSource={
-          // Lọc bỏ thông báo "đang ở trạng thái Pending" nếu có thông báo thanh toán thành công
+          // Chỉ lọc bỏ thông báo trạng thái Pending khi có thông báo thanh toán thành công
           notifications.filter(noti => {
             // Kiểm tra có phải thông báo Pending
             const isPendingNotification = 
@@ -295,8 +295,13 @@ const NotificationIcon = ({ cusId: propsCusId }) => {
               item.message.includes("thanh toán thành công")
             );
             
-            // Loại bỏ thông báo Pending nếu có thông báo thanh toán thành công
-            return !(isPendingNotification && hasPaymentSuccess);
+            // Chỉ loại bỏ thông báo Pending nếu có thông báo thanh toán thành công
+            if (isPendingNotification && hasPaymentSuccess) {
+              return false;
+            }
+            
+            // Giữ lại tất cả các thông báo khác
+            return true;
           })
         }
         locale={{ emptyText: <Empty description="Không có thông báo nào" /> }}
@@ -307,6 +312,10 @@ const NotificationIcon = ({ cusId: propsCusId }) => {
           
           if (item.message.includes("THANH TOÁN THÀNH CÔNG")) {
             notificationType = "payment";
+            icon = "✅";
+          } else if (item.message.includes("HỦY GIAO DỊCH")) {
+            notificationType = "cancel-payment";
+            icon = "❌";
           } else if (item.message.includes("cập nhật trạng thái")) {
             notificationType = "status";
             
