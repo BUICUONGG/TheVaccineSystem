@@ -43,7 +43,7 @@ const VaccinePriceList = () => {
           if (
             !priceMap[vaccine.vaccineId] ||
             new Date(importData.importDate) >
-            new Date(priceMap[vaccine.vaccineId].importDate)
+              new Date(priceMap[vaccine.vaccineId].importDate)
           ) {
             priceMap[vaccine.vaccineId] = {
               unitPrice: vaccine.unitPrice,
@@ -97,6 +97,41 @@ const VaccinePriceList = () => {
     setSelectedManufacturers(checkedValues);
   };
 
+  // const getFilteredProducts = () => {
+  //   let filtered = selectedCategory === "Single" ? products : packageProducts;
+
+  //   if (selectedManufacturers.length > 0) {
+  //     filtered = filtered.filter((p) =>
+  //       selectedManufacturers.includes(p.manufacturer)
+  //     );
+  //   }
+
+  //   // Filer gia san pham o day
+  //   if (priceLevel !== "all") {
+  //     filtered = filtered.filter((product) => {
+  //       const productPrice =
+  //         selectedCategory === "Single"
+  //           ? importProductsPrice[product._id]?.unitPrice
+  //           : product.price;
+
+  //       if (!productPrice) return false;
+
+  //       switch (priceLevel) {
+  //         case "under500k":
+  //           return productPrice < 500000;
+  //         case "500kto1m":
+  //           return productPrice >= 500000 && productPrice <= 1000000;
+  //         case "above1m":
+  //           return productPrice > 1000000;
+  //         default:
+  //           return true;
+  //       }
+  //     });
+  //   }
+
+  //   return filtered;
+  // };
+
   const getFilteredProducts = () => {
     let filtered = selectedCategory === "Single" ? products : packageProducts;
 
@@ -106,12 +141,12 @@ const VaccinePriceList = () => {
       );
     }
 
-    // Filer gia san pham o day
     if (priceLevel !== "all") {
       filtered = filtered.filter((product) => {
-        const productPrice = selectedCategory === "Single"
-          ? importProductsPrice[product._id]?.unitPrice
-          : product.price;
+        const productPrice =
+          selectedCategory === "Single"
+            ? importProductsPrice[product._id]?.unitPrice
+            : product.price;
 
         if (!productPrice) return false;
 
@@ -131,8 +166,14 @@ const VaccinePriceList = () => {
     return filtered;
   };
 
+  // Sử dụng danh sách sản phẩm theo trang hiện tại
+  const currentProducts = getFilteredProducts().slice(
+    (currentPage - 1) * productsPerPage,
+    currentPage * productsPerPage
+  );
+
   const handleMoreInfo = (productId) => {
-    localStorage.setItem("vaccineId", productId);
+    // localStorage.setItem("vaccineId", productId);
 
     navigate(`/vaccineDetail/${productId}`);
   };
@@ -169,14 +210,20 @@ const VaccinePriceList = () => {
               <div className="sidebar-section">
                 <h4>Mức giá</h4>
                 <Select
-                  style={{ width: '100%' }}
+                  style={{ width: "100%" }}
                   value={priceLevel}
                   onChange={(value) => setPriceLevel(value)}
                 >
                   <Select.Option value="all">Tất cả mức giá</Select.Option>
-                  <Select.Option value="under500k">Dưới 500,000 VNĐ</Select.Option>
-                  <Select.Option value="500kto1m">500,000 - 1,000,000 VNĐ</Select.Option>
-                  <Select.Option value="above1m">Trên 1,000,000 VNĐ</Select.Option>
+                  <Select.Option value="under500k">
+                    Dưới 500,000 VNĐ
+                  </Select.Option>
+                  <Select.Option value="500kto1m">
+                    500,000 - 1,000,000 VNĐ
+                  </Select.Option>
+                  <Select.Option value="above1m">
+                    Trên 1,000,000 VNĐ
+                  </Select.Option>
                 </Select>
               </div>
 
@@ -202,16 +249,21 @@ const VaccinePriceList = () => {
               </div>
 
               <div className="product-grid">
-                {getFilteredProducts().map((product) => (
+                {currentProducts.map((product) => (
                   <div
-                    className={`product-card ${selectedCategory === "Pack" ? 'package-card' : ''}`}
+                    className={`product-card ${
+                      selectedCategory === "Pack" ? "package-card" : ""
+                    }`}
                     key={product._id}
                   >
                     {selectedCategory === "Single" ? (
                       // Card cho vaccine lẻ
                       <>
                         <div className="product-image">
-                          <img src={product.imageUrl} alt={product.vaccineName} />
+                          <img
+                            src={product.imageUrl}
+                            alt={product.vaccineName}
+                          />
                         </div>
                         <div className="product-info">
                           <h3>{product.vaccineName}</h3>
@@ -222,7 +274,9 @@ const VaccinePriceList = () => {
                           <div className="price-section">
                             <span className="price-label">Giá:</span>
                             <span className="price-value">
-                              {importProductsPrice[product._id]?.unitPrice?.toLocaleString() || "Chưa có hàng"} 
+                              {importProductsPrice[
+                                product._id
+                              ]?.unitPrice?.toLocaleString() || "Chưa có hàng"}
                             </span>
                           </div>
                           <button
@@ -247,7 +301,8 @@ const VaccinePriceList = () => {
                           <div className="price-section">
                             <div className="price-row">
                               <span className="price-value package-price">
-                                {product.price?.toLocaleString() || "Chưa có hàng"} 
+                                {product.price?.toLocaleString() ||
+                                  "Chưa có hàng"}
                               </span>
                             </div>
                           </div>
@@ -264,7 +319,19 @@ const VaccinePriceList = () => {
                 ))}
               </div>
 
-              {getFilteredProducts().length > 0 && (
+              {/* {getFilteredProducts().length > 0 && (
+                <div className="pagination-container">
+                  <Pagination
+                    current={currentPage}
+                    total={getFilteredProducts().length}
+                    pageSize={productsPerPage}
+                    onChange={(page) => setCurrentPage(page)}
+                    showSizeChanger={false}
+                  />
+                </div>
+              )} */}
+
+              {getFilteredProducts().length > productsPerPage && (
                 <div className="pagination-container">
                   <Pagination
                     current={currentPage}
