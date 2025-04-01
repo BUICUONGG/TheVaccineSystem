@@ -198,21 +198,11 @@ class AppointmentService {
       // Xóa thông báo cũ cho appointment này
       await notiService.deleteNotiById(result._id);
       // Tạo thông báo mới
-      const mess = "";
-      if (updateAptGoi.status === "Paid") {
-        mess = `Lịch hẹn của bạn đã cập nhật trạng thái: đã thanh toán`;
-      }
-      if (updateAptGoi.status === "incomplete") {
-        mess = `Lịch hẹn của bạn đã cập nhật trạng thái: đã huỷ`;
-      }
-      if (updateAptGoi.status === "completed") {
-        mess = `Lịch hẹn của bạn đã cập nhật trạng thái: hoàn thành`;
-      }
       await notiService.createNoti({
         cusId: result.cusId,
         apt: result._id,
         aptModel: "AppointmentLe",
-        message: mess,
+        message: `Lịch hẹn le của bạn đã cập nhật trạng thái: ${updateAptLe.status}`,
         createdAt: new Date().toLocaleDateString("vi-VN"),
       });
 
@@ -534,21 +524,11 @@ class AppointmentService {
       // Xóa thông báo cũ cho appointment này
       await notiService.deleteNotiById(result._id);
       // Tạo thông báo mới
-      const mess = "";
-      if (updateAptGoi.status === "Paid") {
-        mess = `Lịch hẹn của bạn đã cập nhật trạng thái: đã thanh toán`;
-      }
-      if (updateAptGoi.status === "incomplete") {
-        mess = `Lịch hẹn của bạn đã cập nhật trạng thái: đã huỷ`;
-      }
-      if (updateAptGoi.status === "completed") {
-        mess = `Lịch hẹn của bạn đã cập nhật trạng thái: hoàn thành`;
-      }
       await notiService.createNoti({
         cusId: result.cusId,
         apt: result._id,
         aptModel: "AppointmentGoi",
-        message: mess,
+        message: `Lịch hẹn của bạn đã cập nhật trạng thái: ${updateAptGoi.status}`,
         createdAt: new Date().toLocaleDateString("vi-VN"),
       });
 
