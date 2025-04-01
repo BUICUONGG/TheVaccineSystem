@@ -13,7 +13,7 @@ export const getOneCusController = async (req, res) => {
 export const getCustomerByIdController = async (req, res) => {
   try {
     const id = req.params.id;
-    console.log(`Controller received customer ID: ${id}`);
+
     const customer = await customerService.getCustomerById(id);
     return res.json(customer);
   } catch (error) {

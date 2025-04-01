@@ -57,7 +57,13 @@ class PaymentService {
 
       const result = await axios.post(config.endpoint, null, { params: order });
       const status = "Pending";
-
+      const mss = "";
+      if (status == "Pending" && paymentData.type === "aptLe") {
+        mss = `Lịch hẹn lẻ của bạn vào lúc ${paymentData.time} đang trong trạng thái đang chờ`;
+      }
+      if (status == "Pending" && paymentData.type === "aptGoi") {
+        mss = `Lịch hẹn gói của bạn vào lúc ${paymentData.time} đang trong trạng thái đang chờ`;
+      }
       if (paymentData.type === "aptLe") {
         const aptLe = await appointmentService.createAptLe(
           transformedPaymentData
@@ -74,11 +80,12 @@ class PaymentService {
             },
           }
         );
+
         await notiService.createNoti({
           cusId: transformedPaymentData.cusId,
           apt: aptLe.insertedId,
           aptModel: "AppointmentLe",
-          message: `Lịch hẹn lẻ của bạn vào lúc ${paymentData.time} đang trong trạng thái ${status}`,
+          message: mss,
           createdAt: new Date().toLocaleDateString("vi-VN"),
         });
       } else {
@@ -104,7 +111,7 @@ class PaymentService {
           cusId: transformedPaymentData.cusId,
           apt: aptGoi._id,
           aptModel: "AppointmentGoi",
-          message: `Lịch hẹn gói của bạn vào lúc ${paymentData.time} đang ở trạng thái ${status}`,
+          message: mss,
           createdAt: new Date().toLocaleDateString("vi-VN"),
         });
       }
