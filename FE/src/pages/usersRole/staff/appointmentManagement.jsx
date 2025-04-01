@@ -370,7 +370,7 @@ const AppointmentManagement = () => {
       case "incomplete":
         return "red";
       case "Pending":
-        return "blue";
+        return "red";
       case "Paid":
         return "blue";
       case "approve":
@@ -387,7 +387,7 @@ const AppointmentManagement = () => {
       case "incomplete":
         return "Đã hủy";
       case "Pending":
-        return "Đã thanh toán";
+        return "Đã hủy";
       case "Paid":
         return "Đã thanh toán";
       case "approve":
@@ -654,7 +654,7 @@ const AppointmentManagement = () => {
       filters: [
         { text: "Hoàn thành", value: "completed" },
         { text: "Đã hủy", value: "incomplete" },
-        { text: "Đã thanh toán", value: "Pending" },
+        { text: "Đã thanh toán", value: "Paid" },
         { text: "Đã duyệt", value: "approve" },
       ],
       onFilter: (value, record) => record.status === value,
