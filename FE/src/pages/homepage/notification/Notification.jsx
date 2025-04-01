@@ -307,7 +307,6 @@ const NotificationIcon = ({ cusId: propsCusId }) => {
           
           if (item.message.includes("THANH TOÁN THÀNH CÔNG")) {
             notificationType = "payment";
-            icon = "✅";
           } else if (item.message.includes("cập nhật trạng thái")) {
             notificationType = "status";
             

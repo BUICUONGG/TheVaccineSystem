@@ -550,8 +550,8 @@ const HomePage = () => {
                     <div className="vaccine-price-v1">
                       {vaccine.vaccineImports &&
                         vaccine.vaccineImports.length > 0 &&
-                        importProductsPrice[vaccine._id].unitPrice
-                        ? `${importProductsPrice[vaccine._id]?.unitPrice?.toLocaleString()} VNĐ`
+                        importProductsPrice?.[vaccine._id]?.unitPrice
+                        ? `${(importProductsPrice?.[vaccine._id]?.unitPrice || 0).toLocaleString()} VNĐ`
                         : "Chưa có hàng"}
                     </div>
                     <Link to="/pricelist" className="vaccine-view-more-v1">
