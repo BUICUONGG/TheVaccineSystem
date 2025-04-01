@@ -718,10 +718,10 @@ const HomePage = () => {
           <div className="footer-section">
             <h3>PHÁP LÝ & CÂU HỎI</h3>
             <div className="legal-links">
-              <Link to="/search">Tìm kiếm</Link>
-              <Link to="/about">Giới thiệu</Link>
-              <Link to="/privacy-policy">Chính sách bảo mật</Link>
-              <Link to="/terms">Điều khoản dịch vụ</Link>
+              <p>Tìm kiếm</p>
+              <p>Giới thiệu</p>
+              <p>Chính sách bảo mật</p>
+              <p>Điều khoản dịch vụ</p>
               {isLoggedIn && userRole === "customer" && (
                 <Link to="#" onClick={openFeedbackForm}>Đánh giá dịch vụ</Link>
               )}

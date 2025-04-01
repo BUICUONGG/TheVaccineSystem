@@ -370,7 +370,7 @@ const AppointmentManagement = () => {
       case "incomplete":
         return "red";
       case "Pending":
-        return "red";
+        return "darkred";
       case "Paid":
         return "blue";
       case "approve":
@@ -387,7 +387,7 @@ const AppointmentManagement = () => {
       case "incomplete":
         return "Đã hủy";
       case "Pending":
-        return "Đã hủy";
+        return "Hủy thanh toán";
       case "Paid":
         return "Đã thanh toán";
       case "approve":
@@ -664,19 +664,46 @@ const AppointmentManagement = () => {
       defaultSortOrder: "ascend", // Sắp xếp mặc định theo thứ tự tăng dần
     },
     {
-      title: "Chi tiết",
-      key: "details",
-      width: 80,
+      title: "Thao tác",
+      key: "actions",
+      width: 200,
       render: (_, record) => (
-        <Space size="middle">
-        <Button
-          type="primary"
-          icon={<MenuOutlined />}
-          onClick={() => showAppointmentDetails(record)}
-          disabled={record.status === "incomplete"}
+        <div className="action-buttons">
+          {record.status === "Paid" && (
+            <>
+              <Button
+                type="primary"
+                className="complete-button"
+                onClick={() => handleStatusChange(record._id, "approve", true)}
+              >
+                Duyệt đơn
+              </Button>
+              <Button
+                danger
+                className="cancel-button"
+                onClick={() => handleStatusChange(record._id, "incomplete", true)}
+              >
+                Hủy đơn
+              </Button>
+            </>
+          )}
+          {record.status === "Pending" && (
+            <Button
+              danger
+              className="cancel-button"
+              onClick={() => handleStatusChange(record._id, "incomplete", true)}
+            >
+              Hủy đơn
+            </Button>
+          )}
+          <Button
+            type="primary"
+            icon={<MenuOutlined />}
+            onClick={() => showAppointmentDetails(record)}
+            disabled={record.status === "incomplete"}
             className="detail-button"
-        />
-        </Space>
+          />
+        </div>
       ),
     },
   ];
@@ -766,7 +793,7 @@ const AppointmentManagement = () => {
       filters: [
         { text: "Hoàn thành", value: "completed" },
         { text: "Đã hủy", value: "incomplete" },
-        { text: "Đã thanh toán", value: "Pending" },
+        { text: "Đã thanh toán", value: "Paid" },
         { text: "Đã duyệt", value: "approve" },
       ],
       onFilter: (value, record) => record.status === value,
@@ -781,11 +808,11 @@ const AppointmentManagement = () => {
       width: 200,
       render: (_, record) => (
         <div className="action-buttons">
-          {record.status === "Pending" && (
+          {record.status === "Paid" && (
             <>
               <Button
                 type="primary"
-                className="approve-button"
+                className="complete-button"
                 onClick={() =>
                   handleStatusChange(
                     record._id,
@@ -794,7 +821,7 @@ const AppointmentManagement = () => {
                   )
                 }
               >
-                Duyệt đơn
+                Hoàn thành
               </Button>
               <Button
                 danger
@@ -819,6 +846,21 @@ const AppointmentManagement = () => {
               onClick={() => handleStatusChange(record._id, "completed", false)}
             >
               Complete
+            </Button>
+          )}
+          {record.status === "Pending" && (
+            <Button
+              danger
+              className="cancel-button"
+              onClick={() =>
+                handleStatusChange(
+                  record._id,
+                  "incomplete",
+                  false
+                )
+              }
+            >
+              Hủy đơn
             </Button>
           )}
           <Button
@@ -1074,7 +1116,7 @@ const AppointmentManagement = () => {
                   <span className="detail-label">Thao tác:</span>
                   <span className="detail-value">
                     <div className="action-buttons">
-                      {selectedAppointment.status === "Pending" && (
+                      {selectedAppointment.status === "Paid" && (
                         <>
                           <Button
                             type="primary"
@@ -1126,8 +1168,7 @@ const AppointmentManagement = () => {
 
               {/* Phần thao tác cho lịch hẹn gói */}
               {selectedAppointment.isPackage &&
-                (selectedAppointment.status === "Pending" ||
-                  selectedAppointment.status === "Paid") && (
+                (selectedAppointment.status === "Paid") && (
                   <div className="detail-row" style={{ marginTop: "20px" }}>
                     <span className="detail-label">Thao tác:</span>
                     <span className="detail-value">
@@ -1251,7 +1292,7 @@ const AppointmentManagement = () => {
                               onClick={() => {
                                 const newStatus =
                                   item.status === "completed"
-                                    ? "Pending"
+                                    ? "Paid"
                                     : "completed";
                                 console.log(
                                   `Toggling status for dose ${item.doseNumber} from ${item.status} to ${newStatus}`
@@ -1282,8 +1323,7 @@ const AppointmentManagement = () => {
 
             {/* Hiển thị thông báo yêu cầu duyệt đơn khi đơn chưa được duyệt */}
             {selectedAppointment.isPackage &&
-              (selectedAppointment.status === "Pending" ||
-                selectedAppointment.status === "Paid") && (
+              (selectedAppointment.status === "Paid") && (
                 <div className="dose-schedule-section">
                   <div className="approve-notice">
                     <Title level={4}>Thông báo</Title>

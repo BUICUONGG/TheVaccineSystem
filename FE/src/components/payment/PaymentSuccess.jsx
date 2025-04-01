@@ -118,6 +118,30 @@ const PaymentSuccess = () => {
           status: 'Thành công',
           ...additionalInfo
         });
+
+        // Tạo thông báo thanh toán thành công
+        try {
+          const accesstoken = localStorage.getItem("accesstoken");
+          if (accesstoken && additionalInfo.cusId && additionalInfo.vaccineName) {
+            // Tạo nội dung thông báo dựa vào loại vaccine
+            const notificationMessage = additionalInfo.type === "aptGoi"
+              ? `✅ THANH TOÁN THÀNH CÔNG: Bạn đã thanh toán gói vaccine "${additionalInfo.vaccineName}". Vui lòng đến trung tâm vào ngày ${additionalInfo.date} để tiêm chủng.`
+              : `✅ THANH TOÁN THÀNH CÔNG: Bạn đã thanh toán vaccine "${additionalInfo.vaccineName}". Vui lòng đến trung tâm vào ngày ${additionalInfo.date} để tiêm chủng.`;
+
+            // Gọi API tạo thông báo
+            await axiosInstance.post("/noti/createNoti", {
+              cusId: additionalInfo.cusId,
+              message: notificationMessage
+            }, {
+              headers: { Authorization: `Bearer ${accesstoken}` }
+            });
+            
+            console.log("Đã tạo thông báo thanh toán thành công");
+          }
+        } catch (notificationError) {
+          console.error("Lỗi tạo thông báo:", notificationError);
+          // Không ảnh hưởng đến luồng thanh toán
+        }
         
         // Start progress for navigation
         setProgressActive(true);
