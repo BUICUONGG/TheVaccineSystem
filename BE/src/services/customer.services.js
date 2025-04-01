@@ -19,7 +19,6 @@ class CustomerService {
 
   async getCustomerById(id) {
     try {
-      console.log(`Looking for customer with direct ID: ${id}`);
       const result = await connectToDatabase.customers.findOne({
         _id: new ObjectId(id),
       });
