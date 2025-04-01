@@ -155,7 +155,7 @@ export const incrementViewsController = async (req, res) => {
 export const toggleLikeController = async (req, res) => {
   try {
     const { blogId } = req.params;
-    const userId = req.user._id;
+    const userId = req.user.id;
     const result = await blogService.toggleLike(blogId, userId);
     return res.status(200).json({
       message: "Like toggled successfully",
@@ -191,7 +191,7 @@ export const addCommentController = async (req, res) => {
   try {
     const { blogId } = req.params;
     const { content } = req.body;
-    const userId = req.user._id;
+    const userId = req.user.id;
     
     if (!content || content.trim() === '') {
       return res.status(400).json({ error: "Comment content is required" });
