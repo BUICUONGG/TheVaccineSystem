@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Card, Row, Col, Typography, Tag, Space, Divider, Select, Input, Button, Tooltip, Spin, Avatar, List, message, Modal, Form } from "antd";
+import { Card, Row, Col, Typography, Tag, Space, Divider, Select, Input, Button, Tooltip, Spin, Avatar, List, message, Modal, Form, Popconfirm } from "antd";
 import {
   EyeOutlined,
   HeartOutlined,
@@ -15,6 +15,7 @@ import {
   RiseOutlined,
   BarsOutlined,
   HomeOutlined,
+  DeleteOutlined,
 } from "@ant-design/icons";
 import slugify from 'slugify';
 import { Link } from "react-router-dom";
@@ -57,6 +58,31 @@ const BlogList = () => {
     fetchPopularTags();
     setVisible(true);
   }, [categoryFilter, tagFilter, searchKeyword, sortBy]);
+
+  useEffect(() => {
+    // Thêm CSS cho comment-author
+    const style = document.createElement('style');
+    style.innerHTML = `
+      .comment-author {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 5px;
+      }
+      .comment-author-info {
+        display: flex;
+        align-items: center;
+      }
+      .delete-comment-btn {
+        margin-left: 8px;
+      }
+    `;
+    document.head.appendChild(style);
+    
+    return () => {
+      document.head.removeChild(style);
+    };
+  }, []);
 
   const fetchBlogs = async () => {
     try {
@@ -113,10 +139,17 @@ const BlogList = () => {
   };
 
   const toggleLike = async (blogId) => {
+    // Check if user is logged in
+    const accessToken = localStorage.getItem("accesstoken");
+    if (!accessToken) {
+      message.error("Bạn cần đăng nhập để thích bài viết");
+      return;
+    }
+
     try {
       await axiosInstance.post(`/blog/like/${blogId}`, {}, {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem("accesstoken")}`,
+          Authorization: `Bearer ${accessToken}`,
         },
       });
 
@@ -137,6 +170,7 @@ const BlogList = () => {
       }));
     } catch (error) {
       console.error("Failed to toggle like:", error);
+      message.error("Không thể thích bài viết. Vui lòng thử lại sau.");
     }
   };
 
@@ -233,6 +267,13 @@ const BlogList = () => {
   const handleCommentSubmit = async () => {
     if (!commentContent.trim() || !selectedBlog) return;
 
+    // Check if user is logged in
+    const accessToken = localStorage.getItem("accesstoken");
+    if (!accessToken) {
+      message.error("Bạn cần đăng nhập để bình luận");
+      return;
+    }
+
     try {
       setSubmittingComment(true);
 
@@ -240,14 +281,14 @@ const BlogList = () => {
         content: commentContent
       }, {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem("accesstoken")}`,
+          Authorization: `Bearer ${accessToken}`,
         },
       });
 
       // Refresh blog detail to show the new comment
       const updatedBlogResponse = await axiosInstance.get(`/blog/detail/${selectedBlog._id}`, {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem("accesstoken")}`,
+          Authorization: `Bearer ${accessToken}`,
         },
       });
 
@@ -271,9 +312,54 @@ const BlogList = () => {
       message.success("Bình luận đã được thêm");
     } catch (error) {
       console.error("Failed to submit comment:", error);
-      message.error("Bạn cần đăng nhập để bình luận");
+      message.error("Không thể thêm bình luận. Vui lòng thử lại sau.");
     } finally {
       setSubmittingComment(false);
+    }
+  };
+
+  // Sửa lại hàm xóa comment để sử dụng đúng ID
+  const handleDeleteComment = async (commentId) => {
+    if (!selectedBlog) return;
+    const accessToken = localStorage.getItem("accesstoken");
+    if (!accessToken) {
+      message.error("Bạn cần đăng nhập để xóa bình luận");
+      return;
+    }
+
+    try {
+      // Gọi API hide comment (sử dụng API đã có)
+      await axiosInstance.post(`/blog/comment/${selectedBlog._id}/${commentId}/hide`, {}, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+
+      // Refresh blog detail to update comments
+      const updatedBlogResponse = await axiosInstance.get(`/blog/detail/${selectedBlog._id}`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+
+      if (updatedBlogResponse.data) {
+        const updatedBlog = updatedBlogResponse.data;
+        // Update selectedBlog state with new data
+        setSelectedBlog(updatedBlog);
+        // Update blogs state to reflect the new comment list
+        setBlogs(prevBlogs =>
+          prevBlogs.map(blog =>
+            blog._id === updatedBlog._id
+              ? { ...blog, comments: updatedBlog.comments }
+              : blog
+          )
+        );
+      }
+
+      message.success("Bình luận đã được xóa");
+    } catch (error) {
+      console.error("Failed to delete comment:", error);
+      message.error("Không thể xóa bình luận. Vui lòng thử lại sau.");
     }
   };
 
@@ -372,13 +458,7 @@ const BlogList = () => {
 
                 <Tooltip title="Bình luận">
                   <span className="stat-item">
-                    <CommentOutlined /> {blog.comments?.length || 0}
-                  </span>
-                </Tooltip>
-
-                <Tooltip title="Thời gian đọc">
-                  <span className="stat-item">
-                    <ClockCircleOutlined /> {blog.readingTime || 5} phút
+                    <CommentOutlined /> {blog.comments?.filter(comment => comment.status === "active").length || 0}
                   </span>
                 </Tooltip>
               </div>
@@ -409,7 +489,7 @@ const BlogList = () => {
 
       <div className="blog-header">
         <Title level={2} className={`main-title ${visible ? "fade-in" : ""}`}>
-          Câu Chuyện Vaccine
+          Cẩm Nang Vaccine
         </Title>
 
         <div style={{ marginBottom: 16 }}>
@@ -614,13 +694,7 @@ const BlogList = () => {
 
                       <Tooltip title="Bình luận">
                         <span className="stat-item">
-                          <CommentOutlined /> {selectedBlog.comments?.length || 0}
-                        </span>
-                      </Tooltip>
-
-                      <Tooltip title="Thời gian đọc">
-                        <span className="stat-item">
-                          <ClockCircleOutlined /> {selectedBlog.readingTime || 5} phút
+                          <CommentOutlined /> {selectedBlog.comments?.filter(comment => comment.status === "active").length || 0}
                         </span>
                       </Tooltip>
                     </Space>
@@ -631,22 +705,38 @@ const BlogList = () => {
               {/* Right side - Comments */}
               <Col xs={24} sm={24} md={8} className="blog-detail-comments">
                 <div className="comments-header">
-                  <Title level={4}>Bình luận ({selectedBlog.comments?.length || 0})</Title>
+                  <Title level={4}>Bình luận ({selectedBlog.comments?.filter(comment => comment.status === "active").length || 0})</Title>
                 </div>
 
                 <div className="comments-list">
-                  {selectedBlog.comments && selectedBlog.comments.length > 0 ? (
+                  {selectedBlog.comments && selectedBlog.comments.filter(comment => comment.status === "active").length > 0 ? (
                     <div className="comments-list-content">
-                      {selectedBlog.comments.map((comment, index) => (
+                      {selectedBlog.comments
+                        .filter(comment => comment.status === "active")
+                        .map((comment, index) => (
                         <div key={index} className="comment-item">
                           <div className="comment-author">
-                            <Avatar icon={<UserOutlined />} />
-                            <div className="comment-info">
-                              <Text strong>Người dùng</Text>
-                              <Text type="secondary" style={{ fontSize: '12px' }}>
-                                {new Date(comment.createdAt).toLocaleString()}
-                              </Text>
+                            <div className="comment-author-info">
+                              <Avatar icon={<UserOutlined />} />
+                              <div className="comment-info">
+                                <Text strong>{comment.user ? (comment.user.username || 'Người dùng') : 'Người dùng'}</Text>
+                                <Text type="secondary" style={{ fontSize: '12px' }}>
+                                  {new Date(comment.createdAt).toLocaleString()}
+                                </Text>
+                              </div>
                             </div>
+                            {localStorage.getItem("userId") === String(comment.userId) && (
+                              <Popconfirm
+                                title="Xóa bình luận của bạn?"
+                                onConfirm={() => handleDeleteComment(comment.userId)}
+                                okText="Có"
+                                cancelText="Không"
+                              >
+                                <Button type="text" danger size="small" className="delete-comment-btn">
+                                  <DeleteOutlined />
+                                </Button>
+                              </Popconfirm>
+                            )}
                           </div>
                           <div className="comment-content">
                             <div className="comment-bubble">
@@ -667,33 +757,41 @@ const BlogList = () => {
                 </div>
 
                 <div className="comment-input">
-                  <Form.Item style={{ marginBottom: 0 }}>
-                    <div style={{ display: 'flex' }}>
-                      <Avatar size="small" icon={<UserOutlined />} style={{ marginRight: 8 }} />
-                      <Input.TextArea
-                        rows={2}
-                        placeholder="Viết bình luận..."
-                        value={commentContent}
-                        onChange={(e) => setCommentContent(e.target.value)}
-                        onPressEnter={(e) => {
-                          if (!e.shiftKey) {
-                            e.preventDefault();
-                            handleCommentSubmit();
-                          }
-                        }}
-                      />
+                  {localStorage.getItem("accesstoken") ? (
+                    <>
+                      <Form.Item style={{ marginBottom: 0 }}>
+                        <div style={{ display: 'flex' }}>
+                          <Avatar size="small" icon={<UserOutlined />} style={{ marginRight: 8 }} />
+                          <Input.TextArea
+                            rows={2}
+                            placeholder="Viết bình luận..."
+                            value={commentContent}
+                            onChange={(e) => setCommentContent(e.target.value)}
+                            onPressEnter={(e) => {
+                              if (!e.shiftKey) {
+                                e.preventDefault();
+                                handleCommentSubmit();
+                              }
+                            }}
+                          />
+                        </div>
+                      </Form.Item>
+                      <div style={{ textAlign: 'right', marginTop: 8 }}>
+                        <Button
+                          type="primary"
+                          onClick={handleCommentSubmit}
+                          disabled={!commentContent.trim()}
+                          loading={submittingComment}
+                        >
+                          Bình luận
+                        </Button>
+                      </div>
+                    </>
+                  ) : (
+                    <div style={{ textAlign: 'center', padding: '10px', background: '#f5f5f5', borderRadius: '4px' }}>
+                      <Text>Vui lòng <Link to="/login">đăng nhập</Link> để bình luận</Text>
                     </div>
-                  </Form.Item>
-                  <div style={{ textAlign: 'right', marginTop: 8 }}>
-                    <Button
-                      type="primary"
-                      onClick={handleCommentSubmit}
-                      disabled={!commentContent.trim()}
-                      loading={submittingComment}
-                    >
-                      Bình luận
-                    </Button>
-                  </div>
+                  )}
                 </div>
               </Col>
             </Row>

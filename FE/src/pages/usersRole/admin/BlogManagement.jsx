@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import { Table, Input, Button, Modal, Form, Popconfirm, Select, Tag, Rate, Typography, Space, Tooltip, Divider, Badge, Card } from "antd";
-import { EditOutlined, DeleteOutlined, PlusOutlined, EyeOutlined, ClockCircleOutlined, LikeOutlined, CommentOutlined, UndoOutlined, SearchOutlined } from "@ant-design/icons";
+import { Table, Input, Button, Modal, Form, Popconfirm, Select, Tag, Rate, Typography, Space, Tooltip, Divider, Badge, Card, Avatar } from "antd";
+import { EditOutlined, DeleteOutlined, PlusOutlined, EyeOutlined, ClockCircleOutlined, LikeOutlined, CommentOutlined, UndoOutlined, SearchOutlined, UserOutlined, InfoCircleOutlined } from "@ant-design/icons";
 import axiosInstance from "../../../service/api";
 
 const { Search } = Input;
@@ -23,6 +23,8 @@ const BlogManagement = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalBlogs, setTotalBlogs] = useState(0);
   const pageSize = 10;
+  const [commentSearchText, setCommentSearchText] = useState("");
+  const [statsCommentSearchText, setStatsCommentSearchText] = useState("");
 
   const categories = [
     { value: "lich-tiem-chung", label: "Lịch tiêm chủng" },
@@ -221,14 +223,52 @@ const BlogManagement = () => {
     return category ? category.label : value;
   };
 
-  const showDetailModal = (blog) => {
-    setDetailBlog(blog);
-    setIsDetailModalVisible(true);
+  const showDetailModal = async (blog) => {
+    try {
+      // Reset search text
+      setCommentSearchText("");
+      
+      // Fetch the complete blog details with user information for comments
+      const response = await axiosInstance.get(`/blog/detail/${blog._id}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accesstoken")}`,
+        },
+      });
+      
+      if (response.data) {
+        setDetailBlog(response.data);
+        setIsDetailModalVisible(true);
+      }
+    } catch (error) {
+      console.error("Failed to fetch blog details:", error);
+      Modal.error({
+        content: "Không thể tải chi tiết bài viết",
+      });
+    }
   };
 
-  const showStatsModal = (blog) => {
-    setStatsBlog(blog);
-    setIsStatsModalVisible(true);
+  const showStatsModal = async (blog) => {
+    try {
+      // Reset search text
+      setStatsCommentSearchText("");
+      
+      // Fetch the complete blog details with user information for comments
+      const response = await axiosInstance.get(`/blog/detail/${blog._id}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accesstoken")}`,
+        },
+      });
+      
+      if (response.data) {
+        setStatsBlog(response.data);
+        setIsStatsModalVisible(true);
+      }
+    } catch (error) {
+      console.error("Failed to fetch blog details:", error);
+      Modal.error({
+        content: "Không thể tải thống kê bài viết",
+      });
+    }
   };
 
   const columns = [
@@ -355,6 +395,46 @@ const BlogManagement = () => {
     setIsEditModalVisible(true);
   };
 
+  // Thêm hàm để ẩn bình luận
+  const hideComment = async (blogId, comment) => {
+    try {
+      await axiosInstance.post(
+        `/blog/comment/${blogId}/${comment.userId}/hide`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("accesstoken")}`,
+          },
+        }
+      );
+
+      Modal.success({
+        content: "Đã ẩn bình luận thành công!",
+      });
+
+      // Cập nhật lại thông tin blog sau khi ẩn bình luận
+      const response = await axiosInstance.get(`/blog/detail/${blogId}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("accesstoken")}`,
+        },
+      });
+      
+      if (response.data) {
+        // Cập nhật cả detailBlog và statsBlog nếu đang hiển thị cùng một blog
+        setDetailBlog(response.data);
+        
+        if (statsBlog && statsBlog._id === blogId) {
+          setStatsBlog(response.data);
+        }
+      }
+    } catch (error) {
+      console.error("Error hiding comment:", error);
+      Modal.error({
+        content: "Không thể ẩn bình luận",
+      });
+    }
+  };
+
   return (
     <div style={{ padding: "20px" }}>
       <div
@@ -418,9 +498,15 @@ const BlogManagement = () => {
       <Modal
         title="Chi tiết thống kê"
         open={isStatsModalVisible}
-        onCancel={() => setIsStatsModalVisible(false)}
+        onCancel={() => {
+          setIsStatsModalVisible(false);
+          setStatsCommentSearchText(""); // Reset search khi đóng modal
+        }}
         footer={[
-          <Button key="back" onClick={() => setIsStatsModalVisible(false)}>
+          <Button key="back" onClick={() => {
+            setIsStatsModalVisible(false);
+            setStatsCommentSearchText(""); // Reset search khi đóng modal
+          }}>
             Đóng
           </Button>,
         ]}
@@ -445,11 +531,96 @@ const BlogManagement = () => {
                   <p><LikeOutlined /> Lượt thích: <strong>{statsBlog.likes || 0}</strong></p>
                 </div>
                 <div>
-                  <p><CommentOutlined /> Bình luận: <strong>{statsBlog.comments?.length || 0}</strong></p>
+                  <p><CommentOutlined /> Bình luận: <strong>{statsBlog.comments?.filter(comment => comment.status !== "hidden").length || 0}</strong></p>
                   <p><ClockCircleOutlined /> Thời gian đọc: <strong>{statsBlog.readingTime || 0} phút</strong></p>
                 </div>
               </div>
             </Card>
+            
+            {statsBlog.comments && statsBlog.comments.filter(comment => comment.status !== "hidden").length > 0 && (
+              <Card 
+                title="Bình luận gần đây" 
+                style={{ marginBottom: 16 }}
+                extra={
+                  <Input.Search
+                    placeholder="Tìm kiếm"
+                    allowClear
+                    style={{ width: 150 }}
+                    size="small"
+                    onChange={(e) => setStatsCommentSearchText(e.target.value)}
+                  />
+                }
+              >
+                {statsBlog.comments
+                  .filter(comment => comment.status !== "hidden")
+                  .filter(comment => 
+                    statsCommentSearchText ? 
+                    comment.content.toLowerCase().includes(statsCommentSearchText.toLowerCase()) || 
+                    (comment.user?.username && comment.user.username.toLowerCase().includes(statsCommentSearchText.toLowerCase())) : 
+                    true
+                  ).length === 0 ? (
+                  <div style={{ textAlign: 'center', padding: '10px 0', color: '#999', fontSize: '13px' }}>
+                    {statsCommentSearchText ? 'Không tìm thấy bình luận phù hợp' : 'Chưa có bình luận nào'}
+                  </div>
+                ) : (
+                  statsBlog.comments
+                    .filter(comment => comment.status !== "hidden")
+                    .filter(comment => 
+                      statsCommentSearchText ? 
+                      comment.content.toLowerCase().includes(statsCommentSearchText.toLowerCase()) || 
+                      (comment.user?.username && comment.user.username.toLowerCase().includes(statsCommentSearchText.toLowerCase())) : 
+                      true
+                    )
+                    .slice(0, 3)
+                    .map((comment, index) => (
+                      <div key={index} style={{ marginBottom: index < 2 ? 10 : 0, paddingBottom: index < 2 ? 10 : 0, borderBottom: index < 2 ? '1px solid #f0f0f0' : 'none' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                          <div style={{ display: 'flex', alignItems: 'center' }}>
+                            <Avatar icon={<UserOutlined />} size="small" style={{ marginRight: 8 }} />
+                            <div>
+                              <Text strong>
+                                {comment.user && comment.user.username 
+                                  ? comment.user.username 
+                                  : comment.user && comment.user.fullName 
+                                    ? comment.user.fullName 
+                                    : `User ID: ${comment.userId}`}
+                              </Text>
+                              <Text type="secondary" style={{ marginLeft: 8, fontSize: '12px', display: 'block' }}>
+                                {new Date(comment.createdAt).toLocaleString()}
+                              </Text>
+                            </div>
+                          </div>
+                          
+                          <Popconfirm
+                            title="Bạn có chắc chắn muốn ẩn bình luận này?"
+                            onConfirm={() => hideComment(statsBlog._id, comment)}
+                            okText="Có"
+                            cancelText="Không"
+                          >
+                            <Button danger type="link" size="small">
+                              Ẩn
+                            </Button>
+                          </Popconfirm>
+                        </div>
+                        <div style={{ marginLeft: 24, marginTop: 4, color: '#666' }}>
+                          {comment.content.length > 100 ? `${comment.content.substring(0, 100)}...` : comment.content}
+                        </div>
+                      </div>
+                    ))
+                )}
+                
+                {!statsCommentSearchText && statsBlog.comments.filter(comment => comment.status !== "hidden").length > 3 && (
+                  <div style={{ textAlign: 'center', marginTop: 10 }}>
+                    <Button type="link" onClick={() => {
+                      showDetailModal(statsBlog);
+                      setIsStatsModalVisible(false);
+                    }}>
+                      Xem tất cả {statsBlog.comments.filter(comment => comment.status !== "hidden").length} bình luận
+                    </Button>
+                  </div>
+                )}
+              </Card>
+            )}
             
             <Card title="Đánh giá">
               <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -476,10 +647,16 @@ const BlogManagement = () => {
       <Modal
         title={detailBlog?.blogTitle}
         open={isDetailModalVisible}
-        onCancel={() => setIsDetailModalVisible(false)}
+        onCancel={() => {
+          setIsDetailModalVisible(false);
+          setCommentSearchText(""); // Reset search khi đóng modal
+        }}
         width={800}
         footer={[
-          <Button key="back" onClick={() => setIsDetailModalVisible(false)}>
+          <Button key="back" onClick={() => {
+            setIsDetailModalVisible(false);
+            setCommentSearchText(""); // Reset search khi đóng modal
+          }}>
             Đóng
           </Button>
         ]}
@@ -517,18 +694,70 @@ const BlogManagement = () => {
             
             {detailBlog.comments && detailBlog.comments.length > 0 && (
               <div style={{ marginTop: 30 }}>
-                <h3>Bình luận ({detailBlog.comments.length})</h3>
-                {detailBlog.comments.map((comment, index) => (
-                  <div key={index} style={{ marginBottom: 10, padding: 10, border: '1px solid #f0f0f0', borderRadius: 5 }}>
-                    <div style={{ marginBottom: 5 }}>
-                      <Text strong>User ID: {comment.userId}</Text>
-                      <Text type="secondary" style={{ marginLeft: 10 }}>
-                        {new Date(comment.createdAt).toLocaleString()}
-                      </Text>
-                    </div>
-                    <div>{comment.content}</div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 15 }}>
+                  <h3>Bình luận ({detailBlog.comments.filter(comment => comment.status !== "hidden").length})</h3>
+                  <Input.Search
+                    placeholder="Tìm kiếm bình luận..."
+                    style={{ width: 250 }}
+                    onChange={(e) => setCommentSearchText(e.target.value)}
+                  />
+                </div>
+                
+                {detailBlog.comments
+                  .filter(comment => comment.status !== "hidden")
+                  .filter(comment => 
+                    commentSearchText ? 
+                    comment.content.toLowerCase().includes(commentSearchText.toLowerCase()) || 
+                    (comment.user?.username && comment.user.username.toLowerCase().includes(commentSearchText.toLowerCase())) : 
+                    true
+                  ).length === 0 ? (
+                  <div style={{ textAlign: 'center', padding: '20px 0', color: '#999' }}>
+                    {commentSearchText ? 'Không tìm thấy bình luận phù hợp' : 'Chưa có bình luận nào'}
                   </div>
-                ))}
+                ) : (
+                  detailBlog.comments
+                    .filter(comment => comment.status !== "hidden")
+                    .filter(comment => 
+                      commentSearchText ? 
+                      comment.content.toLowerCase().includes(commentSearchText.toLowerCase()) || 
+                      (comment.user?.username && comment.user.username.toLowerCase().includes(commentSearchText.toLowerCase())) : 
+                      true
+                    )
+                    .map((comment, index) => (
+                      <div key={index} style={{ marginBottom: 10, padding: 10, border: '1px solid #f0f0f0', borderRadius: 5 }}>
+                        <div style={{ marginBottom: 5, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                          <div style={{ display: 'flex', alignItems: 'center' }}>
+                            <Avatar icon={<UserOutlined />} style={{ marginRight: 8 }} />
+                            <div>
+                              <Text strong>
+                                {comment.user && comment.user.username 
+                                  ? comment.user.username 
+                                  : comment.user && comment.user.fullName 
+                                    ? comment.user.fullName 
+                                    : `User ID: ${comment.userId}`}
+                              </Text>
+                              <div>
+                                <Text type="secondary" style={{ fontSize: '12px' }}>
+                                  {new Date(comment.createdAt).toLocaleString()}
+                                </Text>
+                              </div>
+                            </div>
+                          </div>
+                          <Popconfirm
+                            title="Bạn có chắc chắn muốn ẩn bình luận này?"
+                            onConfirm={() => hideComment(detailBlog._id, comment)}
+                            okText="Có"
+                            cancelText="Không"
+                          >
+                            <Button danger type="link" size="small">
+                              Xóa bình luận
+                            </Button>
+                          </Popconfirm>
+                        </div>
+                        <div style={{ marginLeft: 32 }}>{comment.content}</div>
+                      </div>
+                    ))
+                )}
               </div>
             )}
           </div>

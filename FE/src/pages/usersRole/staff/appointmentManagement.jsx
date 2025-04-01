@@ -593,12 +593,28 @@ const AppointmentManagement = () => {
       },
     },
     {
+      title: "Ngày tạo",
+      dataIndex: "createdAt",
+      key: "createdAt",
+      width: 110,
+      render: (createdAt) => {
+        // Chuyển đổi định dạng ngày tháng
+        const date = createdAt ? new Date(createdAt) : null;
+        return date ? moment(date).format("DD/MM/YYYY") : "N/A";
+      },
+      sorter: (a, b) => {
+        const dateA = a.createdAt ? new Date(a.createdAt) : new Date(0);
+        const dateB = b.createdAt ? new Date(b.createdAt) : new Date(0);
+        return dateB - dateA; // Sắp xếp giảm dần (mới nhất lên đầu)
+      },
+      defaultSortOrder: "descend", // Sắp xếp mặc định theo thứ tự giảm dần
+    },
+    {
       title: "Ngày hẹn",
       dataIndex: "date",
       key: "date",
       width: 110,
       sortDirections: ["ascend", "descend"],
-      defaultSortOrder: "descend",
     },
     {
       title: "Giá tiền",
@@ -661,7 +677,6 @@ const AppointmentManagement = () => {
       render: (status) => (
         <Tag color={getStatusColor(status)}>{getStatusText(status)}</Tag>
       ),
-      defaultSortOrder: "ascend", // Sắp xếp mặc định theo thứ tự tăng dần
     },
     {
       title: "Thao tác",
@@ -769,12 +784,28 @@ const AppointmentManagement = () => {
       },
     },
     {
+      title: "Ngày tạo",
+      dataIndex: "createdAt",
+      key: "createdAt",
+      width: 110,
+      render: (createdAt) => {
+        // Chuyển đổi định dạng ngày tháng
+        const date = createdAt ? new Date(createdAt) : null;
+        return date ? moment(date).format("DD/MM/YYYY") : "N/A";
+      },
+      sorter: (a, b) => {
+        const dateA = a.createdAt ? new Date(a.createdAt) : new Date(0);
+        const dateB = b.createdAt ? new Date(b.createdAt) : new Date(0);
+        return dateB - dateA; // Sắp xếp giảm dần (mới nhất lên đầu)
+      },
+      defaultSortOrder: "descend", // Sắp xếp mặc định theo thứ tự giảm dần
+    },
+    {
       title: "Ngày hẹn",
       dataIndex: "date",
       key: "date",
       width: 110,
       sortDirections: ["ascend", "descend"],
-      defaultSortOrder: "descend",
     },
     {
       title: "Giá tiền",
@@ -800,7 +831,6 @@ const AppointmentManagement = () => {
       render: (status) => (
         <Tag color={getStatusColor(status)}>{getStatusText(status)}</Tag>
       ),
-      defaultSortOrder: "ascend",
     },
     {
       title: "Thao tác",
