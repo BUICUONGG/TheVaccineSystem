@@ -16,6 +16,7 @@ const RegistrationForm = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [isAdult, setIsAdult] = useState(false);
   const navigate = useNavigate();
 
   const validateUsername = (username) => {
@@ -114,10 +115,9 @@ const RegistrationForm = () => {
         // Xử lý error từ backend
         setErrors({
           ...errors,
-          username: data || "Đăng ký thất bại!"
+          username: data || "Đăng ký thất bại!",
         });
         toast.error(data || "Đăng ký thất bại!");
-
       }
     } catch (error) {
       console.error("Registration error:", error);
@@ -155,7 +155,9 @@ const RegistrationForm = () => {
                 value={formData.username}
                 onChange={handleChange}
               />
-              {errors.username && <div className="regis-error">{errors.username}</div>}
+              {errors.username && (
+                <div className="regis-error">{errors.username}</div>
+              )}
             </div>
 
             <div className="regis-input-group">
@@ -168,7 +170,9 @@ const RegistrationForm = () => {
                 value={formData.email}
                 onChange={handleChange}
               />
-              {errors.email && <div className="regis-error">{errors.email}</div>}
+              {errors.email && (
+                <div className="regis-error">{errors.email}</div>
+              )}
             </div>
 
             <div className="regis-input-group">
@@ -188,7 +192,9 @@ const RegistrationForm = () => {
               >
                 {showPassword ? <FiEyeOff /> : <FiEye />}
               </button>
-              {errors.password && <div className="regis-error">{errors.password}</div>}
+              {errors.password && (
+                <div className="regis-error">{errors.password}</div>
+              )}
             </div>
 
             <div className="regis-input-group">
@@ -208,7 +214,18 @@ const RegistrationForm = () => {
               >
                 {showConfirmPassword ? <FiEyeOff /> : <FiEye />}
               </button>
-              {errors.confirmPassword && <div className="regis-error">{errors.confirmPassword}</div>}
+              {errors.confirmPassword && (
+                <div className="regis-error">{errors.confirmPassword}</div>
+              )}
+            </div>
+            <div className="regis-checkbox-group">
+              <input
+                type="checkbox"
+                id="ageConfirm"
+                checked={isAdult}
+                onChange={() => setIsAdult(!isAdult)}
+              />
+              <label htmlFor="ageConfirm">Tôi xác nhận tôi đã đủ 18 tuổi</label>
             </div>
 
             <div className="regis-button-group">
@@ -221,8 +238,10 @@ const RegistrationForm = () => {
               </button>
               <button
                 type="submit"
-                disabled={loading}
-                className="regis-btn regis-btn-primary"
+                disabled={loading || !isAdult}
+                className={`regis-btn regis-btn-primary ${
+                  !isAdult ? "disabled" : ""
+                }`}
               >
                 {loading ? "Đang xử lý..." : "Đăng Ký"}
               </button>
