@@ -137,7 +137,7 @@ class PaymentService {
         app_trans_id,
       });
       if (aptLe) {
-        await connectToDatabase.appointmentLes.updateOne(
+        await connectToDatabase.appointmentLes.findOneAndUpdate(
           { app_trans_id },
           { $set: { status: "Paid" } }
         );
@@ -155,7 +155,7 @@ class PaymentService {
         app_trans_id,
       });
       if (aptGoi) {
-        await connectToDatabase.appointmentGois.updateOne(
+        await connectToDatabase.appointmentGois.findOneAndUpdate(
           { app_trans_id },
           { $set: { status: "Paid" } }
         );
