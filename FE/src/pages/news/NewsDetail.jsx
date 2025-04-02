@@ -25,7 +25,6 @@ const NewsDetail = () => {
 
     useEffect(() => {
         fetchNewsDetail();
-        // Increment view count
         incrementViewCount();
     }, [id]);
 

@@ -842,7 +842,7 @@ const AppointmentManagement = () => {
             <>
               <Button
                 type="primary"
-                className="complete-button"
+                className="approve-button"
                 onClick={() =>
                   handleStatusChange(
                     record._id,
@@ -851,7 +851,7 @@ const AppointmentManagement = () => {
                   )
                 }
               >
-                Hoàn thành
+                Duyệt đơn
               </Button>
               <Button
                 danger
