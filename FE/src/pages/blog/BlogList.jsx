@@ -5,7 +5,6 @@ import {
   HeartOutlined,
   HeartFilled,
   CommentOutlined,
-  ClockCircleOutlined,
   FilterOutlined,
   SearchOutlined,
   TagOutlined,
@@ -43,7 +42,6 @@ const BlogList = () => {
   const [submittingComment, setSubmittingComment] = useState(false);
   const footerRef = useRef(null);
 
-  // Danh sách các danh mục blog
   const categories = [
     { value: "lich-tiem-chung", label: "Lịch tiêm chủng" },
     { value: "hoat-dong-tiem-chung", label: "Hoạt động tiêm chủng" },
@@ -60,7 +58,6 @@ const BlogList = () => {
   }, [categoryFilter, tagFilter, searchKeyword, sortBy]);
 
   useEffect(() => {
-    // Thêm CSS cho comment-author
     const style = document.createElement('style');
     style.innerHTML = `
       .comment-author {
@@ -88,7 +85,6 @@ const BlogList = () => {
     try {
       setLoading(true);
 
-      // Xây dựng tham số truy vấn
       const params = {
         status: "active"
       };
@@ -97,7 +93,7 @@ const BlogList = () => {
       if (tagFilter) params.tags = tagFilter;
       if (searchKeyword) params.keyword = searchKeyword;
 
-      // Xử lý sắp xếp
+
       if (sortBy === "newest") {
         params.sortBy = "createDate";
         params.sortOrder = "desc";
@@ -139,7 +135,6 @@ const BlogList = () => {
   };
 
   const toggleLike = async (blogId) => {
-    // Check if user is logged in
     const accessToken = localStorage.getItem("accesstoken");
     if (!accessToken) {
       message.error("Bạn cần đăng nhập để thích bài viết");
@@ -170,7 +165,6 @@ const BlogList = () => {
       }));
     } catch (error) {
       console.error("Failed to toggle like:", error);
-      message.error("Không thể thích bài viết. Vui lòng thử lại sau.");
     }
   };
 
@@ -195,14 +189,12 @@ const BlogList = () => {
     return category ? category.label : value;
   };
 
-  // Hàm cắt ngắn nội dung
   const truncateContent = (content, maxLength = 150) => {
     if (!content) return "";
     if (content.length <= maxLength) return content;
     return content.substr(0, maxLength) + "...";
   };
 
-  // Hàm tăng lượt xem khi người dùng xem chi tiết bài viết
   const incrementViews = async (blogId) => {
     try {
       const response = await axiosInstance.post(`/blog/view/${blogId}`, {}, {
@@ -210,8 +202,6 @@ const BlogList = () => {
           Authorization: `Bearer ${localStorage.getItem("accesstoken")}`,
         },
       });
-
-      // Cập nhật state để hiển thị lượt xem mới
       setBlogs(blogs.map(blog => {
         if (blog._id === blogId) {
           return {
@@ -228,16 +218,11 @@ const BlogList = () => {
     }
   };
 
-  // Xử lý khi người dùng nhấp vào để xem chi tiết bài viết
   const handleViewBlogDetail = (blog) => {
-    // Tăng lượt xem
     incrementViews(blog._id);
-
-    // Lấy chi tiết blog nếu cần
     fetchBlogDetail(blog._id);
   };
 
-  // Fetch blog detail with comments
   const fetchBlogDetail = async (blogId) => {
     try {
       const response = await axiosInstance.get(`/blog/detail/${blogId}`, {
@@ -251,23 +236,19 @@ const BlogList = () => {
         setIsDetailModalVisible(true);
       }
     } catch (error) {
-      console.error("Failed to fetch blog detail:", error);
       message.error("Không thể tải chi tiết bài viết");
     }
   };
 
-  // Handle closing the detail modal
   const handleCloseDetailModal = () => {
     setIsDetailModalVisible(false);
     setSelectedBlog(null);
     setCommentContent("");
   };
 
-  // Handle comment submission
   const handleCommentSubmit = async () => {
     if (!commentContent.trim() || !selectedBlog) return;
 
-    // Check if user is logged in
     const accessToken = localStorage.getItem("accesstoken");
     if (!accessToken) {
       message.error("Bạn cần đăng nhập để bình luận");
@@ -285,7 +266,7 @@ const BlogList = () => {
         },
       });
 
-      // Refresh blog detail to show the new comment
+
       const updatedBlogResponse = await axiosInstance.get(`/blog/detail/${selectedBlog._id}`, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
@@ -293,12 +274,9 @@ const BlogList = () => {
       });
 
       if (updatedBlogResponse.data) {
-        const updatedBlog = updatedBlogResponse.data;
 
-        // Update selectedBlog state with new data
         setSelectedBlog(updatedBlog);
 
-        // Update blogs state to reflect the new comment count
         setBlogs(prevBlogs =>
           prevBlogs.map(blog =>
             blog._id === updatedBlog._id
@@ -311,14 +289,12 @@ const BlogList = () => {
       setCommentContent("");
       message.success("Bình luận đã được thêm");
     } catch (error) {
-      console.error("Failed to submit comment:", error);
       message.error("Không thể thêm bình luận. Vui lòng thử lại sau.");
     } finally {
       setSubmittingComment(false);
     }
   };
 
-  // Sửa lại hàm xóa comment để sử dụng đúng ID
   const handleDeleteComment = async (commentId) => {
     if (!selectedBlog) return;
     const accessToken = localStorage.getItem("accesstoken");
@@ -328,14 +304,12 @@ const BlogList = () => {
     }
 
     try {
-      // Gọi API hide comment (sử dụng API đã có)
       await axiosInstance.post(`/blog/comment/${selectedBlog._id}/${commentId}/hide`, {}, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
       });
 
-      // Refresh blog detail to update comments
       const updatedBlogResponse = await axiosInstance.get(`/blog/detail/${selectedBlog._id}`, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
@@ -344,9 +318,7 @@ const BlogList = () => {
 
       if (updatedBlogResponse.data) {
         const updatedBlog = updatedBlogResponse.data;
-        // Update selectedBlog state with new data
         setSelectedBlog(updatedBlog);
-        // Update blogs state to reflect the new comment list
         setBlogs(prevBlogs =>
           prevBlogs.map(blog =>
             blog._id === updatedBlog._id
@@ -363,16 +335,6 @@ const BlogList = () => {
     }
   };
 
-  // Hàm tạo slug an toàn từ tiếng Việt
-  const createSafeSlug = (text) => {
-    return slugify(text, {
-      lower: true,      // Chuyển thành chữ thường
-      strict: true,     // Loại bỏ các ký tự đặc biệt
-      locale: 'vi'      // Hỗ trợ tiếng Việt
-    });
-  };
-
-  // Render blog item
   const renderBlogItem = (blog, index) => (
     <Card
       key={blog._id}
@@ -610,7 +572,6 @@ const BlogList = () => {
         </div>
       </div>
 
-      {/* Blog Detail Modal - giống Facebook */}
       <Modal
         open={isDetailModalVisible}
         onCancel={handleCloseDetailModal}
@@ -623,7 +584,7 @@ const BlogList = () => {
         {selectedBlog && (
           <div className="blog-detail-container">
             <Row className="blog-detail-wrapper">
-              {/* Left side - Blog content */}
+
               <Col xs={24} sm={24} md={16} className="blog-detail-content">
                 <div className="blog-detail-header">
                   <div className="blog-detail-title">

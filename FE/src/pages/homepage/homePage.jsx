@@ -438,13 +438,6 @@ const HomePage = () => {
                     />
                     <h3>{vaccine.vaccineName}</h3>
                     <p>Nhà sản xuất: {vaccine.manufacturer}</p>
-                    <div className="vaccine-price-v1">
-                      {vaccine.vaccineImports &&
-                        vaccine.vaccineImports.length > 0 &&
-                        importProductsPrice?.[vaccine._id]?.unitPrice
-                        ? `${(importProductsPrice?.[vaccine._id]?.unitPrice || 0).toLocaleString()} VNĐ`
-                        : "Chưa có hàng"}
-                    </div>
                     <Link to="/pricelist" className="vaccine-view-more-v1">
                       XEM THÊM
                     </Link>
