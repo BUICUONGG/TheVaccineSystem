@@ -299,16 +299,16 @@ const VaccinesPage = () => {
         vaccines: values.vaccines.map(v => ({
           vaccineId: v.vaccineId,
           quantity: parseInt(v.quantity),
-          expiryDate: v.expiryDate.format("DD/MM/YYYY"), // Format ngày hết hạn
+          expiryDate: v.expiryDate.format("DD/MM/YYYY"), 
           unitPrice: parseFloat(v.unitPrice)
         })),
-        importDate: values.importDate.format("DD/MM/YYYY"), // Format ngày nhập theo DD/MM/YYYY
+        importDate: values.importDate.format("DD/MM/YYYY"), 
         supplier: values.supplier,
         importedBy: adminId,
         totalPrice: values.vaccines.reduce((sum, v) => {
           return sum + (parseFloat(v.unitPrice) * parseInt(v.quantity));
         }, 0),
-        createdAt: new Date().toLocaleDateString("en-GB") // Format ngày tạo theo DD/MM/YYYY
+        createdAt: new Date().toLocaleDateString("en-GB")  
       };
 
       console.log("Payload gửi đi:", formattedData);
@@ -419,11 +419,11 @@ const VaccinesPage = () => {
           },
         }
       );
-  
+
       Modal.success({
         content: "Xóa gói vaccine thành công!",
       });
-  
+
       fetchPackages(accesstoken);
     } catch (error) {
       console.error("Error deleting vaccine package:", error);
@@ -479,7 +479,7 @@ const VaccinesPage = () => {
           "Chưa có hình ảnh"
         ),
     },
-   
+
     {
       title: "Thao tác",
       key: "actions",
@@ -549,12 +549,6 @@ const VaccinesPage = () => {
       width: 120,
       render: (_, record) => (
         <Space>
-          <Button
-            type="primary"
-            size="small"
-            icon={<EditOutlined />}
-            onClick={() => showEditModal(record)}
-          />
           <Popconfirm
             title="Xóa lô vaccine"
             description="Bạn có chắc chắn muốn xóa lô vaccine này?"
@@ -643,12 +637,6 @@ const VaccinesPage = () => {
       width: 120,
       render: (_, record) => (
         <Space>
-          <Button
-            type="primary"
-            size="small"
-            icon={<EditOutlined />}
-            onClick={() => showEditModal(record)}
-          />
           <Popconfirm
             title="Xóa gói vaccine"
             description="Bạn có chắc chắn muốn xóa gói vaccine này?"
@@ -679,52 +667,6 @@ const VaccinesPage = () => {
     });
 
     setIsEditModalVisible(true);
-  };
-
-  const showImportDetailModal = (importDetail) => {
-    Modal.info({
-      title: `Chi tiết lô nhập ${importDetail.batchNumber}`,
-      width: 700,
-      content: (
-        <div>
-          <p><strong>Nhà cung cấp:</strong> {importDetail.supplier}</p>
-          <p><strong>Ngày nhập:</strong> {importDetail.importDate}</p>
-          <p><strong>Tổng giá trị:</strong> {importDetail.totalPrice?.toLocaleString()} VNĐ</p>
-          <Table
-            dataSource={importDetail.vaccines}
-            columns={[
-              {
-                title: "Vaccine",
-                dataIndex: "vaccineId",
-                key: "vaccineId",
-                render: (vaccineId) => {
-                  const vaccine = inventoryList.find(v => v._id === vaccineId);
-                  return vaccine?.vaccineName || "N/A";
-                }
-              },
-              {
-                title: "Số lượng",
-                dataIndex: "quantity",
-                key: "quantity",
-              },
-              {
-                title: "Hạn sử dụng",
-                dataIndex: "expiryDate",
-                key: "expiryDate",
-              },
-              {
-                title: "Đơn giá",
-                dataIndex: "unitPrice",
-                key: "unitPrice",
-                render: (price) => `${price?.toLocaleString() || 0} VNĐ`,
-              }
-            ]}
-            pagination={false}
-            rowKey={(record, index) => `vaccine-${index}`}
-          />
-        </div>
-      ),
-    });
   };
 
   const showPackageDetailModal = (packageDetail) => {

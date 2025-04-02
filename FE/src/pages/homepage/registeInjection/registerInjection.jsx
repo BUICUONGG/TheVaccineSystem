@@ -30,7 +30,7 @@ const RegisterInjection = () => {
     document.title = "Đăng ký tiêm chủng";
   }, []);
 
-  // Thêm useEffect để fetch danh sách vaccine
+  // Fetch danh sách vaccine
   useEffect(() => {
     const fetchVaccines = async () => {
       try {
@@ -47,7 +47,7 @@ const RegisterInjection = () => {
     fetchVaccines();
   }, []);
 
-  // Thêm useEffect để fetch vaccine packages
+  // Fetch vaccine packages
   useEffect(() => {
     const fetchVaccinePackages = async () => {
       try {
@@ -66,45 +66,6 @@ const RegisterInjection = () => {
     fetchVaccinePackages();
   }, []);
 
-  // useEffect(() => {
-  //   const fetchImportPrices = async () => {
-  //     try {
-  //       const token = localStorage.getItem("accesstoken");
-  //       const response = await axiosInstance.get("/vaccineimport/getfullData", {
-  //         headers: { Authorization: `Bearer ${token}` },
-  //       });
-
-  //       // Xử lý dữ liệu giá
-  //       const priceMap = {};
-  //       response.data.forEach((importData) => {
-  //         importData.vaccines.forEach((vaccine) => {
-  //           if (
-  //             !priceMap[vaccine.vaccineId] ||
-  //             new Date(importData.importDate) >
-  //             new Date(priceMap[vaccine.vaccineId].importDate)
-  //           ) {
-  //             priceMap[vaccine.vaccineId] = {
-  //               unitPrice: vaccine.unitPrice,
-  //               importDate: importData.importDate,
-  //             };
-  //           }
-  //         });
-  //       });
-  //       setImportProductsPrice(priceMap);
-  //     } catch (error) {
-  //       console.error("Error fetching import prices:", error);
-  //       toast.error("Không thể tải thông tin giá", {
-  //         position: "top-right",
-  //         autoClose: 3000,
-  //       });
-  //     }
-  //   };
-
-  //   fetchImportPrices();
-  // }, []);
-
-
-
   useEffect(() => {
     const fetchImportPrices = async () => {
       try {
@@ -113,16 +74,16 @@ const RegisterInjection = () => {
           headers: { Authorization: `Bearer ${token}` },
         });
 
-        // Lấy ngày hiện tại (bỏ giờ phút giây để so sánh chính xác)
+        // Ngày hiện tại 
         const today = new Date();
         today.setHours(0, 0, 0, 0);
 
         const priceMap = {};
         response.data.forEach((importData) => {
           importData.vaccines.forEach((vaccine) => {
-            const expiryDate = new Date(vaccine.expiryDate.split("/").reverse().join("-")); // Chuyển đổi DD/MM/YYYY thành Date
+            const expiryDate = new Date(vaccine.expiryDate.split("/").reverse().join("-"));
 
-            // Chỉ lưu giá nếu vaccine còn hạn sử dụng
+            // Lưu giá nếu vaccine còn hạn sử dụng
             if (expiryDate >= today) {
               if (
                 !priceMap[vaccine.vaccineId] ||
@@ -146,11 +107,10 @@ const RegisterInjection = () => {
         });
       }
     };
-
     fetchImportPrices();
   }, []);
-  
-  // Fetch user info khi component mount và user đã đăng nhập
+
+  // 
   useEffect(() => {
     const fetchUserInfo = async () => {
       const userId = localStorage.getItem("userId");
@@ -164,21 +124,12 @@ const RegisterInjection = () => {
 
       try {
         const response = await axiosInstance.get(
-          `/customer/getOneCustomer/${userId}`,
-          {
-            headers: {
-              Authorization: `Bearer ${accesstoken}`,
-            },
-          }
+          `/customer/getOneCustomer/${userId}`, {
+          headers: { Authorization: `Bearer ${accesstoken}`, },
+        }
         );
-
-        // console.log("User Info:", response.data);
-
-        // Cập nhật form nếu có dữ liệu trả về
         if (response.data) {
-          setParentInfo(response.data); // Lưu thông tin phụ huynh
-
-          // Nếu không phải đăng ký cho trẻ em thì điền form
+          setParentInfo(response.data);
         }
       } catch (error) {
         console.error("Error fetching user info:", error);
@@ -248,7 +199,6 @@ const RegisterInjection = () => {
     // Cập nhật ID vaccine được chọn
     setSelectedVaccineId(vaccine._id);
 
-    // Lấy giá trị hiện tại của form
     const currentFormValues = form.getFieldsValue();
 
     // Cập nhật form values tùy theo loại vaccine
@@ -263,7 +213,6 @@ const RegisterInjection = () => {
         vaccinePackageId: vaccine._id,
       });
     }
-
     // Lưu dữ liệu vào localStorage
     saveFormData({
       ...currentFormValues,
