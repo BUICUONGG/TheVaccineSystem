@@ -67,11 +67,11 @@ const ProfileAccount = () => {
         }
       );
 
-      message.success('Cập nhật thông tin thành công');
+      toast.success('Cập nhật thông tin thành công');
       setIsEditMode(false);
       await refreshUserData();
     } catch (error) {
-      message.error("Cập nhật thông tin thất bại", error);
+      toast.error("Cập nhật thông tin thất bại", error);
     } finally {
       setLoading(false);
     }
@@ -94,7 +94,7 @@ const ProfileAccount = () => {
       form.resetFields(["oldPassword", "newPassword", "confirmPassword"]);
       setShowPasswordChange(false);
     } catch (error) {
-      message.error(error.response?.data?.message || "Thất bại khi đổi mật khẩu");
+      toast.error(error.response?.data?.message || "Thất bại khi đổi mật khẩu");
     } finally {
       setLoading(false);
     }

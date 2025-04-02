@@ -24,31 +24,37 @@ const VaccinePriceList = () => {
     setIsLoading(true);
     try {
       const token = localStorage.getItem("accesstoken");
-      const [vaccineResponse, packageResponse, importResponse] =
-        await Promise.all([
-          axiosInstance.get("/vaccine/showInfo", {
-            headers: { Authorization: `Bearer ${token}` },
-          }),
-          axiosInstance.get("/vaccinepakage/showVaccinePakage", {
-            headers: { Authorization: `Bearer ${token}` },
-          }),
-          axiosInstance.get("/vaccineimport/getfullData", {
-            headers: { Authorization: `Bearer ${token}` },
-          }),
-        ]);
+      const [vaccineResponse, packageResponse, importResponse] = await Promise.all([
+        axiosInstance.get("/vaccine/showInfo", {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+        axiosInstance.get("/vaccinepakage/showVaccinePakage", {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+        axiosInstance.get("/vaccineimport/getfullData", {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
+      ]);
+
+      // Lấy ngày hiện tại (bỏ giờ phút giây để so sánh chính xác)
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
 
       const priceMap = {};
       importResponse.data.forEach((importData) => {
         importData.vaccines.forEach((vaccine) => {
-          if (
-            !priceMap[vaccine.vaccineId] ||
-            new Date(importData.importDate) >
-              new Date(priceMap[vaccine.vaccineId].importDate)
-          ) {
-            priceMap[vaccine.vaccineId] = {
-              unitPrice: vaccine.unitPrice,
-              importDate: importData.importDate,
-            };
+          const expiryDate = new Date(vaccine.expiryDate.split("/").reverse().join("-")); 
+
+          if (expiryDate >= today) {
+            if (
+              !priceMap[vaccine.vaccineId] ||
+              new Date(importData.importDate) > new Date(priceMap[vaccine.vaccineId].importDate)
+            ) {
+              priceMap[vaccine.vaccineId] = {
+                unitPrice: vaccine.unitPrice,
+                importDate: importData.importDate,
+              };
+            }
           }
         });
       });
@@ -66,7 +72,6 @@ const VaccinePriceList = () => {
       setIsLoading(false);
     }
   };
-
   useEffect(() => {
     const token = localStorage.getItem("accesstoken");
     if (token) {
@@ -251,9 +256,8 @@ const VaccinePriceList = () => {
               <div className="product-grid">
                 {currentProducts.map((product) => (
                   <div
-                    className={`product-card ${
-                      selectedCategory === "Pack" ? "package-card" : ""
-                    }`}
+                    className={`product-card ${selectedCategory === "Pack" ? "package-card" : ""
+                      }`}
                     key={product._id}
                   >
                     {selectedCategory === "Single" ? (

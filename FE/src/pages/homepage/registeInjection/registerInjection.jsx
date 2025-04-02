@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Form, Button, DatePicker, Input, Radio, Switch, Checkbox } from "antd";
 import { UserOutlined, UserAddOutlined } from "@ant-design/icons";
-import dayjs from "dayjs"; // Thay moment bằng dayjs
+import dayjs from "dayjs";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "@fortawesome/fontawesome-free/css/all.min.css";
@@ -14,12 +14,12 @@ const RegisterInjection = () => {
   const navigate = useNavigate();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [form] = Form.useForm();
-  const [vaccineList, setVaccineList] = useState([]); // Chỉ giữ lại các states cần thiết
+  const [vaccineList, setVaccineList] = useState([]);
   const [parentInfo, setParentInfo] = useState(null);
   const [isChildRegistration, setIsChildRegistration] = useState(false);
-  const [vaccinePackages, setVaccinePackages] = useState([]); // Thêm state cho vaccine gói
-  const [selectedVaccineType, setSelectedVaccineType] = useState(null); // 'single' hoặc 'package'
-  const [selectedVaccineId, setSelectedVaccineId] = useState(null); // Lưu trữ ID của vaccine được chọn
+  const [vaccinePackages, setVaccinePackages] = useState([]);
+  const [selectedVaccineType, setSelectedVaccineType] = useState(null);
+  const [selectedVaccineId, setSelectedVaccineId] = useState(null);
   const [importProductsPrice, setImportProductsPrice] = useState({});
 
   useEffect(() => {
@@ -66,6 +66,45 @@ const RegisterInjection = () => {
     fetchVaccinePackages();
   }, []);
 
+  // useEffect(() => {
+  //   const fetchImportPrices = async () => {
+  //     try {
+  //       const token = localStorage.getItem("accesstoken");
+  //       const response = await axiosInstance.get("/vaccineimport/getfullData", {
+  //         headers: { Authorization: `Bearer ${token}` },
+  //       });
+
+  //       // Xử lý dữ liệu giá
+  //       const priceMap = {};
+  //       response.data.forEach((importData) => {
+  //         importData.vaccines.forEach((vaccine) => {
+  //           if (
+  //             !priceMap[vaccine.vaccineId] ||
+  //             new Date(importData.importDate) >
+  //             new Date(priceMap[vaccine.vaccineId].importDate)
+  //           ) {
+  //             priceMap[vaccine.vaccineId] = {
+  //               unitPrice: vaccine.unitPrice,
+  //               importDate: importData.importDate,
+  //             };
+  //           }
+  //         });
+  //       });
+  //       setImportProductsPrice(priceMap);
+  //     } catch (error) {
+  //       console.error("Error fetching import prices:", error);
+  //       toast.error("Không thể tải thông tin giá", {
+  //         position: "top-right",
+  //         autoClose: 3000,
+  //       });
+  //     }
+  //   };
+
+  //   fetchImportPrices();
+  // }, []);
+
+
+
   useEffect(() => {
     const fetchImportPrices = async () => {
       try {
@@ -74,22 +113,30 @@ const RegisterInjection = () => {
           headers: { Authorization: `Bearer ${token}` },
         });
 
-        // Xử lý dữ liệu giá
+        // Lấy ngày hiện tại (bỏ giờ phút giây để so sánh chính xác)
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
         const priceMap = {};
         response.data.forEach((importData) => {
           importData.vaccines.forEach((vaccine) => {
-            if (
-              !priceMap[vaccine.vaccineId] ||
-              new Date(importData.importDate) >
-              new Date(priceMap[vaccine.vaccineId].importDate)
-            ) {
-              priceMap[vaccine.vaccineId] = {
-                unitPrice: vaccine.unitPrice,
-                importDate: importData.importDate,
-              };
+            const expiryDate = new Date(vaccine.expiryDate.split("/").reverse().join("-")); // Chuyển đổi DD/MM/YYYY thành Date
+
+            // Chỉ lưu giá nếu vaccine còn hạn sử dụng
+            if (expiryDate >= today) {
+              if (
+                !priceMap[vaccine.vaccineId] ||
+                new Date(importData.importDate) > new Date(priceMap[vaccine.vaccineId].importDate)
+              ) {
+                priceMap[vaccine.vaccineId] = {
+                  unitPrice: vaccine.unitPrice,
+                  importDate: importData.importDate,
+                };
+              }
             }
           });
         });
+
         setImportProductsPrice(priceMap);
       } catch (error) {
         console.error("Error fetching import prices:", error);
@@ -102,7 +149,7 @@ const RegisterInjection = () => {
 
     fetchImportPrices();
   }, []);
-
+  
   // Fetch user info khi component mount và user đã đăng nhập
   useEffect(() => {
     const fetchUserInfo = async () => {
@@ -176,34 +223,7 @@ const RegisterInjection = () => {
     }
   }, [form]);
 
-  useEffect(() => {
-    const savedData = localStorage.getItem('vaccineRegistrationData');
-    if (savedData) {
-      try {
-        const parsedData = JSON.parse(savedData);
 
-        // Khôi phục trạng thái đăng ký
-        setIsChildRegistration(parsedData.isChildRegistration);
-        setSelectedVaccineType(parsedData.selectedVaccineType);
-        setSelectedVaccineId(parsedData.selectedVaccineId);
-
-        // Khôi phục form values
-        if (parsedData.formValues) {
-          const formValues = {
-            ...parsedData.formValues,
-            date: parsedData.formValues.date ? dayjs(parsedData.formValues.date) : undefined,
-            childInfo: parsedData.formValues.childInfo ? {
-              ...parsedData.formValues.childInfo,
-              birthday: parsedData.formValues.childInfo.birthday ? dayjs(parsedData.formValues.childInfo.birthday) : undefined
-            } : undefined
-          };
-          form.setFieldsValue(formValues);
-        }
-      } catch (error) {
-        console.error('Error loading saved form data:', error);
-      }
-    }
-  }, [form]);
 
   const handleVaccineSelect = (vaccine) => {
     // Kiểm tra giá cho từng loại vaccine
@@ -261,14 +281,12 @@ const RegisterInjection = () => {
         return;
       }
 
-      // Chuẩn bị dữ liệu chung
       const now = new Date();
       const time = `${String(now.getHours()).padStart(2, "0")}:${String(
         now.getMinutes()
       ).padStart(2, "0")}`;
       const selectedDate = values.date.format("DD/MM/YYYY");
 
-      // Tạo dữ liệu cơ bản cho đơn đăng ký
       let invoiceData = {
         cusId: cusId,
         childId: "",
@@ -278,10 +296,9 @@ const RegisterInjection = () => {
         status: "pending",
       };
 
-      // Thêm thông tin trẻ em nếu là đăng ký cho trẻ
+      // Thêm thông tin trẻ em 
       if (isChildRegistration && values.childInfo) {
         invoiceData.childInfo = {
-          // customerId: values.childInfo.cusId,
           name: values.childInfo.name,
           birthday: values.childInfo.birthday.format("DD/MM/YYYY"),
           gender: values.childInfo.gender,
@@ -334,7 +351,6 @@ const RegisterInjection = () => {
     }
   };
 
-  // Sửa lại hàm disabledDate
   const disabledDate = (current) => {
     return current && current < dayjs().startOf("day");
   };
@@ -400,7 +416,6 @@ const RegisterInjection = () => {
               saveFormData(allValues);
             }}
           >
-            {/* Phần thông tin cá nhân đơn giản hóa */}
             {isChildRegistration ? (
               <div className="form-section form-child-info">
                 <h3>Thông Tin Trẻ Em</h3>
@@ -514,11 +529,10 @@ const RegisterInjection = () => {
               </div>
             )}
 
-            {/* Phần đăng ký tiêm chủng */}
             <div className="form-section form-vaccine-info">
               <h3>Thông Tin Đăng Ký Tiêm</h3>
 
-              {/* Thêm Radio để chọn loại vaccine */}
+              {/*Radio để chọn loại vaccine */}
               <Form.Item name="vaccineType" className="vaccine-type-selector">
                 <Radio.Group
                   onChange={(e) => setSelectedVaccineType(e.target.value)}

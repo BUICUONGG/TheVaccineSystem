@@ -49,7 +49,7 @@ class PaymentService {
         amount: transformedPaymentData.price,
         description: `Payment for the order #${transID}`,
         bank_code: "",
-        callback_url: `https://f5e4-27-78-77-55.ngrok-free.app/zalopay/callback`,
+        callback_url: `https://4ff0-118-71-79-106.ngrok-free.app/zalopay/callback`,
       };
 
       const data = `${config.app_id}|${order.app_trans_id}|${order.app_user}|${order.amount}|${order.app_time}|${order.embed_data}|${order.item}`;

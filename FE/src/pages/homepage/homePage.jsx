@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { FaMoneyBillWave, FaChild, FaChevronLeft, FaChevronRight, FaCommentAlt, FaQuoteLeft, FaQuoteRight } from "react-icons/fa";
-import {  UserOutlined, LogoutOutlined } from "@ant-design/icons";
-import {  Avatar, Menu, Rate, Carousel } from "antd";
+import { UserOutlined, LogoutOutlined } from "@ant-design/icons";
+import { Avatar, Menu, Rate, Carousel } from "antd";
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import "./homePage.css";
 import { useNavigate, Link } from "react-router-dom";
@@ -168,11 +168,10 @@ const HomePage = () => {
     `;
     document.head.appendChild(script);
 
-    // Cleanup function
     return () => {
       document.head.removeChild(script);
     };
-  }, []); // Empty dependency array means this runs once when component mounts
+  }, []); 
 
   // Thêm ref cho footer
   const footerRef = useRef(null);
@@ -219,24 +218,36 @@ const HomePage = () => {
       try {
         const response = await axiosInstance.get("/vaccineimport/getfullData");
         const priceMap = {};
+        const today = new Date();
+        today.setHours(0, 0, 0, 0); // Đặt giờ về 0 để so sánh chính xác ngày
+
         response.data.forEach(importData => {
           importData.vaccines.forEach(vaccine => {
-            if (!priceMap[vaccine.vaccineId] ||
-              new Date(importData.importDate) > new Date(priceMap[vaccine.vaccineId].importDate)) {
-              priceMap[vaccine.vaccineId] = {
-                unitPrice: vaccine.unitPrice,
-                importDate: importData.importDate
-              };
+            const expiryDate = new Date(vaccine.expiryDate.split("/").reverse().join("-")); // Chuyển đổi từ DD/MM/YYYY sang Date
+
+            // Chỉ lưu vaccine còn hạn sử dụng
+            if (expiryDate >= today) {
+              if (
+                !priceMap[vaccine.vaccineId] ||
+                new Date(importData.importDate) > new Date(priceMap[vaccine.vaccineId].importDate)
+              ) {
+                priceMap[vaccine.vaccineId] = {
+                  unitPrice: vaccine.unitPrice,
+                  importDate: importData.importDate,
+                };
+              }
             }
           });
         });
+
         setImportProductsPrice(priceMap);
       } catch (error) {
         console.error("Error fetching vaccine import data:", error);
       }
-    }
+    };
+
     fetchVaccineImport();
-  }, [])
+  }, []);
 
 
 
@@ -275,7 +286,7 @@ const HomePage = () => {
         console.log("Data blog:", response.data);
         const blogsData = response.data.blogs || [];
         // Lọc chỉ hiển thị các blog có trạng thái "active"
-        const activeBlogs = blogsData .filter(blog => blog.status === "active");
+        const activeBlogs = blogsData.filter(blog => blog.status === "active");
         // Lấy 3 bài blog mới nhất
         const latestBlogs = activeBlogs.slice(0, 3).map(blog => ({
           ...blog,
@@ -308,7 +319,7 @@ const HomePage = () => {
         },
       });
       console.log("Data news:", response.data.result);
-      
+
       // Lọc chỉ hiển thị các news có trạng thái "active"
       const activeNews = response.data.result.filter(news => news.status === "published");
       // Lấy 3 bài news mới nhất
