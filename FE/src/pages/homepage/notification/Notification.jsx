@@ -44,10 +44,8 @@ const NotificationIcon = ({ cusId: propsCusId }) => {
     }
   }, [cusId]);
 
-  // Sử dụng useCallback để tránh tạo lại hàm fetchNotifications mỗi khi component re-render
   const fetchNotifications = useCallback(async () => {
     if (!cusId) {
-      console.log("Không có cusId, không thể lấy thông báo");
       return;
     }
     
@@ -56,12 +54,10 @@ const NotificationIcon = ({ cusId: propsCusId }) => {
     try {
       const accesstoken = localStorage.getItem("accesstoken");
       if (!accesstoken) {
-        console.log("Không có accesstoken, không thể lấy thông báo");
         return;
       }
       
       // Gọi API với đúng định dạng URL
-      console.log("URL API:", `/noti/getNotiByCusId/${cusId}`);
       const response = await axiosInstance.get(`/noti/getNotiByCusId/${cusId}`, {
         headers: { Authorization: `Bearer ${accesstoken}` },
       });
@@ -180,7 +176,7 @@ const NotificationIcon = ({ cusId: propsCusId }) => {
         read: true
       };
       setNotifications([defaultNotification]);
-      setUnreadCount(0); // Không hiển thị badge
+      setUnreadCount(0); 
     }
   }, [cusId, fetchNotifications]);
 
@@ -291,8 +287,7 @@ const NotificationIcon = ({ cusId: propsCusId }) => {
             
             // Kiểm tra có thông báo thanh toán thành công
             const hasPaymentSuccess = notifications.some(item => 
-              item.message.includes("THANH TOÁN THÀNH CÔNG") || 
-              item.message.includes("thanh toán thành công")
+              item.message.includes("THANH TOÁN THÀNH CÔNG")
             );
             
             // Chỉ loại bỏ thông báo Pending nếu có thông báo thanh toán thành công
@@ -320,13 +315,15 @@ const NotificationIcon = ({ cusId: propsCusId }) => {
             notificationType = "status";
             
             if (item.message.includes("completed")) {
-              icon = "✅"; // Check mark for completed status
+              icon = "✅";
             } else if (item.message.includes("pending")) {
-              icon = "⏳"; // Hourglass for pending status
+              icon = "⏳"; 
             } else if (item.message.includes("approve")) {
-              icon = "👍"; // Thumbs up for approve status
+              icon = "👍"; 
+            } else if (item.message.includes("incomplete")) {
+              icon = "❌"; 
             } else {
-              icon = "🔔"; // Default bell icon
+              icon = "🔔"; 
             }
           } else if (item.message.includes("đã được cập nhật")) {
             notificationType = "update";
