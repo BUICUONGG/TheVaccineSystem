@@ -1072,12 +1072,7 @@ const AppointmentManagement = () => {
                     "N/A"}
                 </span>
               </div>
-              <div className="detail-row">
-                <span className="detail-label">Trẻ em:</span>
-                <span className="detail-value">
-                  {selectedAppointment?.childId?.name || "Không có"}
-                </span>
-              </div>
+
               
               {!selectedAppointment.isPackage && (
                 <div className="detail-row">

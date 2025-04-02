@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { FaMoneyBillWave, FaChild, FaChevronLeft, FaChevronRight, FaCommentAlt, FaQuoteLeft, FaQuoteRight } from "react-icons/fa";
-import { UserOutlined, LogoutOutlined } from "@ant-design/icons";
-import { Avatar, Menu, Rate, Carousel } from "antd";
+import { UserOutlined } from "@ant-design/icons";
+import { Avatar, Rate, Carousel } from "antd";
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import "./homePage.css";
 import { useNavigate, Link } from "react-router-dom";
@@ -18,19 +18,15 @@ const HomePage = () => {
   const [showBackToTop, setShowBackToTop] = useState(false);
   const [vaccines, setVaccines] = useState([]);
   const [currentVaccineIndex, setCurrentVaccineIndex] = useState(0);
-
   const [cusId, setCusId] = useState(null);
   const [showFeedbackForm, setShowFeedbackForm] = useState(false);
   const [username, setUsername] = useState("");
   const [blogs, setBlogs] = useState([]);
   const [loadingBlogs, setLoadingBlogs] = useState(false);
-  const [likedBlogStates, setLikedBlogStates] = useState({});
   const [news, setNews] = useState([]);
   const [loadingNews, setLoadingNews] = useState(false);
   const [importProductsPrice, setImportProductsPrice] = useState({});
 
-
-  // Mảng đường dẫn hình ảnh news
   const newsImages = [
     "/images/news/news1.jpeg",
     "/images/news/news2.jpg",
@@ -85,7 +81,6 @@ const HomePage = () => {
         if (role === "customer") {
           const storedCusId = localStorage.getItem("cusId");
           if (storedCusId) {
-            console.log("Đã lấy cusId từ localStorage:", storedCusId);
             setCusId(storedCusId);
           } else {
             console.log("Không tìm thấy cusId trong localStorage");
@@ -129,14 +124,9 @@ const HomePage = () => {
       setFadeIn(true);
     }, 200);
   };
-  const handleLogout = () => {
-    localStorage.clear();
-    navigate("/thank-you");
-  };
-
 
   useEffect(() => {
-    // Script cửa Chatbase
+    //Chatbase.io
     const script = document.createElement("script");
     script.innerHTML = `
       (function(){
@@ -173,13 +163,8 @@ const HomePage = () => {
     };
   }, []); 
 
-  // Thêm ref cho footer
-  const footerRef = useRef(null);
 
-  // Thêm function scroll
-  const scrollToFooter = () => {
-    footerRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
+  const footerRef = useRef(null);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -198,7 +183,7 @@ const HomePage = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  // Fetch vaccines for the carousel
+  // Fetch vaccines
   useEffect(() => {
     const fetchVaccines = async () => {
       try {
@@ -208,48 +193,8 @@ const HomePage = () => {
         console.error("Error fetching vaccines:", error);
       }
     };
-
     fetchVaccines();
   }, []);
-
-  // Print price of import vaccine
-  useEffect(() => {
-    const fetchVaccineImport = async () => {
-      try {
-        const response = await axiosInstance.get("/vaccineimport/getfullData");
-        const priceMap = {};
-        const today = new Date();
-        today.setHours(0, 0, 0, 0); // Đặt giờ về 0 để so sánh chính xác ngày
-
-        response.data.forEach(importData => {
-          importData.vaccines.forEach(vaccine => {
-            const expiryDate = new Date(vaccine.expiryDate.split("/").reverse().join("-")); // Chuyển đổi từ DD/MM/YYYY sang Date
-
-            // Chỉ lưu vaccine còn hạn sử dụng
-            if (expiryDate >= today) {
-              if (
-                !priceMap[vaccine.vaccineId] ||
-                new Date(importData.importDate) > new Date(priceMap[vaccine.vaccineId].importDate)
-              ) {
-                priceMap[vaccine.vaccineId] = {
-                  unitPrice: vaccine.unitPrice,
-                  importDate: importData.importDate,
-                };
-              }
-            }
-          });
-        });
-
-        setImportProductsPrice(priceMap);
-      } catch (error) {
-        console.error("Error fetching vaccine import data:", error);
-      }
-    };
-
-    fetchVaccineImport();
-  }, []);
-
-
 
   // Handle vaccine carousel navigation
   const nextVaccine = () => {
@@ -268,32 +213,19 @@ const HomePage = () => {
     }
   };
 
-  // Cập nhật timeline khi currentVaccineIndex thay đổi
-  useEffect(() => {
-    const timelineEl = document.querySelector(".vaccine-timeline-line-v4");
-    if (timelineEl && vaccines.length > 0) {
-      const percentage = (currentVaccineIndex / (vaccines.length - 1)) * 100;
-      timelineEl.style.width = `${percentage}%`;
-    }
-  }, [currentVaccineIndex, vaccines.length]);
-
-  // Thêm hàm fetch blogs
+  //Fetch Blogs
   useEffect(() => {
     const fetchBlogs = async () => {
       try {
         setLoadingBlogs(true);
         const response = await axiosInstance.get("/blog/showBlog");
-        console.log("Data blog:", response.data);
         const blogsData = response.data.blogs || [];
-        // Lọc chỉ hiển thị các blog có trạng thái "active"
+
         const activeBlogs = blogsData.filter(blog => blog.status === "active");
-        // Lấy 3 bài blog mới nhất
         const latestBlogs = activeBlogs.slice(0, 3).map(blog => ({
-          ...blog,
-          views: 1000
+          ...blog
         }));
         setBlogs(latestBlogs);
-        console.log("Blog show ra:", latestBlogs);
       } catch (error) {
         console.error("Failed to fetch blogs:", error);
       } finally {
@@ -303,13 +235,10 @@ const HomePage = () => {
     fetchBlogs();
   }, []);
 
-
-  // Thêm useEffect để fetch news
+//Fetch News
   useEffect(() => {
     fetchNews();
   }, []);
-
-  // Thêm hàm fetch news
   const fetchNews = async () => {
     try {
       setLoadingNews(true);
@@ -318,15 +247,11 @@ const HomePage = () => {
           Authorization: `Bearer ${localStorage.getItem("accesstoken")}`,
         },
       });
-      console.log("Data news:", response.data.result);
 
-      // Lọc chỉ hiển thị các news có trạng thái "active"
       const activeNews = response.data.result.filter(news => news.status === "published");
-      // Lấy 3 bài news mới nhất
       const latestNews = activeNews.slice(0, 3).map((news, index) => ({
         ...news,
-        views: 500,
-        // Gán hình ảnh theo thứ tự, nếu vượt quá số lượng hình ảnh thì lặp lại
+       
         imageUrl: newsImages[index % newsImages.length]
       }));
       setNews(latestNews);
@@ -337,7 +262,7 @@ const HomePage = () => {
     }
   };
 
-  // Add a new function to handle opening the feedback form
+  //Feedback form
   const openFeedbackForm = () => {
     if (isLoggedIn && userRole === "customer") {
       setShowFeedbackForm(true);
@@ -346,60 +271,17 @@ const HomePage = () => {
     }
   };
 
-  // Create dropdown menu items based on user role
-  const getUserMenuItems = () => {
-    if (userRole === "admin") {
-      return (
-        <Menu>
-          <Menu.Item key="admin" icon={<UserOutlined />}>
-            <Link to="/admin">Admin</Link>
-          </Menu.Item>
-          <Menu.Divider />
-          <Menu.Item key="logout" icon={<LogoutOutlined />} onClick={handleLogout}>
-            Đăng xuất
-          </Menu.Item>
-        </Menu>
-      );
-    } else if (userRole === "staff") {
-      return (
-        <Menu>
-          <Menu.Item key="staff" icon={<UserOutlined />}>
-            <Link to="/staffLayout">Quản lý KH</Link>
-          </Menu.Item>
-          <Menu.Divider />
-          <Menu.Item key="logout" icon={<LogoutOutlined />} onClick={handleLogout}>
-            Đăng xuất
-          </Menu.Item>
-        </Menu>
-      );
-    } else {
-      return (
-        <Menu>
-          <Menu.Item key="profile" icon={<UserOutlined />}>
-            <Link to="/profile">Hồ sơ cá nhân</Link>
-          </Menu.Item>
-          <Menu.Divider />
-          <Menu.Item key="logout" icon={<LogoutOutlined />} onClick={handleLogout}>
-            Đăng xuất
-          </Menu.Item>
-        </Menu>
-      );
-    }
-  };
-
-  // Add a new useEffect to fetch customer feedbacks
+  //Fetch cus feedback
   useEffect(() => {
     fetchCustomerFeedbacks();
   }, []);
-
-  // Function to fetch customer feedbacks
   const fetchCustomerFeedbacks = async () => {
     try {
       setLoadingFeedbacks(true);
       const response = await axiosInstance.get("/feedback/getAllFeedback");
 
       if (response.status === 200 && Array.isArray(response.data)) {
-        // Sort by rating (highest first) and then take top 6
+        //Sort top 6
         const sortedFeedbacks = response.data
           .sort((a, b) => b.rating - a.rating)
           .slice(0, 6);
@@ -411,15 +293,13 @@ const HomePage = () => {
               const customerResponse = await axiosInstance.get(`/customer/getCustomerById/${feedback.cusId}`);
               return {
                 ...feedback,
-                customerName: customerResponse.data.customerName || customerResponse.data.username || "Khách hàng",
-                customerAvatar: null // You can add avatar URL if available
+                customerName: customerResponse.data.customerName 
               };
             } catch (error) {
               console.error("Error fetching customer details:", error);
               return {
                 ...feedback,
                 customerName: "Khách hàng",
-                customerAvatar: null
               };
             }
           })
@@ -438,7 +318,7 @@ const HomePage = () => {
     <div className="homepage">
       <HeaderLayouts footerRef={footerRef} />
 
-      {/* Remove old nav section and continue with existing code */}
+
       <div className="banner-container">
         <div
           className="banner-slider"
@@ -774,7 +654,6 @@ const HomePage = () => {
         </button>
       )}
 
-      {/* Floating feedback button for customers */}
       {isLoggedIn && userRole === "customer" && (
         <button
           className="feedback-floating-button"
@@ -786,7 +665,6 @@ const HomePage = () => {
         </button>
       )}
 
-      {/* Feedback Form Modal */}
       <FeedbackForm
         isOpen={showFeedbackForm}
         onClose={() => setShowFeedbackForm(false)}

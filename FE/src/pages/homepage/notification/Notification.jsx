@@ -125,7 +125,6 @@ const NotificationIcon = ({ cusId: propsCusId }) => {
           setUnreadCount(0); // Không hiển thị badge khi chỉ có thông báo mặc định
         }
       } else {
-        console.log("Không có dữ liệu thông báo hoặc dữ liệu không phải mảng");
         console.log("Dữ liệu nhận được:", response.data);
         // Tạo một thông báo mặc định khi không có thông báo nào
         const defaultNotification = {
@@ -139,7 +138,6 @@ const NotificationIcon = ({ cusId: propsCusId }) => {
     } catch (error) {
       console.error("Lỗi khi lấy thông báo:", error);
       if (error.response) {
-        console.error("Chi tiết lỗi:", error.response.data);
         console.error("Mã lỗi:", error.response.status);
       } else {
         console.error("Lỗi không có response:", error.message);
@@ -181,7 +179,6 @@ const NotificationIcon = ({ cusId: propsCusId }) => {
   }, [cusId, fetchNotifications]);
 
   const handleRefresh = () => {
-    console.log("Đang làm mới thông báo...");
     fetchNotifications();
   };
 
@@ -282,8 +279,7 @@ const NotificationIcon = ({ cusId: propsCusId }) => {
             // Kiểm tra có phải thông báo Pending
             const isPendingNotification = 
               noti.message.includes("đang ở trạng thái Pending") || 
-              noti.message.includes("đang trong trạng thái Pending") || 
-              noti.message.includes("Lịch hẹn gói của bạn vào lúc");
+              noti.message.includes("đang trong trạng thái Pending");
             
             // Kiểm tra có thông báo thanh toán thành công
             const hasPaymentSuccess = notifications.some(item => 
