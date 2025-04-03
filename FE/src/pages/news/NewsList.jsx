@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Card, Row, Col, Typography, Spin, Empty, Button, message, Divider, Tag, Space, Carousel } from 'antd';
+import { Card, Typography, Spin, Empty, Button, message, Divider, Tag, Space, Carousel } from 'antd';
 import { Link, useNavigate } from 'react-router-dom';
-import { HomeOutlined, CalendarOutlined, FilterOutlined, LeftOutlined, RightOutlined } from '@ant-design/icons';
+import { HomeOutlined, CalendarOutlined, FilterOutlined } from '@ant-design/icons';
 import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import axiosInstance from '../../service/api';
 import './NewsList.css';
@@ -18,8 +18,7 @@ const NewsList = () => {
   const navigate = useNavigate();
   const carouselRef = useRef(null);
   const [currentFeaturedIndex, setCurrentFeaturedIndex] = useState(0);
-  
-  // Category mapping
+
   const categoryMap = {
     'all': 'Tất cả tin tức',
     'tin-tuc-suc-khoe': 'Tin tức sức khoẻ',
@@ -49,8 +48,9 @@ const NewsList = () => {
       
       if (response.data && response.data.result) {
         const allNews = response.data.result;
-        // Tách các tin tức nổi bật (featured: true) và tin tức thường
+
         const featured = allNews.filter(item => item.featured === true);
+
         setFeaturedNews(featured);
         setNews(allNews);
         setFilteredNews(allNews);
@@ -91,7 +91,7 @@ const NewsList = () => {
     return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
   };
 
-  // Chuyển đến slider trước đó
+
   const prevFeatured = () => {
     if (featuredNews.length > 0) {
       setCurrentFeaturedIndex((prevIndex) =>
@@ -99,8 +99,6 @@ const NewsList = () => {
       );
     }
   };
-
-  // Chuyển đến slider tiếp theo
   const nextFeatured = () => {
     if (featuredNews.length > 0) {
       setCurrentFeaturedIndex((prevIndex) =>
@@ -108,8 +106,6 @@ const NewsList = () => {
       );
     }
   };
-
-  // Tự động chuyển slider
   useEffect(() => {
     if (featuredNews.length > 0) {
       const timer = setInterval(() => {

@@ -26,7 +26,6 @@ const FeedbackManagement = () => {
       setLoading(true);
       const accesstoken = localStorage.getItem("accesstoken");
       
-      // 1. Fetch all feedbacks
       const response = await axiosInstance.get("/feedback/getAllFeedback", {
         headers: {
           Authorization: `Bearer ${accesstoken}`,
@@ -38,7 +37,6 @@ const FeedbackManagement = () => {
           new Date(b.createAt) - new Date(a.createAt)
         );
         
-        // 2. Fetch all customers to have a complete list
         const customersResponse = await axiosInstance.get("/customer/getAllCustomer", {
           headers: {
             Authorization: `Bearer ${accesstoken}`,
@@ -119,7 +117,6 @@ const FeedbackManagement = () => {
         fetchFeedbacks(); // Refresh the list
       }
     } catch (error) {
-      console.error("Error deleting feedback:", error);
       message.error("Không thể xóa đánh giá");
       
       if (error.response?.status === 401) {
