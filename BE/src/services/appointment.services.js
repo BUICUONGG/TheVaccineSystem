@@ -161,7 +161,7 @@ class AppointmentService {
         createdAt: new Date().toLocaleDateString("vi-VN"),
         time: time,
         price,
-        note: note || "",
+        note: note,
       };
 
       await connectToDatabase.appointmentLes.insertOne(aptLe);

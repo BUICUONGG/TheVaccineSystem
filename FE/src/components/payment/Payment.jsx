@@ -37,9 +37,7 @@ const PaymentPage = () => {
       date: invoiceData.date,
       time: invoiceData.time,
       status: "pending",
-      note: `Lịch tiêm ${invoiceData.type === "aptLe" ? "vaccine" : "gói"} ${
-        invoiceData.vaccineName
-      }`,
+      note: "",
     };
 
     // Thêm thông tin trẻ nếu đăng ký cho trẻ
@@ -149,18 +147,23 @@ const PaymentPage = () => {
       const accesstoken = localStorage.getItem("accesstoken");
       if (accesstoken && paymentData) {
         // Tạo nội dung thông báo hủy thanh toán
-        const cancelNotificationMessage = paymentData.type === "aptGoi"
-          ? `❌ ❌ HỦY GIAO DỊCH: Bạn đã hủy thanh toán vaccine "${paymentData.vaccineName}".`
-          : `❌ ❌ HỦY GIAO DỊCH: Bạn đã hủy thanh toán vaccine "${paymentData.vaccineName}".`;
+        const cancelNotificationMessage =
+          paymentData.type === "aptGoi"
+            ? `❌ ❌ HỦY GIAO DỊCH: Bạn đã hủy thanh toán vaccine "${paymentData.vaccineName}".`
+            : `❌ ❌ HỦY GIAO DỊCH: Bạn đã hủy thanh toán vaccine "${paymentData.vaccineName}".`;
 
         // Gọi API tạo thông báo hủy
-        axiosInstance.post("/noti/createNoti", {
-          cusId: paymentData.cusId,
-          message: cancelNotificationMessage
-        }, {
-          headers: { Authorization: `Bearer ${accesstoken}` }
-        });
-        
+        axiosInstance.post(
+          "/noti/createNoti",
+          {
+            cusId: paymentData.cusId,
+            message: cancelNotificationMessage,
+          },
+          {
+            headers: { Authorization: `Bearer ${accesstoken}` },
+          }
+        );
+
         console.log("Đã tạo thông báo hủy thanh toán");
       }
     } catch (notificationError) {
@@ -364,12 +367,11 @@ const PaymentPage = () => {
             <div className="payment-method-info">
               <h3>Phương thức thanh toán</h3>
               <div className="payment-method-zalopay">
-
                 <div className="zalopay-image">
-                  <img 
-                    src="/images/zalopay.jpg" 
-                    alt="ZaloPay Payment" 
-                    className="zalopay-illustration" 
+                  <img
+                    src="/images/zalopay.jpg"
+                    alt="ZaloPay Payment"
+                    className="zalopay-illustration"
                   />
                 </div>
                 <p>
