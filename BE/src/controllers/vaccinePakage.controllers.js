@@ -47,3 +47,15 @@ export const getDetailFullVaccinePakageController = async (req, res) => {
     res.status(500).json(error.message);
   }
 };
+
+export const getDetailFullVaccinePakageByIdController = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const result = await vaccinePakageService.getDetailFullVaccinePakageById(
+      id
+    );
+    res.status(500).json(result);
+  } catch (error) {
+    res.status(500).json(error.message);
+  }
+};

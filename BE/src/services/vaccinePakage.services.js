@@ -93,6 +93,39 @@ class VaccinePakageService {
       throw new Error(error.message);
     }
   }
+
+  async getDetailFullVaccinePakageById() {
+    try {
+      // Lấy tất cả gói vaccine
+      const packages = await connectToDatabase.vaccinepackages.find().toArray();
+
+      // Lấy danh sách tất cả vaccineId có trong packages
+      const vaccineIds = packages.flatMap((pkg) =>
+        pkg.vaccines.map((v) => v.vaccineId)
+      );
+
+      // Tìm thông tin vaccine từ inventory dựa trên vaccineIds
+      const inventoryData = await connectToDatabase.vaccinceInventorys
+        .find({ _id: { $in: vaccineIds } })
+        .toArray();
+
+      // Ghép thông tin vaccine vào từng package
+      const result = packages.map((pkg) => ({
+        ...pkg,
+        vaccines: pkg.vaccines.map((vaccine) => ({
+          ...vaccine,
+          details:
+            inventoryData.find((inv) => inv._id.equals(vaccine.vaccineId)) ||
+            null,
+        })),
+      }));
+
+      return result;
+    } catch (error) {
+      console.log(error.message);
+      throw new Error(error.message);
+    }
+  }
 }
 
 const vaccinePakageService = new VaccinePakageService();

@@ -3,6 +3,7 @@ import {
   createVaccinePakageController,
   deleteVaccinePakageController,
   getAllVaccinePakageController,
+  getDetailFullVaccinePakageByIdController,
   getDetailFullVaccinePakageController,
   updateVaccinePakageController,
 } from "../controllers/vaccinePakage.controllers.js";
@@ -35,6 +36,11 @@ vaccinePakageRoutes.post(
 vaccinePakageRoutes.get(
   "/getDetailFullVaccinePakage",
   getDetailFullVaccinePakageController
+);
+
+vaccinePakageRoutes.post(
+  "/getDetailFullVaccinePakage/:id",
+  getDetailFullVaccinePakageByIdController
 );
 
 export default vaccinePakageRoutes;
