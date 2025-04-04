@@ -74,20 +74,23 @@ const RegisterInjection = () => {
           headers: { Authorization: `Bearer ${token}` },
         });
 
-        // Ngày hiện tại 
+        // Ngày hiện tại
         const today = new Date();
         today.setHours(0, 0, 0, 0);
 
         const priceMap = {};
         response.data.forEach((importData) => {
           importData.vaccines.forEach((vaccine) => {
-            const expiryDate = new Date(vaccine.expiryDate.split("/").reverse().join("-"));
+            const expiryDate = new Date(
+              vaccine.expiryDate.split("/").reverse().join("-")
+            );
 
             // Lưu giá nếu vaccine còn hạn sử dụng
             if (expiryDate >= today) {
               if (
                 !priceMap[vaccine.vaccineId] ||
-                new Date(importData.importDate) > new Date(priceMap[vaccine.vaccineId].importDate)
+                new Date(importData.importDate) >
+                  new Date(priceMap[vaccine.vaccineId].importDate)
               ) {
                 priceMap[vaccine.vaccineId] = {
                   unitPrice: vaccine.unitPrice,
@@ -110,7 +113,7 @@ const RegisterInjection = () => {
     fetchImportPrices();
   }, []);
 
-  // 
+  //
   useEffect(() => {
     const fetchUserInfo = async () => {
       const userId = localStorage.getItem("userId");
@@ -124,9 +127,10 @@ const RegisterInjection = () => {
 
       try {
         const response = await axiosInstance.get(
-          `/customer/getOneCustomer/${userId}`, {
-          headers: { Authorization: `Bearer ${accesstoken}`, },
-        }
+          `/customer/getOneCustomer/${userId}`,
+          {
+            headers: { Authorization: `Bearer ${accesstoken}` },
+          }
         );
         if (response.data) {
           setParentInfo(response.data);
@@ -146,7 +150,7 @@ const RegisterInjection = () => {
   }, [isLoggedIn, form]);
 
   useEffect(() => {
-    const savedData = localStorage.getItem('vaccineRegistrationData');
+    const savedData = localStorage.getItem("vaccineRegistrationData");
     if (savedData) {
       try {
         const parsedData = JSON.parse(savedData);
@@ -160,21 +164,25 @@ const RegisterInjection = () => {
         if (parsedData.formValues) {
           const formValues = {
             ...parsedData.formValues,
-            date: parsedData.formValues.date ? dayjs(parsedData.formValues.date) : undefined,
-            childInfo: parsedData.formValues.childInfo ? {
-              ...parsedData.formValues.childInfo,
-              birthday: parsedData.formValues.childInfo.birthday ? dayjs(parsedData.formValues.childInfo.birthday) : undefined
-            } : undefined
+            date: parsedData.formValues.date
+              ? dayjs(parsedData.formValues.date)
+              : undefined,
+            childInfo: parsedData.formValues.childInfo
+              ? {
+                  ...parsedData.formValues.childInfo,
+                  birthday: parsedData.formValues.childInfo.birthday
+                    ? dayjs(parsedData.formValues.childInfo.birthday)
+                    : undefined,
+                }
+              : undefined,
           };
           form.setFieldsValue(formValues);
         }
       } catch (error) {
-        console.error('Error loading saved form data:', error);
+        console.error("Error loading saved form data:", error);
       }
     }
   }, [form]);
-
-
 
   const handleVaccineSelect = (vaccine) => {
     // Kiểm tra giá cho từng loại vaccine
@@ -216,11 +224,13 @@ const RegisterInjection = () => {
     // Lưu dữ liệu vào localStorage
     saveFormData({
       ...currentFormValues,
-      [selectedVaccineType === "single" ? "vaccineId" : "vaccinePackageId"]: vaccine._id
+      [selectedVaccineType === "single" ? "vaccineId" : "vaccinePackageId"]:
+        vaccine._id,
     });
   };
 
   const onFinish = async (values) => {
+    console.log("values", values);
     try {
       const accesstoken = localStorage.getItem("accesstoken");
       const cusId = localStorage.getItem("cusId");
@@ -243,12 +253,14 @@ const RegisterInjection = () => {
         date: selectedDate,
         time: time,
         status: "pending",
+        childInfo: {},
       };
 
-      // Thêm thông tin trẻ em 
+      // Thêm thông tin trẻ em
       if (isChildRegistration && values.childInfo) {
         invoiceData.childInfo = {
           name: values.childInfo.name,
+          cusId: cusId,
           birthday: values.childInfo.birthday.format("DD/MM/YYYY"),
           gender: values.childInfo.gender,
           healthNote: values.childInfo.healthNote || "",
@@ -306,7 +318,7 @@ const RegisterInjection = () => {
 
   const disabledBirthDate = (current) => {
     // Không cho chọn ngày trong tương lai
-    return current && current > dayjs().endOf('day');
+    return current && current > dayjs().endOf("day");
   };
 
   const saveFormData = (values) => {
@@ -316,14 +328,18 @@ const RegisterInjection = () => {
       selectedVaccineId,
       formValues: {
         ...values,
-        date: values.date ? values.date.format('YYYY-MM-DD') : undefined,
-        childInfo: values.childInfo ? {
-          ...values.childInfo,
-          birthday: values.childInfo.birthday ? values.childInfo.birthday.format('YYYY-MM-DD') : undefined
-        } : undefined
-      }
+        date: values.date ? values.date.format("YYYY-MM-DD") : undefined,
+        childInfo: values.childInfo
+          ? {
+              ...values.childInfo,
+              birthday: values.childInfo.birthday
+                ? values.childInfo.birthday.format("YYYY-MM-DD")
+                : undefined,
+            }
+          : undefined,
+      },
     };
-    localStorage.setItem('vaccineRegistrationData', JSON.stringify(formData));
+    localStorage.setItem("vaccineRegistrationData", JSON.stringify(formData));
   };
 
   const footerRef = useRef(null);
@@ -390,7 +406,9 @@ const RegisterInjection = () => {
                             return Promise.resolve();
                           }
                           if (value.isAfter(dayjs())) {
-                            return Promise.reject("Không thể chọn ngày sinh trong tương lai");
+                            return Promise.reject(
+                              "Không thể chọn ngày sinh trong tương lai"
+                            );
                           }
                           return Promise.resolve();
                         },
@@ -466,15 +484,15 @@ const RegisterInjection = () => {
                 {(!parentInfo?.customerName ||
                   !parentInfo?.phone ||
                   !parentInfo?.address) && (
-                    <div className="update-info-notice">
-                      <span className="notice-text">
-                        Vui lòng cập nhật đầy đủ thông tin cá nhân!
-                      </span>
-                      <Link to="/profile" className="update-link">
-                        Cập nhật ngay
-                      </Link>
-                    </div>
-                  )}
+                  <div className="update-info-notice">
+                    <span className="notice-text">
+                      Vui lòng cập nhật đầy đủ thông tin cá nhân!
+                    </span>
+                    <Link to="/profile" className="update-link">
+                      Cập nhật ngay
+                    </Link>
+                  </div>
+                )}
               </div>
             )}
 
@@ -493,7 +511,11 @@ const RegisterInjection = () => {
               </Form.Item>
 
               <Form.Item
-                name={selectedVaccineType === "single" ? "vaccineId" : "vaccinePackageId"}
+                name={
+                  selectedVaccineType === "single"
+                    ? "vaccineId"
+                    : "vaccinePackageId"
+                }
                 label="Chọn Vaccine"
                 rules={[{ required: true, message: "Vui lòng chọn vaccine!" }]}
               >
@@ -504,12 +526,17 @@ const RegisterInjection = () => {
                     </div>
                   ) : selectedVaccineType === "single" ? (
                     vaccineList.map((vaccine) => {
-                      const hasPrice = !!importProductsPrice[vaccine._id]?.unitPrice;
+                      const hasPrice =
+                        !!importProductsPrice[vaccine._id]?.unitPrice;
                       return (
                         <div
                           key={vaccine._id}
-                          className={`vaccine-card ${selectedVaccineId === vaccine._id ? "selected" : ""} ${!hasPrice ? "no-price" : ""}`}
-                          onClick={() => hasPrice && handleVaccineSelect(vaccine)}
+                          className={`vaccine-card ${
+                            selectedVaccineId === vaccine._id ? "selected" : ""
+                          } ${!hasPrice ? "no-price" : ""}`}
+                          onClick={() =>
+                            hasPrice && handleVaccineSelect(vaccine)
+                          }
                         >
                           {hasPrice && (
                             <Checkbox
@@ -526,8 +553,16 @@ const RegisterInjection = () => {
                             <p className="register-vaccine-description">
                               {vaccine.description}
                             </p>
-                            <p className={`vaccine-price ${!hasPrice ? "unavailable" : ""}`}>
-                              {hasPrice ? `${importProductsPrice[vaccine._id].unitPrice.toLocaleString()} VNĐ` : "Chưa có hàng"}
+                            <p
+                              className={`vaccine-price ${
+                                !hasPrice ? "unavailable" : ""
+                              }`}
+                            >
+                              {hasPrice
+                                ? `${importProductsPrice[
+                                    vaccine._id
+                                  ].unitPrice.toLocaleString()} VNĐ`
+                                : "Chưa có hàng"}
                             </p>
                           </div>
                         </div>
@@ -539,7 +574,9 @@ const RegisterInjection = () => {
                       return (
                         <div
                           key={pack._id}
-                          className={`vaccine-card ${selectedVaccineId === pack._id ? "selected" : ""} ${!hasPrice ? "no-price" : ""}`}
+                          className={`vaccine-card ${
+                            selectedVaccineId === pack._id ? "selected" : ""
+                          } ${!hasPrice ? "no-price" : ""}`}
                           onClick={() => hasPrice && handleVaccineSelect(pack)}
                         >
                           {hasPrice && (
@@ -557,8 +594,14 @@ const RegisterInjection = () => {
                             <p className="register-vaccine-description">
                               {pack.description}
                             </p>
-                            <p className={`vaccine-price ${!hasPrice ? "unavailable" : ""}`}>
-                              {hasPrice ? `${pack.price.toLocaleString()} VNĐ` : "Chưa có giá"}
+                            <p
+                              className={`vaccine-price ${
+                                !hasPrice ? "unavailable" : ""
+                              }`}
+                            >
+                              {hasPrice
+                                ? `${pack.price.toLocaleString()} VNĐ`
+                                : "Chưa có giá"}
                             </p>
                           </div>
                         </div>

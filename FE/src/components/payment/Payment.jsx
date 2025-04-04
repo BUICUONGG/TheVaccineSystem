@@ -27,6 +27,7 @@ const PaymentPage = () => {
     }
 
     const invoiceData = location.state.invoiceData;
+    console.log("Invoice data:", invoiceData);
 
     // Prepare payment data from invoice data
     const data = {
@@ -43,7 +44,7 @@ const PaymentPage = () => {
     // Thêm thông tin trẻ nếu đăng ký cho trẻ
     if (invoiceData.childInfo) {
       data.childInfo = {
-        customerId: invoiceData.childInfo.cusId,
+        cusId: invoiceData.childInfo.cusId,
         name: invoiceData.childInfo.name,
         birthday: invoiceData.childInfo.birthday,
         gender: invoiceData.childInfo.gender,
