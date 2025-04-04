@@ -38,7 +38,7 @@ const PaymentPage = () => {
       date: invoiceData.date,
       time: invoiceData.time,
       status: "pending",
-      note: "",
+      note: invoiceData.note,
     };
 
     // Thêm thông tin trẻ nếu đăng ký cho trẻ
