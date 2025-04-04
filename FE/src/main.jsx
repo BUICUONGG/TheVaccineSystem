@@ -31,6 +31,7 @@ import StaffsPage from "./pages/usersRole/admin/staffsPage";
 import PaymentPage from "./components/Payment/Payment";
 // import PaymentSuccess from "./components/Payment/PaymentSuccess";
 import VaccineDetail from "./pages/homepage/vaccineShop/vaccineDetail";
+import MyChild from "./pages/homepage/profile/components/MyChild";
 
 const router = createBrowserRouter([
   {
@@ -166,6 +167,10 @@ const router = createBrowserRouter([
       {
         path: "history",
         element: <ProfileHistory />,
+      },
+      {
+        path: "myChild",
+        element: <MyChild />,
       },
     ],
   },
