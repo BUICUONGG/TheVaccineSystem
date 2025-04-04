@@ -230,6 +230,7 @@ const RegisterInjection = () => {
   };
 
   const onFinish = async (values) => {
+    console.log("values", values);
     try {
       const accesstoken = localStorage.getItem("accesstoken");
       const cusId = localStorage.getItem("cusId");
@@ -252,13 +253,14 @@ const RegisterInjection = () => {
         date: selectedDate,
         time: time,
         status: "pending",
+        childInfo: {},
       };
 
       // Thêm thông tin trẻ em
       if (isChildRegistration && values.childInfo) {
         invoiceData.childInfo = {
           name: values.childInfo.name,
-          cusId: values.childInfo.cusId,
+          cusId: cusId,
           birthday: values.childInfo.birthday.format("DD/MM/YYYY"),
           gender: values.childInfo.gender,
           healthNote: values.childInfo.healthNote || "",

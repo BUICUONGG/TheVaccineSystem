@@ -18,8 +18,8 @@ class ChildService {
 
   async create(childData) {
     try {
-      if (childData.customerId) {
-        childData.customerId = new ObjectId(childData.customerId);
+      if (childData.cusId) {
+        childData.cusId = new ObjectId(childData.cusId);
       }
       const result = await connectToDatabase.childs.insertOne(childData);
       if (!result) throw new Error("Không tạo được child");
