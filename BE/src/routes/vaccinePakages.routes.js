@@ -3,6 +3,7 @@ import {
   createVaccinePakageController,
   deleteVaccinePakageController,
   getAllVaccinePakageController,
+  getDetailFullVaccinePakageController,
   updateVaccinePakageController,
 } from "../controllers/vaccinePakage.controllers.js";
 import { validateAccessToken } from "../middlewares/user.middleware.js";
@@ -29,6 +30,11 @@ vaccinePakageRoutes.post(
   "/deleteVaccinePakage/:id",
   validateAccessToken,
   deleteVaccinePakageController
+);
+
+vaccinePakageRoutes.get(
+  "/getDetailFullVaccinePakage",
+  getDetailFullVaccinePakageController
 );
 
 export default vaccinePakageRoutes;

@@ -1,3 +1,4 @@
+import connectToDatabase from "../config/database.js";
 import vaccinePakageService from "../services/vaccinePakage.services.js";
 
 export const getAllVaccinePakageController = async (req, res) => {
@@ -35,5 +36,14 @@ export const deleteVaccinePakageController = async (req, res) => {
     res.status(200).json("Delete thành công");
   } catch (error) {
     throw new Error(error.message);
+  }
+};
+
+export const getDetailFullVaccinePakageController = async (req, res) => {
+  try {
+    const result = await vaccinePakageService.getAllVaccinePackages();
+    res.status(200).json(result);
+  } catch (error) {
+    res.status(500).json(error.message);
   }
 };
