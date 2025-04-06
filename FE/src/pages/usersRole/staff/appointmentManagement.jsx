@@ -22,7 +22,8 @@ import {
   CheckCircleOutlined,
   ClockCircleOutlined,
   ExclamationCircleOutlined,
-  ReloadOutlined
+  ReloadOutlined,
+  CheckOutlined
 } from "@ant-design/icons";
 import moment from "moment";
 import axiosInstance from "../../../service/api";
@@ -33,15 +34,13 @@ const { Title, Text } = Typography;
 
 const AppointmentManagement = () => {
   const [loading, setLoading] = useState(false);
-  const [appointmentsGoi, setAppointmentsGoi] = useState([]);
-  const [appointmentsLe, setAppointmentsLe] = useState([]);
+  const [appointments, setAppointments] = useState([]);
   const [selectedAppointment, setSelectedAppointment] = useState(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [searchText, setSearchText] = useState("");
   const [activeTab, setActiveTab] = useState("1");
   const [detailLoading, setDetailLoading] = useState(false);
-  const [filteredAppointmentsGoi, setFilteredAppointmentsGoi] = useState([]);
-  const [filteredAppointmentsLe, setFilteredAppointmentsLe] = useState([]);
+  const [filteredAppointments, setFilteredAppointments] = useState([]);
   const [isRescheduleModalVisible, setIsRescheduleModalVisible] = useState(false);
   const [rescheduleDate, setRescheduleDate] = useState(null);
   const [selectedAppointmentDetail, setSelectedAppointmentDetail] = useState(null);
@@ -57,6 +56,11 @@ const AppointmentManagement = () => {
   const [vaccineList, setVaccineList] = useState([]);
   const [vaccinePackageList, setVaccinePackageList] = useState([]);
   const [customers, setCustomers] = useState([]);
+
+  // State để quản lý modal check out
+  const [isCheckoutModalVisible, setIsCheckoutModalVisible] = useState(false);
+  const [checkoutNote, setCheckoutNote] = useState("");
+  const [currentCheckoutRecord, setCurrentCheckoutRecord] = useState(null);
 
   // Fetch users, vaccines, and appointments on component mount
   useEffect(() => {
@@ -94,40 +98,33 @@ const AppointmentManagement = () => {
       ]);
       
       // Enrich appointments with customer username and vaccine names
-      const enrichedLe = leResponse.data.map(apt => {
-        const customer = customersData.find(c => c._id === apt.cusId);
-        const vaccine = vaccinesResponse.data.find(v => v._id === apt.vaccineId);
-        return {
-          ...apt,
-          customerName: customer ? 
-            (customer.username || "Không xác định") : 
-            "Không xác định",
-          customerFullName: customer ? customer.customerName : "Không xác định",
-          customerGender: customer ? customer.gender : "Không xác định",
-          vaccineName: vaccine ? vaccine.vaccineName : "Không xác định",
-          createdAt: apt.createdAt || "Không xác định"
-        };
-      });
+      const enrichedLe = leResponse.data.map(apt => ({
+        ...apt,
+        type: "Lẻ",
+        customerName: customersData.find(c => c._id === apt.cusId)?.username || "Không xác định",
+        customerFullName: customersData.find(c => c._id === apt.cusId)?.customerName || "Không xác định",
+        customerGender: customersData.find(c => c._id === apt.cusId)?.gender || "Không xác định",
+        vaccineName: vaccinesResponse.data.find(v => v._id === apt.vaccineId)?.vaccineName || "Không xác định",
+        createdAt: apt.createdAt || "Không xác định"
+      }));
 
-      const enrichedGoi = goiResponse.data.map(apt => {
-        const customer = customersData.find(c => c._id === apt.cusId);
-        const vaccinePackage = packagesResponse.data.find(p => p._id === apt.vaccinePackageId);
-        return {
-          ...apt,
-          customerName: customer ? 
-            (customer.username || "Không xác định") : 
-            "Không xác định",
-          customerFullName: customer ? customer.customerName : "Không xác định",
-          customerGender: customer ? customer.gender : "Không xác định",
-          vaccineName: vaccinePackage ? vaccinePackage.packageName : "Không xác định",
-          createdAt: apt.createdAt || "Không xác định"
-        };
-      });
+      const enrichedGoi = goiResponse.data.map(apt => ({
+        ...apt,
+        type: "Gói",
+        customerName: customersData.find(c => c._id === apt.cusId)?.username || "Không xác định",
+        customerFullName: customersData.find(c => c._id === apt.cusId)?.customerName || "Không xác định",
+        customerGender: customersData.find(c => c._id === apt.cusId)?.gender || "Không xác định",
+        vaccineName: packagesResponse.data.find(p => p._id === apt.vaccinePackageId)?.packageName || "Không xác định",
+        createdAt: apt.createdAt || "Không xác định"
+      }));
       
-      setAppointmentsLe(enrichedLe);
-      setAppointmentsGoi(enrichedGoi);
-      setFilteredAppointmentsLe(enrichedLe);
-      setFilteredAppointmentsGoi(enrichedGoi);
+      // Gộp và sắp xếp appointments
+      const mergedAppointments = [...enrichedLe, ...enrichedGoi].sort((a, b) => 
+        new Date(b.createdAt) - new Date(a.createdAt)
+      );
+
+      setAppointments(mergedAppointments);
+      setFilteredAppointments(mergedAppointments);
     } catch (error) {
       message.error("Không thể tải dữ liệu");
     } finally {
@@ -157,18 +154,13 @@ const AppointmentManagement = () => {
     const value = e.target.value.toLowerCase();
     setSearchText(value);
 
-    const filterAppointments = (appointments) => 
-      appointments.filter(apt => 
-        Object.values(apt).some(val => 
-          String(val).toLowerCase().includes(value)
-        )
-      );
+    const filteredData = appointments.filter(apt => 
+      Object.values(apt).some(val => 
+        String(val).toLowerCase().includes(value)
+      )
+    );
 
-    if (activeTab === "1") {
-      setFilteredAppointmentsLe(filterAppointments(appointmentsLe));
-    } else {
-      setFilteredAppointmentsGoi(filterAppointments(appointmentsGoi));
-    }
+    setFilteredAppointments(filteredData);
   };
 
   const getStatusColor = (status) => {
@@ -259,21 +251,6 @@ const AppointmentManagement = () => {
       setCurrentInjectionRecord(record);
       setInjectionNote("");
       
-      // Bắt đầu quá trình tiêm với 2 giai đoạn
-      let progress = 0;
-      const timer = setInterval(() => {
-        progress += 1;
-        setInjectionProgress(progress);
-
-        if (progress === 5) {
-          // Sau 5 giây, hiển thị modal nhập ghi chú
-          clearInterval(timer);
-          setIsInjectionNoteModalVisible(true);
-        }
-      }, 1000);
-
-      setInjectionTimer(timer);
-      
       message.success("Bắt đầu tiêm");
       fetchAllData(); // Refresh data to show updated status
     } catch (error) {
@@ -292,35 +269,19 @@ const AppointmentManagement = () => {
       // Đóng modal ghi chú
       setIsInjectionNoteModalVisible(false);
 
-      // Tiếp tục đếm 5 giây cuối
-      let progress = 5;
-      const timer = setInterval(() => {
-        progress += 1;
-        setInjectionProgress(progress);
+      // Gọi API update note
+      await axiosInstance.post(updateEndpoint + currentInjectionRecord._id, {
+        note: injectionNote || "Bình thường"
+      });
 
-        if (progress === 10) {
-          // Sau 5 giây nữa, hoàn thành tiêm
-          clearInterval(timer);
-          
-          // Gọi API update trạng thái và note
-          axiosInstance.post(updateEndpoint + currentInjectionRecord._id, {
-            status: "completed",
-            note: injectionNote || "Bình thường"
-          });
-
-          message.success("Hoàn thành tiêm");
-          fetchAllData();
-          
-          // Reset trạng thái
-          setCurrentInjectionRecord(null);
-          setInjectionProgress(0);
-          setInjectionNote("");
-        }
-      }, 1000);
-
-      setInjectionTimer(timer);
+      message.success("Cập nhật ghi chú thành công");
+      fetchAllData();
+      
+      // Reset trạng thái
+      setCurrentInjectionRecord(null);
+      setInjectionNote("");
     } catch (error) {
-      message.error("Không thể hoàn thành tiêm");
+      message.error("Không thể cập nhật ghi chú");
     }
   };
 
@@ -356,9 +317,44 @@ const AppointmentManagement = () => {
     setIsDetailModalVisible(true);
   };
 
+  // Hàm hiển thị modal check out
+  const showCheckoutModal = (record) => {
+    setCurrentCheckoutRecord(record);
+    setCheckoutNote(record.note || "");
+    setIsCheckoutModalVisible(true);
+  };
+
+  // Hàm thực hiện check out
+  const handleCheckout = async () => {
+    if (!currentCheckoutRecord) return;
+
+    try {
+      const updateEndpoint = currentCheckoutRecord.vaccinePackageId 
+        ? "/appointmentGoi/update/" 
+        : "/appointmentLe/update/";
+      
+      // Cập nhật trạng thái và note
+      await axiosInstance.post(updateEndpoint + currentCheckoutRecord._id, {
+        status: "completed",
+        note: checkoutNote || "Hoàn thành tiêm, sức khỏe ổn định"
+      });
+
+      message.success("Check-out thành công");
+      
+      // Đóng modal và làm mới dữ liệu
+      setIsCheckoutModalVisible(false);
+      setCurrentCheckoutRecord(null);
+      setCheckoutNote("");
+      fetchAllData();
+    } catch (error) {
+      message.error("Không thể check-out");
+    }
+  };
+
+  // Điều chỉnh renderActionButtons để thêm nút check out
   const renderActionButtons = (record) => {
     const actionMap = {
-      "Paid": (
+      "1": ( // Tab Quầy Check-In
         <Button 
           type="primary" 
           icon={<CheckCircleOutlined />} 
@@ -367,7 +363,7 @@ const AppointmentManagement = () => {
           Check-in
         </Button>
       ),
-      "đã tới": (
+      "2": ( // Tab Phòng Khám Sàng Lọc
         <div>
           <Tooltip title="Khám bình thường">
             <Button 
@@ -390,7 +386,7 @@ const AppointmentManagement = () => {
           </Tooltip>
         </div>
       ),
-      "đã khám": (
+      "3": ( // Tab Phòng Tiêm
         <Button 
           type="primary" 
           icon={<ClockCircleOutlined />} 
@@ -398,10 +394,20 @@ const AppointmentManagement = () => {
         >
           Bắt đầu tiêm
         </Button>
-      )
+      ),
+      "4": ( // Tab Phòng Theo Dõi Sau Tiêm
+        <Button 
+          type="primary" 
+          icon={<CheckOutlined />} 
+          onClick={() => showCheckoutModal(record)}
+        >
+          Check-out
+        </Button>
+      ),
+      "5": null  // Tab Check-Out - không có nút hành động
     };
 
-    return actionMap[record.status] || null;
+    return actionMap[activeTab] || null;
   };
 
   // Thêm modal để chọn lại ngày hẹn
@@ -473,7 +479,7 @@ const AppointmentManagement = () => {
               </Tag>
             </Descriptions.Item>
             <Descriptions.Item label="Ghi chú trong quá trình tiêm">
-              {selectedAppointmentDetail.note || "Bình thường"}
+              {selectedAppointmentDetail.note || "Sức khỏe ổn định, có thể tiêm"}
             </Descriptions.Item>
           </Descriptions>
 
@@ -528,13 +534,43 @@ const AppointmentManagement = () => {
     </Modal>
   );
 
-  // Cập nhật columns để thêm cột chi tiết
+  // Modal check out
+  const renderCheckoutModal = () => (
+    <Modal
+      title="Check-out Sau Tiêm"
+      open={isCheckoutModalVisible}
+      onOk={handleCheckout}
+      onCancel={() => {
+        setIsCheckoutModalVisible(false);
+        setCurrentCheckoutRecord(null);
+        setCheckoutNote("");
+      }}
+      okText="Hoàn tất"
+      cancelText="Hủy"
+    >
+      <Input.TextArea 
+        rows={4} 
+        placeholder="Nhập ghi chú sau khi theo dõi (nếu có)"
+        value={checkoutNote}
+        onChange={(e) => setCheckoutNote(e.target.value)}
+      />
+      <div style={{ marginTop: 16, color: '#666' }}>
+        <p>Vui lòng ghi chú tình trạng sức khỏe sau khi tiêm và theo dõi</p>
+      </div>
+    </Modal>
+  );
+
+  // Cập nhật columns để thêm cột Loại
   const columns = [
     {
-      title: 'Mã Đơn',
-      dataIndex: '_id',
-      key: '_id',
-      render: (text) => text.slice(-6)
+      title: 'Loại',
+      dataIndex: 'type',
+      key: 'type',
+      render: (type) => (
+        <Tag color={type === 'Lẻ' ? 'blue' : 'green'}>
+          {type}
+        </Tag>
+      )
     },
     {
       title: 'Tên đăng nhập',
@@ -580,6 +616,20 @@ const AppointmentManagement = () => {
     }
   ];
 
+  // Hàm lọc appointments theo tab
+  const getFilteredAppointmentsByTab = () => {
+    const tabStatusMap = {
+      "1": "Paid",
+      "2": "đã tới",
+      "3": "đã khám",
+      "4": "đang chờ",
+      "5": "completed"
+    };
+
+    const currentStatus = tabStatusMap[activeTab];
+    return filteredAppointments.filter(apt => apt.status === currentStatus);
+  };
+
   return (
     <div className="appointment-management">
       <div style={{
@@ -614,24 +664,49 @@ const AppointmentManagement = () => {
         activeKey={activeTab} 
         onChange={(key) => setActiveTab(key)}
       >
-        <TabPane tab="Vaccine Lẻ" key="1">
+        <TabPane tab="Quầy Check-In" key="1">
           <Table 
             columns={columns}
-            dataSource={filteredAppointmentsLe}
+            dataSource={getFilteredAppointmentsByTab()}
             loading={loading}
             rowKey="_id"
           />
         </TabPane>
-        <TabPane tab="Vaccine Gói" key="2">
+        <TabPane tab="Phòng Khám Sàng Lọc" key="2">
           <Table 
             columns={columns}
-            dataSource={filteredAppointmentsGoi}
+            dataSource={getFilteredAppointmentsByTab()}
+            loading={loading}
+            rowKey="_id"
+          />
+        </TabPane>
+        <TabPane tab="Phòng Tiêm" key="3">
+          <Table 
+            columns={columns}
+            dataSource={getFilteredAppointmentsByTab()}
+            loading={loading}
+            rowKey="_id"
+          />
+        </TabPane>
+        <TabPane tab="Phòng Theo Dõi Sau Tiêm" key="4">
+          <Table 
+            columns={columns}
+            dataSource={getFilteredAppointmentsByTab()}
+            loading={loading}
+            rowKey="_id"
+          />
+        </TabPane>
+        <TabPane tab="Check-Out" key="5">
+          <Table 
+            columns={columns}
+            dataSource={getFilteredAppointmentsByTab()}
             loading={loading}
             rowKey="_id"
           />
         </TabPane>
       </Tabs>
 
+      {renderCheckoutModal()}
       {renderRescheduleModal()}
       {renderDetailModal()}
       {renderInjectionNoteModal()}
