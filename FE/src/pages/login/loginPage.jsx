@@ -10,7 +10,7 @@ const LoginPage = () => {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [, setErrors] = useState({});
-  const [rememberMe, setRememberMe] = useState(false);
+  // const [rememberMe, setRememberMe] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -44,33 +44,9 @@ const LoginPage = () => {
         localStorage.setItem("userId", response.data.userId);
         localStorage.setItem("cusId", response.data.cusId);
         localStorage.setItem("username", username);
-        
-                // console.log("Trying to login with:", { username, password });
-        
-        // // Thử dùng fetch thay vì axiosInstance
-        // const response = await fetch("http://localhost:8080/user/login", {
-        //   method: "POST",
-        //   headers: {
-        //     "Content-Type": "application/json"
-        //   },
-        //   body: JSON.stringify({ username, password }),
-        //   credentials: "include"
-        // });
-        
-        // console.log("Response status:", response.status);
-        // const data = await response.json();
-        // console.log("Response data:", data);
-        
-        // if (!response.ok) {
-        //   throw new Error(data.message || "Đăng nhập thất bại");
-        // }
-        
-        // // Xử lý dữ liệu giống như trước
-        // localStorage.setItem("accesstoken", data.accesstoken);
-        // localStorage.setItem("userId", data.userId);
-        // localStorage.setItem("cusId", data.cusId);
+
         const tokenParts = response.data.accesstoken.split(".");
-                // const tokenParts = data.accesstoken.split(".");
+
         const payload = JSON.parse(atob(tokenParts[1]));
         const userRole = payload.role;
         console.log(userRole);
@@ -79,11 +55,11 @@ const LoginPage = () => {
         setIsLoading(false);
         toast.success("Đăng nhập thành công!");
         navigate("/welcome");
-      } catch (error) {        
+      } catch (error) {
         setIsLoading(false);
         const errorMessage =
-            error.response?.data || "Đăng nhập thất bại!";
-        toast.error(errorMessage); 
+          error.response?.data || "Đăng nhập thất bại!";
+        toast.error(errorMessage);
       }
     }
   };
