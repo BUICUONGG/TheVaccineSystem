@@ -54,7 +54,7 @@ export const getDetailFullVaccinePakageByIdController = async (req, res) => {
     const result = await vaccinePakageService.getDetailFullVaccinePakageById(
       id
     );
-    res.status(500).json(result);
+    res.status(200).json(result);
   } catch (error) {
     res.status(500).json(error.message);
   }
