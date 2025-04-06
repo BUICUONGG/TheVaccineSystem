@@ -56,6 +56,8 @@ const Profile = () => {
     if (path === "/homepage") return "home";
     if (path.includes("/profile/history")) return "history";
     if (path.includes("/profile/account")) return "account";
+    if (path.includes("/profile/myChild")) return "myChild";
+
     return "profile";
   };
 
@@ -83,6 +85,12 @@ const Profile = () => {
       icon: <HistoryOutlined />,
       label: "Lịch sử tiêm chủng",
       onClick: () => navigate("/profile/history"),
+    },
+    {
+      key: "myChild",
+      icon: <UserOutlined />,
+      label: "Thống tin con",
+      onClick: () => navigate("/profile/myChild"),
     },
   ];
 

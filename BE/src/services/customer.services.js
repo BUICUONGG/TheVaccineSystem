@@ -83,7 +83,6 @@ class CustomerService {
       });
 
       if (customerById) {
-        console.log("Found customer by _id");
         const result = await connectToDatabase.customers.findOneAndUpdate(
           { _id: new ObjectId(customerId) },
           { $set: updateData },
@@ -92,7 +91,7 @@ class CustomerService {
         return result;
       } else {
         // If not found, try to find by userId
-        console.log("Trying to find customer by userId");
+
         const result = await connectToDatabase.customers.findOneAndUpdate(
           { userId: new ObjectId(customerId) },
           { $set: updateData },

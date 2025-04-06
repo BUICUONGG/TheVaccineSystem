@@ -66,7 +66,7 @@ class ChildService {
     try {
       const result = connectToDatabase.childs
         .find({
-          customerId: new ObjectId(cusId),
+          cusId: new ObjectId(cusId),
         })
         .toArray();
 
