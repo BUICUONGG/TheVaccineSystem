@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Table, Input, Button, Modal, Form, Select, Popconfirm, Tag, Space, Typography, Tooltip } from "antd";
-import { EditOutlined, EyeInvisibleOutlined, SearchOutlined, ReloadOutlined } from "@ant-design/icons";
+import { EditOutlined, EyeInvisibleOutlined, SearchOutlined, ReloadOutlined, UserOutlined } from "@ant-design/icons";
 import axiosInstance from "../../../service/api";
 
 const { Search } = Input;
@@ -19,6 +19,7 @@ const AllCustomerPage = () => {
   const [form] = Form.useForm();
   const [currentPage, setCurrentPage] = useState(1);
   const [totalCustomers, setTotalCustomers] = useState(0);
+  const [customerChildren, setCustomerChildren] = useState({});
   const pageSize = 10;
 
   useEffect(() => {
@@ -53,9 +54,36 @@ const AllCustomerPage = () => {
       
       const customersData = response.data.result || [];
       console.log("Customer data returned:", customersData);
+      
+      // Preload children for all customers
+      const childrenMap = {};
+      const childrenPromises = customersData.map(async (customer) => {
+        try {
+          const childrenResponse = await axiosInstance.get(
+            `/child/getAllChildbyCusId/${customer._id}`,
+            {
+              headers: {
+                Authorization: `Bearer ${localStorage.getItem("accesstoken")}`,
+              },
+            }
+          );
+          childrenMap[customer._id] = childrenResponse.data;
+        } catch (error) {
+          console.error(`Error fetching children for customer ${customer._id}:`, error);
+          childrenMap[customer._id] = [];
+        }
+      });
+      
+      // Wait for all children to be fetched
+      await Promise.all(childrenPromises);
+      
       setCustomers(customersData);
       setFilteredCustomers(customersData);
       setTotalCustomers(customersData.length);
+      
+      // Set children data
+      setCustomerChildren(childrenMap);
+      
       setLoading(false);
     } catch (error) {
       console.error("Failed to fetch customers:", error);
@@ -167,6 +195,29 @@ const AllCustomerPage = () => {
     return !customer.customerName && !customer.phone && !customer.birthday && !customer.address && !customer.gender;
   };
 
+  const fetchChildrenForCustomer = async (customerId) => {
+    try {
+      const response = await axiosInstance.get(
+        `/child/getAllChildbyCusId/${customerId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("accesstoken")}`,
+          },
+        }
+      );
+      
+      setCustomerChildren(prev => ({
+        ...prev,
+        [customerId]: response.data
+      }));
+      
+      return response.data;
+    } catch (error) {
+      console.error(`Error fetching children for customer ${customerId}:`, error);
+      return [];
+    }
+  };
+
   const columns = [
     {
       title: "STT",
@@ -222,6 +273,18 @@ const AllCustomerPage = () => {
           {isCustomerHidden(record) ? "Đã ẩn" : "Hoạt động"}
         </Tag>
       ),
+    },
+    {
+      title: "Số con",
+      key: "childrenCount",
+      render: (_, record) => {
+        const children = customerChildren[record._id] || [];
+        return (
+          <Tag icon={<UserOutlined />} color="geekblue">
+            {children.length}
+          </Tag>
+        );
+      },
     },
     {
       title: "Hành động",
@@ -295,6 +358,60 @@ const AllCustomerPage = () => {
         columns={columns}
         loading={loading}
         rowKey="_id"
+        expandable={{
+          expandedRowRender: (record) => {
+            const children = customerChildren[record._id] || [];
+            
+            if (children.length === 0) {
+              return <p style={{ margin: 0 }}>Không có con</p>;
+            }
+            
+            return (
+              <div>
+                <h4>Danh sách con</h4>
+                {children.map((child, index) => (
+                  <div key={child._id} style={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    marginBottom: '10px',
+                    padding: '10px',
+                    backgroundColor: '#f5f5f5',
+                    borderRadius: '5px'
+                  }}>
+                    <div style={{ 
+                      width: '40px', 
+                      height: '40px', 
+                      borderRadius: '50%', 
+                      backgroundColor: '#1890ff', 
+                      color: 'white', 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      justifyContent: 'center', 
+                      marginRight: '15px' 
+                    }}>
+                      {index + 1}
+                    </div>
+                    <div>
+                      <strong>Tên: </strong>{child.name || 'Chưa cập nhật'}
+                      <br />
+                      <strong>Ngày sinh: </strong>{child.birthday || 'Chưa cập nhật'}
+                      <br />
+                      <strong>Giới tính: </strong>{child.gender === 'Male' ? 'Nam' : child.gender === 'Female' ? 'Nữ' : 'Khác'}
+                      <br />
+                      <strong>Ghi chú sức khỏe: </strong>{child.healthNote || 'Không có'}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            );
+          },
+          onExpand: (expanded, record) => {
+            if (expanded && !customerChildren[record._id]) {
+              fetchChildrenForCustomer(record._id);
+            }
+          },
+          rowExpandable: (record) => true,
+        }}
         pagination={{
           current: currentPage,
           pageSize: pageSize,

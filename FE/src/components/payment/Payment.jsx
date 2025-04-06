@@ -150,8 +150,8 @@ const PaymentPage = () => {
         // Tạo nội dung thông báo hủy thanh toán
         const cancelNotificationMessage =
           paymentData.type === "aptGoi"
-            ? `❌ ❌ HỦY GIAO DỊCH: Bạn đã hủy thanh toán vaccine "${paymentData.vaccineName}".`
-            : `❌ ❌ HỦY GIAO DỊCH: Bạn đã hủy thanh toán vaccine "${paymentData.vaccineName}".`;
+            ? ` HỦY GIAO DỊCH: Bạn đã hủy thanh toán vaccine "${paymentData.vaccineName}".`
+            : ` HỦY GIAO DỊCH: Bạn đã hủy thanh toán vaccine "${paymentData.vaccineName}".`;
 
         // Gọi API tạo thông báo hủy
         axiosInstance.post(
