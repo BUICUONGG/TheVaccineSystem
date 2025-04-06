@@ -1,0 +1,183 @@
+.mychild-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.mychild-page-title {
+  font-size: 2rem;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 2rem;
+  color: #333;
+}
+
+.mychild-create-child-button {
+  background-color: #4CAF50;
+  color: white;
+  padding: 1rem 2rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  margin-bottom: 2rem;
+}
+
+.mychild-create-child-button:hover {
+  background-color: #45a049;
+}
+
+.mychild-children-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2rem;
+}
+
+.mychild-child-card {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.mychild-child-avatar {
+  width: 64px;
+  height: 64px;
+  background-color: #e3f2fd;
+  border: 2px solid #2196f3;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+  color: #2196f3;
+}
+
+.mychild-child-info {
+  text-align: center;
+  width: 100%;
+}
+
+.mychild-child-name {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #333;
+}
+
+.mychild-child-detail {
+  color: #666;
+  margin: 0.5rem 0;
+  font-size: 1rem;
+}
+
+.mychild-edit-button {
+  margin-top: 1rem;
+  padding: 0.5rem 1.5rem;
+  background-color: #2196f3;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.mychild-edit-button:hover {
+  background-color: #1976d2;
+}
+
+.mychild-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.mychild-modal-content {
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  width: 90%;
+  max-width: 500px;
+}
+
+.mychild-form-group {
+  margin-bottom: 1.5rem;
+}
+
+.mychild-form-label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: #333;
+}
+
+.mychild-form-input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 1rem;
+}
+
+.mychild-form-input:focus {
+  outline: none;
+  border-color: #2196f3;
+  box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.2);
+}
+
+.mychild-modal-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.mychild-cancel-button,
+.mychild-submit-button {
+  width: 140px;
+  height: 45px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.mychild-cancel-button {
+  background-color: #dc3545;
+  color: white;
+}
+
+.mychild-submit-button {
+  background-color: #2196f3;
+  color: white;
+}
+
+.mychild-cancel-button:hover {
+  background-color: #c82333;
+}
+
+.mychild-submit-button:hover {
+  background-color: #1976d2;
+}
+
+.mychild-cancel-button:active,
+.mychild-submit-button:active {
+  transform: translateY(1px);
+}

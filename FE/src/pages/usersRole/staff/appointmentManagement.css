@@ -436,4 +436,39 @@
 
 .approve-notice-content p:last-child {
   margin-bottom: 0;
+}
+
+/* Styles for Type Tag */
+.ant-tag-blue {
+  background-color: #e6f7ff;
+  border-color: #1890ff;
+  color: #1890ff;
+  font-weight: 600;
+}
+
+.ant-tag-green {
+  background-color: #f6ffed;
+  border-color: #52c41a;
+  color: #52c41a;
+  font-weight: 600;
+}
+
+/* Responsive table adjustments */
+.appointment-management .ant-table {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.appointment-management .ant-table-wrapper {
+  overflow-x: auto;
+}
+
+@media (max-width: 768px) {
+  .appointment-management .ant-table {
+    font-size: 12px;
+  }
+  
+  .appointment-management .ant-table-cell {
+    padding: 8px 6px !important;
+  }
 } 

@@ -81,17 +81,18 @@ const Profile = () => {
       onClick: () => navigate("/profile/account"),
     },
     {
-      key: "history",
-      icon: <HistoryOutlined />,
-      label: "Lịch sử tiêm chủng",
-      onClick: () => navigate("/profile/history"),
-    },
-    {
       key: "myChild",
       icon: <UserOutlined />,
       label: "Thống tin con",
       onClick: () => navigate("/profile/myChild"),
     },
+    {
+      key: "history",
+      icon: <HistoryOutlined />,
+      label: "Lịch sử tiêm chủng",
+      onClick: () => navigate("/profile/history"),
+    },
+    
   ];
 
   return (

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Form, Button, DatePicker, Input, Radio, Switch, Checkbox } from "antd";
+import { Form, Button, DatePicker, Input, Radio, Switch, Checkbox, Modal } from "antd";
 import { UserOutlined, UserAddOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
 import { toast } from "react-toastify";
@@ -14,6 +14,7 @@ const RegisterInjection = () => {
   const navigate = useNavigate();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [form] = Form.useForm();
+  const [childForm] = Form.useForm();
   const [vaccineList, setVaccineList] = useState([]);
   const [parentInfo, setParentInfo] = useState(null);
   const [isChildRegistration, setIsChildRegistration] = useState(false);
@@ -21,6 +22,9 @@ const RegisterInjection = () => {
   const [selectedVaccineType, setSelectedVaccineType] = useState(null);
   const [selectedVaccineId, setSelectedVaccineId] = useState(null);
   const [importProductsPrice, setImportProductsPrice] = useState({});
+  const [childrenList, setChildrenList] = useState([]);
+  const [selectedChild, setSelectedChild] = useState(null);
+  const [showChildForm, setShowChildForm] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem("accesstoken");
@@ -90,7 +94,7 @@ const RegisterInjection = () => {
               if (
                 !priceMap[vaccine.vaccineId] ||
                 new Date(importData.importDate) >
-                  new Date(priceMap[vaccine.vaccineId].importDate)
+                new Date(priceMap[vaccine.vaccineId].importDate)
               ) {
                 priceMap[vaccine.vaccineId] = {
                   unitPrice: vaccine.unitPrice,
@@ -169,11 +173,11 @@ const RegisterInjection = () => {
               : undefined,
             childInfo: parsedData.formValues.childInfo
               ? {
-                  ...parsedData.formValues.childInfo,
-                  birthday: parsedData.formValues.childInfo.birthday
-                    ? dayjs(parsedData.formValues.childInfo.birthday)
-                    : undefined,
-                }
+                ...parsedData.formValues.childInfo,
+                birthday: parsedData.formValues.childInfo.birthday
+                  ? dayjs(parsedData.formValues.childInfo.birthday)
+                  : undefined,
+              }
               : undefined,
           };
           form.setFieldsValue(formValues);
@@ -184,8 +188,61 @@ const RegisterInjection = () => {
     }
   }, [form]);
 
+  useEffect(() => {
+    const fetchChildren = async () => {
+      try {
+        const cusId = localStorage.getItem("cusId");
+        const response = await axiosInstance.get(`/child/getAllChildbyCusId/${cusId}`);
+        setChildrenList(response.data);
+      } catch (err) {
+        console.error("Lỗi gọi API lấy danh sách trẻ:", err);
+      }
+    };
+    fetchChildren();
+  }, []);
+
+  const handleCreateChild = async (values) => {
+    try {
+      const cusId = localStorage.getItem("cusId");
+      values.birthday = dayjs(values.birthday).format('DD/MM/YYYY');
+
+      const response = await axiosInstance.post("/child/create", {
+        ...values,
+        cusId,
+      });
+
+      const newChild = {
+        _id: response.data._id,
+        name: values.name,
+        birthday: values.birthday,
+        gender: values.gender,
+        healthNote: values.healthNote,
+        cusId: cusId
+      };
+
+      setChildrenList(prevList => [...prevList, newChild]);
+
+      setShowChildForm(false);
+      setSelectedChild(newChild);
+      childForm.resetFields();
+
+      toast.success("Tạo trẻ thành công!");
+    } catch (err) {
+      console.error("Lỗi tạo trẻ:", err);
+      toast.error("Không thể tạo thông tin trẻ!");
+    }
+  };
+
+  const handleChildSelect = (child) => {
+    if (selectedChild && selectedChild._id === child._id) {
+      setSelectedChild(null);
+    } else {
+      setSelectedChild(child);
+    }
+  };
+
   const handleVaccineSelect = (vaccine) => {
-    // Kiểm tra giá cho từng loại vaccine
+
     if (selectedVaccineType === "single") {
       if (!importProductsPrice[vaccine._id]?.unitPrice) {
         toast.warning("Hiện chưa có lô vaccine này để tiêm!", {
@@ -204,12 +261,20 @@ const RegisterInjection = () => {
       }
     }
 
-    // Cập nhật ID vaccine được chọn
+    if (selectedVaccineId === vaccine._id) {
+      setSelectedVaccineId(null);
+      form.setFieldsValue({
+        vaccineId: undefined,
+        vaccinePackageId: undefined,
+      });
+      return;
+    }
+
     setSelectedVaccineId(vaccine._id);
 
     const currentFormValues = form.getFieldsValue();
 
-    // Cập nhật form values tùy theo loại vaccine
+
     if (selectedVaccineType === "single") {
       form.setFieldsValue({
         vaccineId: vaccine._id,
@@ -221,7 +286,7 @@ const RegisterInjection = () => {
         vaccinePackageId: vaccine._id,
       });
     }
-    // Lưu dữ liệu vào localStorage
+
     saveFormData({
       ...currentFormValues,
       [selectedVaccineType === "single" ? "vaccineId" : "vaccinePackageId"]:
@@ -230,22 +295,23 @@ const RegisterInjection = () => {
   };
 
   const onFinish = async (values) => {
-    console.log("values", values);
     try {
       const accesstoken = localStorage.getItem("accesstoken");
-      const cusId = localStorage.getItem("cusId");
-
+      const cusId = localStorage.getItem("cusId");      
+      
+      console.log("Selected Child:", selectedChild);
+  
       if (!accesstoken) {
         navigate("/login");
         return;
       }
-
+  
       const now = new Date();
       const time = `${String(now.getHours()).padStart(2, "0")}:${String(
         now.getMinutes()
       ).padStart(2, "0")}`;
       const selectedDate = values.date.format("DD/MM/YYYY");
-
+  
       let invoiceData = {
         cusId: cusId,
         childId: "",
@@ -255,18 +321,22 @@ const RegisterInjection = () => {
         status: "pending",
         childInfo: {},
       };
-
+  
+      // Log thông tin invoice ban đầu
+      console.log("Initial Invoice Data:", invoiceData);
+  
       // Thêm thông tin trẻ em
-      if (isChildRegistration && values.childInfo) {
+      if (isChildRegistration && selectedChild) {
         invoiceData.childInfo = {
-          name: values.childInfo.name,
-          cusId: cusId,
-          birthday: values.childInfo.birthday.format("DD/MM/YYYY"),
-          gender: values.childInfo.gender,
-          healthNote: values.childInfo.healthNote || "",
+          customerId: selectedChild.cusId,
+          name: selectedChild.name,
+          birthday: selectedChild.birthday,
+          gender: selectedChild.gender,
+          healthNote: selectedChild.healthNote || "",
         };
+        console.log("Child Info Added:", invoiceData.childInfo);
       }
-
+  
       // Thêm thông tin vaccine
       if (selectedVaccineType === "single") {
         const selectedVaccine = vaccineList.find(
@@ -279,6 +349,11 @@ const RegisterInjection = () => {
           price: importProductsPrice[selectedVaccineId]?.unitPrice || 0,
           type: "aptLe",
         };
+        console.log("Single Vaccine Info Added:", {
+          vaccineId: selectedVaccine._id,
+          vaccineName: selectedVaccine.vaccineName,
+          price: importProductsPrice[selectedVaccineId]?.unitPrice
+        });
       } else {
         const selectedPackage = vaccinePackages.find(
           (p) => p._id === selectedVaccineId
@@ -290,25 +365,25 @@ const RegisterInjection = () => {
           price: selectedPackage.price || 0,
           type: "aptGoi",
         };
+        console.log("Package Vaccine Info Added:", {
+          vaccinePackageId: selectedPackage._id,
+          packageName: selectedPackage.packageName,
+          price: selectedPackage.price
+        });
       }
-
-      const clearSavedData = () => {
-        localStorage.removeItem("vaccineRegistrationData");
-      };
-
+  
+      console.log("Final Invoice Data:", invoiceData);
+  
       // Chuyển đến trang thanh toán
       navigate("/payment", {
         state: {
           invoiceData,
         },
       });
-      clearSavedData();
+      
     } catch (error) {
       console.error("Lỗi đăng ký:", error);
-      toast.error("Đăng ký thất bại, vui lòng thử lại sau", {
-        position: "top-right",
-        autoClose: 3000,
-      });
+      toast.error("Đăng ký thất bại, vui lòng thử lại sau");
     }
   };
 
@@ -331,11 +406,11 @@ const RegisterInjection = () => {
         date: values.date ? values.date.format("YYYY-MM-DD") : undefined,
         childInfo: values.childInfo
           ? {
-              ...values.childInfo,
-              birthday: values.childInfo.birthday
-                ? values.childInfo.birthday.format("YYYY-MM-DD")
-                : undefined,
-            }
+            ...values.childInfo,
+            birthday: values.childInfo.birthday
+              ? values.childInfo.birthday.format("YYYY-MM-DD")
+              : undefined,
+          }
           : undefined,
       },
     };
@@ -343,6 +418,64 @@ const RegisterInjection = () => {
   };
 
   const footerRef = useRef(null);
+
+  const ChildFormModal = () => (
+    <Modal
+      visible={showChildForm}
+      title="Thêm Trẻ Mới"
+      onCancel={() => setShowChildForm(false)}
+      footer={null}
+    >
+      <Form
+        form={childForm}
+        layout="vertical"
+        onFinish={handleCreateChild}
+      >
+        <Form.Item
+          label="Họ và tên trẻ"
+          name="name"
+          rules={[{ required: true, message: "Vui lòng nhập tên trẻ" }]}
+        >
+          <Input />
+        </Form.Item>
+        <Form.Item
+          label="Ngày sinh"
+          name="birthday"
+          rules={[{ required: true, message: "Vui lòng chọn ngày sinh" }]}
+        >
+          <DatePicker
+            style={{ width: "100%" }}
+            format="DD/MM/YYYY"
+            disabledDate={disabledBirthDate}
+          />
+        </Form.Item>
+        <Form.Item
+          label="Giới tính"
+          name="gender"
+          initialValue="male"
+        >
+          <Radio.Group>
+            <Radio value="male">Nam</Radio>
+            <Radio value="female">Nữ</Radio>
+          </Radio.Group>
+        </Form.Item>
+        <Form.Item
+          label="Ghi chú sức khỏe"
+          name="healthNote"
+        >
+          <Input.TextArea rows={3} />
+        </Form.Item>
+        <Form.Item className="form-buttons">
+          <Button type="primary" htmlType="submit">
+            Tạo
+          </Button>
+          <Button onClick={() => setShowChildForm(false)} style={{ marginLeft: 8 }}>
+            Hủy
+          </Button>
+        </Form.Item>
+      </Form>
+    </Modal>
+  );
 
   return (
     <div className="form-register-page">
@@ -372,6 +505,10 @@ const RegisterInjection = () => {
             </span>
           </div>
 
+          {/* Thay thế form tạo trẻ cũ bằng modal */}
+          <ChildFormModal />
+
+          {/* Form chính */}
           <Form
             form={form}
             layout="vertical"
@@ -382,88 +519,36 @@ const RegisterInjection = () => {
             }}
           >
             {isChildRegistration ? (
-              <div className="form-section form-child-info">
-                <h3>Thông Tin Trẻ Em</h3>
-                <div className="child-info-container">
-                  <Form.Item
-                    name={["childInfo", "name"]}
-                    label="Họ và tên trẻ"
-                    rules={[
-                      { required: true, message: "Vui lòng nhập tên trẻ!" },
-                    ]}
-                  >
-                    <Input placeholder="Nhập họ và tên trẻ" />
-                  </Form.Item>
-
-                  <Form.Item
-                    name={["childInfo", "birthday"]}
-                    label="Ngày sinh"
-                    rules={[
-                      { required: true, message: "Vui lòng chọn ngày sinh!" },
-                      {
-                        validator: (_, value) => {
-                          if (!value) {
-                            return Promise.resolve();
-                          }
-                          if (value.isAfter(dayjs())) {
-                            return Promise.reject(
-                              "Không thể chọn ngày sinh trong tương lai"
-                            );
-                          }
-                          return Promise.resolve();
-                        },
-                      },
-                    ]}
-                  >
-                    <DatePicker
-                      format="DD/MM/YYYY"
-                      placeholder="Chọn ngày sinh"
-                      className="date-picker"
-                      disabledDate={disabledBirthDate}
-                      showToday={false}
-                    />
-                  </Form.Item>
-
-                  <Form.Item
-                    name={["childInfo", "gender"]}
-                    label="Giới tính"
-                    rules={[
-                      { required: true, message: "Vui lòng chọn giới tính!" },
-                    ]}
-                  >
-                    <Radio.Group className="gender-select">
-                      <Radio.Button value="male">Nam</Radio.Button>
-                      <Radio.Button value="female">Nữ</Radio.Button>
-                    </Radio.Group>
-                  </Form.Item>
-
-                  <Form.Item
-                    name={["childInfo", "healthNote"]}
-                    label="Ghi chú sức khỏe"
-                  >
-                    <Input.TextArea
-                      placeholder="Nhập ghi chú về tình trạng sức khỏe của trẻ (nếu có)"
-                      rows={4}
-                    />
-                  </Form.Item>
-                </div>
-
-                <div className="guardian-info">
-                  <h4>Thông Tin Người Giám Hộ</h4>
-                  <div className="info-display-grid">
-                    <div className="info-item">
-                      <label>Người giám hộ:</label>
-                      <div className="info-value">
-                        {parentInfo?.customerName}
+              <>
+                <div className="form-section">
+                  <h3>Chọn Trẻ Đi Tiêm</h3>
+                  <div className="child-card-list">
+                    {childrenList.map((child) => (
+                      <div
+                        key={child._id}
+                        className={`child-card ${selectedChild?._id === child._id ? 'selected' : ''}`}
+                        onClick={() => handleChildSelect(child)}
+                      >
+                        <div className="child-avatar-circle">
+                          <UserOutlined style={{ fontSize: 24, color: "#1890ff" }} />
+                        </div>
+                        <div className="child-info">
+                          <div className="child-name">{child.name}</div>
+                          <div className="child-birthday">Ngày sinh: {child.birthday}</div>
+                          <div className="child-gender">Giới tính: {child.gender === "male" ? "Nam" : "Nữ"}</div>
+                        </div>
                       </div>
-                    </div>
-                    <div className="info-item">
-                      <label>Số điện thoại:</label>
-                      <div className="info-value">{parentInfo?.phone}</div>
-                    </div>
+                    ))}
                   </div>
+                  <button
+                    className="add-child-btn"
+                    type="button"
+                    onClick={() => setShowChildForm(true)}
+                  >
+                    Tạo trẻ mới
+                  </button>
                 </div>
-              </div>
+              </>
             ) : (
               <div className="form-section form-personal-info">
                 <h3>Thông Tin Cá Nhân</h3>
@@ -484,22 +569,20 @@ const RegisterInjection = () => {
                 {(!parentInfo?.customerName ||
                   !parentInfo?.phone ||
                   !parentInfo?.address) && (
-                  <div className="update-info-notice">
-                    <span className="notice-text">
-                      Vui lòng cập nhật đầy đủ thông tin cá nhân!
-                    </span>
-                    <Link to="/profile" className="update-link">
-                      Cập nhật ngay
-                    </Link>
-                  </div>
-                )}
+                    <div className="update-info-notice">
+                      <span className="notice-text">
+                        Vui lòng cập nhật đầy đủ thông tin cá nhân!
+                      </span>
+                      <Link to="/profile" className="update-link">
+                        Cập nhật ngay
+                      </Link>
+                    </div>
+                  )}
               </div>
             )}
 
             <div className="form-section form-vaccine-info">
               <h3>Thông Tin Đăng Ký Tiêm</h3>
-
-              {/*Radio để chọn loại vaccine */}
               <Form.Item name="vaccineType" className="vaccine-type-selector">
                 <Radio.Group
                   onChange={(e) => setSelectedVaccineType(e.target.value)}
@@ -511,11 +594,7 @@ const RegisterInjection = () => {
               </Form.Item>
 
               <Form.Item
-                name={
-                  selectedVaccineType === "single"
-                    ? "vaccineId"
-                    : "vaccinePackageId"
-                }
+                name={selectedVaccineType === "single" ? "vaccineId" : "vaccinePackageId"}
                 label="Chọn Vaccine"
                 rules={[{ required: true, message: "Vui lòng chọn vaccine!" }]}
               >
@@ -526,17 +605,12 @@ const RegisterInjection = () => {
                     </div>
                   ) : selectedVaccineType === "single" ? (
                     vaccineList.map((vaccine) => {
-                      const hasPrice =
-                        !!importProductsPrice[vaccine._id]?.unitPrice;
+                      const hasPrice = !!importProductsPrice[vaccine._id]?.unitPrice;
                       return (
                         <div
                           key={vaccine._id}
-                          className={`vaccine-card ${
-                            selectedVaccineId === vaccine._id ? "selected" : ""
-                          } ${!hasPrice ? "no-price" : ""}`}
-                          onClick={() =>
-                            hasPrice && handleVaccineSelect(vaccine)
-                          }
+                          className={`vaccine-card ${selectedVaccineId === vaccine._id ? "selected" : ""} ${!hasPrice ? "no-price" : ""}`}
+                          onClick={() => hasPrice && handleVaccineSelect(vaccine)}
                         >
                           {hasPrice && (
                             <Checkbox
@@ -550,19 +624,9 @@ const RegisterInjection = () => {
                           )}
                           <div className="vaccine-card-content">
                             <h3>{vaccine.vaccineName}</h3>
-                            <p className="register-vaccine-description">
-                              {vaccine.description}
-                            </p>
-                            <p
-                              className={`vaccine-price ${
-                                !hasPrice ? "unavailable" : ""
-                              }`}
-                            >
-                              {hasPrice
-                                ? `${importProductsPrice[
-                                    vaccine._id
-                                  ].unitPrice.toLocaleString()} VNĐ`
-                                : "Chưa có hàng"}
+                            <p className="register-vaccine-description">{vaccine.description}</p>
+                            <p className={`vaccine-price ${!hasPrice ? "unavailable" : ""}`}>
+                              {hasPrice ? `${importProductsPrice[vaccine._id].unitPrice.toLocaleString()} VNĐ` : "Chưa có hàng"}
                             </p>
                           </div>
                         </div>
@@ -574,9 +638,7 @@ const RegisterInjection = () => {
                       return (
                         <div
                           key={pack._id}
-                          className={`vaccine-card ${
-                            selectedVaccineId === pack._id ? "selected" : ""
-                          } ${!hasPrice ? "no-price" : ""}`}
+                          className={`vaccine-card ${selectedVaccineId === pack._id ? "selected" : ""} ${!hasPrice ? "no-price" : ""}`}
                           onClick={() => hasPrice && handleVaccineSelect(pack)}
                         >
                           {hasPrice && (
@@ -591,17 +653,9 @@ const RegisterInjection = () => {
                           )}
                           <div className="vaccine-card-content">
                             <h3>{pack.packageName}</h3>
-                            <p className="register-vaccine-description">
-                              {pack.description}
-                            </p>
-                            <p
-                              className={`vaccine-price ${
-                                !hasPrice ? "unavailable" : ""
-                              }`}
-                            >
-                              {hasPrice
-                                ? `${pack.price.toLocaleString()} VNĐ`
-                                : "Chưa có giá"}
+                            <p className="register-vaccine-description">{pack.description}</p>
+                            <p className={`vaccine-price ${!hasPrice ? "unavailable" : ""}`}>
+                              {hasPrice ? `${pack.price.toLocaleString()} VNĐ` : "Chưa có giá"}
                             </p>
                           </div>
                         </div>
@@ -618,13 +672,9 @@ const RegisterInjection = () => {
                   { required: true, message: "Vui lòng chọn ngày tiêm!" },
                   {
                     validator: (_, value) => {
-                      if (!value) {
-                        return Promise.resolve();
-                      }
+                      if (!value) return Promise.resolve();
                       if (value.isBefore(dayjs().startOf("day"))) {
-                        return Promise.reject(
-                          "Không thể chọn ngày trong quá khứ"
-                        );
+                        return Promise.reject("Không thể chọn ngày trong quá khứ");
                       }
                       return Promise.resolve();
                     },
@@ -654,5 +704,4 @@ const RegisterInjection = () => {
     </div>
   );
 };
-
 export default RegisterInjection;
