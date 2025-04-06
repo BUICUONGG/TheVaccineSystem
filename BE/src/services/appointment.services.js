@@ -58,45 +58,6 @@ class AppointmentService {
       if (!listAptle) {
         throw new Error("khong thee in danh sach");
       }
-
-      // Populate customer information for each appointment
-      for (let appointment of listAptle) {
-        try {
-          // Kiểm tra xem collections và cusId có tồn tại
-          if (appointment.cusId && connectToDatabase.customers) {
-            const customer = await connectToDatabase.customers.findOne({
-              _id: new ObjectId(appointment.cusId),
-            });
-
-            appointment.customer = customer || null;
-          }
-
-          // Kiểm tra cho vaccine collection
-          if (appointment.vaccineId && connectToDatabase.vaccines) {
-            const vaccine = await connectToDatabase.vaccines.findOne({
-              _id: new ObjectId(appointment.vaccineId),
-            });
-
-            appointment.vaccine = vaccine || null;
-          }
-
-          // Kiểm tra cho child collection
-          if (appointment.childId && connectToDatabase.childs) {
-            const child = await connectToDatabase.childs.findOne({
-              _id: new ObjectId(appointment.childId),
-            });
-
-            appointment.child = child || null;
-          }
-        } catch (err) {
-          console.log(
-            `Error populating data for appointment ${appointment._id}:`,
-            err
-          );
-          // Tiếp tục vòng lặp, không dừng toàn bộ quá trình nếu một appointment gặp lỗi
-        }
-      }
-
       return listAptle;
     } catch (error) {
       console.log(error);
