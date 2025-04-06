@@ -1,18 +1,18 @@
 import { useState, useEffect } from "react";
 import { Form, Input, Button, message, Spin } from "antd";
 import { useOutletContext } from "react-router-dom";
-import './ProfileAccount.css'; // Thay đổi import CSS
+import './ProfileAccount.css'; 
 import axiosInstance from "../../../../service/api";
 import { toast } from "react-toastify";
 
 const ProfileAccount = () => {
-  const { userData, refreshUserData } = useOutletContext();
+  const { refreshUserData } = useOutletContext();
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [, setUserAccount] = useState(null);
-  const [isEditing, setIsEditing] = useState(false);
+
   const [showPasswordChange, setShowPasswordChange] = useState(false);
-  const [isEditMode, setIsEditMode] = useState(false);
+  const [setIsEditMode] = useState(false);
 
   useEffect(() => {
     const fetchUserAccount = async () => {
@@ -28,7 +28,6 @@ const ProfileAccount = () => {
             headers: { Authorization: `Bearer ${accesstoken}` }
           }
         );
-
         setUserAccount(response.data);
         form.setFieldsValue({
           username: response.data.username,
@@ -41,12 +40,6 @@ const ProfileAccount = () => {
 
     fetchUserAccount();
   }, [form]);
-
-  const handleEdit = () => {
-    setIsEditMode(true);
-  };
-
-
 
   const handleUpdateInfo = async (values) => {
     try {
