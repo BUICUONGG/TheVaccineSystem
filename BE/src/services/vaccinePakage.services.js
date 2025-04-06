@@ -94,36 +94,40 @@ class VaccinePakageService {
     }
   }
 
-  async getDetailFullVaccinePakageById() {
+  async getDetailFullVaccinePackageById(id) {
     try {
-      // Lấy tất cả gói vaccine
-      const packages = await connectToDatabase.vaccinepackages.find().toArray();
+      // Lấy gói vaccine theo id
+      const vaccinePackage = await connectToDatabase.vaccinepackages.findOne({
+        _id: new ObjectId(id),
+      });
 
-      // Lấy danh sách tất cả vaccineId có trong packages
-      const vaccineIds = packages.flatMap((pkg) =>
-        pkg.vaccines.map((v) => v.vaccineId)
-      );
+      if (!vaccinePackage) {
+        throw new Error("Vaccine package not found");
+      }
 
-      // Tìm thông tin vaccine từ inventory dựa trên vaccineIds
+      // Lấy danh sách vaccineId
+      const vaccineIds = vaccinePackage.vaccines.map((v) => v.vaccineId);
+
+      // Tìm thông tin vaccine từ inventory
       const inventoryData = await connectToDatabase.vaccinceInventorys
         .find({ _id: { $in: vaccineIds } })
         .toArray();
 
-      // Ghép thông tin vaccine vào từng package
-      const result = packages.map((pkg) => ({
-        ...pkg,
-        vaccines: pkg.vaccines.map((vaccine) => ({
-          ...vaccine,
-          details:
-            inventoryData.find((inv) => inv._id.equals(vaccine.vaccineId)) ||
-            null,
-        })),
+      // Ghép thông tin chi tiết vào từng vaccine trong gói
+      const enrichedVaccines = vaccinePackage.vaccines.map((vaccine) => ({
+        ...vaccine,
+        details:
+          inventoryData.find((inv) => inv._id.equals(vaccine.vaccineId)) ||
+          null,
       }));
 
-      return result;
+      return {
+        ...vaccinePackage,
+        vaccines: enrichedVaccines,
+      };
     } catch (error) {
-      console.log(error.message);
-      throw new Error(error.message);
+      console.error(error.message);
+      throw new Error("Failed to get full vaccine package details");
     }
   }
 }
