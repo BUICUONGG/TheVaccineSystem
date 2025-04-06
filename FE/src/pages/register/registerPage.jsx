@@ -3,6 +3,7 @@ import { FiUser, FiMail, FiLock, FiEye, FiEyeOff } from "react-icons/fi";
 import { useNavigate, Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import "./registerPage.css";
+import axiosInstance from "../../service/api";
 
 const RegistrationForm = () => {
   const [formData, setFormData] = useState({
@@ -90,18 +91,16 @@ const RegistrationForm = () => {
 
     setLoading(true);
     try {
-      const response = await fetch("http://localhost:8080/user/register", {
-        method: "POST",
+      const response = await axiosInstance.post("/user/register", formData, {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),
       });
 
-      const data = await response.json();
+      const data = response.data; // Dữ liệu trả về từ backend
       console.log(formData);
 
-      if (response.ok) {
+      if (response.status === 201) {
         // Đăng ký thành công
         setFormData({
           username: "",
@@ -110,7 +109,7 @@ const RegistrationForm = () => {
           confirmPassword: "",
         });
         toast.success("Đăng ký thành công!");
-        navigate("/login");
+        navigate("/homepage");
       } else {
         // Xử lý error từ backend
         setErrors({
@@ -126,6 +125,7 @@ const RegistrationForm = () => {
       setLoading(false);
     }
   };
+
   const handleLoginButton = () => {
     navigate("/login");
   };
