@@ -97,6 +97,10 @@ const VaccineDetail = () => {
                 />
               </motion.div>
 
+              <Link to="/pricelist" className="back-to-shop">
+                ← Về trang cửa hàng
+              </Link>
+
               <Link to="/registerinjection" className="register-button">
                 Đặt lịch ngay
               </Link>

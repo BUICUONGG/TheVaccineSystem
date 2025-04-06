@@ -32,6 +32,7 @@ import PaymentPage from "./components/payment/Payment";
 // import PaymentSuccess from "./components/Payment/PaymentSuccess";
 import VaccineDetail from "./pages/homepage/vaccineShop/vaccineDetail";
 import MyChild from "./pages/homepage/profile/components/MyChild";
+import VaccinePackageDetail from "./pages/homepage/vaccineShop/vaccinePackageDetail";
 
 const router = createBrowserRouter([
   {
@@ -61,6 +62,10 @@ const router = createBrowserRouter([
   {
     path: "/vaccineDetail/:id",
     element: <VaccineDetail />,
+  },
+  {
+    path: "/vaccinePkgDetail/:id",
+    element: <VaccinePackageDetail />,
   },
   {
     path: "/registerinjection",

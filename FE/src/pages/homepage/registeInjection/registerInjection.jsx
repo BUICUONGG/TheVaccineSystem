@@ -294,24 +294,32 @@ const RegisterInjection = () => {
     });
   };
 
+  const handleViewDetail = (vaccineId, isPackage = false) => {
+    if (isPackage) {
+      navigate(`/vaccinePkgDetail/${vaccineId}`);
+    } else {
+      navigate(`/vaccineDetail/${vaccineId}`);
+    }
+  };
+
   const onFinish = async (values) => {
     try {
       const accesstoken = localStorage.getItem("accesstoken");
-      const cusId = localStorage.getItem("cusId");      
-      
+      const cusId = localStorage.getItem("cusId");
+
       console.log("Selected Child:", selectedChild);
-  
+
       if (!accesstoken) {
         navigate("/login");
         return;
       }
-  
+
       const now = new Date();
       const time = `${String(now.getHours()).padStart(2, "0")}:${String(
         now.getMinutes()
       ).padStart(2, "0")}`;
       const selectedDate = values.date.format("DD/MM/YYYY");
-  
+
       let invoiceData = {
         cusId: cusId,
         childId: "",
@@ -321,10 +329,10 @@ const RegisterInjection = () => {
         status: "pending",
         childInfo: {},
       };
-  
+
       // Log thông tin invoice ban đầu
       console.log("Initial Invoice Data:", invoiceData);
-  
+
       // Thêm thông tin trẻ em
       if (isChildRegistration && selectedChild) {
         invoiceData.childInfo = {
@@ -336,7 +344,7 @@ const RegisterInjection = () => {
         };
         console.log("Child Info Added:", invoiceData.childInfo);
       }
-  
+
       // Thêm thông tin vaccine
       if (selectedVaccineType === "single") {
         const selectedVaccine = vaccineList.find(
@@ -371,16 +379,16 @@ const RegisterInjection = () => {
           price: selectedPackage.price
         });
       }
-  
+
       console.log("Final Invoice Data:", invoiceData);
-  
+
       // Chuyển đến trang thanh toán
       navigate("/payment", {
         state: {
           invoiceData,
         },
       });
-      
+
     } catch (error) {
       console.error("Lỗi đăng ký:", error);
       toast.error("Đăng ký thất bại, vui lòng thử lại sau");
@@ -625,9 +633,19 @@ const RegisterInjection = () => {
                           <div className="vaccine-card-content">
                             <h3>{vaccine.vaccineName}</h3>
                             <p className="register-vaccine-description">{vaccine.description}</p>
-                            <p className={`vaccine-price ${!hasPrice ? "unavailable" : ""}`}>
-                              {hasPrice ? `${importProductsPrice[vaccine._id].unitPrice.toLocaleString()} VNĐ` : "Chưa có hàng"}
-                            </p>
+                            <div className="vaccine-price-detail-row">
+                              <p className={`vaccine-price ${!hasPrice ? "unavailable" : ""}`}>
+                                {hasPrice ? `${importProductsPrice[vaccine._id].unitPrice.toLocaleString()} VNĐ` : "Chưa có hàng"}
+                              </p>
+                              <Link
+                                to={`/vaccineDetail/${vaccine._id}`}
+                                onClick={(e) => e.stopPropagation()}
+                                className="view-detail-link"
+                              >
+                                Xem chi tiết
+                              </Link>
+                            </div>
+
                           </div>
                         </div>
                       );
@@ -654,9 +672,18 @@ const RegisterInjection = () => {
                           <div className="vaccine-card-content">
                             <h3>{pack.packageName}</h3>
                             <p className="register-vaccine-description">{pack.description}</p>
-                            <p className={`vaccine-price ${!hasPrice ? "unavailable" : ""}`}>
-                              {hasPrice ? `${pack.price.toLocaleString()} VNĐ` : "Chưa có giá"}
-                            </p>
+                            <div className="vaccine-price-detail-row">
+                              <p className={`vaccine-price ${!hasPrice ? "unavailable" : ""}`}>
+                                {hasPrice ? `${pack.price.toLocaleString()} VNĐ` : "Chưa có giá"}
+                              </p>
+                              <Link
+                                to={`/vaccinePkgDetail/${pack._id}`}
+                                onClick={(e) => e.stopPropagation()}
+                                className="view-detail-link"
+                              >
+                                Xem chi tiết gói
+                              </Link>
+                            </div>
                           </div>
                         </div>
                       );

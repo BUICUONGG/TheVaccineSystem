@@ -102,41 +102,6 @@ const VaccinePriceList = () => {
     setSelectedManufacturers(checkedValues);
   };
 
-  // const getFilteredProducts = () => {
-  //   let filtered = selectedCategory === "Single" ? products : packageProducts;
-
-  //   if (selectedManufacturers.length > 0) {
-  //     filtered = filtered.filter((p) =>
-  //       selectedManufacturers.includes(p.manufacturer)
-  //     );
-  //   }
-
-  //   // Filer gia san pham o day
-  //   if (priceLevel !== "all") {
-  //     filtered = filtered.filter((product) => {
-  //       const productPrice =
-  //         selectedCategory === "Single"
-  //           ? importProductsPrice[product._id]?.unitPrice
-  //           : product.price;
-
-  //       if (!productPrice) return false;
-
-  //       switch (priceLevel) {
-  //         case "under500k":
-  //           return productPrice < 500000;
-  //         case "500kto1m":
-  //           return productPrice >= 500000 && productPrice <= 1000000;
-  //         case "above1m":
-  //           return productPrice > 1000000;
-  //         default:
-  //           return true;
-  //       }
-  //     });
-  //   }
-
-  //   return filtered;
-  // };
-
   const getFilteredProducts = () => {
     let filtered = selectedCategory === "Single" ? products : packageProducts;
 
@@ -177,10 +142,12 @@ const VaccinePriceList = () => {
     currentPage * productsPerPage
   );
 
-  const handleMoreInfo = (productId) => {
-    // localStorage.setItem("vaccineId", productId);
-
-    navigate(`/vaccineDetail/${productId}`);
+  const handleMoreInfo = (productId, isPackage = false) => {
+    if (isPackage) {
+      navigate(`/vaccinePkgDetail/${productId}`);
+    } else {
+      navigate(`/vaccineDetail/${productId}`);
+    }
   };
 
   const footerRef = useRef(null);
@@ -285,7 +252,7 @@ const VaccinePriceList = () => {
                           </div>
                           <button
                             className="view-more-btn"
-                            onClick={() => handleMoreInfo(product._id)}
+                            onClick={() => handleMoreInfo(product._id, false)}
                           >
                             XEM THÊM
                           </button>
@@ -312,7 +279,7 @@ const VaccinePriceList = () => {
                           </div>
                           <button
                             className="view-more-btn package-btn"
-                            onClick={() => handleMoreInfo(product._id)}
+                            onClick={() => handleMoreInfo(product._id, true)}
                           >
                             XEM CHI TIẾT GÓI
                           </button>
@@ -322,18 +289,6 @@ const VaccinePriceList = () => {
                   </div>
                 ))}
               </div>
-
-              {/* {getFilteredProducts().length > 0 && (
-                <div className="pagination-container">
-                  <Pagination
-                    current={currentPage}
-                    total={getFilteredProducts().length}
-                    pageSize={productsPerPage}
-                    onChange={(page) => setCurrentPage(page)}
-                    showSizeChanger={false}
-                  />
-                </div>
-              )} */}
 
               {getFilteredProducts().length > productsPerPage && (
                 <div className="pagination-container">

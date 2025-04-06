@@ -1160,3 +1160,24 @@ Header Framework styles
 .child-card.selected .child-name {
   color: #1890ff;
 }
+
+.view-detail-link {
+  display: inline-block;
+  margin-top: 6px;
+  font-size: 14px;
+  color: #2563eb;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.view-detail-link:hover {
+  color: #1d4ed8;
+}
+
+.vaccine-price-detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: auto;
+}
+
