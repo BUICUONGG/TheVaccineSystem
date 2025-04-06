@@ -39,8 +39,11 @@ function MyChild() {
 
   const handleCreateChild = async () => {
     try {
-      const response = await axiosInstance.post("/child/create", newChild);
-      setChildren([...children, response.data]);
+      await axiosInstance.post("/child/create", newChild);
+      const response = await axiosInstance.get(
+        `/child/getAllChildbyCusId/${cusId}`
+      );
+      setChildren(response.data);
       setNewChild({
         cusId: localStorage.getItem("cusId"),
         name: "",
