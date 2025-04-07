@@ -17,5 +17,5 @@ childRoutes.get("/showChildren", showChildController);
 childRoutes.get("/getAllChildbyCusId/:id", getAllChildbyCusIController);
 childRoutes.post("/create", validateAccessToken, createChildController);
 childRoutes.post("/update/:id", validateAccessToken, updateChildController);
-childRoutes.post("deleteChild/:id", validateAccessToken, deleteChildController);
+childRoutes.post("/deleteChild/:id", deleteChildController);
 export default childRoutes;
