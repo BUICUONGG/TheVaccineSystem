@@ -1,11 +1,14 @@
 import { useState } from "react";
 import { FiUser, FiLock, FiEye, FiEyeOff } from "react-icons/fi";;
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 import "./loginPage.css";
 import { toast } from "react-toastify";
 import axiosInstance from "../../service/api";
 
 const LoginPage = () => {
+  const location = useLocation();
+  const redirectTo = new URLSearchParams(location.search).get("redirectTo") || "/";
+
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -54,7 +57,7 @@ const LoginPage = () => {
 
         setIsLoading(false);
         toast.success("Đăng nhập thành công!");
-        navigate("/welcome");
+        navigate(redirectTo);
       } catch (error) {
         setIsLoading(false);
         const errorMessage =
