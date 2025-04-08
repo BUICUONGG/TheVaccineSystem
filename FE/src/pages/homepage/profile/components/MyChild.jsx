@@ -305,9 +305,16 @@ function MyChild() {
             <div className="mychild-child-info">
               <h2 className="mychild-child-name">Tên con: {child.name}</h2>
               <p className="mychild-child-detail">🎂 {child.birthday}</p>
-              <p className="mychild-child-detail">⚤ {child.gender}</p>
-              <p className="mychild-child-detail">
-                📝 {child.healthNote || "Không có"}
+              <p className="mychild-child-detail ">
+                ⚤{" "}
+                {child.gender === "Male"
+                  ? "Nam"
+                  : child.gender === "Female"
+                  ? "Nữ"
+                  : "Không xác định"}
+              </p>
+              <p className="mychild-child-detail mychild-health-note">
+                Tình trạng sức khoẻ: {child.healthNote || "Không có"}
               </p>
               <div className="mychild-buttons">
                 <button

@@ -13,7 +13,7 @@
 }
 
 .mychild-create-child-button {
-  background-color: #4CAF50;
+  background-color: #4caf50;
   color: white;
   padding: 1rem 2rem;
   border: none;
@@ -214,4 +214,14 @@
 
 .btn-delete:hover {
   background-color: #cc0000;
+}
+
+.mychild-health-note {
+  display: -webkit-box;
+  -webkit-line-clamp: 2; /* số dòng muốn hiển thị */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-height: 3em; /* chiều cao tương ứng với 2 dòng */
+  line-height: 1.5em;
 }
