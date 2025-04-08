@@ -83,7 +83,7 @@ const Profile = () => {
     {
       key: "myChild",
       icon: <UserOutlined />,
-      label: "Thống tin con",
+      label: "Thông tin con",
       onClick: () => navigate("/profile/myChild"),
     },
     {
@@ -92,7 +92,6 @@ const Profile = () => {
       label: "Lịch sử tiêm chủng",
       onClick: () => navigate("/profile/history"),
     },
-    
   ];
 
   return (

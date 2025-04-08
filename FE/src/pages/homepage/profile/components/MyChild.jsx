@@ -8,8 +8,8 @@ function MyChild() {
   const [children, setChildren] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isCreating, setIsCreating] = useState(false);
-  const [isEditing, setIsEditing] = useState(false); 
-  const [editingChild, setEditingChild] = useState(null); 
+  const [isEditing, setIsEditing] = useState(false);
+  const [editingChild, setEditingChild] = useState(null);
 
   const [newChild, setNewChild] = useState({
     name: "",
@@ -23,7 +23,9 @@ function MyChild() {
   useEffect(() => {
     const fetchChildren = async () => {
       try {
-        const response = await axiosInstance.get(`/child/getAllChildbyCusId/${cusId}`);
+        const response = await axiosInstance.get(
+          `/child/getAllChildbyCusId/${cusId}`
+        );
         setChildren(response.data);
       } catch (error) {
         console.error("Lỗi khi lấy danh sách trẻ:", error);
@@ -70,8 +72,10 @@ function MyChild() {
   };
 
   const handleDeleteChild = async (id) => {
+    const confirmDelete = window.confirm("Bạn có chắc chắn muốn xóa trẻ này?");
+    if (!confirmDelete) return;
     try {
-      await axiosInstance.delete(`/child/deleteChild/${id}`);
+      await axiosInstance.post(`/child/deleteChild/${id}`);
       setChildren((prev) => prev.filter((child) => child._id !== id));
       toast.success("Đã xóa trẻ!");
     } catch (error) {
@@ -127,7 +131,10 @@ function MyChild() {
       <h1 className="mychild-page-title">Danh sách con của tôi</h1>
 
       <div>
-        <button onClick={() => setIsCreating(true)} className="mychild-create-child-button">
+        <button
+          onClick={() => setIsCreating(true)}
+          className="mychild-create-child-button"
+        >
           Tạo trẻ
         </button>
       </div>
@@ -184,10 +191,18 @@ function MyChild() {
                 ></textarea>
               </div>
               <div className="mychild-modal-buttons">
-                <button type="button" onClick={() => setIsCreating(false)} className="mychild-cancel-button">
+                <button
+                  type="button"
+                  onClick={() => setIsCreating(false)}
+                  className="mychild-cancel-button"
+                >
                   Hủy
                 </button>
-                <button type="button" onClick={handleCreateChild} className="mychild-submit-button">
+                <button
+                  type="button"
+                  onClick={handleCreateChild}
+                  className="mychild-submit-button"
+                >
                   Tạo con
                 </button>
               </div>
@@ -207,7 +222,9 @@ function MyChild() {
                   type="text"
                   name="name"
                   value={editingChild.name}
-                  onChange={(e) => setEditingChild({ ...editingChild, name: e.target.value })}
+                  onChange={(e) =>
+                    setEditingChild({ ...editingChild, name: e.target.value })
+                  }
                   className="mychild-form-input"
                   required
                 />
@@ -219,7 +236,12 @@ function MyChild() {
                   name="birthday"
                   value={editingChild.birthday}
                   max={getToday()}
-                  onChange={(e) => setEditingChild({ ...editingChild, birthday: e.target.value })}
+                  onChange={(e) =>
+                    setEditingChild({
+                      ...editingChild,
+                      birthday: e.target.value,
+                    })
+                  }
                   className="mychild-form-input"
                   required
                 />
@@ -229,7 +251,9 @@ function MyChild() {
                 <select
                   name="gender"
                   value={editingChild.gender}
-                  onChange={(e) => setEditingChild({ ...editingChild, gender: e.target.value })}
+                  onChange={(e) =>
+                    setEditingChild({ ...editingChild, gender: e.target.value })
+                  }
                   className="mychild-form-input"
                   required
                 >
@@ -242,15 +266,28 @@ function MyChild() {
                 <textarea
                   name="healthNote"
                   value={editingChild.healthNote}
-                  onChange={(e) => setEditingChild({ ...editingChild, healthNote: e.target.value })}
+                  onChange={(e) =>
+                    setEditingChild({
+                      ...editingChild,
+                      healthNote: e.target.value,
+                    })
+                  }
                   className="mychild-form-input"
                 ></textarea>
               </div>
               <div className="mychild-modal-buttons">
-                <button type="button" onClick={() => setIsEditing(false)} className="mychild-cancel-button">
+                <button
+                  type="button"
+                  onClick={() => setIsEditing(false)}
+                  className="mychild-cancel-button"
+                >
                   Hủy
                 </button>
-                <button type="button" onClick={handleUpdateChild} className="mychild-submit-button">
+                <button
+                  type="button"
+                  onClick={handleUpdateChild}
+                  className="mychild-submit-button"
+                >
                   Cập nhật
                 </button>
               </div>
@@ -262,15 +299,29 @@ function MyChild() {
       <div className="mychild-children-grid">
         {children.map((child) => (
           <div key={child._id} className="mychild-child-card">
-            <div className="mychild-child-avatar">{child.name.charAt(0).toUpperCase()}</div>
+            <div className="mychild-child-avatar">
+              {child.name.charAt(0).toUpperCase()}
+            </div>
             <div className="mychild-child-info">
               <h2 className="mychild-child-name">Tên con: {child.name}</h2>
               <p className="mychild-child-detail">🎂 {child.birthday}</p>
               <p className="mychild-child-detail">⚤ {child.gender}</p>
-              <p className="mychild-child-detail">📝 {child.healthNote || "Không có"}</p>
+              <p className="mychild-child-detail">
+                📝 {child.healthNote || "Không có"}
+              </p>
               <div className="mychild-buttons">
-                <button className="btn-edit" onClick={() => handleEditClick(child)}>Cập nhật</button>
-                <button className="btn-delete" onClick={() => handleDeleteChild(child._id)}>Xóa</button>
+                <button
+                  className="btn-edit"
+                  onClick={() => handleEditClick(child)}
+                >
+                  Cập nhật
+                </button>
+                <button
+                  className="btn-delete"
+                  onClick={() => handleDeleteChild(child._id)}
+                >
+                  Xóa
+                </button>
               </div>
             </div>
           </div>
