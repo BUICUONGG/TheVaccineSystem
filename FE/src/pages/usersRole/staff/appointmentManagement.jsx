@@ -664,7 +664,10 @@ const AppointmentManagement = () => {
                   <div key={index} className="dose-schedule-item">
                     <h4>Mũi {dose.doseNumber}</h4>
                     <div className="dose-info">
-                      <div>• Tên vaccine: {vaccineList[dose.vaccineId] || "Chưa có thông tin"}</div>
+                      <div>• Tên vaccine: {
+                        vaccineList.find(v => v._id === dose.vaccineId)?.vaccineName || 
+                        "Chưa có thông tin"
+                      }</div>
                       <div>• Ngày tiêm: {dose.date || "Chưa có thông tin"}</div>
                       <div>• Giá tiêm: {dose.price?.toLocaleString("vi-VN") || "0"} VNĐ</div>
                       <div>
@@ -912,16 +915,6 @@ const AppointmentManagement = () => {
         </Button>
       </div>
 
-      <div className="search-container">
-        <Input
-          placeholder="Tìm kiếm lịch hẹn..."
-          prefix={<SearchOutlined />}
-          value={searchText}
-          onChange={handleSearch}
-          className="search-input"
-          allowClear
-        />
-      </div>
 
       <Tabs
         defaultActiveKey="1"

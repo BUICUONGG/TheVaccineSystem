@@ -124,6 +124,12 @@ const ProfileHistory = () => {
         return "#1890ff";  // Xanh dương - Đã thanh toán (chờ tiêm)
       case "approve":
         return "purple";  // Màu tím - Đã duyệt
+      case "đã tới":
+        return "orange";  // Cam - Đã tới
+      case "đã khám":
+        return "purple";  // Tím - Đã khám
+      case "đang chờ":
+        return "gold";  // Vàng kim - Đang chờ
       default:
         return "gray"; // Màu mặc định
     }
@@ -132,15 +138,21 @@ const ProfileHistory = () => {
   const getStatusText = (status) => {
     switch (status?.toLowerCase()) {
       case "completed":
-        return "ĐÃ TIÊM";
+        return "HOÀN THÀNH";
       case "incomplete":
         return "ĐÃ HỦY";
       case "pending":
-        return "CHƯA THANH TOÁN";
+        return "Chưa tiêm";
       case "paid":
         return "ĐÃ THANH TOÁN";
       case "approve":
         return "ĐÃ DUYỆT";
+      case "đã tới":
+        return "ĐÃ TỚI";
+      case "đã khám":
+        return "ĐÃ KHÁM";
+      case "đang chờ":
+        return "ĐANG CHỜ";
       default:
         return "KHÔNG XÁC ĐỊNH";
     }
@@ -155,14 +167,17 @@ const ProfileHistory = () => {
     let filtered = [...appointments];
 
     if (tabKey === "pending") {
-
+      // Đơn của bạn: trạng thái paid và completed
       filtered = filtered.filter(
-        (apt) => apt.status?.toLowerCase() === "paid"
+        (apt) => 
+          apt.status?.toLowerCase() === "paid" || 
+          apt.status?.toLowerCase() === "completed"
       );
     } else {
-
+      // Đang Thực Hiện: trạng thái còn lại (trừ completed)
       filtered = filtered.filter(
-        (apt) => apt.status?.toLowerCase() !== "paid"
+        (apt) => 
+          apt.status?.toLowerCase() !== "completed"
       );
     }
 
@@ -291,7 +306,7 @@ const ProfileHistory = () => {
         <Descriptions.Item label="Ngày tạo đơn">
           {appointment.createdAt || "Chưa có thông tin"}
         </Descriptions.Item>
-        <Descriptions.Item label="Ghi chú">
+        <Descriptions.Item label="Ghi chú trong quá trình tiêm">
           {appointment.note || "Chưa có thông tin"}
         </Descriptions.Item>
         <Descriptions.Item label="Trạng thái">
@@ -389,6 +404,31 @@ const ProfileHistory = () => {
       onFilter: (value, record) => record.type === value,
     },
     {
+      title: "Tiến độ",
+      key: "progress",
+      width: "10%",
+      render: (_, record) => {
+        if (record.type === "Tiêm gói" && record.doseSchedule) {
+          const completedDoses = record.doseSchedule.filter(dose => 
+            dose.status?.toLowerCase() === "completed"
+          ).length;
+          const totalDoses = record.doseSchedule.length;
+          return `${completedDoses}/${totalDoses}`;
+        }
+        return '-';
+      },
+      sorter: (a, b) => {
+        if (a.type !== "Tiêm gói" || b.type !== "Tiêm gói") return 0;
+        const aCompletedDoses = a.doseSchedule.filter(dose => 
+          dose.status?.toLowerCase() === "completed"
+        ).length;
+        const bCompletedDoses = b.doseSchedule.filter(dose => 
+          dose.status?.toLowerCase() === "completed"
+        ).length;
+        return aCompletedDoses - bCompletedDoses;
+      },
+    },
+    {
       title: "Trạng thái",
       key: "status",
       width: "15%",
@@ -401,7 +441,7 @@ const ProfileHistory = () => {
         filters: [
           { text: "Đã tiêm", value: "completed" },
           { text: "Đã hủy", value: "incomplete" },
-          { text: "Chưa thanh toán", value: "pending" },
+          { text: "Chưa tiêm", value: "pending" },
           { text: "Chờ tiêm", value: "paid" },
         ],
         onFilter: (value, record) => record.status?.toLowerCase() === value,
@@ -433,10 +473,11 @@ const ProfileHistory = () => {
 
       <div className="search-section">
         <Input
-          placeholder="Tìm kiếm..."
+          placeholder="Tìm kiếm"
           prefix={<SearchOutlined />}
           onChange={(e) => setSearchText(e.target.value)}
           className="search-input"
+          allowClear
         />
       </div>
       <Tabs
@@ -448,7 +489,7 @@ const ProfileHistory = () => {
         <TabPane
           tab={
             <span className="tab-label">
-              Đang chờ duyệt
+              Đơn của bạn
               {getFilteredAppointments("pending").length > 0 && (
                 <Tag color="#faad14" className="tab-count">
                   {getFilteredAppointments("pending").length}
@@ -474,7 +515,7 @@ const ProfileHistory = () => {
         </TabPane>
 
         <TabPane
-          tab={<span className="tab-label">Các đơn khác</span>}
+          tab={<span className="tab-label">Đang Thực Hiện</span>}
           key="others"
         >
           <Table

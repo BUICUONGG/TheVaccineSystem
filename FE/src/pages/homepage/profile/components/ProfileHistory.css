@@ -80,13 +80,6 @@
     padding: 8px 16px;
   }
 
-  .history-container .search-section {
-    padding: 0 10px;
-  }
-
-  .history-container .search-input {
-    max-width: 100%;
-  }
 }
 
 .custom-tabs {
@@ -156,36 +149,6 @@
 
 .history-table .ant-table-row[data-status="pending"]:hover > td {
   background-color: #fff1b8 !important;
-}
-
-/* Thêm phạm vi cụ thể cho search section */
-.history-container .search-section {
-  margin: 24px 0;
-  padding: 0 15px;
-}
-
-/* Thêm phạm vi cụ thể cho search input */
-.history-container .search-input {
-  width: 100%;
-  max-width: 400px;
-  height: 40px;
-  border-radius: 8px;
-  font-size: 14px;
-}
-
-.history-container .search-input .ant-input-prefix {
-  color: #1890ff;
-  margin-right: 8px;
-}
-
-.history-container .search-input .ant-input {
-  padding-left: 12px;
-}
-
-.history-container .search-input .ant-input:hover,
-.history-container .search-input .ant-input:focus {
-  border-color: #1890ff;
-  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.1);
 }
 
 /* Styles cho modal */
