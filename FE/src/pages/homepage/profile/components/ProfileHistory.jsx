@@ -207,7 +207,7 @@ const ProfileHistory = () => {
                       {appointment.customer?.birthday || "Chưa có thông tin"}
                     </Descriptions.Item>
                     <Descriptions.Item label="Giới tính">
-                      {appointment.customer?.gender === 'male' ? 'Nam' : 'Nữ'}
+                      {appointment.customer?.gender === 'Male' ? 'Nam' : 'Nữ'}
                     </Descriptions.Item>
                     <Descriptions.Item label="Số điện thoại">
                       {appointment.customer?.phone || "Chưa có thông tin"}
@@ -232,7 +232,7 @@ const ProfileHistory = () => {
                       {appointment.child?.birthday || "Chưa có thông tin"}
                     </Descriptions.Item>
                     <Descriptions.Item label="Giới tính">
-                      {appointment.child?.gender === 'male' ? 'Nam' : 'Nữ'}
+                      {appointment.child?.gender === 'Male' ? 'Nam' : 'Nữ'}
                     </Descriptions.Item>
                     <Descriptions.Item label="Ghi chú sức khỏe">
                       {appointment.child?.healthNote || "Không có ghi chú"}

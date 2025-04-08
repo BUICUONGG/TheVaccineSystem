@@ -225,7 +225,7 @@ const AppointmentManagement = () => {
       "completed": "HOÀN THÀNH",
       "incomplete": "Đã hủy",
       "Pending": "Hủy thanh toán",
-      "pending": "Đang chờ",
+      "pending": "Chưa tiêm",
       "Paid": "ĐÃ THANH TOÁN",
       "đã tới": "ĐÃ TỚI",
       "đã khám": "ĐÃ KHÁM",
@@ -643,7 +643,7 @@ const AppointmentManagement = () => {
                     </div>
                     <div className="child-gender">
                       <strong>Giới tính: </strong>
-                      {selectedAppointmentDetail.childInfo.gender === 'male' ? 'Nam' : 'Nữ'}
+                      {selectedAppointmentDetail.childInfo.gender === 'Male' ? 'Nam' : 'Nữ'}
                     </div>
                     <div className="child-health-note">
                       <strong>Ghi chú sức khỏe: </strong>
@@ -773,7 +773,7 @@ const AppointmentManagement = () => {
               {selectedChildInfo.birthday}
             </Descriptions.Item>
             <Descriptions.Item label="Giới tính">
-              {selectedChildInfo.gender === 'male' ? 'Nam' : 'Nữ'}
+              {selectedChildInfo.gender === 'Male' ? 'Nam' : 'Nữ'}
             </Descriptions.Item>
             <Descriptions.Item label="Ghi chú sức khỏe">
               {selectedChildInfo.healthNote || 'Không có ghi chú'}
