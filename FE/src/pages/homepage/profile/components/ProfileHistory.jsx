@@ -306,7 +306,7 @@ const ProfileHistory = () => {
         <Descriptions.Item label="Ngày tạo đơn">
           {appointment.createdAt || "Chưa có thông tin"}
         </Descriptions.Item>
-        <Descriptions.Item label="Ghi chú">
+        <Descriptions.Item label="Ghi chú trong quá trình tiêm">
           {appointment.note || "Chưa có thông tin"}
         </Descriptions.Item>
         <Descriptions.Item label="Trạng thái">

@@ -32,7 +32,7 @@ const PaymentPage = () => {
     // Prepare payment data from invoice data
     const data = {
       cusId: invoiceData.cusId,
-      childId: "",
+      childId: "", // Để trống theo yêu cầu API
       price: invoiceData.price,
       type: invoiceData.type,
       date: invoiceData.date,
@@ -43,8 +43,9 @@ const PaymentPage = () => {
 
     // Thêm thông tin trẻ nếu đăng ký cho trẻ
     if (invoiceData.childInfo) {
+      data.childId = invoiceData.childInfo._id;
       data.childInfo = {
-        cusId: invoiceData.childInfo.cusId  || localStorage.getItem("cusId"),
+        cusId: invoiceData.childInfo.cusId,
         name: invoiceData.childInfo.name,
         birthday: invoiceData.childInfo.birthday,
         gender: invoiceData.childInfo.gender,
