@@ -241,8 +241,38 @@ const RegisterInjection = () => {
     }
   };
 
-  const handleVaccineSelect = (vaccine) => {
+  const validateVaccinePackageByAge = (child, pack) => {
+    if (!child || !pack) return false;
 
+    // Tính tuổi của trẻ
+    const birthDate = dayjs(child.birthday, 'DD/MM/YYYY');
+    const currentDate = dayjs();
+    const ageInMonths = currentDate.diff(birthDate, 'month');
+    const ageInYears = currentDate.diff(birthDate, 'year');
+
+    // Kiểm tra tên gói vaccine
+    const packageName = pack.packageName.toLowerCase();
+
+    // Gói sơ sinh cho trẻ dưới 1 tuổi
+    if (packageName.includes('sơ sinh')) {
+      return ageInMonths <= 12;
+    }
+
+    // Gói người lớn chỉ cho người trên 7 tuổi
+    if (packageName.includes('người lớn')) {
+      return ageInYears >= 7;
+    }
+
+    // Các gói khác cho trẻ em từ 1-7 tuổi
+    if (packageName.includes('trẻ em') || packageName.includes('tiêu chuẩn')) {
+      return ageInMonths > 12 && ageInYears < 7;
+    }
+
+    // Trường hợp mặc định
+    return true;
+  };
+
+  const handleVaccineSelect = (vaccine) => {
     if (selectedVaccineType === "single") {
       if (!importProductsPrice[vaccine._id]?.unitPrice) {
         toast.warning("Hiện chưa có lô vaccine này để tiêm!", {
@@ -252,6 +282,17 @@ const RegisterInjection = () => {
         return;
       }
     } else {
+      // Kiểm tra tuổi trẻ nếu đang đăng ký cho trẻ
+      if (isChildRegistration && selectedChild) {
+        if (!validateVaccinePackageByAge(selectedChild, vaccine)) {
+          toast.warning("Gói vaccine này không phù hợp với độ tuổi của trẻ!", {
+            position: "top-right",
+            autoClose: 3000,
+          });
+          return;
+        }
+      }
+
       if (!vaccine.price) {
         toast.warning("Hiện chưa có gói vaccine này để tiêm!", {
           position: "top-right",
@@ -273,7 +314,6 @@ const RegisterInjection = () => {
     setSelectedVaccineId(vaccine._id);
 
     const currentFormValues = form.getFieldsValue();
-
 
     if (selectedVaccineType === "single") {
       form.setFieldsValue({
@@ -654,13 +694,45 @@ const RegisterInjection = () => {
                   ) : (
                     vaccinePackages.map((pack) => {
                       const hasPrice = !!pack.price;
+                      
+                      // Kiểm tra tính hợp lệ của gói vaccine với độ tuổi trẻ
+                      let isAgeValid = true;
+                      let ageRestrictionMessage = '';
+                      
+                      if (isChildRegistration && selectedChild) {
+                        const birthDate = dayjs(selectedChild.birthday, 'DD/MM/YYYY');
+                        const currentDate = dayjs();
+                        const ageInMonths = currentDate.diff(birthDate, 'month');
+                        const ageInYears = currentDate.diff(birthDate, 'year');
+                        const packageName = pack.packageName.toLowerCase();
+
+                        if (packageName.includes('sơ sinh')) {
+                          isAgeValid = ageInMonths <= 12;
+                          ageRestrictionMessage = ageInMonths <= 12 
+                            ? '' 
+                            : 'Gói này chỉ dành cho trẻ dưới 1 tuổi';
+                        } else if (packageName.includes('người lớn')) {
+                          isAgeValid = ageInYears >= 7;
+                          ageRestrictionMessage = ageInYears >= 7 
+                            ? '' 
+                            : 'Gói này chỉ dành cho người trên 7 tuổi';
+                        } else if (packageName.includes('trẻ em') || packageName.includes('tiêu chuẩn')) {
+                          isAgeValid = ageInMonths > 12 && ageInYears < 7;
+                          ageRestrictionMessage = ageInMonths > 12 && ageInYears < 7 
+                            ? '' 
+                            : 'Gói này chỉ dành cho trẻ em từ 1-7 tuổi';
+                        }
+                      }
+
                       return (
                         <div
                           key={pack._id}
-                          className={`vaccine-card ${selectedVaccineId === pack._id ? "selected" : ""} ${!hasPrice ? "no-price" : ""}`}
-                          onClick={() => hasPrice && handleVaccineSelect(pack)}
+                          className={`vaccine-card 
+                            ${selectedVaccineId === pack._id ? "selected" : ""} 
+                            ${!hasPrice || !isAgeValid ? "no-price" : ""}`}
+                          onClick={() => hasPrice && isAgeValid && handleVaccineSelect(pack)}
                         >
-                          {hasPrice && (
+                          {hasPrice && isAgeValid && (
                             <Checkbox
                               checked={selectedVaccineId === pack._id}
                               onChange={(e) => {
@@ -673,8 +745,23 @@ const RegisterInjection = () => {
                           <div className="vaccine-card-content">
                             <h3>{pack.packageName}</h3>
                             <p className="register-vaccine-description">{pack.description}</p>
+                            
+                            {/* Hiển thị thông báo hạn chế độ tuổi */}
+                            {!isAgeValid && (
+                              <div 
+                                style={{ 
+                                  color: 'red', 
+                                  fontSize: '0.8em', 
+                                  marginTop: '10px',
+                                  fontStyle: 'italic'
+                                }}
+                              >
+                                {ageRestrictionMessage}
+                              </div>
+                            )}
+                            
                             <div className="vaccine-price-detail-row">
-                              <p className={`vaccine-price ${!hasPrice ? "unavailable" : ""}`}>
+                              <p className={`vaccine-price ${!hasPrice || !isAgeValid ? "unavailable" : ""}`}>
                                 {hasPrice ? `${pack.price.toLocaleString()} VNĐ` : "Chưa có giá"}
                               </p>
                               <Link
