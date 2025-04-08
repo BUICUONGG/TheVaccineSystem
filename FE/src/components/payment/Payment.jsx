@@ -43,6 +43,7 @@ const PaymentPage = () => {
 
     // Thêm thông tin trẻ nếu đăng ký cho trẻ
     if (invoiceData.childInfo) {
+      data.childId = invoiceData.childInfo._id;
       data.childInfo = {
         cusId: invoiceData.childInfo.cusId,
         name: invoiceData.childInfo.name,

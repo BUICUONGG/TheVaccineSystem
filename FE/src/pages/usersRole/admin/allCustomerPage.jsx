@@ -219,12 +219,7 @@ const AllCustomerPage = () => {
   };
 
   const columns = [
-    {
-      title: "STT",
-      key: "stt",
-      render: (_, record, index) => index + 1,
-      width: 60,
-    },
+
     {
       title: "Tên đăng nhập",
       dataIndex: "username",

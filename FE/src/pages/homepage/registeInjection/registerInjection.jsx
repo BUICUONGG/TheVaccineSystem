@@ -336,6 +336,7 @@ const RegisterInjection = () => {
       // Thêm thông tin trẻ em
       if (isChildRegistration && selectedChild) {
         invoiceData.childInfo = {
+          _id: selectedChild._id,
           customerId: selectedChild.cusId,
           name: selectedChild.name,
           birthday: selectedChild.birthday,

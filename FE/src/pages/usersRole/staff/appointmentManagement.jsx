@@ -23,7 +23,9 @@ import {
   ClockCircleOutlined,
   ExclamationCircleOutlined,
   ReloadOutlined,
-  CheckOutlined
+  CheckOutlined,
+  UserOutlined,
+  InfoCircleOutlined
 } from "@ant-design/icons";
 import moment from "moment";
 import axiosInstance from "../../../service/api";
@@ -62,6 +64,9 @@ const AppointmentManagement = () => {
   const [checkoutNote, setCheckoutNote] = useState("");
   const [currentCheckoutRecord, setCurrentCheckoutRecord] = useState(null);
 
+  const [selectedChildInfo, setSelectedChildInfo] = useState(null);
+  const [isChildModalVisible, setIsChildModalVisible] = useState(false);
+
   // Fetch users, vaccines, and appointments on component mount
   useEffect(() => {
     fetchAllData();
@@ -91,32 +96,66 @@ const AppointmentManagement = () => {
       });
       setVaccinePackageList(packagesResponse.data);
 
+      // Fetch children for each customer
+      const childrenPromises = customersData.map(async (customer) => {
+        try {
+          const childrenResponse = await axiosInstance.get(
+            `/child/getAllChildbyCusId/${customer._id}`,
+            { headers: { Authorization: `Bearer ${accesstoken}` } }
+          );
+          return { customerId: customer._id, children: childrenResponse.data };
+        } catch (error) {
+          console.error(`Error fetching children for customer ${customer._id}:`, error);
+          return { customerId: customer._id, children: [] };
+        }
+      });
+
+      const childrenData = await Promise.all(childrenPromises);
+      const childrenMap = childrenData.reduce((acc, item) => {
+        acc[item.customerId] = item.children;
+        return acc;
+      }, {});
+
       // Fetch appointments
       const [leResponse, goiResponse] = await Promise.all([
         axiosInstance.get("/appointmentLe/showInfo"),
         axiosInstance.get("/appointmentGoi/showInfo")
       ]);
       
-      // Enrich appointments with customer username and vaccine names
-      const enrichedLe = leResponse.data.map(apt => ({
-        ...apt,
-        type: "Lẻ",
-        customerName: customersData.find(c => c._id === apt.cusId)?.username || "Không xác định",
-        customerFullName: customersData.find(c => c._id === apt.cusId)?.customerName || "Không xác định",
-        customerGender: customersData.find(c => c._id === apt.cusId)?.gender || "Không xác định",
-        vaccineName: vaccinesResponse.data.find(v => v._id === apt.vaccineId)?.vaccineName || "Không xác định",
-        createdAt: apt.createdAt || "Không xác định"
-      }));
+      // Enrich appointments with customer username, vaccine names, and child info
+      const enrichedLe = leResponse.data.map(apt => {
+        const customer = customersData.find(c => c._id === apt.cusId);
+        const customerChildren = childrenMap[apt.cusId] || [];
+        
+        return {
+          ...apt,
+          type: "Lẻ",
+          customerName: customer?.username || "Không xác định",
+          customerFullName: customer?.customerName || "Không xác định",
+          customerGender: customer?.gender || "Không xác định",
+          vaccineName: vaccinesResponse.data.find(v => v._id === apt.vaccineId)?.vaccineName || "Không xác định",
+          createdAt: apt.createdAt || "Không xác định",
+          // Tìm thông tin trẻ nếu là đăng ký cho trẻ
+          childInfo: customerChildren.find(child => child._id === apt.childId) || null
+        };
+      });
 
-      const enrichedGoi = goiResponse.data.map(apt => ({
-        ...apt,
-        type: "Gói",
-        customerName: customersData.find(c => c._id === apt.cusId)?.username || "Không xác định",
-        customerFullName: customersData.find(c => c._id === apt.cusId)?.customerName || "Không xác định",
-        customerGender: customersData.find(c => c._id === apt.cusId)?.gender || "Không xác định",
-        vaccineName: packagesResponse.data.find(p => p._id === apt.vaccinePackageId)?.packageName || "Không xác định",
-        createdAt: apt.createdAt || "Không xác định"
-      }));
+      const enrichedGoi = goiResponse.data.map(apt => {
+        const customer = customersData.find(c => c._id === apt.cusId);
+        const customerChildren = childrenMap[apt.cusId] || [];
+        
+        return {
+          ...apt,
+          type: "Gói",
+          customerName: customer?.username || "Không xác định",
+          customerFullName: customer?.customerName || "Không xác định",
+          customerGender: customer?.gender || "Không xác định",
+          vaccineName: packagesResponse.data.find(p => p._id === apt.vaccinePackageId)?.packageName || "Không xác định",
+          createdAt: apt.createdAt || "Không xác định",
+          // Tìm thông tin trẻ nếu là đăng ký cho trẻ
+          childInfo: customerChildren.find(child => child._id === apt.childId) || null
+        };
+      });
       
       // Gộp và sắp xếp appointments
       const mergedAppointments = [...enrichedLe, ...enrichedGoi].sort((a, b) => 
@@ -351,6 +390,12 @@ const AppointmentManagement = () => {
     }
   };
 
+  // Hàm hiển thị thông tin chi tiết của trẻ
+  const showChildDetails = (childInfo) => {
+    setSelectedChildInfo(childInfo);
+    setIsChildModalVisible(true);
+  };
+
   // Điều chỉnh renderActionButtons để thêm nút check out
   const renderActionButtons = (record) => {
     const actionMap = {
@@ -486,21 +531,32 @@ const AppointmentManagement = () => {
           {selectedAppointmentDetail.childInfo && (
             <>
               <Divider />
-              <h3>Thông tin trẻ em</h3>
-              <Descriptions column={1} bordered>
-                <Descriptions.Item label="Tên trẻ">
-                  {selectedAppointmentDetail.childInfo.name}
-                </Descriptions.Item>
-                <Descriptions.Item label="Ngày sinh">
-                  {selectedAppointmentDetail.childInfo.birthday}
-                </Descriptions.Item>
-                <Descriptions.Item label="Giới tính">
-                  {selectedAppointmentDetail.childInfo.gender === 'male' ? 'Nam' : 'Nữ'}
-                </Descriptions.Item>
-                <Descriptions.Item label="Ghi chú sức khỏe">
-                  {selectedAppointmentDetail.childInfo.healthNote || "Không có ghi chú"}
-                </Descriptions.Item>
-              </Descriptions>
+              <div className="child-info-section">
+                <h3>Thông tin trẻ em</h3>
+                <div className="child-card">
+                  <div className="child-avatar-circle">
+                    <UserOutlined style={{ fontSize: 24, color: "#1890ff" }} />
+                  </div>
+                  <div className="child-info">
+                    <div className="child-name">
+                      <strong>Tên trẻ: </strong>
+                      {selectedAppointmentDetail.childInfo.name}
+                    </div>
+                    <div className="child-birthday">
+                      <strong>Ngày sinh: </strong>
+                      {selectedAppointmentDetail.childInfo.birthday}
+                    </div>
+                    <div className="child-gender">
+                      <strong>Giới tính: </strong>
+                      {selectedAppointmentDetail.childInfo.gender === 'male' ? 'Nam' : 'Nữ'}
+                    </div>
+                    <div className="child-health-note">
+                      <strong>Ghi chú sức khỏe: </strong>
+                      {selectedAppointmentDetail.childInfo.healthNote || "Không có"}
+                    </div>
+                  </div>
+                </div>
+              </div>
             </>
           )}
         </div>
@@ -560,7 +616,47 @@ const AppointmentManagement = () => {
     </Modal>
   );
 
-  // Cập nhật columns để thêm cột Loại
+  // Modal hiển thị thông tin chi tiết của trẻ
+  const renderChildDetailsModal = () => (
+    <Modal
+      title="Thông tin chi tiết trẻ em"
+      open={isChildModalVisible}
+      onCancel={() => {
+        setIsChildModalVisible(false);
+        setSelectedChildInfo(null);
+      }}
+      footer={[
+        <Button key="close" onClick={() => setIsChildModalVisible(false)}>
+          Đóng
+        </Button>
+      ]}
+      width={500}
+    >
+      {selectedChildInfo && (
+        <div className="child-details-modal">
+          <div className="child-avatar-circle">
+            <UserOutlined style={{ fontSize: 48, color: "#1890ff" }} />
+          </div>
+          <Descriptions column={1} bordered>
+            <Descriptions.Item label="Tên trẻ">
+              {selectedChildInfo.name}
+            </Descriptions.Item>
+            <Descriptions.Item label="Ngày sinh">
+              {selectedChildInfo.birthday}
+            </Descriptions.Item>
+            <Descriptions.Item label="Giới tính">
+              {selectedChildInfo.gender === 'male' ? 'Nam' : 'Nữ'}
+            </Descriptions.Item>
+            <Descriptions.Item label="Ghi chú sức khỏe">
+              {selectedChildInfo.healthNote || 'Không có ghi chú'}
+            </Descriptions.Item>
+          </Descriptions>
+        </div>
+      )}
+    </Modal>
+  );
+
+  // Cập nhật columns để thêm cột Trẻ em
   const columns = [
     {
       title: 'Loại',
@@ -596,6 +692,25 @@ const AppointmentManagement = () => {
           {getStatusText(status)}
         </Tag>
       )
+    },
+    {
+      title: 'Trẻ em',
+      key: 'childInfo',
+      render: (_, record) => {
+        // Kiểm tra xem record có thông tin trẻ không
+        if (record.childInfo && record.childInfo.name) {
+          return (
+            <Button 
+              type="link" 
+              icon={<InfoCircleOutlined />}
+              onClick={() => showChildDetails(record.childInfo)}
+            >
+              {record.childInfo.name}
+            </Button>
+          );
+        }
+        return 'Không có';
+      }
     },
     {
       title: 'Chi tiết',
@@ -710,6 +825,7 @@ const AppointmentManagement = () => {
       {renderRescheduleModal()}
       {renderDetailModal()}
       {renderInjectionNoteModal()}
+      {renderChildDetailsModal()}
     </div>
   );
 };
