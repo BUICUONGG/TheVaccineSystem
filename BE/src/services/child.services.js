@@ -55,7 +55,7 @@ class ChildService {
       if (!result) {
         throw new Error("Không tìm thấy bản ghi để xóa");
       }
-      return result;
+      return "Xoá thành công";
     } catch (error) {
       console.log(error.message);
       throw new Error(error.message);

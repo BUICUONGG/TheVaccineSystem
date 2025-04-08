@@ -33,7 +33,7 @@ export const deleteChildController = async (req, res) => {
   try {
     const id = req.params.id;
     const result = await childService.deleteChild(id);
-    res.status(200).json("Xoa thanh cong");
+    res.status(200).json(result);
   } catch (error) {
     res.status(500).json(error.message);
   }

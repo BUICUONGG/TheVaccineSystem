@@ -22,12 +22,12 @@ function HeaderLayouts({ footerRef }) {
         const payload = JSON.parse(atob(tokenParts[1]));
         const role = payload.role;
         setUserRole(role);
-        
+
         const storedUsername = localStorage.getItem("username");
         if (storedUsername) {
           setUsername(storedUsername);
         }
-        
+
         if (role === "customer") {
           const storedCusId = localStorage.getItem("cusId");
           if (storedCusId) {
@@ -42,7 +42,7 @@ function HeaderLayouts({ footerRef }) {
     // Add scroll event listener
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
-      
+
       if (currentScrollY > 100) { // Only apply behavior after scrolling past 100px
         if (currentScrollY > lastScrollY) {
           // Scrolling down - hide nav
@@ -55,12 +55,12 @@ function HeaderLayouts({ footerRef }) {
         // Always show nav at the top of the page
         setNavVisible(true);
       }
-      
+
       setLastScrollY(currentScrollY);
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
-    
+
     return () => {
       window.removeEventListener('scroll', handleScroll);
     };
@@ -152,7 +152,16 @@ function HeaderLayouts({ footerRef }) {
         {!isLoggedIn ? (
           <>
             <li>
-              <Link to="/login">Đăng Nhập</Link>
+              <a
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  const currentPath = window.location.pathname;
+                  navigate(`/login?redirectTo=${currentPath}`);
+                }}
+              >
+                Đăng Nhập
+              </a>
             </li>
             <li>
               <Link to="/register">Đăng Ký</Link>
@@ -169,9 +178,9 @@ function HeaderLayouts({ footerRef }) {
               <Dropdown overlay={getUserMenuItems()} trigger={['click']}>
                 <a onClick={(e) => e.preventDefault()}>
                   <Space>
-                    <Avatar 
-                      icon={<UserOutlined />} 
-                      style={{ backgroundColor: userRole === 'admin' ? '#ff4d4f' : userRole === 'staff' ? '#1890ff' : '#52c41a' }} 
+                    <Avatar
+                      icon={<UserOutlined />}
+                      style={{ backgroundColor: userRole === 'admin' ? '#ff4d4f' : userRole === 'staff' ? '#1890ff' : '#52c41a' }}
                     />
                     <span className="username">{username}</span>
                     <DownOutlined />
