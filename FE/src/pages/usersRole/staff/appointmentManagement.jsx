@@ -1,31 +1,33 @@
 import { useState, useEffect } from "react";
-import { 
-  Table, 
-  Tag, 
-  Button, 
-  message, 
-  Modal, 
-  Input, 
-  List, 
-  Typography, 
-  Divider, 
+import {
+  Table,
+  Tag,
+  Button,
+  message,
+  Modal,
+  Input,
+  List,
+  Typography,
+  Divider,
   Tabs,
   Tooltip,
   DatePicker,
   Descriptions,
-  Progress
+  Progress,
+  Popconfirm
 } from "antd";
-import { 
-  SearchOutlined, 
-  CheckCircleFilled, 
-  MenuOutlined, 
+import {
+  SearchOutlined,
+  CheckCircleFilled,
+  MenuOutlined,
   CheckCircleOutlined,
   ClockCircleOutlined,
   ExclamationCircleOutlined,
   ReloadOutlined,
   CheckOutlined,
   UserOutlined,
-  InfoCircleOutlined
+  InfoCircleOutlined,
+  EditOutlined
 } from "@ant-design/icons";
 import moment from "moment";
 import axiosInstance from "../../../service/api";
@@ -52,7 +54,7 @@ const AppointmentManagement = () => {
   const [currentInjectionRecord, setCurrentInjectionRecord] = useState(null);
   const [injectionProgress, setInjectionProgress] = useState(0);
   const [injectionTimer, setInjectionTimer] = useState(null);
-  
+
   // Thêm state để lưu danh sách users và vaccines
   const [userList, setUserList] = useState([]);
   const [vaccineList, setVaccineList] = useState([]);
@@ -66,6 +68,8 @@ const AppointmentManagement = () => {
 
   const [selectedChildInfo, setSelectedChildInfo] = useState(null);
   const [isChildModalVisible, setIsChildModalVisible] = useState(false);
+
+  const [healthNote, setHealthNote] = useState("");
 
   // Fetch users, vaccines, and appointments on component mount
   useEffect(() => {
@@ -121,12 +125,12 @@ const AppointmentManagement = () => {
         axiosInstance.get("/appointmentLe/showInfo"),
         axiosInstance.get("/appointmentGoi/showInfo")
       ]);
-      
+
       // Enrich appointments with customer username, vaccine names, and child info
       const enrichedLe = leResponse.data.map(apt => {
         const customer = customersData.find(c => c._id === apt.cusId);
         const customerChildren = childrenMap[apt.cusId] || [];
-        
+
         return {
           ...apt,
           type: "Lẻ",
@@ -143,7 +147,7 @@ const AppointmentManagement = () => {
       const enrichedGoi = goiResponse.data.map(apt => {
         const customer = customersData.find(c => c._id === apt.cusId);
         const customerChildren = childrenMap[apt.cusId] || [];
-        
+
         return {
           ...apt,
           type: "Gói",
@@ -156,9 +160,9 @@ const AppointmentManagement = () => {
           childInfo: customerChildren.find(child => child._id === apt.childId) || null
         };
       });
-      
+
       // Gộp và sắp xếp appointments
-      const mergedAppointments = [...enrichedLe, ...enrichedGoi].sort((a, b) => 
+      const mergedAppointments = [...enrichedLe, ...enrichedGoi].sort((a, b) =>
         new Date(b.createdAt) - new Date(a.createdAt)
       );
 
@@ -193,8 +197,8 @@ const AppointmentManagement = () => {
     const value = e.target.value.toLowerCase();
     setSearchText(value);
 
-    const filteredData = appointments.filter(apt => 
-      Object.values(apt).some(val => 
+    const filteredData = appointments.filter(apt =>
+      Object.values(apt).some(val =>
         String(val).toLowerCase().includes(value)
       )
     );
@@ -207,6 +211,7 @@ const AppointmentManagement = () => {
       "completed": "green",
       "incomplete": "red",
       "Pending": "darkred",
+      "pending": "yellow",
       "Paid": "blue",
       "đã tới": "orange",
       "đã khám": "purple",
@@ -220,6 +225,7 @@ const AppointmentManagement = () => {
       "completed": "HOÀN THÀNH",
       "incomplete": "Đã hủy",
       "Pending": "Hủy thanh toán",
+      "pending": "Đang chờ",
       "Paid": "ĐÃ THANH TOÁN",
       "đã tới": "ĐÃ TỚI",
       "đã khám": "ĐÃ KHÁM",
@@ -230,14 +236,14 @@ const AppointmentManagement = () => {
 
   const handleCheckin = async (record) => {
     try {
-      const updateEndpoint = record.vaccinePackageId 
-        ? "/appointmentGoi/update/" 
+      const updateEndpoint = record.vaccinePackageId
+        ? "/appointmentGoi/update/"
         : "/appointmentLe/update/";
-      
+
       await axiosInstance.post(updateEndpoint + record._id, {
         status: "đã tới"
       });
-      
+
       message.success("Check-in thành công");
       fetchAllData();
     } catch (error) {
@@ -256,13 +262,14 @@ const AppointmentManagement = () => {
       // Nếu không bình thường, mở modal để nhập note và chọn lại ngày
       if (!isNormal) {
         setSelectedAppointment(record);
+        setCheckoutNote(record.note || "");
         setIsRescheduleModalVisible(true);
         return;
       }
 
       await axiosInstance.post(updateEndpoint + record._id, {
         status: newStatus,
-        note: ""
+        note: record.note || ""
       });
       
       message.success(isNormal 
@@ -281,17 +288,29 @@ const AppointmentManagement = () => {
         ? "/appointmentGoi/update/" 
         : "/appointmentLe/update/";
       
-      // Cập nhật trạng thái sang "đang chờ" ngay từ đầu
-      await axiosInstance.post(updateEndpoint + record._id, {
-        status: "đang chờ"
-      });
-      
-      // Lưu record hiện tại và reset note
-      setCurrentInjectionRecord(record);
-      setInjectionNote("");
+      if (record.type === 'Gói') {
+        // Tìm mũi tiêm đầu tiên chưa hoàn thành
+        const currentDose = record.doseSchedule.find(dose => dose.status !== 'completed');
+        if (currentDose) {
+          // Cập nhật trạng thái mũi tiêm hiện tại
+          await axiosInstance.post(updateEndpoint + record._id, {
+            status: "đang chờ",
+            doseSchedule: record.doseSchedule.map(dose => 
+              dose.doseNumber === currentDose.doseNumber 
+                ? { ...dose, status: 'đang chờ' }
+                : dose
+            )
+          });
+        }
+      } else {
+        // Xử lý cho đơn lẻ như cũ
+        await axiosInstance.post(updateEndpoint + record._id, {
+          status: "đang chờ"
+        });
+      }
       
       message.success("Bắt đầu tiêm");
-      fetchAllData(); // Refresh data to show updated status
+      fetchAllData();
     } catch (error) {
       message.error("Không thể bắt đầu tiêm");
     }
@@ -301,10 +320,10 @@ const AppointmentManagement = () => {
     if (!currentInjectionRecord) return;
 
     try {
-      const updateEndpoint = currentInjectionRecord.vaccinePackageId 
-        ? "/appointmentGoi/update/" 
+      const updateEndpoint = currentInjectionRecord.vaccinePackageId
+        ? "/appointmentGoi/update/"
         : "/appointmentLe/update/";
-      
+
       // Đóng modal ghi chú
       setIsInjectionNoteModalVisible(false);
 
@@ -315,7 +334,7 @@ const AppointmentManagement = () => {
 
       message.success("Cập nhật ghi chú thành công");
       fetchAllData();
-      
+
       // Reset trạng thái
       setCurrentInjectionRecord(null);
       setInjectionNote("");
@@ -335,16 +354,24 @@ const AppointmentManagement = () => {
         ? "/appointmentGoi/update/" 
         : "/appointmentLe/update/";
       
-      await axiosInstance.post(updateEndpoint + selectedAppointment._id, {
+      const updateData = {
         status: "Paid",
-        note: "Khám sàng lọc bất thường, cần đánh giá lại",
+        note: checkoutNote || "Khám sàng lọc bất thường, cần đánh giá lại",
         date: rescheduleDate.format("DD/MM/YYYY")
-      });
+      };
+
+      if (selectedAppointment.type === 'Gói') {
+        updateData.healthNote = healthNote || "";
+      }
+
+      await axiosInstance.post(updateEndpoint + selectedAppointment._id, updateData);
 
       message.success("Đã cập nhật lịch hẹn và ghi chú");
       setIsRescheduleModalVisible(false);
       setSelectedAppointment(null);
       setRescheduleDate(null);
+      setCheckoutNote("");
+      setHealthNote("");
       fetchAllData();
     } catch (error) {
       message.error("Không thể cập nhật lịch hẹn");
@@ -356,47 +383,34 @@ const AppointmentManagement = () => {
     setIsDetailModalVisible(true);
   };
 
-  // Hàm hiển thị modal check out
-  const showCheckoutModal = (record) => {
-    setCurrentCheckoutRecord(record);
-    setCheckoutNote(record.note || "");
-    setIsCheckoutModalVisible(true);
-  };
-
-  // Hàm thực hiện check out
-  const handleCheckout = async () => {
-    if (!currentCheckoutRecord) return;
-
+  // Thêm hàm xử lý cập nhật note
+  const handleUpdateNote = async (record) => {
     try {
-      const updateEndpoint = currentCheckoutRecord.vaccinePackageId 
+      const updateEndpoint = record.vaccinePackageId 
         ? "/appointmentGoi/update/" 
         : "/appointmentLe/update/";
       
-      // Cập nhật trạng thái và note
-      await axiosInstance.post(updateEndpoint + currentCheckoutRecord._id, {
-        status: "completed",
-        note: checkoutNote || "Hoàn thành tiêm, sức khỏe ổn định"
-      });
+      const updateData = {
+        note: checkoutNote || "Cập nhật ghi chú",
+      };
 
-      message.success("Check-out thành công");
-      
-      // Đóng modal và làm mới dữ liệu
+      if (record.type === 'Gói') {
+        updateData.healthNote = healthNote || "";
+      }
+
+      await axiosInstance.post(updateEndpoint + record._id, updateData);
+      message.success("Cập nhật ghi chú thành công");
       setIsCheckoutModalVisible(false);
       setCurrentCheckoutRecord(null);
       setCheckoutNote("");
+      setHealthNote("");
       fetchAllData();
     } catch (error) {
-      message.error("Không thể check-out");
+      message.error("Không thể cập nhật ghi chú");
     }
   };
 
-  // Hàm hiển thị thông tin chi tiết của trẻ
-  const showChildDetails = (childInfo) => {
-    setSelectedChildInfo(childInfo);
-    setIsChildModalVisible(true);
-  };
-
-  // Điều chỉnh renderActionButtons để thêm nút check out
+  // Cập nhật hàm renderActionButtons
   const renderActionButtons = (record) => {
     const actionMap = {
       "1": ( // Tab Quầy Check-In
@@ -441,18 +455,86 @@ const AppointmentManagement = () => {
         </Button>
       ),
       "4": ( // Tab Phòng Theo Dõi Sau Tiêm
-        <Button 
-          type="primary" 
-          icon={<CheckOutlined />} 
-          onClick={() => showCheckoutModal(record)}
-        >
-          Check-out
-        </Button>
+        <div>
+          <Button 
+            type="primary" 
+            icon={<EditOutlined />} 
+            onClick={() => {
+              setCurrentCheckoutRecord(record);
+              setCheckoutNote(record.note || "");
+              setIsCheckoutModalVisible(true);
+            }}
+            style={{ marginRight: 8 }}
+          >
+            Cập nhật
+          </Button>
+          <Button 
+            type="primary" 
+            icon={<CheckOutlined />}
+            onClick={() => handleCheckout(record)}
+          >
+            Checkout
+          </Button>
+        </div>
       ),
       "5": null  // Tab Check-Out - không có nút hành động
     };
 
     return actionMap[activeTab] || null;
+  };
+
+  // Cập nhật hàm handleCheckout
+  const handleCheckout = async (record) => {
+    try {
+      const updateEndpoint = record.vaccinePackageId 
+        ? "/appointmentGoi/update/" 
+        : "/appointmentLe/update/";
+      
+      if (record.type === 'Gói') {
+        const currentDose = record.doseSchedule.find(dose => dose.status === 'đang chờ');
+        if (currentDose) {
+          const completedDoses = record.doseSchedule.filter(dose => dose.status === 'completed').length;
+          const totalDoses = record.doseSchedule.length;
+          
+          if (completedDoses + 1 === totalDoses) {
+            await axiosInstance.post(updateEndpoint + record._id, {
+              status: "completed",
+              note: record.note || "Hoàn thành tiêm, sức khỏe ổn định",
+              doseSchedule: record.doseSchedule.map(dose => 
+                dose.doseNumber === currentDose.doseNumber 
+                  ? { ...dose, status: 'completed' }
+                  : dose
+              )
+            });
+          } else {
+            const nextDose = record.doseSchedule.find(dose => 
+              dose.doseNumber > currentDose.doseNumber && dose.status !== 'completed'
+            );
+            
+            await axiosInstance.post(updateEndpoint + record._id, {
+              status: "Paid",
+              note: record.note || "Hoàn thành mũi tiêm, sức khỏe ổn định",
+              date: nextDose?.date || record.date,
+              doseSchedule: record.doseSchedule.map(dose => 
+                dose.doseNumber === currentDose.doseNumber 
+                  ? { ...dose, status: 'completed' }
+                  : dose
+              )
+            });
+          }
+        }
+      } else {
+        await axiosInstance.post(updateEndpoint + record._id, {
+          status: "completed",
+          note: record.note || "Hoàn thành tiêm, sức khỏe ổn định"
+        });
+      }
+
+      message.success("Check-out thành công");
+      fetchAllData();
+    } catch (error) {
+      message.error("Không thể check-out");
+    }
   };
 
   // Thêm modal để chọn lại ngày hẹn
@@ -465,15 +547,28 @@ const AppointmentManagement = () => {
         setIsRescheduleModalVisible(false);
         setSelectedAppointment(null);
         setRescheduleDate(null);
+        setCheckoutNote("");
       }}
+      okText="Cập nhật"
+      cancelText="Hủy"
     >
       <div>
         <p>Vui lòng chọn ngày hẹn mới do kết quả khám sàng lọc bất thường:</p>
         <DatePicker 
-          style={{ width: '100%' }} 
+          style={{ width: '100%', marginBottom: 16 }} 
           onChange={(date) => setRescheduleDate(date)}
           disabledDate={(current) => current && current < moment().startOf('day')}
         />
+        
+        <div style={{ marginBottom: 16 }}>
+          <p>Ghi chú trong quá trình tiêm:</p>
+          <Input.TextArea 
+            rows={4} 
+            placeholder="Nhập ghi chú về kết quả khám sàng lọc (nếu có)"
+            value={checkoutNote}
+            onChange={(e) => setCheckoutNote(e.target.value)}
+          />
+        </div>
       </div>
     </Modal>
   );
@@ -506,8 +601,8 @@ const AppointmentManagement = () => {
               {selectedAppointmentDetail.customerFullName}
             </Descriptions.Item>
             <Descriptions.Item label="Giới tính">
-              {selectedAppointmentDetail.customerGender === 'Male' ? 'Nam' : 
-               selectedAppointmentDetail.customerGender === 'Female' ? 'Nữ' : 'Khác'}
+              {selectedAppointmentDetail.customerGender === 'Male' ? 'Nam' :
+                selectedAppointmentDetail.customerGender === 'Female' ? 'Nữ' : 'Khác'}
             </Descriptions.Item>
             <Descriptions.Item label="Vaccine">
               {selectedAppointmentDetail.vaccineName}
@@ -559,6 +654,33 @@ const AppointmentManagement = () => {
               </div>
             </>
           )}
+
+          {selectedAppointmentDetail.type === "Gói" && selectedAppointmentDetail.doseSchedule && (
+            <>
+              <Divider />
+              <div className="dose-schedule-section">
+                <h3>Lịch tiêm theo gói</h3>
+                {selectedAppointmentDetail.doseSchedule.map((dose, index) => (
+                  <div key={index} className="dose-schedule-item">
+                    <h4>Mũi {dose.doseNumber}</h4>
+                    <div className="dose-info">
+                      <div>• Tên vaccine: {vaccineList[dose.vaccineId] || "Chưa có thông tin"}</div>
+                      <div>• Ngày tiêm: {dose.date || "Chưa có thông tin"}</div>
+                      <div>• Giá tiêm: {dose.price?.toLocaleString("vi-VN") || "0"} VNĐ</div>
+                      <div>
+                        • Trạng thái:
+                        <Tag color={getStatusColor(dose.status)}>
+                          {getStatusText(dose.status)}
+                        </Tag>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+
+
         </div>
       )}
     </Modal>
@@ -571,16 +693,16 @@ const AppointmentManagement = () => {
       onOk={handleContinueInjection}
       okText="Tiếp tục"
     >
-      <Input.TextArea 
-        rows={4} 
+      <Input.TextArea
+        rows={4}
         placeholder="Nhập ghi chú về quá trình tiêm (nếu có)"
         value={injectionNote}
         onChange={(e) => setInjectionNote(e.target.value)}
       />
       <div style={{ marginTop: 16, textAlign: 'center' }}>
-        <Progress 
-          percent={(injectionProgress / 10) * 100} 
-          status="active" 
+        <Progress
+          percent={(injectionProgress / 10) * 100}
+          status="active"
           strokeColor={{
             '0%': '#108ee9',
             '100%': '#87d068',
@@ -590,28 +712,34 @@ const AppointmentManagement = () => {
     </Modal>
   );
 
-  // Modal check out
+  // Cập nhật modal checkout
   const renderCheckoutModal = () => (
     <Modal
-      title="Check-out Sau Tiêm"
+      title="Cập nhật ghi chú"
       open={isCheckoutModalVisible}
-      onOk={handleCheckout}
+      onOk={() => handleUpdateNote(currentCheckoutRecord)}
       onCancel={() => {
         setIsCheckoutModalVisible(false);
         setCurrentCheckoutRecord(null);
         setCheckoutNote("");
       }}
-      okText="Hoàn tất"
+      okText="Cập nhật"
       cancelText="Hủy"
     >
-      <Input.TextArea 
-        rows={4} 
-        placeholder="Nhập ghi chú sau khi theo dõi (nếu có)"
-        value={checkoutNote}
-        onChange={(e) => setCheckoutNote(e.target.value)}
-      />
-      <div style={{ marginTop: 16, color: '#666' }}>
-        <p>Vui lòng ghi chú tình trạng sức khỏe sau khi tiêm và theo dõi</p>
+      <div>
+        <div style={{ marginBottom: 16 }}>
+          <p>Ghi chú trong quá trình tiêm:</p>
+          <Input.TextArea 
+            rows={4} 
+            placeholder="Nhập ghi chú sau khi theo dõi (nếu có)"
+            value={checkoutNote}
+            onChange={(e) => setCheckoutNote(e.target.value)}
+          />
+        </div>
+
+        <div style={{ marginTop: 16, color: '#666' }}>
+          <p>Vui lòng ghi chú tình trạng sức khỏe sau khi tiêm và theo dõi</p>
+        </div>
       </div>
     </Modal>
   );
@@ -669,14 +797,54 @@ const AppointmentManagement = () => {
       )
     },
     {
-      title: 'Tên đăng nhập',
-      dataIndex: 'customerName',
-      key: 'customerName'
+      title: 'Người tiêm',
+      key: 'name',
+      width: '20%',
+      render: (_, record) => {
+        const name = !record.childInfo || record.childInfo === null
+          ? record.customerFullName
+          : record.childInfo.name;
+        return (
+          <div>
+            <div>{name}</div>
+            {record.childInfo && (
+              <small style={{ color: "#666" }}>
+                {record.customerGender?.toLowerCase() === 'male' ? 'Cha' : 'Mẹ'}: {record.customerFullName}
+              </small>
+            )}
+          </div>
+        );
+      },
+      sorter: (a, b) => {
+        const nameA = !a.childInfo ? a.customerFullName : a.childInfo.name;
+        const nameB = !b.childInfo ? b.customerFullName : b.childInfo.name;
+        return nameA?.localeCompare(nameB);
+      },
+      filterMode: "tree",
+      filterSearch: true,
+      onFilter: (value, record) => {
+        const name = !record.childInfo
+          ? record.customerFullName
+          : record.childInfo.name;
+        return name?.toLowerCase().includes(value.toLowerCase());
+      },
     },
     {
       title: 'Vaccine',
       dataIndex: 'vaccineName',
       key: 'vaccineName'
+    },
+    {
+      title: 'Tiến độ',
+      key: 'progress',
+      render: (_, record) => {
+        if (record.type === 'Gói' && record.doseSchedule) {
+          const completedDoses = record.doseSchedule.filter(dose => dose.status === 'completed').length;
+          const totalDoses = record.doseSchedule.length;
+          return `${completedDoses}/${totalDoses}`;
+        }
+        return '-';
+      }
     },
     {
       title: 'Ngày Tiêm',
@@ -694,25 +862,6 @@ const AppointmentManagement = () => {
       )
     },
     {
-      title: 'Trẻ em',
-      key: 'childInfo',
-      render: (_, record) => {
-        // Kiểm tra xem record có thông tin trẻ không
-        if (record.childInfo && record.childInfo.name) {
-          return (
-            <Button 
-              type="link" 
-              icon={<InfoCircleOutlined />}
-              onClick={() => showChildDetails(record.childInfo)}
-            >
-              {record.childInfo.name}
-            </Button>
-          );
-        }
-        return 'Không có';
-      }
-    },
-    {
       title: 'Chi tiết',
       key: 'details',
       render: (_, record) => (
@@ -720,7 +869,7 @@ const AppointmentManagement = () => {
           type="link" 
           onClick={() => showAppointmentDetails(record)}
         >
-          Xem chi tiết
+          +
         </Button>
       )
     },
@@ -754,9 +903,9 @@ const AppointmentManagement = () => {
         alignItems: "center"
       }}>
       <h1>Quản lý lịch hẹn</h1>
-        <Button 
-          type="default" 
-          icon={<ReloadOutlined />} 
+        <Button
+          type="default"
+          icon={<ReloadOutlined />}
           onClick={fetchAllData}
         >
           Làm mới dữ liệu
@@ -774,13 +923,13 @@ const AppointmentManagement = () => {
         />
       </div>
 
-      <Tabs 
-        defaultActiveKey="1" 
-        activeKey={activeTab} 
+      <Tabs
+        defaultActiveKey="1"
+        activeKey={activeTab}
         onChange={(key) => setActiveTab(key)}
       >
         <TabPane tab="Quầy Check-In" key="1">
-          <Table 
+          <Table
             columns={columns}
             dataSource={getFilteredAppointmentsByTab()}
             loading={loading}
@@ -788,7 +937,7 @@ const AppointmentManagement = () => {
           />
         </TabPane>
         <TabPane tab="Phòng Khám Sàng Lọc" key="2">
-          <Table 
+          <Table
             columns={columns}
             dataSource={getFilteredAppointmentsByTab()}
             loading={loading}
@@ -796,7 +945,7 @@ const AppointmentManagement = () => {
           />
         </TabPane>
         <TabPane tab="Phòng Tiêm" key="3">
-          <Table 
+          <Table
             columns={columns}
             dataSource={getFilteredAppointmentsByTab()}
             loading={loading}
@@ -804,7 +953,7 @@ const AppointmentManagement = () => {
           />
         </TabPane>
         <TabPane tab="Phòng Theo Dõi Sau Tiêm" key="4">
-          <Table 
+          <Table
             columns={columns}
             dataSource={getFilteredAppointmentsByTab()}
             loading={loading}
@@ -812,7 +961,7 @@ const AppointmentManagement = () => {
           />
         </TabPane>
         <TabPane tab="Check-Out" key="5">
-          <Table 
+          <Table
             columns={columns}
             dataSource={getFilteredAppointmentsByTab()}
             loading={loading}
