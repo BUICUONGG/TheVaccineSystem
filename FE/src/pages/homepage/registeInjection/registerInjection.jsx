@@ -14,7 +14,7 @@ const RegisterInjection = () => {
   const navigate = useNavigate();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [form] = Form.useForm();
-  const [childForm] = Form.useForm();
+
   const [vaccineList, setVaccineList] = useState([]);
   const [parentInfo, setParentInfo] = useState(null);
   const [isChildRegistration, setIsChildRegistration] = useState(false);
@@ -25,6 +25,8 @@ const RegisterInjection = () => {
   const [childrenList, setChildrenList] = useState([]);
   const [selectedChild, setSelectedChild] = useState(null);
   const [showChildForm, setShowChildForm] = useState(false);
+  const [isCreateChildModalVisible, setIsCreateChildModalVisible] = useState(false);
+  const [createChildForm] = Form.useForm();
 
   useEffect(() => {
     const token = localStorage.getItem("accesstoken");
@@ -201,38 +203,6 @@ const RegisterInjection = () => {
     fetchChildren();
   }, []);
 
-  const handleCreateChild = async (values) => {
-    try {
-      const cusId = localStorage.getItem("cusId");
-      values.birthday = dayjs(values.birthday).format('DD/MM/YYYY');
-
-      const response = await axiosInstance.post("/child/create", {
-        ...values,
-        cusId,
-      });
-
-      const newChild = {
-        _id: response.data._id,
-        name: values.name,
-        birthday: values.birthday,
-        gender: values.gender,
-        healthNote: values.healthNote,
-        cusId: cusId
-      };
-
-      setChildrenList(prevList => [...prevList, newChild]);
-
-      setShowChildForm(false);
-      setSelectedChild(newChild);
-      childForm.resetFields();
-
-      toast.success("Tạo trẻ thành công!");
-    } catch (err) {
-      console.error("Lỗi tạo trẻ:", err);
-      toast.error("Không thể tạo thông tin trẻ!");
-    }
-  };
-
   const handleChildSelect = (child) => {
     if (selectedChild && selectedChild._id === child._id) {
       setSelectedChild(null);
@@ -284,7 +254,7 @@ const RegisterInjection = () => {
       form.setFieldsValue({
         vaccineId: undefined,
         vaccinePackageId: vaccine._id,
-      });
+      });Ẻ
     }
 
     saveFormData({
@@ -299,6 +269,34 @@ const RegisterInjection = () => {
       navigate(`/vaccinePkgDetail/${vaccineId}`);
     } else {
       navigate(`/vaccineDetail/${vaccineId}`);
+    }
+  };
+
+  const handleCreateChild = async (values) => {
+    try {
+      const cusId = localStorage.getItem("cusId");
+      const newChild = {
+        customerId: cusId,
+        name: values.name,
+        birthday: dayjs(values.birthday).format("DD/MM/YYYY"),
+        gender: values.gender,
+        healthNote: values.healthNote || "",
+      };
+      
+      setChildrenList([...childrenList, { ...newChild, _id: Date.now() }]);
+      
+      
+      setSelectedChild({ ...newChild, _id: Date.now() });
+      
+      
+      setIsCreateChildModalVisible(false);
+      createChildForm.resetFields();
+      
+           
+      toast.success("Tạo trẻ thành công!");
+    } catch (error) {
+      console.error("Lỗi khi tạo trẻ:", error);
+      toast.error("Tạo trẻ thất bại!");
     }
   };
 
@@ -331,7 +329,7 @@ const RegisterInjection = () => {
       };
 
       // Log thông tin invoice ban đầu
-      console.log("Initial Invoice Data:", invoiceData);
+
 
       // Thêm thông tin trẻ em
       if (isChildRegistration && selectedChild) {
@@ -343,7 +341,6 @@ const RegisterInjection = () => {
           gender: selectedChild.gender,
           healthNote: selectedChild.healthNote || "",
         };
-        console.log("Child Info Added:", invoiceData.childInfo);
       }
 
       // Thêm thông tin vaccine
@@ -383,7 +380,7 @@ const RegisterInjection = () => {
 
       console.log("Final Invoice Data:", invoiceData);
 
-      // Chuyển đến trang thanh toán
+      
       navigate("/payment", {
         state: {
           invoiceData,
@@ -426,65 +423,9 @@ const RegisterInjection = () => {
     localStorage.setItem("vaccineRegistrationData", JSON.stringify(formData));
   };
 
-  const footerRef = useRef(null);
+  
 
-  const ChildFormModal = () => (
-    <Modal
-      visible={showChildForm}
-      title="Thêm Trẻ Mới"
-      onCancel={() => setShowChildForm(false)}
-      footer={null}
-    >
-      <Form
-        form={childForm}
-        layout="vertical"
-        onFinish={handleCreateChild}
-      >
-        <Form.Item
-          label="Họ và tên trẻ"
-          name="name"
-          rules={[{ required: true, message: "Vui lòng nhập tên trẻ" }]}
-        >
-          <Input />
-        </Form.Item>
-        <Form.Item
-          label="Ngày sinh"
-          name="birthday"
-          rules={[{ required: true, message: "Vui lòng chọn ngày sinh" }]}
-        >
-          <DatePicker
-            style={{ width: "100%" }}
-            format="DD/MM/YYYY"
-            disabledDate={disabledBirthDate}
-          />
-        </Form.Item>
-        <Form.Item
-          label="Giới tính"
-          name="gender"
-          initialValue="Male"
-        >
-          <Radio.Group>
-            <Radio value="Male">Nam</Radio>
-            <Radio value="Female">Nữ</Radio>
-          </Radio.Group>
-        </Form.Item>
-        <Form.Item
-          label="Ghi chú sức khỏe"
-          name="healthNote"
-        >
-          <Input.TextArea rows={3} />
-        </Form.Item>
-        <Form.Item className="form-buttons">
-          <Button type="primary" htmlType="submit">
-            Tạo
-          </Button>
-          <Button onClick={() => setShowChildForm(false)} style={{ marginLeft: 8 }}>
-            Hủy
-          </Button>
-        </Form.Item>
-      </Form>
-    </Modal>
-  );
+  const footerRef = useRef(null);
 
   return (
     <div className="form-register-page">
@@ -515,12 +456,12 @@ const RegisterInjection = () => {
           </div>
 
           {/* Thay thế form tạo trẻ cũ bằng modal */}
-          <ChildFormModal />
+              
 
           {/* Form chính */}
           <Form
             form={form}
-            layout="vertical"
+            layout="vertical"   
             onFinish={onFinish}
             className="form-registration"
             onValuesChange={(_, allValues) => {
@@ -552,10 +493,76 @@ const RegisterInjection = () => {
                   <button
                     className="add-child-btn"
                     type="button"
-                    onClick={() => setShowChildForm(true)}
+                    onClick={() => setIsCreateChildModalVisible(true)}
                   >
                     Tạo trẻ mới
                   </button>
+                  <Modal
+                    title="Tạo Thông Tin Trẻ Mới"
+                    open={isCreateChildModalVisible}
+                    onCancel={() => {
+                      setIsCreateChildModalVisible(false);
+                      createChildForm.resetFields();
+                    }}
+                    footer={null}
+                  >
+                    <Form
+                      form={createChildForm}
+                      layout="vertical"
+                      onFinish={handleCreateChild}
+                    >
+                      <Form.Item
+                        name="name"
+                        label="Họ và tên"
+                        rules={[{ required: true, message: "Vui lòng nhập tên trẻ!" }]}
+                      >
+                        <Input placeholder="Nhập họ và tên trẻ" />
+                      </Form.Item>
+
+                      <Form.Item
+                        name="birthday"
+                        label="Ngày sinh"
+                        rules={[{ required: true, message: "Vui lòng chọn ngày sinh!" }]}
+                      >
+                        <DatePicker
+                          format="DD-MM-YYYY"
+                          disabledDate={disabledBirthDate}
+                          placeholder="Chọn ngày sinh"
+                          style={{ width: '100%' }}
+                        />
+                      </Form.Item>
+
+                      <Form.Item
+                        name="gender"
+                        label="Giới tính"
+                        rules={[{ required: true, message: "Vui lòng chọn giới tính!" }]}
+                      >
+                        <Radio.Group>
+                          <Radio value="Male">Nam</Radio>
+                          <Radio value="Female">Nữ</Radio>
+                        </Radio.Group>
+                      </Form.Item>
+
+                      <Form.Item
+                        name="healthNote"
+                        label="Ghi chú sức khỏe"
+                      >
+                        <Input.TextArea placeholder="Nhập ghi chú về tình trạng sức khỏe của trẻ (nếu có)" />
+                      </Form.Item>
+
+                      <Form.Item className="form-buttons">
+                        <Button type="primary" htmlType="submit">
+                          Tạo mới
+                        </Button>
+                        <Button onClick={() => {
+                          setIsCreateChildModalVisible(false);
+                          createChildForm.resetFields();
+                        }}>
+                          Hủy
+                        </Button>
+                      </Form.Item>
+                    </Form>
+                  </Modal>
                 </div>
               </>
             ) : (
