@@ -461,11 +461,11 @@ const RegisterInjection = () => {
         <Form.Item
           label="Giới tính"
           name="gender"
-          initialValue="male"
+          initialValue="Male"
         >
           <Radio.Group>
-            <Radio value="male">Nam</Radio>
-            <Radio value="female">Nữ</Radio>
+            <Radio value="Male">Nam</Radio>
+            <Radio value="Female">Nữ</Radio>
           </Radio.Group>
         </Form.Item>
         <Form.Item
@@ -544,7 +544,7 @@ const RegisterInjection = () => {
                         <div className="child-info">
                           <div className="child-name">{child.name}</div>
                           <div className="child-birthday">Ngày sinh: {child.birthday}</div>
-                          <div className="child-gender">Giới tính: {child.gender === "male" ? "Nam" : "Nữ"}</div>
+                          <div className="child-gender">Giới tính: {child.gender === "Male" ? "Nam" : "Nữ"}</div>
                         </div>
                       </div>
                     ))}
