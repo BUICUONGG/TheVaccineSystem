@@ -50,7 +50,6 @@ class PaymentService {
         amount: transformedPaymentData.price,
         description: `Payment for the order #${transID}`,
         bank_code: "",
-        // callback_url: `https://dfa1-42-119-231-69.ngrok-free.app/zalopay/callback`,
         callback_url: `https://thevaccinesystem.onrender.com/zalopay/callback`,
       };
 
