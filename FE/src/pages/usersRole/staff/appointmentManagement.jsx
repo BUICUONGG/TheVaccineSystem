@@ -269,7 +269,7 @@ const AppointmentManagement = () => {
 
       await axiosInstance.post(updateEndpoint + record._id, {
         status: newStatus,
-        note: record.note || ""
+        note: isNormal ? "Sức khỏe ổn định, có thể tiêm" : record.note
       });
       
       message.success(isNormal 
@@ -324,7 +324,6 @@ const AppointmentManagement = () => {
         ? "/appointmentGoi/update/"
         : "/appointmentLe/update/";
 
-      // Đóng modal ghi chú
       setIsInjectionNoteModalVisible(false);
 
       // Gọi API update note

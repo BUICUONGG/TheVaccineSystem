@@ -542,9 +542,10 @@ const RegisterInjection = () => {
             <span className={!isChildRegistration ? "active-type" : ""}>
               <UserOutlined /> Đăng ký cho bản thân
             </span>
-            <Switch
+            <Checkbox
               checked={isChildRegistration}
               onChange={(checked) => {
+                e.stopPropagation();
                 setIsChildRegistration(checked);
                 form.resetFields();
               }}
